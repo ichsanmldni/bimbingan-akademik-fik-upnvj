@@ -18,10 +18,6 @@ export default function Home() {
   const [selectedJenis, setSelectedJenis] = useState("");
   const [selectedSistem, setSelectedSistem] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    window.location.href = "/";
-  };
   return (
     <div>
       <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px] z-20">
@@ -92,7 +88,7 @@ export default function Home() {
                 { value: "Jurusan C", label: "Jurusan C" },
               ]}
               onChange={(e) => setSelectedJenis(e.target.value)}
-              value={selectedJadwal}
+              value={selectedJenis}
               placeholder="Pilih Jenis Bimbingan"
             />
             <SelectField
@@ -102,7 +98,7 @@ export default function Home() {
                 { value: "Jurusan C", label: "Jurusan C" },
               ]}
               onChange={(e) => setSelectedSistem(e.target.value)}
-              value={selectedJadwal}
+              value={selectedSistem}
               placeholder="Pilih Sistem Bimbingan"
             />
             <button className="bg-orange-500 rounded-lg py-[6px] font-medium">

@@ -49,7 +49,7 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="Cari"
-                className="pl-8 pr-2 w-full outline-none bg-transparent" // Add padding to prevent text overlap with the icon
+                className="pl-8 pr-2 w-full outline-none bg-transparent"
               />
               <span className="absolute left-4 top-1/2 transform -translate-y-1/2">
                 <Image
@@ -131,7 +131,7 @@ export default function Home() {
             09/Kpts/Menved/1967, tanggal 21 Pebruari 1967. Kemudian berdasarkan
             Surat Keputusan Menhankam/Pangab Nomor: Skep/1555/1977 tanggal 30
             November 1977 PTPN “Veteran” Jakarta berubah nama menjadi
-            Universitas Pembangunan Nasional (UPN) "Veteran" Cabang Jakarta.
+            Universitas Pembangunan Nasional (UPN) “Veteran” Cabang Jakarta.
             Pada tahun 1980, UPN “Veteran” Cabang Jakarta menambah program
             pendidikannya, yaitu Pendidikan Ahli Teknik Informatika dan Komputer
             (PATIK) dengan jenjang pendidikan Diploma 3. Program Pendidikan Ahli
