@@ -7,6 +7,7 @@ import landingPageImage from "../../assets/images/landing-page.png";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import NotificationModal from "@/components/ui/NotificationModal";
 
 export default function Home() {
   const cards = Array(9).fill(null);
@@ -15,10 +16,10 @@ export default function Home() {
   const handleNotificationClick = () => {
     setIsModalOpen(true);
   };
-
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
   return (
     <div>
       <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px] z-20">
@@ -40,6 +41,7 @@ export default function Home() {
           <NotificationLogo onClick={handleNotificationClick} />
           <ProfileImage />
         </div>
+        {isModalOpen && <NotificationModal onClose={closeModal} />}
       </div>
 
       <div className="py-[100px] ">
