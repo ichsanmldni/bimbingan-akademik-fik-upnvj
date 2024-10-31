@@ -1,16 +1,14 @@
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import PasswordInput from "./PasswordInput";
 import Link from "next/link";
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState<string>("");
-  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Email:", email);
-    router.push("/");
+    window.location.href = "/";
   };
 
   return (

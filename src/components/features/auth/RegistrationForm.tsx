@@ -2,7 +2,6 @@
 import { useState } from "react";
 import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PasswordInput from "./PasswordInput";
 
@@ -13,11 +12,10 @@ const RegistrationForm = () => {
   const [selectedDosen, setSelectedDosen] = useState("");
   const [selectedJurusan, setSelectedJurusan] = useState("");
   const [selectedPeminatan, setSelectedPeminatan] = useState("");
-  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/");
+    window.location.href = "/";
   };
 
   return (

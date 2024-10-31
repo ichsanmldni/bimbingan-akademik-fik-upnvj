@@ -12,12 +12,12 @@ export default function Home() {
       <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px]">
         <div className="flex items-center gap-5">
           <Logo className="size-[40px]" />
-          <Link href="/" className="font-semibold">
+          <a href="/" className="font-semibold">
             Bimbingan Konseling Mahasiswa FIK
-          </Link>
+          </a>
         </div>
         <div className="flex items-center gap-6">
-          <Link href="/">Beranda</Link>
+          <a href="/">Beranda</a>
           <Link
             href="/informasi-akademik"
             className="text-orange-500 font-bold"
