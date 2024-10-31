@@ -1,9 +1,9 @@
 import Logo from "@/components/ui/LogoUPNVJ";
 import NotificationLogo from "@/components/ui/NotificationLogo";
 import ProfileImage from "@/components/ui/ProfileImage";
-import landingPageImage from "../assets/images/landing-page.png";
+// import landingPageImage from "../assets/images/landing-page.png";
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 
 export default function Home() {
   const cards = Array(9).fill(null);
