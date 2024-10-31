@@ -8,9 +8,19 @@ import Image from "next/image";
 import searchIcon from "../../assets/images/search.png";
 import dropdownIcon from "../../assets/images/dropdown.png";
 import { useState } from "react";
+import NotificationModal from "@/components/ui/NotificationModal";
 
 export default function Home() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleNotificationClick = () => {
+    setIsModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? null : menuName);
@@ -37,9 +47,10 @@ export default function Home() {
           <Link href="/artikel">Artikel</Link>
         </div>
         <div className="flex gap-8 items-center">
-          <NotificationLogo />
+          <NotificationLogo onClick={handleNotificationClick} />
           <ProfileImage />
         </div>
+        {isModalOpen && <NotificationModal onClose={closeModal} />}
       </div>
       <div className="flex w-full pt-[80px]">
         <div className="flex flex-col w-[25%] border ml-32 gap-6 pt-10 pb-6 px-8">

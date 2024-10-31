@@ -3,6 +3,7 @@
 import InputField from "@/components/ui/InputField";
 import Logo from "@/components/ui/LogoUPNVJ";
 import NotificationLogo from "@/components/ui/NotificationLogo";
+import NotificationModal from "@/components/ui/NotificationModal";
 import ProfileImage from "@/components/ui/ProfileImage";
 import SelectField from "@/components/ui/SelectField";
 import Link from "next/link";
@@ -17,6 +18,15 @@ export default function Home() {
   const [selectedJadwal, setSelectedJadwal] = useState("");
   const [selectedJenis, setSelectedJenis] = useState("");
   const [selectedSistem, setSelectedSistem] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleNotificationClick = () => {
+    setIsModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <div>
@@ -36,9 +46,10 @@ export default function Home() {
           <Link href="/artikel">Artikel</Link>
         </div>
         <div className="flex gap-8 items-center">
-          <NotificationLogo />
+          <NotificationLogo onClick={handleNotificationClick} />
           <ProfileImage />
         </div>
+        {isModalOpen && <NotificationModal onClose={closeModal} />}
       </div>
 
       <div className="pt-[100px]">
