@@ -6,9 +6,19 @@ import ProfileImage from "@/components/ui/ProfileImage";
 import landingPageImage from "../../assets/images/landing-page.png";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function Home() {
   const cards = Array(9).fill(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleNotificationClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   return (
     <div>
       <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px] z-20">
@@ -27,7 +37,7 @@ export default function Home() {
           </Link>
         </div>
         <div className="flex gap-8 items-center">
-          <NotificationLogo />
+          <NotificationLogo onClick={handleNotificationClick} />
           <ProfileImage />
         </div>
       </div>
