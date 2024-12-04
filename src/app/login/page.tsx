@@ -10,7 +10,7 @@ export default function Home() {
       <Logo className="mt-8 mx-auto size-[72px]" />
       <div className="flex gap-20 justify-center">
         <LoginImage />
-        <LoginForm />
+        <LoginForm isAdmin={false} />
       </div>
     </div>
   );

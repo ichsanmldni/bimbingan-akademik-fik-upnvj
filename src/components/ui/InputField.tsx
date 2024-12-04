@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface InputFieldProps {
   type: string;
   placeholder: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
+  className: string;
+  disabled: boolean;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -12,14 +14,21 @@ const InputField: React.FC<InputFieldProps> = ({
   placeholder,
   onChange,
   value,
-}) => (
-  <input
-    type={type}
-    className="px-3 py-2 text-[15px] border rounded-lg"
-    placeholder={placeholder}
-    onChange={onChange}
-    value={value}
-  />
-);
+  className,
+  disabled,
+}) => {
+  return (
+    <input
+      type={type}
+      className={`${
+        value === "" ? "text-neutral-400" : "text-black"
+      } ${className}`}
+      placeholder={placeholder}
+      onChange={onChange}
+      value={value}
+      disabled={disabled}
+    />
+  );
+};
 
 export default InputField;

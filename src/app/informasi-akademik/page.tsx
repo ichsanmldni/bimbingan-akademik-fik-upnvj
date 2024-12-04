@@ -1,26 +1,15 @@
 "use client";
 
 import Logo from "@/components/ui/LogoUPNVJ";
-import NotificationLogo from "@/components/ui/NotificationLogo";
-import ProfileImage from "@/components/ui/ProfileImage";
+import NavbarUser from "@/components/ui/NavbarUser";
 import Link from "next/link";
 import Image from "next/image";
 import searchIcon from "../../assets/images/search.png";
 import dropdownIcon from "../../assets/images/dropdown.png";
 import { useState } from "react";
-import NotificationModal from "@/components/ui/NotificationModal";
 
 export default function Home() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleNotificationClick = () => {
-    setIsModalOpen(true);
-  };
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
 
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? null : menuName);
@@ -28,30 +17,7 @@ export default function Home() {
 
   return (
     <div>
-      <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px] z-20">
-        <div className="flex items-center gap-5">
-          <Logo className="size-[40px]" />
-          <a href="/" className="font-semibold">
-            Bimbingan Konseling Mahasiswa FIK
-          </a>
-        </div>
-        <div className="flex items-center gap-6">
-          <a href="/">Beranda</a>
-          <Link
-            href="/informasi-akademik"
-            className="text-orange-500 font-bold"
-          >
-            Informasi Akademik
-          </Link>
-          <Link href="/pengajuan">Pengajuan</Link>
-          <Link href="/artikel">Artikel</Link>
-        </div>
-        <div className="flex gap-8 items-center">
-          <NotificationLogo onClick={handleNotificationClick} />
-          <ProfileImage />
-        </div>
-        {isModalOpen && <NotificationModal onClose={closeModal} />}
-      </div>
+      <NavbarUser />
       <div className="flex w-full pt-[80px]">
         <div className="flex flex-col w-[25%] border ml-32 gap-6 pt-10 pb-6 px-8">
           <div className="flex flex-col gap-4">
@@ -192,9 +158,6 @@ export default function Home() {
             </h1>
           </div>
           <div className="flex items-end gap-5">
-            <Link href="/pengajuan" className="text-[14px]">
-              Pengajuan
-            </Link>
             <Link href="/informasi-akademik" className="text-[14px]">
               Informasi Akademik
             </Link>

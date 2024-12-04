@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Mahasiswa {
+  id               Int                              @id @default(autoincrement())
+  dosen_pa         DosenPA?                         @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id      Int?
+  email            String                           @unique
+  nim              String
+  password         String
+  no_whatsapp      String
+  peminatan        String
+  jurusan          String
+  nama_lengkap     String
+  profile_image    String?
+  notifikasi       NotifikasiMahasiswa[]
+  sesi_chatbot     SesiChatbotMahasiswa[]
+  pesan_chatbot    PesanChatbotMahasiswa[]
+  chat_pribadi     ChatPribadi[]
+}
+
+model Dosen {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  nip              String
+  password         String
+  nama_lengkap     String
+  profile_image    String?
+  kaprodi          Kaprodi[]
+  dosenpa          DosenPA[]
+  
+}
+
+model DosenPA {
+  id               Int                      @id @default(autoincrement())
+  dosen            Dosen?                   @relation(fields: [dosen_id], references: [id])
+  dosen_id         Int?
+  notifikasi       NotifikasiDosenPA[]
+  chat_pribadi     ChatPribadi[]
+  pesan_chatbot    PesanChatbotDosenPA[]
+  sesi_chatbot     SesiChatbotDosenPA[]
+  pengajuan        PengajuanBimbingan[]
+  jadwal           JadwalDosenPA[]
+  mahasiswa        Mahasiswa[]
+  laporan          LaporanBimbingan[]
+}
+
+model Kaprodi {
+  id                      Int                       @id @default(autoincrement())
+  dosen                   Dosen?                    @relation(fields: [dosen_id], references: [id])
+  dosen_id                Int?
+  kaprodi_jurusan         MasterJurusan?            @relation(fields: [kaprodi_jurusan_id], references: [id])
+  kaprodi_jurusan_id      Int
+  notifikasi              NotifikasiKaprodi[]
+  laporan                 LaporanBimbingan[]
+}
+model Admin {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  password         String
+  nickname         String
+  profile_image    String?
+}
+
+model Artikel {
+  id               Int               @id @default(autoincrement())
+  judul            String
+  tanggal          DateTime
+  isi              String
+}
+
+model NotifikasiMahasiswa {
+  id               Int               @id @default(autoincrement())
+  mahasiswa        Mahasiswa         @relation(fields: [mahasiswa_id], references: [id])
+  mahasiswa_id     Int
+  isi              String
+  tanggal          DateTime
+  read             Boolean
+}
+
+model NotifikasiDosenPA {
+  id               Int               @id @default(autoincrement())
+  dosen_pa         DosenPA             @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id      Int
+  isi              String
+  tanggal          DateTime
+  read             Boolean
+}
+
+model NotifikasiKaprodi {
+  id               Int               @id @default(autoincrement())
+  kaprodi          Kaprodi           @relation(fields: [kaprodi_id], references: [id])
+  kaprodi_id       Int
+  isi              String
+  tanggal          DateTime
+  read             Boolean
+}
+
+model MenuInformasiAkademik {
+  id               Int               @id @default(autoincrement())
+  nama             String
+  submenus         SubmenuInformasiAkademik[]
+}
+
+model SubmenuInformasiAkademik {
+  id                            Int                       @id @default(autoincrement())
+  menu                          MenuInformasiAkademik     @relation(fields: [menu_informasi_akademik_id], references: [id])
+  menu_informasi_akademik_id    Int
+  nama                          String
+  isi                           String
+}
+
+model PengajuanBimbingan {
+  id                    Int               @id @default(autoincrement())
+  dosen_pa              DosenPA           @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id           Int
+  nama_lengkap          String
+  nim                   String
+  email                 String
+  no_whatsapp           String
+  jadwal_bimbingan      String
+  jenis_bimbingan       String
+  sistem_bimbingan      String
+  tanggal_pengajuan     DateTime
+  status                String
+}
+
+model LaporanBimbingan {
+  id                    Int                        @id @default(autoincrement())
+  dosen_pa              DosenPA?                   @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id           Int?
+  kaprodi               Kaprodi?                   @relation(fields: [kaprodi_id], references: [id])
+  kaprodi_id            Int?
+  tanggal_bimbingan     String
+  jumlah_mahasiswa      Int
+  jenis_bimbingan       MasterJenisBimbingan?      @relation(fields: [jenis_bimbingan_id], references: [id])
+  jenis_bimbingan_id    Int?
+  sistem_bimbingan      MasterSistemBimbingan?     @relation(fields: [sistem_bimbingan_id], references: [id])
+  sistem_bimbingan_id   Int?
+  kendala_mahasiswa     String
+  solusi                String
+  kesimpulan            String
+  dokumentasi           String
+  feedback_kaprodi      String?
+  status                String
+}
+
+model JadwalDosenPA {
+  id               Int               @id @default(autoincrement())
+  dosen_pa         DosenPA           @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id      Int
+  hari             String
+  jam_mulai        DateTime
+  jam_selesai      DateTime
+}
+
+model SesiChatbotMahasiswa {
+  id               Int               @id @default(autoincrement())
+  mahasiswa        Mahasiswa         @relation(fields: [mahasiswa_id], references: [id])
+  mahasiswa_id     Int
+  waktu_mulai      DateTime
+  pesan_chatbot    PesanChatbotMahasiswa[]
+}
+
+model SesiChatbotDosenPA {
+  id               Int               @id @default(autoincrement())
+  dosen_pa         DosenPA           @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id      Int
+  waktu_mulai      DateTime
+  pesan_chatbot    PesanChatbotDosenPA[]
+}
+
+model PesanChatbotMahasiswa {
+  id                              Int                     @id @default(autoincrement())
+  sesi_chatbot                    SesiChatbotMahasiswa    @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
+  sesi_chatbot_mahasiswa_id       Int
+  mahasiswa                       Mahasiswa               @relation(fields: [mahasiswa_id], references: [id])
+  mahasiswa_id                    Int
+  is_bot                          Boolean
+  pesan                           String
+  waktu_kirim                     DateTime
+}
+
+model PesanChatbotDosenPA {
+  id                           Int                    @id @default(autoincrement())
+  sesi_chatbot_dosen_pa        SesiChatbotDosenPA     @relation(fields: [sesi_chatbot_dosen_pa_id], references: [id])
+  sesi_chatbot_dosen_pa_id     Int
+  dosen_pa                     DosenPA                @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id                  Int
+  is_bot                       Boolean
+  pesan                        String
+  waktu_kirim                  DateTime
+}
+
+model ChatPribadi {
+  id                     Int                   @id @default(autoincrement())
+  dosen_pa               DosenPA               @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id            Int
+  mahasiswa              Mahasiswa             @relation(fields: [mahasiswa_id], references: [id])
+  mahasiswa_id           Int
+  waktu_mulai            DateTime
+  pesan_chat_dosen_pa    PesanChatDosenPA[]
+  pesan_chat_mahasiswa   PesanChatMahasiswa[]
+}
+
+model PesanChatDosenPA {
+  id               Int               @id @default(autoincrement())
+  chat_pribadi     ChatPribadi       @relation(fields: [chat_pribadi_id], references: [id])
+  chat_pribadi_id  Int
+  pesan            String
+  waktu_kirim      DateTime
+}
+
+model PesanChatMahasiswa {
+  id               Int               @id @default(autoincrement())
+  chat_pribadi     ChatPribadi       @relation(fields: [chat_pribadi_id], references: [id])
+  chat_pribadi_id  Int
+  pesan            String
+  waktu_kirim      DateTime
+}
+
+model ResponBot {
+  id               Int               @id @default(autoincrement())
+  respon           String
+}
+
+model MasterTahunAjaran {
+  id              Int      @id @default(autoincrement())
+  order           Int
+  tahun_ajaran    String
+}
+
+model MasterJurusan {
+  id             Int                @id @default(autoincrement())
+  order          Int
+  jurusan        String
+  peminatan      MasterPeminatan[]
+  kaprodi        Kaprodi[]
+}
+
+model MasterPeminatan {
+  id             Int            @id @default(autoincrement())
+  order          Int
+  peminatan      String
+  jurusan        MasterJurusan  @relation(fields: [jurusan_id], references: [id])
+  jurusan_id     Int
+}
+
+model MasterJenisBimbingan {
+  id                 Int      @id @default(autoincrement())
+  order              Int
+  jenis_bimbingan    String
+  laporan            LaporanBimbingan[]
+}
+
+model MasterSistemBimbingan {
+  id                 Int      @id @default(autoincrement())
+  order              Int
+  sistem_bimbingan   String
+  laporan            LaporanBimbingan[]
+}
+

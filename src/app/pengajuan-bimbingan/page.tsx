@@ -2,10 +2,8 @@
 
 import InputField from "@/components/ui/InputField";
 import Logo from "@/components/ui/LogoUPNVJ";
-import NotificationLogo from "@/components/ui/NotificationLogo";
-import NotificationModal from "@/components/ui/NotificationModal";
-import ProfileImage from "@/components/ui/ProfileImage";
 import SelectField from "@/components/ui/SelectField";
+import NavbarUser from "@/components/ui/NavbarUser";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -19,39 +17,9 @@ export default function Home() {
   const [selectedJenis, setSelectedJenis] = useState("");
   const [selectedSistem, setSelectedSistem] = useState("");
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleNotificationClick = () => {
-    setIsModalOpen(true);
-  };
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   return (
     <div>
-      <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px] z-20">
-        <div className="flex items-center gap-5">
-          <Logo className="size-[40px]" />
-          <a href="/" className="font-semibold">
-            Bimbingan Konseling Mahasiswa FIK
-          </a>
-        </div>
-        <div className="flex items-center gap-6">
-          <a href="/">Beranda</a>
-          <Link href="/informasi-akademik">Informasi Akademik</Link>
-          <Link className="text-orange-500 font-bold" href="/pengajuan">
-            Pengajuan
-          </Link>
-          <Link href="/artikel">Artikel</Link>
-        </div>
-        <div className="flex gap-8 items-center">
-          <NotificationLogo onClick={handleNotificationClick} />
-          <ProfileImage />
-        </div>
-        {isModalOpen && <NotificationModal onClose={closeModal} />}
-      </div>
-
+      <NavbarUser />
       <div className="pt-[100px]">
         <div className="mt-4 mb-10 mx-[130px] border rounded-lg">
           <h1 className="font-semibold text-[30px] text-center pt-4">
@@ -63,24 +31,28 @@ export default function Home() {
               placeholder="Nama Lengkap"
               onChange={(e) => setNamaLengkap(e.target.value)}
               value={namaLengkap}
+              className="px-3 py-2 text-[15px] border rounded-lg"
             />
             <InputField
               type="text"
               placeholder="NIM"
               onChange={(e) => setNim(e.target.value)}
               value={nim}
+              className="px-3 py-2 text-[15px] border rounded-lg"
             />
             <InputField
               type="text"
               placeholder="E-mail"
               onChange={(e) => setEmail(e.target.value)}
               value={email}
+              className="px-3 py-2 text-[15px] border rounded-lg"
             />
             <InputField
               type="text"
               placeholder="No Whatsapp"
               onChange={(e) => setNoWa(e.target.value)}
               value={noWa}
+              className="px-3 py-2 text-[15px] border rounded-lg"
             />
             <SelectField
               options={[
@@ -91,6 +63,7 @@ export default function Home() {
               onChange={(e) => setSelectedJadwal(e.target.value)}
               value={selectedJadwal}
               placeholder="Pilih Jadwal Bimbingan"
+              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
             />
             <SelectField
               options={[
@@ -101,6 +74,7 @@ export default function Home() {
               onChange={(e) => setSelectedJenis(e.target.value)}
               value={selectedJenis}
               placeholder="Pilih Jenis Bimbingan"
+              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
             />
             <SelectField
               options={[
@@ -111,6 +85,7 @@ export default function Home() {
               onChange={(e) => setSelectedSistem(e.target.value)}
               value={selectedSistem}
               placeholder="Pilih Sistem Bimbingan"
+              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
             />
             <button className="bg-orange-500 rounded-lg py-[6px] font-medium">
               Ajukan
@@ -128,9 +103,6 @@ export default function Home() {
             </h1>
           </div>
           <div className="flex items-end gap-5">
-            <Link href="/pengajuan" className="text-[14px]">
-              Pengajuan
-            </Link>
             <Link href="/informasi-akademik" className="text-[14px]">
               Informasi Akademik
             </Link>

@@ -1,48 +1,24 @@
 "use client";
 
 import Logo from "@/components/ui/LogoUPNVJ";
-import NotificationLogo from "@/components/ui/NotificationLogo";
-import ProfileImage from "@/components/ui/ProfileImage";
+import NavbarUser from "@/components/ui/NavbarUser";
 import landingPageImage from "../../assets/images/landing-page.png";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import NotificationModal from "@/components/ui/NotificationModal";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const cards = Array(9).fill(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
-  const handleNotificationClick = () => {
-    setIsModalOpen(true);
-  };
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const handleDetailArticle = () => {
+    router.push("/artikel/123");
   };
 
   return (
     <div>
-      <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px] z-20">
-        <div className="flex items-center gap-5">
-          <Logo className="size-[40px]" />
-          <a href="/" className="font-semibold">
-            Bimbingan Konseling Mahasiswa FIK
-          </a>
-        </div>
-        <div className="flex items-center gap-6">
-          <a href="/">Beranda</a>
-          <Link href="/informasi-akademik">Informasi Akademik</Link>
-          <Link href="/pengajuan">Pengajuan</Link>
-          <Link className="text-orange-500 font-bold" href="/artikel">
-            Artikel
-          </Link>
-        </div>
-        <div className="flex gap-8 items-center">
-          <NotificationLogo onClick={handleNotificationClick} />
-          <ProfileImage />
-        </div>
-        {isModalOpen && <NotificationModal onClose={closeModal} />}
-      </div>
+      <NavbarUser />
 
       <div className="py-[100px] ">
         <h1 className="text-[36px] font-semibold text-center">
@@ -55,7 +31,11 @@ export default function Home() {
 
         <div className="mt-10 text-start grid grid-cols-3 mx-32 gap-12">
           {cards.map((_, index) => (
-            <div key={index} className="border rounded-lg">
+            <div
+              key={index}
+              className="border rounded-lg"
+              onClick={handleDetailArticle}
+            >
               <Image src={landingPageImage} alt="contoh" />
               <div className="flex flex-col gap-2 bg-slate-50 p-4">
                 <h1 className="font-semibold text-[24px]">Judul</h1>
@@ -76,9 +56,6 @@ export default function Home() {
             </h1>
           </div>
           <div className="flex items-end gap-5">
-            <Link href="/pengajuan" className="text-[14px]">
-              Pengajuan
-            </Link>
             <Link href="/informasi-akademik" className="text-[14px]">
               Informasi Akademik
             </Link>

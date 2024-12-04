@@ -1,19 +1,23 @@
 import Image from "next/image";
 import notificationIcon from "../../assets/images/bell.png";
 
-interface NotificationLogoProps {
+interface NotificationButtonProps {
   onClick: () => void;
+  className: string;
 }
 
-const NotificationLogo: React.FC<NotificationLogoProps> = ({ onClick }) => {
+const NotificationButton: React.FC<NotificationButtonProps> = ({
+  onClick,
+  className,
+}) => {
   return (
     <Image
       src={notificationIcon}
       alt="Notification Icon"
-      className="w-6 h-6 cursor-pointer"
+      className={className}
       onClick={onClick}
     />
   );
 };
 
-export default NotificationLogo;
+export default NotificationButton;

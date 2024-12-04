@@ -3,9 +3,18 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface PasswordInputProps {
   placeholder?: string;
+  disabled?: boolean;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isConfirmPassword?: boolean;
+  className: string;
 }
 
-const PasswordInput: React.FC<PasswordInputProps> = ({ placeholder }) => {
+const PasswordInput: React.FC<PasswordInputProps> = ({
+  placeholder,
+  disabled,
+  onChange,
+  className,
+}) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const togglePasswordVisibility = () => {
@@ -16,8 +25,14 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ placeholder }) => {
     <div className="relative">
       <input
         type={showPassword ? "text" : "password"}
-        className="px-3 py-2 text-[15px] border rounded-lg w-full"
+        className={className}
         placeholder={placeholder || "Kata Sandi"}
+        disabled={disabled}
+        onChange={(e) => {
+          if (onChange) {
+            onChange(e);
+          }
+        }}
       />
       <button
         type="button"
@@ -25,9 +40,9 @@ const PasswordInput: React.FC<PasswordInputProps> = ({ placeholder }) => {
         className="absolute right-3 top-3"
       >
         {showPassword ? (
-          <FaEyeSlash className="text-gray-500" />
+          <FaEyeSlash className="mt-4 text-gray-500" />
         ) : (
-          <FaEye className="text-gray-500" />
+          <FaEye className="mt-4 text-gray-500" />
         )}
       </button>
     </div>

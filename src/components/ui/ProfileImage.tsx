@@ -1,12 +1,18 @@
 import Image from "next/image";
 import profilePlaceholder from "../../assets/images/profile.png";
 
-const ProfileImage = () => {
+interface ProfileImageProps {
+  onClick: () => void;
+  className: string;
+}
+
+const ProfileImage: React.FC<ProfileImageProps> = ({ onClick, className }) => {
   return (
     <Image
       src={profilePlaceholder}
       alt="Profile Image"
-      className="w-8 h-8 rounded-full cursor-pointer"
+      className={className}
+      onClick={onClick}
     />
   );
 };

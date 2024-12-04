@@ -5,6 +5,7 @@ interface SelectFieldProps {
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   value: string;
   placeholder: string;
+  className: string;
   disabled?: boolean;
 }
 
@@ -14,12 +15,11 @@ const SelectField: React.FC<SelectFieldProps> = ({
   value,
   placeholder,
   disabled,
+  className,
 }) => (
   <div className="relative">
     <select
-      className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${
-        value === "" ? "text-gray-400" : "text-black"
-      }`}
+      className={`${className} ${value === "" ? "text-gray-400" : "text-black"}`}
       value={value}
       onChange={onChange}
       disabled={disabled}
@@ -28,12 +28,14 @@ const SelectField: React.FC<SelectFieldProps> = ({
         {placeholder}
       </option>
       {options.map((option) => (
-        <option key={option.value} value={option.value}>
+        <option className="text-black" key={option.value} value={option.value}>
           {option.label}
         </option>
       ))}
     </select>
-    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+    <div
+      className={`${className.includes("hidden") ? "hidden" : "block"} ${className.match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+    >
       <svg
         className="w-4 h-4 text-gray-400"
         fill="none"
