@@ -59,37 +59,25 @@ const Modal = ({
                 <div className="mt-4">{children}</div>
                 <div className="flex ml-auto mt-6 justify-end gap-4">
                   <button
-                    className="flex px-3 py-2 bg-red-500 w-[90px] justify-center items-center gap-2 rounded-lg hover:bg-red-600"
+                    className="flex px-3 py-2 bg-gray-200 w-[100px] justify-center items-center gap-2 rounded-lg hover:bg-gray-300"
                     onClick={onClose}
                   >
-                    <p className="text-white text-[14px]">Cancel</p>
-                    <Image
-                      src={cancelIcon}
-                      className="size-2.5"
-                      alt="Cancel Icon"
-                    />
+                    <p className="text-gray-800 font-medium text-[14px]">
+                      Batal
+                    </p>
                   </button>
                   <button
-                    className={`flex px-3 py-2 w-[90px] justify-center ${modalType === "Delete" ? "bg-red-500" : "bg-green-500"} items-center gap-2 rounded-lg hover:bg-green-600`}
+                    className={`flex px-3 py-2 w-[100px] justify-center ${modalType === "Delete" ? "bg-red-500 hover:bg-red-1000" : "bg-green-500 hover:bg-green-600"} items-center gap-2 rounded-lg`}
                     onClick={
                       modalType === "Tambah"
                         ? onAdd
                         : modalType === "Edit"
                           ? () => onEdit(initialData.id)
                           : modalType === "Delete"
-                            ? onDelete
+                            ? () => onDelete(initialData.id)
                             : ""
                     }
                   >
-                    <p className="text-white text-[14px]">
-                      {modalType === "Tambah"
-                        ? "Add"
-                        : modalType === "Edit"
-                          ? "Save"
-                          : modalType === "Delete"
-                            ? "Yes"
-                            : ""}
-                    </p>
                     {modalType === "Tambah" ? (
                       <Image
                         src={addIcon}
@@ -111,6 +99,15 @@ const Modal = ({
                     ) : (
                       ""
                     )}
+                    <p className="text-white font-medium text-[14px]">
+                      {modalType === "Tambah"
+                        ? "Tambah"
+                        : modalType === "Edit"
+                          ? "Simpan"
+                          : modalType === "Delete"
+                            ? "Hapus"
+                            : ""}
+                    </p>
                   </button>
                 </div>
               </DialogPanel>

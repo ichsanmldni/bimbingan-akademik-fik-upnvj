@@ -29,7 +29,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const [isEditOrder, setIsEditOrder] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [modalType, setModalType] = useState("");
-  const [selectedData, setSelectedData] = useState(null);
   const [selectedParameter, setSelectedParameter] = useState("");
   const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
   const [afterOrderEditDataTahunAjaran, setAfterOrderEditDataTahunAjaran] =
@@ -57,17 +56,62 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const [valueTahunAjaranEditModal, setValueTahunAjaranEditModal] =
     useState("");
   const [selectedTahunAjaranEditModal, setSelectedTahunAjaranEditModal] =
-    useState();
+    useState({});
+  const [selectedTahunAjaranDeleteModal, setSelectedTahunAjaranDeleteModal] =
+    useState({});
+  const [valueJurusanAddModal, setValueJurusanAddModal] = useState("");
+  const [valueJurusanEditModal, setValueJurusanEditModal] = useState("");
+  const [selectedJurusanEditModal, setSelectedJurusanEditModal] = useState({});
+  const [selectedJurusanDeleteModal, setSelectedJurusanDeleteModal] = useState(
+    {}
+  );
+  const [valuePeminatanAddModal, setValuePeminatanAddModal] = useState("");
+  const [valuePeminatanEditModal, setValuePeminatanEditModal] = useState("");
+  const [selectedPeminatanEditModal, setSelectedPeminatanEditModal] = useState(
+    {}
+  );
+  const [selectedPeminatanDeleteModal, setSelectedPeminatanDeleteModal] =
+    useState({});
+  const [valueJenisBimbinganAddModal, setValueJenisBimbinganAddModal] =
+    useState("");
+  const [valueJenisBimbinganEditModal, setValueJenisBimbinganEditModal] =
+    useState("");
+  const [selectedJenisBimbinganEditModal, setSelectedJenisBimbinganEditModal] =
+    useState({});
+  const [
+    selectedJenisBimbinganDeleteModal,
+    setSelectedJenisBimbinganDeleteModal,
+  ] = useState({});
+  const [valueSistemBimbinganAddModal, setValueSistemBimbinganAddModal] =
+    useState("");
+  const [valueSistemBimbinganEditModal, setValueSistemBimbinganEditModal] =
+    useState("");
+  const [
+    selectedSistemBimbinganEditModal,
+    setSelectedSistemBimbinganEditModal,
+  ] = useState({});
+  const [
+    selectedSistemBimbinganDeleteModal,
+    setSelectedSistemBimbinganDeleteModal,
+  ] = useState({});
 
   const openModal = (type, data = null) => {
     setModalType(type);
-    setSelectedData(data);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedData(null);
+    setValueTahunAjaranAddModal("");
+    setValueTahunAjaranEditModal("");
+    setValueJurusanAddModal("");
+    setValueJurusanEditModal("");
+    setValuePeminatanAddModal("");
+    setValuePeminatanEditModal("");
+    setValueJenisBimbinganAddModal("");
+    setValueJenisBimbinganEditModal("");
+    setValueSistemBimbinganAddModal("");
+    setValueSistemBimbinganEditModal("");
   };
 
   const handleDragEndJurusan = (event) => {
@@ -583,8 +627,21 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           <td className="border-b border-gray-200 px-4 py-2">{data.jurusan}</td>
           <td className="border-b border-gray-200 px-4 py-4">
             <div className="flex gap-2 items-center justify-center">
-              <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-              <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+              <EditButton
+                onClick={() => {
+                  setValueJurusanEditModal(data.jurusan);
+                  setSelectedJurusanEditModal(data);
+                  openModal("Edit");
+                }}
+                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+              />
+              <TrashButton
+                onClick={() => {
+                  setSelectedJurusanDeleteModal(data);
+                  openModal("Delete");
+                }}
+                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+              />
             </div>
           </td>
           <DragOverlay>
@@ -734,8 +791,21 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           </td>
           <td className="border-b border-gray-200 px-4 py-4">
             <div className="flex gap-2 items-center justify-center">
-              <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-              <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+              <EditButton
+                onClick={() => {
+                  setValuePeminatanEditModal(data.peminatan);
+                  setSelectedPeminatanEditModal(data);
+                  openModal("Edit");
+                }}
+                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+              />
+              <TrashButton
+                onClick={() => {
+                  setSelectedPeminatanDeleteModal(data);
+                  openModal("Delete");
+                }}
+                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+              />
             </div>
           </td>
           <DragOverlay>
@@ -803,8 +873,21 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           </td>
           <td className="border-b border-gray-200 px-4 py-4">
             <div className="flex gap-2 items-center justify-center">
-              <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-              <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+              <EditButton
+                onClick={() => {
+                  setValueJenisBimbinganEditModal(data.jenis_bimbingan);
+                  setSelectedJenisBimbinganEditModal(data);
+                  openModal("Edit");
+                }}
+                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+              />
+              <TrashButton
+                onClick={() => {
+                  setSelectedJenisBimbinganDeleteModal(data);
+                  openModal("Delete");
+                }}
+                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+              />
             </div>
           </td>
           <DragOverlay>
@@ -874,8 +957,21 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           </td>
           <td className="border-b border-gray-200 px-4 py-4">
             <div className="flex gap-2 items-center justify-center">
-              <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-              <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+              <EditButton
+                onClick={() => {
+                  setValueSistemBimbinganEditModal(data.sistem_bimbingan);
+                  setSelectedSistemBimbinganEditModal(data);
+                  openModal("Edit");
+                }}
+                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+              />
+              <TrashButton
+                onClick={() => {
+                  setSelectedSistemBimbinganDeleteModal(data);
+                  openModal("Delete");
+                }}
+                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+              />
             </div>
           </td>
           <DragOverlay>
@@ -945,7 +1041,20 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         "http://localhost:3000/api/datatahunajaran",
         updatedData
       );
-      console.log(response);
+      console.log("Tahun Ajaran updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const deleteTahunAjaran = async (deletedData) => {
+    try {
+      const response = await axios.delete(
+        "http://localhost:3000/api/datatahunajaran",
+        { data: deletedData }
+      );
       console.log("Tahun Ajaran updated successfully:", response.data);
       return response.data;
     } catch (error) {
@@ -968,6 +1077,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       console.log(result);
 
       getDataTahunAjaran();
+      setIsEditOrder(false);
       closeModal();
     } catch (error) {
       console.error("Registration error:", error.message);
@@ -983,6 +1093,402 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
       const result = await patchTahunAjaran(tahunAjaranValue);
       getDataTahunAjaran();
+      setIsEditOrder(false);
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const handleDeleteTahunAjaran = async (id) => {
+    try {
+      let tahunAjaranValue = {
+        id,
+      };
+
+      const result = await deleteTahunAjaran(tahunAjaranValue);
+      getDataTahunAjaran();
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const addJurusan = async (newData) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/datajurusan",
+        newData
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const patchJurusan = async (updatedData) => {
+    console.log(updatedData);
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/api/datajurusan",
+        updatedData
+      );
+      console.log("Jurusan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const deleteJurusan = async (deletedData) => {
+    try {
+      const response = await axios.delete(
+        "http://localhost:3000/api/datajurusan",
+        { data: deletedData }
+      );
+      console.log("Jurusan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const handleAddJurusan = async (e) => {
+    e.preventDefault();
+
+    try {
+      let jurusanValue = {
+        jurusan: valueJurusanAddModal,
+        order: dataJurusan.length + 1,
+      };
+
+      const result = await addJurusan(jurusanValue);
+
+      console.log(result);
+
+      getDataJurusan();
+      setIsEditOrder(false);
+      closeModal();
+    } catch (error) {
+      console.error("Registration error:", error.message);
+    }
+  };
+
+  const handleEditJurusan = async (id) => {
+    try {
+      let jurusanValue = {
+        id,
+        jurusan: valueJurusanEditModal,
+      };
+
+      const result = await patchJurusan(jurusanValue);
+      getDataJurusan();
+      setIsEditOrder(false);
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const handleDeleteJurusan = async (id) => {
+    try {
+      let jurusanValue = {
+        id,
+      };
+
+      const result = await deleteJurusan(jurusanValue);
+      closeModal();
+      getDataJurusan();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const addPeminatan = async (newData) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/datapeminatan",
+        newData
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const patchPeminatan = async (updatedData) => {
+    console.log(updatedData);
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/api/datapeminatan",
+        updatedData
+      );
+      console.log("Peminatan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const deletePeminatan = async (deletedData) => {
+    try {
+      const response = await axios.delete(
+        "http://localhost:3000/api/datapeminatan",
+        { data: deletedData }
+      );
+      console.log("Peminatan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const handleAddPeminatan = async (e) => {
+    e.preventDefault();
+
+    try {
+      let peminatanValue = {
+        peminatan: valuePeminatanAddModal,
+        order: dataPeminatan.length + 1,
+      };
+
+      const result = await addPeminatan(peminatanValue);
+
+      console.log(result);
+
+      getDataPeminatanByJurusan(selectedJurusan);
+      setIsEditOrder(false);
+      closeModal();
+    } catch (error) {
+      console.error("Registration error:", error.message);
+    }
+  };
+
+  const handleEditPeminatan = async (id) => {
+    try {
+      let peminatanValue = {
+        id,
+        peminatan: valuePeminatanEditModal,
+      };
+
+      const result = await patchPeminatan(peminatanValue);
+      getDataPeminatan();
+      setIsEditOrder(false);
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const handleDeletePeminatan = async (id) => {
+    try {
+      let peminatanValue = {
+        id,
+      };
+
+      const result = await deletePeminatan(peminatanValue);
+      getDataPeminatan();
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const addJenisBimbingan = async (newData) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/datajenisbimbingan",
+        newData
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const patchJenisBimbingan = async (updatedData) => {
+    console.log(updatedData);
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/api/datajenisbimbingan",
+        updatedData
+      );
+      console.log("Jenis Bimbingan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const deleteJenisBimbingan = async (deletedData) => {
+    try {
+      const response = await axios.delete(
+        "http://localhost:3000/api/datajenisbimbingan",
+        { data: deletedData }
+      );
+      console.log("Jenis Bimbingan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const handleAddJenisBimbingan = async (e) => {
+    e.preventDefault();
+
+    try {
+      let jenisBimbinganValue = {
+        jenis_bimbingan: valueJenisBimbinganAddModal,
+        order: dataJenisBimbingan.length + 1,
+      };
+
+      const result = await addJenisBimbingan(jenisBimbinganValue);
+
+      console.log(result);
+
+      getDataJenisBimbingan();
+      setIsEditOrder(false);
+      closeModal();
+    } catch (error) {
+      console.error("Registration error:", error.message);
+    }
+  };
+
+  const handleEditJenisBimbingan = async (id) => {
+    try {
+      let jenisBimbinganValue = {
+        id,
+        jenis_bimbingan: valueJenisBimbinganEditModal,
+      };
+
+      const result = await patchJenisBimbingan(jenisBimbinganValue);
+      getDataJenisBimbingan();
+      setIsEditOrder(false);
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const handleDeleteJenisBimbingan = async (id) => {
+    try {
+      let jenisBimbinganValue = {
+        id,
+      };
+
+      const result = await deleteJenisBimbingan(jenisBimbinganValue);
+      getDataJenisBimbingan();
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const addSistemBimbingan = async (newData) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/datasistembimbingan",
+        newData
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const patchSistemBimbingan = async (updatedData) => {
+    console.log(updatedData);
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/api/datasistembimbingan",
+        updatedData
+      );
+      console.log("Sistem Bimbingan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const deleteSistemBimbingan = async (deletedData) => {
+    try {
+      const response = await axios.delete(
+        "http://localhost:3000/api/datasistembimbingan",
+        { data: deletedData }
+      );
+      console.log("Sistem Bimbingan updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  const handleAddSistemBimbingan = async (e) => {
+    e.preventDefault();
+
+    try {
+      let sistemBimbinganValue = {
+        sistem_bimbingan: valueSistemBimbinganAddModal,
+        order: dataSistemBimbingan.length + 1,
+      };
+
+      const result = await addSistemBimbingan(sistemBimbinganValue);
+
+      console.log(result);
+
+      getDataSistemBimbingan();
+      setIsEditOrder(false);
+      closeModal();
+    } catch (error) {
+      console.error("Registration error:", error.message);
+    }
+  };
+
+  const handleEditSistemBimbingan = async (id) => {
+    try {
+      let sistemBimbinganValue = {
+        id,
+        sistem_bimbingan: valueSistemBimbinganEditModal,
+      };
+
+      const result = await patchSistemBimbingan(sistemBimbinganValue);
+      getDataSistemBimbingan();
+      setIsEditOrder(false);
+      closeModal();
+      console.log("Response from backend:", result);
+    } catch (error) {
+      console.error("Failed to save the updated order.");
+    }
+  };
+
+  const handleDeleteSistemBimbingan = async (id) => {
+    try {
+      let sistemBimbinganValue = {
+        id,
+      };
+
+      const result = await deleteSistemBimbingan(sistemBimbinganValue);
+      getDataSistemBimbingan();
       closeModal();
       console.log("Response from backend:", result);
     } catch (error) {
@@ -1001,14 +1507,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
       setOptionsJurusan(formattedOptions);
 
-      if (afterOrderEditDataJurusan.length === 0) {
-        const afterOrder = dataJurusan.map((data) => {
-          return {
-            ...data,
-          };
-        });
-        setAfterOrderEditDataJurusan(afterOrder);
-      }
+      const afterOrder = dataJurusan.map((data) => {
+        return {
+          ...data,
+        };
+      });
+      setAfterOrderEditDataJurusan(afterOrder);
     }
   }, [dataJurusan]);
 
@@ -1025,40 +1529,34 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   useEffect(() => {
     if (dataPeminatan.length > 0) {
-      if (afterOrderEditDataPeminatan.length === 0) {
-        const afterOrder = dataPeminatan.map((data) => {
-          return {
-            ...data,
-          };
-        });
-        setAfterOrderEditDataPeminatan(afterOrder);
-      }
+      const afterOrder = dataPeminatan.map((data) => {
+        return {
+          ...data,
+        };
+      });
+      setAfterOrderEditDataPeminatan(afterOrder);
     }
   }, [dataPeminatan]);
 
   useEffect(() => {
     if (dataJenisBimbingan.length > 0) {
-      if (afterOrderEditDataJenisBimbingan.length === 0) {
-        const afterOrder = dataJenisBimbingan.map((data) => {
-          return {
-            ...data,
-          };
-        });
-        setAfterOrderEditDataJenisBimbingan(afterOrder);
-      }
+      const afterOrder = dataJenisBimbingan.map((data) => {
+        return {
+          ...data,
+        };
+      });
+      setAfterOrderEditDataJenisBimbingan(afterOrder);
     }
   }, [dataJenisBimbingan]);
 
   useEffect(() => {
     if (dataSistemBimbingan.length > 0) {
-      if (afterOrderEditDataSistemBimbingan.length === 0) {
-        const afterOrder = dataSistemBimbingan.map((data) => {
-          return {
-            ...data,
-          };
-        });
-        setAfterOrderEditDataSistemBimbingan(afterOrder);
-      }
+      const afterOrder = dataSistemBimbingan.map((data) => {
+        return {
+          ...data,
+        };
+      });
+      setAfterOrderEditDataSistemBimbingan(afterOrder);
     }
   }, [dataSistemBimbingan]);
 
@@ -1138,7 +1636,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   }, [activeNavbar]);
 
   return (
-    <div className="p-8 h-[1000px] border rounded-lg">
+    <div className="p-8 h-[1000px] border">
       <div className="flex">
         <SelectField
           options={[
@@ -1273,8 +1771,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                     className={`flex px-2 py-2 w-[88px] justify-center bg-green-500 items-center gap-2 rounded-lg hover:bg-green-600 ${areArraysEqual(dataTahunAjaran, afterOrderEditDataTahunAjaran) || !isEditOrder ? "hidden" : ""}`}
                     onClick={() => handleSaveTahunAjaranOrder()}
                   >
-                    <p className="text-white text-[14px]">Save</p>
                     <Image src={saveIcon} className="size-4" alt="Save Icon" />
+                    <p className="text-white text-[14px]">Save</p>
                   </button>
                   <button
                     className={`flex  py-2 bg-red-500 w-[88px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataTahunAjaran, afterOrderEditDataTahunAjaran) || !isEditOrder ? "hidden" : ""}`}
@@ -1287,12 +1785,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                       setAfterOrderEditDataTahunAjaran(afterOrder);
                     }}
                   >
-                    <p className="text-white text-[14px]">Cancel</p>
                     <Image
                       src={cancelIcon}
                       className="size-2.5"
                       alt="Cancel Icon"
                     />
+                    <p className="text-white text-[14px]">Cancel</p>
                   </button>
                 </div>
               </>
@@ -1302,15 +1800,22 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
               onClose={closeModal}
               onAdd={handleAddTahunAjaran}
               onEdit={handleEditTahunAjaran}
-              title={`${modalType} Tahun Ajaran`}
+              onDelete={handleDeleteTahunAjaran}
+              title={`${modalType === "Delete" ? "Konfirmasi Penghapusan Tahun Ajaran" : `${modalType} Tahun Ajaran`}`}
               modalType={modalType}
-              initialData={selectedTahunAjaranEditModal}
+              initialData={
+                modalType === "Delete"
+                  ? selectedTahunAjaranDeleteModal
+                  : modalType === "Edit"
+                    ? selectedTahunAjaranEditModal
+                    : null
+              }
             >
               {modalType === "Tambah" && (
                 <form>
                   <InputField
                     type="text"
-                    placeholder="Tahun Ajaran"
+                    placeholder="Masukkan tahun ajaran"
                     onChange={(e) => {
                       setValueTahunAjaranAddModal(e.target.value);
                     }}
@@ -1324,7 +1829,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 <form>
                   <InputField
                     type="text"
-                    placeholder="Tahun Ajaran"
+                    placeholder="Masukkan tahun ajaran"
                     onChange={(e) => {
                       setValueTahunAjaranEditModal(e.target.value);
                     }}
@@ -1336,7 +1841,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
               )}
               {modalType === "Delete" && (
                 <p>
-                  Apakah Anda yakin ingin menghapus {selectedData?.tahunAjaran}?
+                  Apakah Anda yakin ingin menghapus tahun ajaran [
+                  {selectedTahunAjaranDeleteModal.tahun_ajaran}] ?
                 </p>
               )}
             </Modal>
@@ -1346,7 +1852,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           <div className="mt-6">
             {afterOrderEditDataJurusan.length === 0 ? (
               <>
-                <button className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">Tambah Jurusan</p>
                 </button>
@@ -1389,7 +1900,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
               </>
             ) : (
               <>
-                <button className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">Tambah Jurusan</p>
                 </button>
@@ -1455,6 +1971,57 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 </div>
               </>
             )}
+            <Modal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              onAdd={handleAddJurusan}
+              onEdit={handleEditJurusan}
+              onDelete={handleDeleteJurusan}
+              title={`${modalType === "Delete" ? "Konfirmasi Penghapusan Jurusan" : `${modalType} Jurusan`}`}
+              modalType={modalType}
+              initialData={
+                modalType === "Delete"
+                  ? selectedJurusanDeleteModal
+                  : modalType === "Edit"
+                    ? selectedJurusanEditModal
+                    : null
+              }
+            >
+              {modalType === "Tambah" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan jurusan"
+                    onChange={(e) => {
+                      setValueJurusanAddModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valueJurusanAddModal}
+                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Edit" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan jurusan"
+                    onChange={(e) => {
+                      setValueJurusanEditModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valueJurusanEditModal}
+                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Delete" && (
+                <p>
+                  Apakah Anda yakin ingin menghapus jurusan [
+                  {selectedJurusanDeleteModal.jurusan}] ?
+                </p>
+              )}
+            </Modal>
           </div>
         )}
         {selectedParameter === "Peminatan" && selectedJurusan !== "" && (
@@ -1576,13 +2143,69 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 </div>
               </>
             )}
+            <Modal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              onAdd={handleAddPeminatan}
+              onEdit={handleEditPeminatan}
+              onDelete={handleDeletePeminatan}
+              title={`${modalType === "Delete" ? "Konfirmasi Penghapusan Peminatan" : `${modalType} Peminatan`}`}
+              modalType={modalType}
+              initialData={
+                modalType === "Delete"
+                  ? selectedPeminatanDeleteModal
+                  : modalType === "Edit"
+                    ? selectedPeminatanEditModal
+                    : null
+              }
+            >
+              {modalType === "Tambah" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan peminatan"
+                    onChange={(e) => {
+                      setValuePeminatanAddModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valuePeminatanAddModal}
+                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Edit" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan peminatan"
+                    onChange={(e) => {
+                      setValuePeminatanEditModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valuePeminatanEditModal}
+                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Delete" && (
+                <p>
+                  Apakah Anda yakin ingin menghapus peminatan [
+                  {selectedPeminatanDeleteModal.peminatan}] ?
+                </p>
+              )}
+            </Modal>
           </div>
         )}
         {selectedParameter === "Jenis Bimbingan" && (
           <div className="mt-6">
             {afterOrderEditDataJenisBimbingan.length === 0 ? (
               <>
-                <button className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">
                     Tambah Jenis Bimbingan
@@ -1629,7 +2252,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
               </>
             ) : (
               <>
-                <button className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">
                     Tambah Jenis Bimbingan
@@ -1701,16 +2329,72 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 </div>
               </>
             )}
+            <Modal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              onAdd={handleAddJenisBimbingan}
+              onEdit={handleEditJenisBimbingan}
+              onDelete={handleDeleteJenisBimbingan}
+              title={`${modalType === "Delete" ? "Konfirmasi Penghapusan Jenis Bimbingan" : `${modalType} Jenis Bimbingan`}`}
+              modalType={modalType}
+              initialData={
+                modalType === "Delete"
+                  ? selectedJenisBimbinganDeleteModal
+                  : modalType === "Edit"
+                    ? selectedJenisBimbinganEditModal
+                    : null
+              }
+            >
+              {modalType === "Tambah" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan jenis bimbingan"
+                    onChange={(e) => {
+                      setValueJenisBimbinganAddModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valueJenisBimbinganAddModal}
+                    className="px-3 py-2 text-[15px] w-2/3 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Edit" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan jenis bimbingan"
+                    onChange={(e) => {
+                      setValueJenisBimbinganEditModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valueJenisBimbinganEditModal}
+                    className="px-3 py-2 text-[15px] w-2/3 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Delete" && (
+                <p>
+                  Apakah Anda yakin ingin menghapus jenis bimbingan [
+                  {selectedJenisBimbinganDeleteModal.jenis_bimbingan}] ?
+                </p>
+              )}
+            </Modal>
           </div>
         )}
         {selectedParameter === "Sistem Bimbingan" && (
           <div className="mt-6">
             {afterOrderEditDataSistemBimbingan.length === 0 ? (
               <>
-                <button className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">
-                    Tambah Jenis Bimbingan
+                    Tambah Sistem Bimbingan
                   </p>
                 </button>
                 <div className="overflow-x-auto mt-6 mb-6">
@@ -1756,7 +2440,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
               </>
             ) : (
               <>
-                <button className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">
                     Tambah Jenis Bimbingan
@@ -1830,6 +2519,57 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 </div>
               </>
             )}
+            <Modal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              onAdd={handleAddSistemBimbingan}
+              onEdit={handleEditSistemBimbingan}
+              onDelete={handleDeleteSistemBimbingan}
+              title={`${modalType === "Delete" ? "Konfirmasi Penghapusan Sistem Bimbingan" : `${modalType} Sistem Bimbingan`}`}
+              modalType={modalType}
+              initialData={
+                modalType === "Delete"
+                  ? selectedSistemBimbinganDeleteModal
+                  : modalType === "Edit"
+                    ? selectedSistemBimbinganEditModal
+                    : null
+              }
+            >
+              {modalType === "Tambah" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan sistem bimbingan"
+                    onChange={(e) => {
+                      setValueSistemBimbinganAddModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valueSistemBimbinganAddModal}
+                    className="px-3 py-2 text-[15px] w-2/3 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Edit" && (
+                <form>
+                  <InputField
+                    type="text"
+                    placeholder="Masukkan sistem bimbingan"
+                    onChange={(e) => {
+                      setValueSistemBimbinganEditModal(e.target.value);
+                    }}
+                    disabled={false}
+                    value={valueSistemBimbinganEditModal}
+                    className="px-3 py-2 text-[15px] w-2/3 focus:outline-none border rounded-lg"
+                  />
+                </form>
+              )}
+              {modalType === "Delete" && (
+                <p>
+                  Apakah Anda yakin ingin menghapus sistem bimbingan [
+                  {selectedSistemBimbinganDeleteModal.sistem_bimbingan}] ?
+                </p>
+              )}
+            </Modal>
           </div>
         )}
       </div>
