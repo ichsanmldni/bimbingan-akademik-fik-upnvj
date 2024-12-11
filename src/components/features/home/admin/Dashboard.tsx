@@ -49,7 +49,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
   }, []);
 
   return (
-    <div className="m-8 p-8 border rounded-lg">
+    <div className="m-8">
       <div className="flex gap-6">
         <FilterField
           options={optionsTahunAjaran}

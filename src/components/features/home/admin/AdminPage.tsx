@@ -8,6 +8,9 @@ import EditButton from "@/components/ui/EditButton";
 import TrashButton from "@/components/ui/TrashButton";
 import ManageParameter from "./ManageParameter";
 import Dashboard from "./Dashboard";
+import ManageLaporanBimbingan from "./ManageLaporanBimbingan";
+import ManageJadwalDosenPA from "./ManageJadwalDosenPA";
+import ManageUser from "./ManageUser";
 
 interface AdminPageProps {
   activeNavbar: string;
@@ -16,7 +19,6 @@ interface AdminPageProps {
 const AdminPage: React.FC<AdminPageProps> = ({ activeNavbar }) => {
   const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
-  const [selectedRoleManageUser, setSelectedRoleManageUser] = useState("");
   const [selectedBab, setSelectedBab] = useState("");
   const [selectedSubBab, setSelectedSubBab] = useState("");
   const [activeTab, setActiveTab] = useState("Bab");
@@ -40,215 +42,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ activeNavbar }) => {
         <ManageParameter activeNavbar={activeNavbar} />
       )}
       {activeNavbar === "Manage Laporan Bimbingan" && (
-        <div className="m-8 p-8 border rounded-lg">
-          <div className="flex px-3 py-2 bg-[#F8FAFC] items-center gap-3 rounded-lg ml-auto w-[20%] hover:bg-orange-600]">
-            <Image src={searchIcon} alt="Search Icon" className="size-4" />
-            <input
-              className="text-[#525252] bg-[#F8FAFC] text-[14px] focus:outline-none w-[80%]"
-              placeholder="Cari"
-            />
-          </div>
-          <div className="border rounded-lg mt-8 p-6">
-            <div className="overflow-x-auto mt-4">
-              <table className="min-w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-100 text-center">
-                    <th className="px-4 py-2 rounded-tl-lg rounded-bl-lg">
-                      No
-                    </th>
-                    <th className="px-4 py-2">Nama Kaprodi</th>
-                    <th className="px-4 py-2">Nama Dosen PA</th>
-                    <th className="px-4 py-2">Tanggal</th>
-                    <th className="px-4 py-2">Sistem Bimbingan</th>
-                    <th className="px-4 py-2">Status</th>
-                    <th className="px-4 py-2 rounded-tr-lg rounded-br-lg">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="text-center">
-                    <td className="border-b border-gray-200 px-4 py-6">1</td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Widya Cholil
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Neny Rosmawarni
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      8 September 2024
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Online
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Belum diberi feedback
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      <div className="flex gap-2 items-center justify-center">
-                        <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <ManageLaporanBimbingan />
       )}
-      {activeNavbar === "Manage Jadwal Dosen PA" && (
-        <div className="m-8 p-8 border rounded-lg">
-          <div className="flex px-3 py-2 bg-[#F8FAFC] items-center gap-3 rounded-lg ml-auto w-[20%]">
-            <Image src={searchIcon} alt="Search Icon" className="size-4" />
-            <input
-              className="text-[#525252] bg-[#F8FAFC] text-[14px] focus:outline-none w-[80%]"
-              placeholder="Cari"
-            />
-          </div>
-          <div className="border rounded-lg mt-8 p-6">
-            <div className="overflow-x-auto mt-4">
-              <table className="min-w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-100 text-center">
-                    <th className="px-4 py-2 rounded-tl-lg rounded-bl-lg">
-                      No
-                    </th>
-                    <th className="px-4 py-2">Nama Dosen PA</th>
-                    <th className="px-4 py-2">Senin</th>
-                    <th className="px-4 py-2">Selasa</th>
-                    <th className="px-4 py-2">Rabu</th>
-                    <th className="px-4 py-2">Kamis</th>
-                    <th className="px-4 py-2">Jumat</th>
-                    <th className="px-4 py-2 rounded-tr-lg rounded-br-lg">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="text-center">
-                    <td className="border-b border-gray-200 px-4 py-6">1</td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Neny Rosmawarni
-                    </td>
-                    <td className="items-center align-top px-4 py-6 border-b border-gray-200 py-6">
-                      <ul>
-                        <li>07.00-08.00</li>
-                        <li>13.00-14.00</li>
-                      </ul>
-                    </td>
-                    <td className="items-center align-top px-4 py-6 border-b border-gray-200 py-6">
-                      <ul>
-                        <li>07.00-08.00</li>
-                        <li>13.00-14.00</li>
-                      </ul>
-                    </td>
-                    <td className="items-center align-top px-4 py-6 border-b border-gray-200 py-6">
-                      <ul>
-                        <li>07.00-08.00</li>
-                        <li>13.00-14.00</li>
-                      </ul>
-                    </td>
-                    <td className="items-center align-top px-4 py-6 border-b border-gray-200 py-6">
-                      <ul>
-                        <li>07.00-08.00</li>
-                        <li>13.00-14.00</li>
-                      </ul>
-                    </td>
-                    <td className="items-center align-top px-4 py-6 border-b border-gray-200 py-6">
-                      <ul>
-                        <li>07.00-08.00</li>
-                        <li>13.00-14.00</li>
-                      </ul>
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      <div className="flex gap-2 items-center justify-center">
-                        <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                        <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-      {activeNavbar === "Manage User" && (
-        <div className="m-8 p-8 border rounded-lg">
-          <div className="flex justify-end gap-8">
-            <SelectField
-              options={[
-                { value: "Mahasiswa", label: "Mahasiswa" },
-                { value: "Dosen PA", label: "Dosen PA" },
-                { value: "Kaprodi", label: "Kaprodi" },
-                { value: "Admin", label: "Admin" },
-              ]}
-              onChange={(e) => setSelectedRoleManageUser(e.target.value)}
-              value={selectedRoleManageUser}
-              placeholder="Filter Role"
-              className={`px-3 py-2 text-[14px] border rounded-lg appearance-none w-[200px]`}
-            />
-            <div className="flex px-3 py-2 bg-[#F8FAFC] items-center gap-3 rounded-lg w-[20%]">
-              <Image src={searchIcon} alt="Search Icon" className="size-4" />
-              <input
-                className="text-[#525252] bg-[#F8FAFC] text-[14px] focus:outline-none w-[80%]"
-                placeholder="Cari"
-              />
-            </div>
-          </div>
-          <div className="border rounded-lg mt-8 p-6">
-            <div className="overflow-x-auto mt-4">
-              <table className="min-w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-100 text-center">
-                    <th className="px-4 py-2 rounded-tl-lg rounded-bl-lg">
-                      No
-                    </th>
-                    <th className="px-4 py-2">Nama</th>
-                    <th className="px-4 py-2">NIM/NIP</th>
-                    <th className="px-4 py-2">Email</th>
-                    <th className="px-4 py-2">No HP</th>
-                    <th className="px-4 py-2">Role</th>
-                    <th className="px-4 py-2">Status</th>
-                    <th className="px-4 py-2 rounded-tr-lg rounded-br-lg">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="text-center">
-                    <td className="border-b border-gray-200 px-4 py-6">1</td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Neny Rosmawarni
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      912372837
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      ichsan225@gmail.com
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      082671628273
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Dosen PA
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      Aktif
-                    </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
-                      <div className="flex gap-2 items-center justify-center">
-                        <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 size-8" />
-                        <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 size-8" />
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+      {activeNavbar === "Manage Jadwal Dosen PA" && <ManageJadwalDosenPA />}
+      {activeNavbar === "Manage User" && <ManageUser />}
       {activeNavbar === "Manage Informasi Akademik" && (
         <div className="m-8 rounded-lg">
           <div className="flex">

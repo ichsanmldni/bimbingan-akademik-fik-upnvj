@@ -67,3 +67,40 @@ export async function POST(req) {
     );
   }
 }
+
+export async function PATCH(req) {
+  try {
+    const body = await req.json();
+
+    const {id, feedback_kaprodi, status} = body;
+    
+    if (!id || !feedback_kaprodi || !status) {
+      return new Response(
+        JSON.stringify({ message: 'Invalid data' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const existingRecord = await prisma.laporanBimbingan.findUnique({
+      where: { id },
+    });
+    
+    if (!existingRecord) {
+      throw new Error('Record not found');
+    }
+    
+    const LaporanBimbingan = await prisma.laporanBimbingan.update({ where: { id }, data: { feedback_kaprodi, status } })
+
+    return new Response(JSON.stringify(LaporanBimbingan), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    
+    
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}

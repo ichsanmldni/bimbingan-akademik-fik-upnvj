@@ -9,6 +9,7 @@ import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
 import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
+import { p } from "framer-motion/client";
 
 interface DashboardKaprodiProps {
   selectedSubMenuDashboard: string;
@@ -23,16 +24,29 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const [nip, setNip] = useState("");
   const [noTelpKaprodi, setNoTelpKaprodi] = useState("");
   const [userProfile, setUserProfile] = useState({});
+  const [selectedDataLaporanBimbingan, setSelectedDataLaporanBimbingan] =
+    useState({});
+  const [selectedDataDosenPA, setSelectedDataDosenPA] = useState({});
   const [feedbackKaprodi, setFeedbackKaprodi] = useState("");
   const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
   const [isDetailLaporanKaprodiClicked, setIsDetailLaporanKaprodiClicked] =
-    useState(true);
+    useState(false);
+  const [isDetailDosenPAClicked, setIsDetailDosenPAClicked] = useState(false);
   const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
   const [isDataChanged, setIsDataChanged] = useState(false);
+  const [dataBimbinganBySelectedDosenPA, setDataBimbinganBySelectedDosenPA] =
+    useState({});
 
-  const handleDetailLaporanKaprodi = () => {
+  const handleDetailLaporanKaprodi = (data) => {
+    setSelectedDataLaporanBimbingan(data);
     setIsDetailLaporanKaprodiClicked((prev) => !prev);
+  };
+
+  const handleDetailDosenPA = (data) => {
+    setSelectedDataDosenPA(data);
+    setIsDetailDosenPAClicked((prev) => !prev);
   };
 
   const getDataDosenPA = async () => {
@@ -114,11 +128,100 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
+  const getDataLaporanBimbinganByKaprodiId = async () => {
+    try {
+      const dataKaprodi = await axios.get(
+        `http://localhost:3000/api/datakaprodi`
+      );
+
+      const kaprodi = dataKaprodi.data.find(
+        (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+      );
+
+      if (!kaprodi) {
+        throw new Error("Kaprodi tidak ditemukan");
+      }
+
+      const kaprodiid = kaprodi.id;
+
+      const dataLaporanBimbingan = await axios.get(
+        `http://localhost:3000/api/laporanbimbingan`
+      );
+
+      const laporanBimbingan = dataLaporanBimbingan.data.filter(
+        (data) => data.kaprodi_id === kaprodiid
+      );
+
+      setDataLaporanBimbingan(laporanBimbingan);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const patchLaporanBimbingan = async (updatedData) => {
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/api/laporanbimbingan",
+        updatedData
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleEditLaporanBimbingan = async (id, status) => {
+    try {
+      let laporanBimbinganValue = {
+        id,
+        feedback_kaprodi: feedbackKaprodi,
+        status,
+      };
+
+      const result = await patchLaporanBimbingan(laporanBimbinganValue);
+      console.log(result);
+      setFeedbackKaprodi("");
+      getDataLaporanBimbinganByKaprodiId();
+    } catch (error) {
+      console.error("Registration error:", error.message);
+    }
+  };
+
+  const getDataBimbinganByDosenPaId = async () => {
+    try {
+      const dataBimbingan = await axios.get(
+        `http://localhost:3000/api/bimbingan`
+      );
+
+      const bimbingan = dataBimbingan.data.filter(
+        (data) =>
+          data.pengajuan_bimbingan.dosen_pa_id === selectedDataDosenPA.id
+      );
+
+      setDataBimbinganBySelectedDosenPA(bimbingan);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     if (dataUser && dataUser.id) {
       getDataDosenById();
     }
   }, [dataUser]);
+
+  useEffect(() => {
+    getDataBimbinganByDosenPaId();
+  }, [selectedDataDosenPA]);
+
+  useEffect(() => {
+    if (userProfile && userProfile.nama_lengkap !== "") {
+      getDataLaporanBimbinganByKaprodiId();
+    }
+  }, [userProfile]);
 
   useEffect(() => {
     if (userProfile && userProfile.nama_lengkap !== "") {
@@ -241,25 +344,103 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       )}
       {selectedSubMenuDashboard === "Data Dosen PA" && (
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
-          <div className="flex flex-col gap-4 border px-[20px] py-[20px] rounded-lg">
+          <div className="flex flex-col gap-4 rounded-lg">
             <h1 className="font-semibold text-[24px]">Data Dosen PA</h1>
-            <div className="flex flex-col gap-4">
-              {dataDosenPA.map((data) => {
-                return (
-                  <div
-                    key={data.id}
-                    className="flex items-center gap-2 border rounded-xl p-2"
-                  >
+            {isDetailDosenPAClicked ? (
+              <div>
+                <div className="flex gap-2 mt-2">
+                  <Image
+                    src={backIconOrange}
+                    alt="backIconOrange"
+                    onClick={() => {
+                      setIsDetailDosenPAClicked(!isDetailDosenPAClicked);
+                      setSelectedDataDosenPA({});
+                    }}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-orange-600 font-medium">Kembali</p>
+                </div>
+                <div className="flex flex-col gap-4 mt-4 border rounded-xl p-8">
+                  <div className="flex gap-6">
                     <Image
                       src={profilePlaceholder}
                       alt="Profile Image"
-                      className="w-8 h-8 rounded-full cursor-pointer"
+                      className="size-[120px] rounded-full cursor-pointer"
                     />
-                    <p className="self-center">{data.dosen.nama_lengkap}</p>
+                    <div className="font-medium mt-2">
+                      <p className="self-center">
+                        {selectedDataDosenPA.dosen.nama_lengkap}
+                      </p>
+                      <p className="self-center">
+                        {selectedDataDosenPA.dosen.nip}
+                      </p>
+                      <p className="self-center">
+                        {selectedDataDosenPA.dosen.email}
+                      </p>
+                      <p className="self-center">
+                        {selectedDataDosenPA.dosen.no_whatsapp}
+                      </p>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <p>Jumlah pengajuan oleh mahasiswa : </p>
+                      <p>
+                        {dataBimbinganBySelectedDosenPA.length} Pengajuan
+                        Bimbingan
+                      </p>
+                    </div>
+                    <div>
+                      <p>Jumlah pengajuan yang diterima : </p>
+                      <p>
+                        {
+                          dataBimbinganBySelectedDosenPA.filter(
+                            (data) =>
+                              data.pengajuan_bimbingan.status === "Diterima"
+                          ).length
+                        }{" "}
+                        Pengajuan Bimbingan
+                      </p>
+                    </div>
+                    <div>
+                      <p>Jumlah laporan bimbingan : </p>
+                      <p>
+                        {
+                          dataBimbinganBySelectedDosenPA.filter(
+                            (data) =>
+                              data.laporan_bimbingan !== null &&
+                              data.laporan_bimbingan?.status ===
+                                "Sudah Diberikan Feedback"
+                          ).length
+                        }{" "}
+                        Laporan Bimbingan
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {dataDosenPA.map((data) => {
+                  return (
+                    <div
+                      key={data.id}
+                      className="flex items-center gap-4 border rounded-xl p-4 cursor-pointer"
+                      onClick={() => {
+                        handleDetailDosenPA(data);
+                      }}
+                    >
+                      <Image
+                        src={profilePlaceholder}
+                        alt="Profile Image"
+                        className="w-8 h-8 rounded-full cursor-pointer"
+                      />
+                      <p className="self-center">{data.dosen.nama_lengkap}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -270,170 +451,200 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
             <h1 className="font-semibold text-[24px]">
               Riwayat Laporan Bimbingan
             </h1>
-            {!isDetailLaporanKaprodiClicked ? (
-              <div className="flex flex-col gap-6">
-                <div
-                  className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
-                  onClick={handleDetailLaporanKaprodi}
-                >
-                  <div className="flex justify-between text-neutral-600">
-                    <p>20 Desember 2024</p>
-                    <p>20 Mahasiswa</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="font-medium">Afif Fakhri</p>
-                      <p>Keuangan</p>
-                      <p className="font-medium">Offline</p>
-                    </div>
-                    <div className="bg-red-500 p-3 self-center rounded-lg">
-                      <p className="text-white text-center">
-                        Belum Diberikan Feedback
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
-                  onClick={handleDetailLaporanKaprodi}
-                >
-                  <div className="flex justify-between text-neutral-600">
-                    <p>20 Desember 2024</p>
-                    <p>20 Mahasiswa</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="font-medium">Afif Fakhri</p>
-                      <p>Keuangan</p>
-                      <p className="font-medium">Offline</p>
-                    </div>
-                    <div className="bg-red-500 p-3 self-center rounded-lg">
-                      <p className="text-white text-center">
-                        Belum Diberikan Feedback
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex gap-2 mt-2">
-                  <Image
-                    src={backIconOrange}
-                    alt="backIconOrange"
-                    onClick={() => {
-                      setIsDetailLaporanKaprodiClicked(
-                        !isDetailLaporanKaprodiClicked
-                      );
-                    }}
-                    className="cursor-pointer"
-                  />
-                  <p className="text-orange-600 font-medium">Kembali</p>
-                </div>
-                <div className="mt-4">
-                  <div className="flex flex-col border rounded-lg p-6 gap-4">
-                    <div className="flex justify-between text-neutral-600">
-                      <p>20 Desember 2024</p>
-                      <p>20 Mahasiswa</p>
-                    </div>
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">Afif Fakhri</p>
-                        <p>Keuangan</p>
-                        <p className="font-medium">Offline</p>
+            {dataLaporanBimbingan.length > 0 ? (
+              !isDetailLaporanKaprodiClicked ? (
+                <div className="flex flex-col gap-6">
+                  {dataLaporanBimbingan.map((data) => (
+                    <div
+                      className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
+                      onClick={() => handleDetailLaporanKaprodi(data)}
+                    >
+                      <div className="flex justify-between text-neutral-600">
+                        <p>{data.waktu_bimbingan}</p>
                       </div>
-                      <div className="bg-green-500 p-3 self-center rounded-lg">
-                        <p className="text-white text-center">Diterima</p>
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="font-medium">{data.nama_mahasiswa}</p>
+                          <p>{data.jenis_bimbingan}</p>
+                          <p className="font-medium">{data.sistem_bimbingan}</p>
+                        </div>
+                        <div
+                          className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-3 self-center rounded-lg`}
+                        >
+                          <p className="text-white text-center">
+                            {data.status}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-4">
-                      <div className="flex flex-col gap-2">
-                        <h3 className="font-medium">Kendala Mahasiswa</h3>
-                        <ol className="list-disc pl-5">
-                          <div className="flex flex-col gap-1">
-                            <li>Kesulitan dalam mengatur waktu</li>
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <div className="flex gap-2 mt-2">
+                    <Image
+                      src={backIconOrange}
+                      alt="backIconOrange"
+                      onClick={() => {
+                        setIsDetailLaporanKaprodiClicked(
+                          !isDetailLaporanKaprodiClicked
+                        );
+                        setSelectedDataLaporanBimbingan({});
+                      }}
+                      className="cursor-pointer"
+                    />
+                    <p className="text-orange-600 font-medium">Kembali</p>
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex flex-col border rounded-lg p-6 gap-4">
+                      <div className="flex justify-between text-neutral-600">
+                        <p>{selectedDataLaporanBimbingan.waktu_bimbingan}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="font-medium">
+                            {selectedDataLaporanBimbingan.nama_mahasiswa}
+                          </p>
+                          <p>{selectedDataLaporanBimbingan.jenis_bimbingan}</p>
+                          <p className="font-medium">
+                            {selectedDataLaporanBimbingan.sistem_bimbingan}
+                          </p>
+                        </div>
+                        <div
+                          className={`${selectedDataLaporanBimbingan.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} p-3 self-center rounded-lg`}
+                        >
+                          <p className="text-white text-center">
+                            {selectedDataLaporanBimbingan.status}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Kendala Mahasiswa</h3>
+                          <p>
+                            {selectedDataLaporanBimbingan.kendala_mahasiswa}
+                          </p>
+                          {/* <ol className="list-disc pl-5">
+                            <div className="flex flex-col gap-1">
+                              <li>Kesulitan dalam mengatur waktu</li>
+                              <p>
+                                Banyak mahasiswa yang merasa kesulitan dalam
+                                mengatur waktu antara kuliah, tugas, dan
+                                kegiatan organisasi. Aktivitas yang padat dapat
+                                membuat mereka kewalahan, terlebih jika ada
+                                tenggat waktu yang bersamaan.
+                              </p>
+                            </div>
+                          </ol> */}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">
+                            Solusi yang ditawarkan
+                          </h3>
+                          <p>{selectedDataLaporanBimbingan.solusi}</p>
+                          {/* <ol className="list-decimal pl-5">
+                            <div className="flex flex-col gap-1">
+                              <li>Mengatur Waktu dan Prioritas</li>
+                              <ol className="list-disc pl-5 flex flex-col gap-1">
+                                <li>
+                                  Solusi : Dosen pembimbing akademik dapat
+                                  membantu mahasiswa dalam membuat jadwal yang
+                                  realistis dan mengajarkan teknik manajemen
+                                  waktu yang efektif, seperti metode time
+                                  blocking, atau menggunakan aplikasi
+                                  perencanaan waktu.
+                                </li>
+                                <li>
+                                  Cara Implementasi : Dosen pembimbing akademik
+                                  dapat membantu mahasiswa dalam membuat jadwal
+                                  yang realistis dan mengajarkan teknik
+                                  manajemen waktu yang efektif, seperti metode
+                                  time blocking, atau menggunakan aplikasi
+                                  perencanaan waktu.
+                                </li>
+                              </ol>
+                            </div>
+                          </ol> */}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Kesimpulan</h3>
+                          <p>{selectedDataLaporanBimbingan.kesimpulan}</p>
+                          {/* <p>
+                            Secara keseluruhan, saya melihat bahwa kamu adalah
+                            mahasiswa yang memiliki potensi besar dan komitmen
+                            yang tinggi terhadap studi. Pencapaian akademik kamu
+                            di beberapa mata kuliah menunjukkan bahwa kamu mampu
+                            menguasai materi dengan baik. Namun, masih ada
+                            beberapa area yang perlu perhatian lebih, terutama
+                            dalam hal manajemen waktu dan pemahaman materi pada
+                            beberapa mata kuliah yang lebih kompleks. Saya juga
+                            mengapresiasi keaktifan kamu dalam perkuliahan dan
+                            keterlibatan dalam diskusi, meskipun ada beberapa
+                            aspek yang perlu kamu tingkatkan, seperti
+                            keterlibatan dalam tugas kelompok dan pengelolaan
+                            tugas dengan lebih baik.
+                          </p> */}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Dokumentasi</h3>
+                          {selectedDataLaporanBimbingan.dokumentasi !== null ? (
+                            <p>{selectedDataLaporanBimbingan.dokumentasi}</p>
+                          ) : (
+                            <p>-</p>
+                          )}
+                          {/* <Image
+                            className="size-[100px]"
+                            src={upnvjLogo}
+                            alt="upnvjLogo"
+                          /> */}
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          <h3 className="font-medium">Feedback Kaprodi</h3>
+                          {selectedDataLaporanBimbingan.feedback_kaprodi !==
+                          null ? (
                             <p>
-                              Banyak mahasiswa yang merasa kesulitan dalam
-                              mengatur waktu antara kuliah, tugas, dan kegiatan
-                              organisasi. Aktivitas yang padat dapat membuat
-                              mereka kewalahan, terlebih jika ada tenggat waktu
-                              yang bersamaan.
+                              {selectedDataLaporanBimbingan.feedback_kaprodi}
                             </p>
-                          </div>
-                        </ol>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <h3 className="font-medium">Solusi yang ditawarkan</h3>
-                        <ol className="list-decimal pl-5">
-                          <div className="flex flex-col gap-1">
-                            <li>Mengatur Waktu dan Prioritas</li>
-                            <ol className="list-disc pl-5 flex flex-col gap-1">
-                              <li>
-                                Solusi : Dosen pembimbing akademik dapat
-                                membantu mahasiswa dalam membuat jadwal yang
-                                realistis dan mengajarkan teknik manajemen waktu
-                                yang efektif, seperti metode time blocking, atau
-                                menggunakan aplikasi perencanaan waktu.
-                              </li>
-                              <li>
-                                Cara Implementasi : Dosen pembimbing akademik
-                                dapat membantu mahasiswa dalam membuat jadwal
-                                yang realistis dan mengajarkan teknik manajemen
-                                waktu yang efektif, seperti metode time
-                                blocking, atau menggunakan aplikasi perencanaan
-                                waktu.
-                              </li>
-                            </ol>
-                          </div>
-                        </ol>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <h3 className="font-medium">Kesimpulan</h3>
-                        <p>
-                          Secara keseluruhan, saya melihat bahwa kamu adalah
-                          mahasiswa yang memiliki potensi besar dan komitmen
-                          yang tinggi terhadap studi. Pencapaian akademik kamu
-                          di beberapa mata kuliah menunjukkan bahwa kamu mampu
-                          menguasai materi dengan baik. Namun, masih ada
-                          beberapa area yang perlu perhatian lebih, terutama
-                          dalam hal manajemen waktu dan pemahaman materi pada
-                          beberapa mata kuliah yang lebih kompleks. Saya juga
-                          mengapresiasi keaktifan kamu dalam perkuliahan dan
-                          keterlibatan dalam diskusi, meskipun ada beberapa
-                          aspek yang perlu kamu tingkatkan, seperti keterlibatan
-                          dalam tugas kelompok dan pengelolaan tugas dengan
-                          lebih baik.
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <h3 className="font-medium">Dokumentasi</h3>
-                        <Image
-                          className="size-[100px]"
-                          src={upnvjLogo}
-                          alt="upnvjLogo"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <h3 className="font-medium">Feedback Kaprodi</h3>
-                        <textarea
-                          placeholder={
-                            feedbackKaprodi === ""
-                              ? "Input Feedback"
-                              : feedbackKaprodi
-                          }
-                          onChange={(e) => {
-                            setFeedbackKaprodi(e.target.value);
-                          }}
-                          value={feedbackKaprodi}
-                          className="px-3 pt-2 h-[200px] text-[15px] border rounded-lg"
-                        ></textarea>
-                        <button className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg w-1/5">
-                          Submit
-                        </button>
+                          ) : (
+                            <div className="flex flex-col gap-3">
+                              <textarea
+                                placeholder={
+                                  feedbackKaprodi === ""
+                                    ? "Input Feedback"
+                                    : feedbackKaprodi
+                                }
+                                onChange={(e) => {
+                                  setFeedbackKaprodi(e.target.value);
+                                }}
+                                value={feedbackKaprodi}
+                                className="px-3 pt-2 h-[200px] text-[15px] border rounded-lg"
+                              ></textarea>
+                              <button
+                                onClick={() => {
+                                  handleEditLaporanBimbingan(
+                                    selectedDataLaporanBimbingan.id,
+                                    "Sudah Diberikan Feedback"
+                                  );
+                                  setIsDetailLaporanKaprodiClicked(
+                                    !isDetailLaporanKaprodiClicked
+                                  );
+                                  setSelectedDataLaporanBimbingan({});
+                                }}
+                                className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg w-1/5"
+                              >
+                                Submit
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              )
+            ) : (
+              <div className="text-center border rounded-lg py-12 text-gray-500 mb-[400px]">
+                <p>Belum ada laporan bimbingan</p>
               </div>
             )}
           </div>

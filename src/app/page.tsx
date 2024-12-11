@@ -66,10 +66,12 @@ export default function Home() {
         if (decodedToken.role === "Mahasiswa") {
           setRoleUser("Mahasiswa");
         } else if (
+          decodedToken.role === "Dosen" &&
           dataDosenPA.find((data) => data.dosen_id === decodedToken.id)
         ) {
           setRoleUser("Dosen PA");
         } else if (
+          decodedToken.role === "Dosen" &&
           dataKaprodi.find((data) => data.dosen_id === decodedToken.id)
         ) {
           setRoleUser("Kaprodi");
@@ -203,6 +205,7 @@ export default function Home() {
           </div>
         </div>
       )}
+
       {roleUser === "Admin" && (
         <div className="flex h-screen">
           <NavbarAdmin
