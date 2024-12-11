@@ -12,7 +12,7 @@ const RegistrationForm = () => {
   const [nim, setNim] = useState("");
   const [nip, setNip] = useState("");
   const [noWa, setNoWa] = useState("");
-  const [dataDosen, setDataDosen] = useState([]);
+  const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataJurusan, setDataJurusan] = useState([]);
   const [dataPeminatan, setDataPeminatan] = useState([]);
   const [password, setPassword] = useState("");
@@ -34,7 +34,8 @@ const RegistrationForm = () => {
       }
 
       const data = await response.data;
-      setDataJurusan(data);
+      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
+      setDataJurusan(sortedDataJurusan);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -66,23 +67,24 @@ const RegistrationForm = () => {
       }
 
       const data = await response.data;
-      setDataPeminatan(data);
+      const sortedDataPeminatan = data.sort((a, b) => a.order - b.order);
+      setDataPeminatan(sortedDataPeminatan);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
 
-  const getDataDosen = async () => {
+  const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosen");
+      const response = await axios.get("http://localhost:3000/api/datadosenpa");
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
       const data = await response.data;
-      setDataDosen(data);
+      setDataDosenPA(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -146,7 +148,7 @@ const RegistrationForm = () => {
 
   useEffect(() => {
     document.cookie = "authToken=; max-age=0; path=/;";
-    getDataDosen();
+    getDataDosenPA();
     getDataJurusan();
   }, []);
 
@@ -156,8 +158,8 @@ const RegistrationForm = () => {
   }, [selectedJurusan]);
 
   useEffect(() => {
-    if (dataDosen.length > 0) {
-      const formattedOptions = dataDosen.map((data) => {
+    if (dataDosenPA.length > 0) {
+      const formattedOptions = dataDosenPA.map((data) => {
         return {
           value: data.dosen.nama_lengkap,
           label: data.dosen.nama_lengkap,
@@ -166,7 +168,7 @@ const RegistrationForm = () => {
 
       setOptionsDosenPA(formattedOptions);
     }
-  }, [dataDosen]);
+  }, [dataDosenPA]);
 
   useEffect(() => {
     if (dataJurusan.length > 0) {
@@ -194,6 +196,19 @@ const RegistrationForm = () => {
     }
   }, [dataPeminatan]);
 
+  useEffect(() => {
+    setEmail("");
+    setNoWa("");
+    setNamaLengkap("");
+    setSelectedDosen("");
+    setNim("");
+    setNip("");
+    setSelectedPeminatan("");
+    setSelectedJurusan("");
+    setPassword("");
+    setConfirmPassword("");
+  }, [selectedRole]);
+
   return (
     <div className="border rounded-lg w-1/2 self-center">
       <h3 className="text-center pt-4 pb-4 px-20 font-semibold text-[28px]">
@@ -206,8 +221,8 @@ const RegistrationForm = () => {
         <div className="pr-8 flex flex-col overflow-y-auto max-h-[200px]">
           <SelectField
             options={[
-              { value: "Dosen", label: "Dosen" },
               { value: "Mahasiswa", label: "Mahasiswa" },
+              { value: "Dosen", label: "Dosen" },
             ]}
             onChange={(e) => setSelectedRole(e.target.value)}
             value={selectedRole}
@@ -282,12 +297,14 @@ const RegistrationForm = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="px-3 py-2 text-[15px] mt-4 border rounded-lg w-full"
             disabled={selectedRole === ""}
+            value={password}
           />
           <PasswordInput
             className="px-3 py-2 text-[15px] mt-4 border rounded-lg w-full"
             disabled={selectedRole === ""}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Konfirmasi Kata Sandi"
+            value={confirmPassword}
           />
         </div>
         <button

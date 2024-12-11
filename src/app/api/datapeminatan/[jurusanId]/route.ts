@@ -36,6 +36,9 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
+    const url = new URL(req.url);
+    const pathSegments = url.pathname.split('/');
+    const jurusanid = pathSegments[pathSegments.indexOf('datapeminatan') + 1];
     const body = await req.json();
 
       const { peminatan, order} = body;
@@ -49,7 +52,7 @@ export async function POST(req) {
 
       const Peminatan = await prisma.masterPeminatan.create({
         data : {
-          peminatan, order
+          peminatan, order, jurusan_id:parseInt(jurusanid)
         }
     });
     return new Response(JSON.stringify(Peminatan), {

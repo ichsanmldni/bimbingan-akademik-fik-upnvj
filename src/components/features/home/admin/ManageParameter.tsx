@@ -497,8 +497,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       }
 
       const data = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
-      setDataTahunAjaran(sortedDataJurusan);
+      const sortedDataTahunAjaran = data.sort((a, b) => a.order - b.order);
+      setDataTahunAjaran(sortedDataTahunAjaran);
+      if (data.length === 0) {
+        setAfterOrderEditDataTahunAjaran([]);
+      }
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -516,6 +519,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const data = await response.data;
       const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
       setDataJurusan(sortedDataJurusan);
+      if (data.length === 0) {
+        setAfterOrderEditDataJurusan([]);
+      }
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -549,6 +555,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const data = await response.data;
       const sortedDataPeminatan = data.sort((a, b) => a.order - b.order);
       setDataPeminatan(sortedDataPeminatan);
+      if (data.length === 0) {
+        setAfterOrderEditDataPeminatan([]);
+      }
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -568,6 +577,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const data = await response.data;
       const sortedDataJenisBimbingan = data.sort((a, b) => a.order - b.order);
       setDataJenisBimbingan(sortedDataJenisBimbingan);
+      if (data.length === 0) {
+        setAfterOrderEditDataJenisBimbingan([]);
+      }
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -587,6 +599,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const data = await response.data;
       const sortedDataSistemBimbingan = data.sort((a, b) => a.order - b.order);
       setDataSistemBimbingan(sortedDataSistemBimbingan);
+      if (data.length === 0) {
+        setAfterOrderEditDataSistemBimbingan([]);
+      }
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -1213,8 +1228,22 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const addPeminatan = async (newData) => {
     try {
+      const dataJurusan = await axios.get(
+        "http://localhost:3000/api/datajurusan"
+      );
+
+      const jurusan = dataJurusan.data.find(
+        (data) => data.jurusan === selectedJurusan
+      );
+
+      if (!jurusan) {
+        throw new Error("Jurusan tidak ditemukan");
+      }
+
+      const jurusanid = jurusan.id;
+
       const response = await axios.post(
-        "http://localhost:3000/api/datapeminatan",
+        `http://localhost:3000/api/datapeminatan/${jurusanid}`,
         newData
       );
 
@@ -1227,8 +1256,22 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const patchPeminatan = async (updatedData) => {
     console.log(updatedData);
     try {
+      const dataJurusan = await axios.get(
+        "http://localhost:3000/api/datajurusan"
+      );
+
+      const jurusan = dataJurusan.data.find(
+        (data) => data.jurusan === selectedJurusan
+      );
+
+      if (!jurusan) {
+        throw new Error("Jurusan tidak ditemukan");
+      }
+
+      const jurusanid = jurusan.id;
+
       const response = await axios.patch(
-        "http://localhost:3000/api/datapeminatan",
+        `http://localhost:3000/api/datapeminatan/${jurusanid}`,
         updatedData
       );
       console.log("Peminatan updated successfully:", response.data);
@@ -1241,8 +1284,22 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const deletePeminatan = async (deletedData) => {
     try {
+      const dataJurusan = await axios.get(
+        "http://localhost:3000/api/datajurusan"
+      );
+
+      const jurusan = dataJurusan.data.find(
+        (data) => data.jurusan === selectedJurusan
+      );
+
+      if (!jurusan) {
+        throw new Error("Jurusan tidak ditemukan");
+      }
+
+      const jurusanid = jurusan.id;
+
       const response = await axios.delete(
-        "http://localhost:3000/api/datapeminatan",
+        `http://localhost:3000/api/datapeminatan/${jurusanid}`,
         { data: deletedData }
       );
       console.log("Peminatan updated successfully:", response.data);
@@ -1282,7 +1339,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       };
 
       const result = await patchPeminatan(peminatanValue);
-      getDataPeminatan();
+      getDataPeminatanByJurusan(selectedJurusan);
       setIsEditOrder(false);
       closeModal();
       console.log("Response from backend:", result);
@@ -1298,7 +1355,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       };
 
       const result = await deletePeminatan(peminatanValue);
-      getDataPeminatan();
+      getDataPeminatanByJurusan(selectedJurusan);
       closeModal();
       console.log("Response from backend:", result);
     } catch (error) {
@@ -2033,7 +2090,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           <div className="mt-4">
             {afterOrderEditDataPeminatan.length === 0 ? (
               <>
-                <button className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">Tambah Peminatan</p>
                 </button>
@@ -2076,7 +2138,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
               </>
             ) : (
               <>
-                <button className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600">
+                <button
+                  onClick={() => {
+                    openModal("Tambah");
+                  }}
+                  className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                >
                   <Image src={plusIcon} alt="Plus Icon" />
                   <p className="text-white text-[14px]">Tambah Peminatan</p>
                 </button>

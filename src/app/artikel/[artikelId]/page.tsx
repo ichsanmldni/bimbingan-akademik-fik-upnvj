@@ -50,7 +50,12 @@ export default function Home() {
           />
           <ProfileImage className="w-8 h-8 rounded-full cursor-pointer" />
         </div>
-        {isModalOpen && <NotificationModal onClose={closeModal} />}
+        {isModalOpen && (
+          <NotificationModal
+            className="fixed inset-0 flex items-start mt-[70px] mr-[180px] justify-end z-50"
+            onClose={closeModal}
+          />
+        )}
       </div>
 
       <div className="pt-[100px] mx-32">

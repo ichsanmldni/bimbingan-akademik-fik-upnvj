@@ -33,6 +33,8 @@ export async function POST(req) {
     try {
       const body = await req.json();
 
+      console.log(body)
+
       const { nim, nip, email, password, role } = body;
 
       if (!role || !password || (role === "Mahasiswa" && !nim) || (role === "Dosen" && !nip)) {
@@ -78,6 +80,7 @@ export async function POST(req) {
           id: user.id,
           role,
           ...(role === "Mahasiswa" ? { nim: user.nim } : { nip: user.nip }),
+          
         },
         SECRET_KEY,
         { expiresIn: EXPIRED_TIME }

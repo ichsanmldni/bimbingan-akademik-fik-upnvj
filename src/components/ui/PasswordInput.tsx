@@ -7,6 +7,7 @@ interface PasswordInputProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isConfirmPassword?: boolean;
   className: string;
+  value: string;
 }
 
 const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -14,6 +15,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   disabled,
   onChange,
   className,
+  value,
 }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -33,6 +35,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
             onChange(e);
           }
         }}
+        value={value}
       />
       <button
         type="button"

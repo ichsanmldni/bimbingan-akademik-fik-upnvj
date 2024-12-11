@@ -3,24 +3,55 @@
 import Logo from "@/components/ui/LogoUPNVJ";
 import NavbarUser from "@/components/ui/NavbarUser";
 import NavbarAdmin from "@/components/ui/NavbarAdmin";
-import DashboardAdmin from "@/components/features/home/admin/DashboardAdmin";
+import AdminPage from "@/components/features/home/admin/AdminPage";
 import landingPageImage from "../assets/images/landing-page.png";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import NavbarMahasiswa from "@/components/ui/NavbarMahasiswa";
+import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
+import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
 
 export default function Home() {
   const cards = Array(9).fill(null);
 
   const [roleUser, setRoleUser] = useState("");
   const [activeNavbar, setActiveNavbar] = useState("Dashboard");
+  const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataKaprodi, setDataKaprodi] = useState([]);
 
-  const router = useRouter();
+  const getDataDosenPA = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosenpa");
 
-  const handleMore = () => {
-    router.push("/artikel");
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosenPA(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataKaprodi = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataKaprodi(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
   };
 
   useEffect(() => {
@@ -31,31 +62,93 @@ export default function Home() {
       const token = authTokenCookie.split("=")[1];
       try {
         const decodedToken = jwtDecode(token);
-        setRoleUser(decodedToken.role);
+
+        if (decodedToken.role === "Mahasiswa") {
+          setRoleUser("Mahasiswa");
+        } else if (
+          dataDosenPA.find((data) => data.dosen_id === decodedToken.id)
+        ) {
+          setRoleUser("Dosen PA");
+        } else if (
+          dataKaprodi.find((data) => data.dosen_id === decodedToken.id)
+        ) {
+          setRoleUser("Kaprodi");
+        } else if (decodedToken.role === "Admin") {
+          setRoleUser("Admin");
+        }
       } catch (error) {
         console.error("Invalid token:", error);
       }
     }
+  }, [dataDosenPA, dataKaprodi]);
+
+  useEffect(() => {
+    getDataDosenPA();
+    getDataKaprodi();
   }, []);
+
   return (
     <div>
-      {["Dosen", "Mahasiswa", "Kaprodi"].includes(roleUser) && (
+      {["Mahasiswa", "Dosen PA", "Kaprodi"].includes(roleUser) && (
         <div>
-          <NavbarUser />
+          <NavbarUser roleUser={roleUser} />
           <div className="bg-slate-100 h-screen">
             <div className="flex h-full items-center gap-[80px] mx-[128px]">
-              <div className="flex flex-col gap-5 w-2/5">
-                <h1 className="font-[800] text-[40px]">
-                  Ajukan bimbingan konseling sekarang dan raih sukses akademik!
-                </h1>
-                <Link
-                  className="bg-orange-500 text-[14px] font-[500] w-1/3 rounded-lg py-2.5 text-center"
-                  href="/pengajuan-bimbingan"
-                >
-                  Ajukan Bimbingan
-                </Link>
-              </div>
-              <Image className="w-1/2" src={landingPageImage} alt="Konseling" />
+              {roleUser === "Mahasiswa" && (
+                <div className="flex flex-col gap-5 w-2/5">
+                  <h1 className="font-[800] text-[40px]">
+                    Ajukan bimbingan konseling sekarang dan raih sukses
+                    akademik!
+                  </h1>
+                  <Link
+                    className="bg-orange-500 hover:bg-orange-600 w-1/3 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
+                    href="/pengajuan-bimbingan"
+                  >
+                    Ajukan Bimbingan
+                  </Link>
+                </div>
+              )}
+              {roleUser === "Dosen PA" && (
+                <div className="flex flex-col gap-5">
+                  <h1 className="font-[800] text-[40px]">
+                    Laporkan Hasil Bimbingan untuk Membantu Mahasiswa Lebih
+                    Baik!
+                  </h1>
+                  <p>
+                    Pastikan bimbingan Anda terdokumentasi dengan baik untuk
+                    membantu mahasiswa berkembang.
+                  </p>
+                  <Link
+                    className="bg-orange-500 hover:bg-orange-600 w-[35%] rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
+                    href="/laporan-bimbingan"
+                  >
+                    Laporkan Bimbingan
+                  </Link>
+                </div>
+              )}
+              {roleUser === "Kaprodi" && (
+                <div className="flex flex-col gap-5 w-2/5">
+                  <h1 className="font-[800] text-[40px]">
+                    Pantau dan Evaluasi Laporan Bimbingan!
+                  </h1>
+                  <p>
+                    Lihat laporan bimbingan untuk memahami permasalahan
+                    mahasiswa dan ambil langkah preventif demi keberhasilan
+                    akademik yang berkelanjutan.
+                  </p>
+                  <Link
+                    className="bg-orange-500 hover:bg-orange-600 w-1/3 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
+                    href="/pengajuan-bimbingan"
+                  >
+                    Tinjau Laporan
+                  </Link>
+                </div>
+              )}
+              <Image
+                className={`${roleUser === "Dosen PA" ? "w-[46%]" : "w-1/2"}`}
+                src={landingPageImage}
+                alt="Konseling"
+              />
             </div>
           </div>
           <div className="text-center border-b">
@@ -78,12 +171,14 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <button
-              onClick={handleMore}
-              className="bg-orange-500 px-4 py-2 mt-8 mb-12 rounded-lg font-medium"
-            >
-              Lebih Banyak
-            </button>
+            <div className="my-12">
+              <Link
+                className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg font-medium text-white"
+                href="/artikel"
+              >
+                Lihat Artikel Lainnya
+              </Link>
+            </div>
           </div>
           <div className="">
             <div className="flex justify-between mx-32 py-8 border-black border-b">
@@ -106,7 +201,6 @@ export default function Home() {
               Hak cipta &copy; 2024 Bimbingan Konseling Mahasiswa FIK UPNVJ
             </p>
           </div>
-          <a href="/login">Ke Login</a>
         </div>
       )}
       {roleUser === "Admin" && (
@@ -115,7 +209,7 @@ export default function Home() {
             activeNavbar={activeNavbar}
             setActiveNavbar={setActiveNavbar}
           />
-          <DashboardAdmin activeNavbar={activeNavbar} />
+          <AdminPage activeNavbar={activeNavbar} />
         </div>
       )}
     </div>

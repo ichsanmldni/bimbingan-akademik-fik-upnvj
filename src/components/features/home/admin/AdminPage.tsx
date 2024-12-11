@@ -7,12 +7,13 @@ import Image from "next/image";
 import EditButton from "@/components/ui/EditButton";
 import TrashButton from "@/components/ui/TrashButton";
 import ManageParameter from "./ManageParameter";
+import Dashboard from "./Dashboard";
 
-interface DashboardAdminProps {
+interface AdminPageProps {
   activeNavbar: string;
 }
 
-const DashboardAdmin: React.FC<DashboardAdminProps> = ({ activeNavbar }) => {
+const AdminPage: React.FC<AdminPageProps> = ({ activeNavbar }) => {
   const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
   const [selectedRoleManageUser, setSelectedRoleManageUser] = useState("");
@@ -34,48 +35,7 @@ const DashboardAdmin: React.FC<DashboardAdminProps> = ({ activeNavbar }) => {
   return (
     <div className="w-[80%] h-screen">
       <HeaderAdmin activeNavbar={activeNavbar} />
-      {activeNavbar === "Dashboard" && (
-        <div className="m-8 p-8 border rounded-lg">
-          <div className="flex gap-6">
-            <SelectField
-              options={[
-                {
-                  value: "Tahun Ajaran 2024/2025",
-                  label: "Tahun Ajaran 2024/2025",
-                },
-              ]}
-              onChange={(e) => setSelectedTahunAjaran(e.target.value)}
-              value={selectedTahunAjaran}
-              placeholder="Pilih Tahun Ajaran"
-              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[250px]`}
-            />
-            <SelectField
-              options={[
-                {
-                  value: "Ganjil",
-                  label: "Ganjil",
-                },
-                {
-                  value: "Genap",
-                  label: "Genap",
-                },
-              ]}
-              onChange={(e) => setSelectedSemester(e.target.value)}
-              value={selectedSemester}
-              placeholder="Pilih Semester"
-              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[150px]`}
-            />
-          </div>
-          <div className="mt-8 p-4 border rounded-lg">
-            <p className="text-[18px] font-semibold">Persentase Persebaran</p>
-          </div>
-          <div className="mt-8 p-4 border rounded-lg">
-            <p className="text-[18px] font-semibold">
-              Total Laporan Bimbingan Dosen PA
-            </p>
-          </div>
-        </div>
-      )}
+      {activeNavbar === "Dashboard" && <Dashboard />}
       {activeNavbar === "Manage Parameter" && (
         <ManageParameter activeNavbar={activeNavbar} />
       )}
@@ -136,7 +96,7 @@ const DashboardAdmin: React.FC<DashboardAdminProps> = ({ activeNavbar }) => {
           </div>
         </div>
       )}
-      {activeNavbar === "Manage Jadwal Dosen" && (
+      {activeNavbar === "Manage Jadwal Dosen PA" && (
         <div className="m-8 p-8 border rounded-lg">
           <div className="flex px-3 py-2 bg-[#F8FAFC] items-center gap-3 rounded-lg ml-auto w-[20%]">
             <Image src={searchIcon} alt="Search Icon" className="size-4" />
@@ -531,4 +491,4 @@ const DashboardAdmin: React.FC<DashboardAdminProps> = ({ activeNavbar }) => {
   );
 };
 
-export default DashboardAdmin;
+export default AdminPage;

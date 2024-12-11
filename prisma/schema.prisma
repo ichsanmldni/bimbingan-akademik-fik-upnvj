@@ -31,6 +31,7 @@ model Dosen {
   nip              String
   password         String
   nama_lengkap     String
+  no_whatsapp      String
   profile_image    String?
   kaprodi          Kaprodi[]
   dosenpa          DosenPA[]
@@ -127,8 +128,17 @@ model PengajuanBimbingan {
   jadwal_bimbingan      String
   jenis_bimbingan       String
   sistem_bimbingan      String
-  tanggal_pengajuan     DateTime
   status                String
+  keterangan            String?
+  bimbingan             Bimbingan[]
+}
+
+model Bimbingan {
+  id                         Int                        @id @default(autoincrement())
+  pengajuan_bimbingan        PengajuanBimbingan         @relation(fields: [pengajuan_bimbingan_id], references: [id])
+  pengajuan_bimbingan_id     Int
+  laporan_bimbingan          LaporanBimbingan?          @relation(fields: [laporan_bimbingan_id], references: [id])
+  laporan_bimbingan_id       Int?
 }
 
 model LaporanBimbingan {
@@ -137,18 +147,17 @@ model LaporanBimbingan {
   dosen_pa_id           Int?
   kaprodi               Kaprodi?                   @relation(fields: [kaprodi_id], references: [id])
   kaprodi_id            Int?
-  tanggal_bimbingan     String
-  jumlah_mahasiswa      Int
-  jenis_bimbingan       MasterJenisBimbingan?      @relation(fields: [jenis_bimbingan_id], references: [id])
-  jenis_bimbingan_id    Int?
-  sistem_bimbingan      MasterSistemBimbingan?     @relation(fields: [sistem_bimbingan_id], references: [id])
-  sistem_bimbingan_id   Int?
+  nama_mahasiswa        String
+  waktu_bimbingan       String
+  jenis_bimbingan       String
+  sistem_bimbingan      String
   kendala_mahasiswa     String
   solusi                String
   kesimpulan            String
-  dokumentasi           String
+  dokumentasi           String?
   feedback_kaprodi      String?
   status                String
+  bimbingan             Bimbingan[]
 }
 
 model JadwalDosenPA {
@@ -156,8 +165,8 @@ model JadwalDosenPA {
   dosen_pa         DosenPA           @relation(fields: [dosen_pa_id], references: [id])
   dosen_pa_id      Int
   hari             String
-  jam_mulai        DateTime
-  jam_selesai      DateTime
+  jam_mulai        String
+  jam_selesai      String
 }
 
 model SesiChatbotMahasiswa {
@@ -256,13 +265,11 @@ model MasterJenisBimbingan {
   id                 Int      @id @default(autoincrement())
   order              Int
   jenis_bimbingan    String
-  laporan            LaporanBimbingan[]
 }
 
 model MasterSistemBimbingan {
   id                 Int      @id @default(autoincrement())
   order              Int
   sistem_bimbingan   String
-  laporan            LaporanBimbingan[]
 }
 

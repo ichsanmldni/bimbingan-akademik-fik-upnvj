@@ -6,18 +6,94 @@ import Link from "next/link";
 import Image from "next/image";
 import searchIcon from "../../assets/images/search.png";
 import dropdownIcon from "../../assets/images/dropdown.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import NavbarMahasiswa from "@/components/ui/NavbarMahasiswa";
+import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
+import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
 
 export default function Home() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [roleUser, setRoleUser] = useState("");
+  const [dataUser, setDataUser] = useState({});
+  const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataKaprodi, setDataKaprodi] = useState([]);
 
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? null : menuName);
   };
 
+  const getDataDosenPA = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosenPA(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataKaprodi = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataKaprodi(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    getDataDosenPA();
+    getDataKaprodi();
+    const cookies = document.cookie.split("; ");
+    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
+
+    if (authTokenCookie) {
+      const token = authTokenCookie.split("=")[1];
+      try {
+        const decodedToken = jwtDecode(token);
+        setDataUser(decodedToken);
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (dataUser.role === "Mahasiswa") {
+      setRoleUser("Mahasiswa");
+    } else if (dataUser.role === "Dosen") {
+      const isDosenPA = dataDosenPA.find(
+        (data) => data.dosen_id === dataUser.id
+      );
+      const isKaprodi = dataKaprodi.find(
+        (data) => data.dosen_id === dataUser.id
+      );
+      if (isDosenPA) {
+        setRoleUser("Dosen PA");
+      } else if (isKaprodi) {
+        setRoleUser("Kaprodi");
+      }
+    }
+  }, [dataUser, dataDosenPA, dataKaprodi]);
+
   return (
     <div>
-      <NavbarUser />
+      <NavbarUser roleUser={roleUser} />
       <div className="flex w-full pt-[80px]">
         <div className="flex flex-col w-[25%] border ml-32 gap-6 pt-10 pb-6 px-8">
           <div className="flex flex-col gap-4">

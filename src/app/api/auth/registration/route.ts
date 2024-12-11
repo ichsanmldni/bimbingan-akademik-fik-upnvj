@@ -48,8 +48,8 @@ export async function POST(req) {
         headers: { 'Content-Type': 'application/json' },
       });
       } else if(body.role==="Dosen"){
-        const { nama_lengkap, email, password, nip, profile_image, } = body;
-        if (!nama_lengkap || !email || !password || !nip ) {
+        const { nama_lengkap, email, password, nip, profile_image, no_whatsapp } = body;
+        if (!nama_lengkap || !email || !password || !nip || !no_whatsapp) {
           return new Response(
             JSON.stringify({ message: 'All fields are required' }),
             { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -62,6 +62,7 @@ export async function POST(req) {
             email,
             password: hashedPassword,
             nip,
+            no_whatsapp,
             profile_image
           }
       });

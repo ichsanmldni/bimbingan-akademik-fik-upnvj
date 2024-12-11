@@ -6,9 +6,15 @@ import { useRouter } from "next/navigation";
 
 interface ModalProps {
   onClose: () => void;
+  className: string;
+  isAdmin?: boolean;
 }
 
-const ProfileModal: React.FC<ModalProps> = ({ onClose }) => {
+const ProfileModal: React.FC<ModalProps> = ({
+  onClose,
+  className,
+  isAdmin,
+}) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -38,12 +44,15 @@ const ProfileModal: React.FC<ModalProps> = ({ onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 flex items-start mt-[70px] mr-[130px] justify-end z-50">
+    <div className={className}>
       <div
         ref={modalRef}
         className="flex flex-col gap-8 bg-white border-2 p-4 rounded-lg w-40"
       >
-        <div className="flex gap-2 cursor-pointer" onClick={dashboardHandle}>
+        <div
+          className={`flex gap-2 cursor-pointer ${isAdmin && "hidden"} `}
+          onClick={dashboardHandle}
+        >
           <Image src={dashboardIcon} alt="dashboardIcon" />
           <p>Dashboard</p>
         </div>
