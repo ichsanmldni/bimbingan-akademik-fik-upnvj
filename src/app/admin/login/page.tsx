@@ -6,7 +6,7 @@ import LoginForm from "@/components/features/auth/LoginForm";
 import { useState } from "react";
 
 export default function Home() {
-  const [isAdmin, setisAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(true);
   return (
     <div className="h-screen flex flex-col items-center">
       <Logo className="mt-8 mx-auto size-[72px]" />

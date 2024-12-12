@@ -10,6 +10,8 @@ import ProfileModal from "./ProfileModal";
 import NotificationButton from "./NotificationButton";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { MessageSquareText } from "lucide-react";
+import Image from "next/image";
 
 interface NavbarUserProps {
   roleUser: string;
@@ -89,7 +91,12 @@ const NavbarUser: React.FC<NavbarUserProps> = ({ roleUser }) => {
           Artikel
         </Link>
       </div>
-      <div className="flex gap-8 items-center">
+      <div className="flex gap-10 items-center">
+        {roleUser === "Dosen PA" && (
+          <Link href="/chatpribadi">
+            <MessageSquareText className="cursor-pointer" />
+          </Link>
+        )}
         <NotificationButton
           onClick={handleNotificationClick}
           className="w-6 h-6 cursor-pointer"

@@ -8,21 +8,20 @@ datasource db {
 }
 
 model Mahasiswa {
-  id               Int                              @id @default(autoincrement())
-  dosen_pa         DosenPA?                         @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id      Int?
-  email            String                           @unique
-  nim              String
-  password         String
-  no_whatsapp      String
-  peminatan        String
-  jurusan          String
-  nama_lengkap     String
-  profile_image    String?
-  notifikasi       NotifikasiMahasiswa[]
-  sesi_chatbot     SesiChatbotMahasiswa[]
-  pesan_chatbot    PesanChatbotMahasiswa[]
-  chat_pribadi     ChatPribadi[]
+  id                          Int                              @id @default(autoincrement())
+  dosen_pa                    DosenPA?                         @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id                 Int?
+  email                       String                           @unique
+  nim                         String
+  password                    String
+  no_whatsapp                 String
+  peminatan                   String
+  jurusan                     String
+  nama_lengkap                String
+  profile_image               String?
+  notifikasi                  NotifikasiMahasiswa[]
+  sesi_chatbot_mahasiswa      SesiChatbotMahasiswa[]
+  chat_pribadi                ChatPribadi[]
 }
 
 model Dosen {
@@ -44,8 +43,6 @@ model DosenPA {
   dosen_id         Int?
   notifikasi       NotifikasiDosenPA[]
   chat_pribadi     ChatPribadi[]
-  pesan_chatbot    PesanChatbotDosenPA[]
-  sesi_chatbot     SesiChatbotDosenPA[]
   pengajuan        PengajuanBimbingan[]
   jadwal           JadwalDosenPA[]
   mahasiswa        Mahasiswa[]
@@ -170,52 +167,43 @@ model JadwalDosenPA {
 }
 
 model SesiChatbotMahasiswa {
-  id               Int               @id @default(autoincrement())
-  mahasiswa        Mahasiswa         @relation(fields: [mahasiswa_id], references: [id])
-  mahasiswa_id     Int
-  waktu_mulai      DateTime
-  pesan_chatbot    PesanChatbotMahasiswa[]
-}
-
-model SesiChatbotDosenPA {
-  id               Int               @id @default(autoincrement())
-  dosen_pa         DosenPA           @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id      Int
-  waktu_mulai      DateTime
-  pesan_chatbot    PesanChatbotDosenPA[]
+  id                        Int                          @id @default(autoincrement())
+  mahasiswa                 Mahasiswa                    @relation(fields: [mahasiswa_id], references: [id])
+  mahasiswa_id              Int
+  pesan_pertama             String
+  waktu_mulai               DateTime
+  pesan_chatbot_mahasiswa   PesanChatbotMahasiswa[]
+  pesan_bot                 PesanBot[]
 }
 
 model PesanChatbotMahasiswa {
   id                              Int                     @id @default(autoincrement())
-  sesi_chatbot                    SesiChatbotMahasiswa    @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
-  sesi_chatbot_mahasiswa_id       Int
-  mahasiswa                       Mahasiswa               @relation(fields: [mahasiswa_id], references: [id])
-  mahasiswa_id                    Int
-  is_bot                          Boolean
+  sesi_chatbot                    SesiChatbotMahasiswa?    @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
+  sesi_chatbot_mahasiswa_id       Int?
   pesan                           String
   waktu_kirim                     DateTime
 }
 
-model PesanChatbotDosenPA {
-  id                           Int                    @id @default(autoincrement())
-  sesi_chatbot_dosen_pa        SesiChatbotDosenPA     @relation(fields: [sesi_chatbot_dosen_pa_id], references: [id])
-  sesi_chatbot_dosen_pa_id     Int
-  dosen_pa                     DosenPA                @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id                  Int
-  is_bot                       Boolean
-  pesan                        String
-  waktu_kirim                  DateTime
+model PesanBot {
+  id                              Int                     @id @default(autoincrement())
+  sesi_chatbot                    SesiChatbotMahasiswa?   @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
+  sesi_chatbot_mahasiswa_id       Int
+  pesan                           String
+  waktu_kirim                     DateTime
 }
 
 model ChatPribadi {
-  id                     Int                   @id @default(autoincrement())
-  dosen_pa               DosenPA               @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id            Int
-  mahasiswa              Mahasiswa             @relation(fields: [mahasiswa_id], references: [id])
-  mahasiswa_id           Int
-  waktu_mulai            DateTime
-  pesan_chat_dosen_pa    PesanChatDosenPA[]
-  pesan_chat_mahasiswa   PesanChatMahasiswa[]
+  id                        Int                   @id @default(autoincrement())
+  dosen_pa                  DosenPA               @relation(fields: [dosen_pa_id], references: [id])
+  dosen_pa_id               Int
+  mahasiswa                 Mahasiswa             @relation(fields: [mahasiswa_id], references: [id])
+  mahasiswa_id              Int
+  pesan_terakhir            String
+  is_pesan_terakhir_read    Boolean
+  waktu_pesan_terakhir      DateTime
+  pengirim_pesan_terakhir   String
+  pesan_chat_dosen_pa       PesanChatDosenPA[]
+  pesan_chat_mahasiswa      PesanChatMahasiswa[]
 }
 
 model PesanChatDosenPA {
@@ -232,11 +220,6 @@ model PesanChatMahasiswa {
   chat_pribadi_id  Int
   pesan            String
   waktu_kirim      DateTime
-}
-
-model ResponBot {
-  id               Int               @id @default(autoincrement())
-  respon           String
 }
 
 model MasterTahunAjaran {

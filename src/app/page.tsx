@@ -10,9 +10,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import NavbarMahasiswa from "@/components/ui/NavbarMahasiswa";
-import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
-import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
+import chatbotIcon from "../assets/images/chatbot.png";
 
 export default function Home() {
   const cards = Array(9).fill(null);
@@ -153,6 +151,15 @@ export default function Home() {
               />
             </div>
           </div>
+          {roleUser === "Mahasiswa" && (
+            <Link
+              href="/chatbot"
+              className="fixed bottom-8 right-8 bg-orange-500 p-4 rounded-full hover:bg-orange-600 shadow-lg"
+              aria-label="Akses Chatbot"
+            >
+              <Image alt="chatbot-icon" className="size-8" src={chatbotIcon} />
+            </Link>
+          )}
           <div className="text-center border-b">
             <h1 className="text-[30px] font-semibold mt-16">
               Rekomendasi artikel

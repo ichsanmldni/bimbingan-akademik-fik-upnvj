@@ -1,3 +1,4 @@
+import { jwtDecode } from 'jwt-decode';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -5,7 +6,21 @@ const protectedRoutes = ['/','/artikel','/laporan-bimbingan','/pengajuan-bimbing
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('authToken')?.value;
+  const token = request.cookies.get("authToken")?.value;
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  const decodedToken = jwtDecode(token);
+  const userRole = decodedToken.role;
+
+  if (
+    (pathname.startsWith('/chatbot')) &&
+    userRole !== 'Mahasiswa'
+  ) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
 
   if (pathname === "/admin") {
     if (token) {
@@ -24,5 +39,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/',"/admin",'/dashboard/:path*', '/informasi-akademik/:path*','/artikel/:path*','/laporan-bimbingan/:path*','/pengajuan-bimbingan/:path*'], // Sesuaikan dengan rute Anda
+  matcher: ['/','/chatbot','/chatpribadi',"/admin",'/dashboard/:path*', '/informasi-akademik/:path*','/artikel/:path*','/laporan-bimbingan/:path*','/pengajuan-bimbingan/:path*'],
 };
