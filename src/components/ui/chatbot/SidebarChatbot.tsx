@@ -97,8 +97,8 @@ export default function SidebarChatbot({
                       : "hover:bg-gray-50"
                   }`}
                 >
-                  {item.pesan_pertama.slice(0, 24) +
-                    (item.pesan_pertama.length > 24 ? "..." : "")}
+                  {item.pesan_pertama.slice(0, 22) +
+                    (item.pesan_pertama.length > 22 ? "..." : "")}
                 </button>
               ))}
             </div>

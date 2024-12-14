@@ -29,6 +29,9 @@ export default function Home() {
   const [dataUser, setDataUser] = useState({});
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
+  const API_BASE_URL = "http://localhost:3000/api";
+  const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("id-ID", {
       timeZone: "Asia/Jakarta",
@@ -122,81 +125,95 @@ export default function Home() {
   };
 
   const getChatGPTResponse = async (userMessage) => {
+    if (!userMessage) throw new Error("Pesan pengguna tidak boleh kosong.");
+
     try {
-      const openAIResponse = await axios.post(
-        "https://api.openai.com/v1/completions",
+      const { data } = await axios.post(
+        OPENAI_API_URL,
         {
           model: "gpt-3.5-turbo",
-          prompt: `${userMessage}\nBerikan informasi terkait jadwal dosen, data dosen, dan bimbingan konseling akademik jika perlu.`,
-          max_tokens: 150,
+          messages: [
+            { role: "system", content: "Anda adalah asisten AI." },
+            { role: "user", content: userMessage },
+          ],
+          max_tokens: 3000,
         },
         {
           headers: {
             Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
           },
         }
       );
-
-      return openAIResponse.data.choices[0].message.text;
-    } catch (error) {
-      console.error("Error getting ChatGPT response:", error);
-      return "Maaf, saya tidak bisa memberikan respons saat ini.";
-    }
-  };
-
-  const addPesanBot = async (newChat) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/pesanbot",
-        newChat
+      return (
+        data.choices[0]?.message?.content || "Tidak ada respons dari model."
       );
-
-      return response.data;
     } catch (error) {
-      throw error;
+      console.error("Error getting ChatGPT response:", error.message);
+      throw new Error("Gagal mendapatkan respons dari ChatGPT.");
     }
   };
 
-  const addChatbotMahasiswa = async (newChat) => {
+  const postData = async (url, payload) => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/chatbotmahasiswa",
-        newChat
-      );
-
-      return response.data;
+      const { data } = await axios.post(url, payload);
+      return data;
     } catch (error) {
-      throw error;
+      console.error(`Error posting to ${url}:`, error.message);
+      throw new Error(`Gagal mengirim data ke ${url}.`);
     }
   };
 
+  const addPesanBot = (newChat) =>
+    postData(`${API_BASE_URL}/pesanbot`, newChat);
+
+  // Fungsi untuk menambahkan chatbot mahasiswa
+  const addChatbotMahasiswa = (newChat) =>
+    postData(`${API_BASE_URL}/chatbotmahasiswa`, newChat);
+
+  // Fungsi utama untuk menangani penambahan chatbot mahasiswa
   const handleAddChatChatbotMahasiswa = async (newData) => {
-    if (activeSesiChatbotMahasiswa !== "New Session") {
-      const newChat = {
-        ...newData,
-        sesi_chatbot_mahasiswa_id: activeSesiChatbotMahasiswa,
-      };
-      try {
-        const result = await addChatbotMahasiswa(newChat);
+    if (!newData || !newData.pesan) {
+      console.error("Data baru atau pesan tidak valid.");
+      return;
+    }
+
+    try {
+      if (activeSesiChatbotMahasiswa !== "New Session") {
+        const newChat = {
+          ...newData,
+          sesi_chatbot_mahasiswa_id: activeSesiChatbotMahasiswa,
+        };
+
+        await addChatbotMahasiswa(newChat);
+
         const chatgptResponse = await getChatGPTResponse(newData.pesan);
-        console.log(chatgptResponse);
+
+        const newPesanBot = {
+          sesi_chatbot_mahasiswa_id: activeSesiChatbotMahasiswa,
+          pesan: chatgptResponse,
+          waktu_kirim: new Date().toISOString(),
+        };
+
+        await addPesanBot(newPesanBot);
+
         getDataChatbotMahasiswabySesiChatbotMahasiswaID();
-      } catch (error) {
-        console.error("Registration error:", error.message);
-      }
-    } else {
-      const newChat = {
-        ...newData,
-        mahasiswa_id: dataUser.id,
-      };
-      try {
+        getDataPesanBotBySesiChatbotMahasiswaID();
+      } else {
+        const newChat = {
+          ...newData,
+          mahasiswa_id: dataUser.id,
+        };
+
         const result = await addChatbotMahasiswa(newChat);
+
         setActiveSesiChatbotMahasiswa(result.sesi_chatbot_mahasiswa_id);
+
         const chatgptResponse = await getChatGPTResponse(newData.pesan);
-        console.log(chatgptResponse);
-      } catch (error) {
-        console.error("Registration error:", error.message);
+        console.log("Respons ChatGPT:", chatgptResponse);
       }
+    } catch (error) {
+      console.error("Error handling chatbot mahasiswa:", error.message);
     }
   };
 
@@ -207,6 +224,12 @@ export default function Home() {
 
     setSortedChatbotData(sortedChatbotData);
   }, [chatbotData]);
+
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [sortedChatbotData]); // Mengawasi perubahan pada chatData
 
   useEffect(() => {
     const cookies = document.cookie.split("; ");
@@ -263,6 +286,8 @@ export default function Home() {
     getDataKaprodi();
     getDataSesiChatbotMahasiswa();
   }, []);
+
+  console.log(chatbotData);
 
   useEffect(() => {
     getDataChatbotMahasiswabySesiChatbotMahasiswaID();
