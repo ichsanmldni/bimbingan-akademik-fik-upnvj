@@ -20,13 +20,65 @@ export default function Home() {
   const [roleUser, setRoleUser] = useState("");
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [isMessageEnter, setIsMessageEnter] = useState(false);
   const [dataSesiChatbotMahasiswa, setDataSesiChatbotMahasiswa] = useState([]);
   const [dataChatbotMahasiswa, setDataChatbotMahasiswa] = useState([]);
   const [dataPesanBot, setDataPesanBot] = useState([]);
   const [chatbotData, setChatbotData] = useState([]);
   const [sortedChatbotData, setSortedChatbotData] = useState([]);
   const [dataUser, setDataUser] = useState({});
+  const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState({
+    dosen_pa: [
+      {
+        id: 1,
+        name: "Dr. Andi",
+        email: "andi@example.com",
+        phone: "081234567890",
+      },
+      {
+        id: 2,
+        name: "Dr. Budi",
+        email: "budi@example.com",
+        phone: "081298765432",
+      },
+    ],
+    jadwal_kosong_semua_dosen_pa: [
+      {
+        dosen_id: 1,
+        jadwal: [
+          { hari: "Senin", jam: "10:00 - 12:00" },
+          { hari: "Rabu", jam: "14:00 - 16:00" },
+        ],
+      },
+      {
+        dosen_id: 2,
+        jadwal: [
+          { hari: "Selasa", jam: "08:00 - 10:00" },
+          { hari: "Kamis", jam: "13:00 - 15:00" },
+        ],
+      },
+    ],
+    jadwal_kosong_dosen_pa_user: {
+      dosen_id: 1,
+      jadwal: [
+        { hari: "Senin", jam: "10:00 - 12:00" },
+        { hari: "Rabu", jam: "14:00 - 16:00" },
+      ],
+    },
+    informasi_akademik: [
+      {
+        id: 1,
+        judul: "Pendaftaran Semester Ganjil",
+        deskripsi:
+          "Pendaftaran untuk semester ganjil dibuka hingga 30 September.",
+      },
+      {
+        id: 2,
+        judul: "Pengumuman Libur Nasional",
+        deskripsi: "Libur nasional akan berlangsung pada tanggal 17 Agustus.",
+      },
+    ],
+  });
+
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
   const API_BASE_URL = "http://localhost:3000/api";
@@ -133,8 +185,14 @@ export default function Home() {
         {
           model: "gpt-3.5-turbo",
           messages: [
-            { role: "system", content: "Anda adalah asisten AI." },
-            { role: "user", content: userMessage },
+            {
+              role: "system",
+              content: `Anda adalah asisten AI yang memberikan jawaban berdasarkan data berikut, atau menjawab seperti biasa untuk pertanyaan umum yang tidak ada di data ini: ${customDataConsumeGPT}`,
+            },
+            {
+              role: "user",
+              content: `${userMessage}`,
+            },
           ],
           max_tokens: 3000,
         },

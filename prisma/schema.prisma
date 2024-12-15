@@ -7,252 +7,301 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Mahasiswa {
-  id                          Int                              @id @default(autoincrement())
-  dosen_pa                    DosenPA?                         @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id                 Int?
-  email                       String                           @unique
-  nim                         String
-  password                    String
-  no_whatsapp                 String
-  peminatan                   String
-  jurusan                     String
-  nama_lengkap                String
-  profile_image               String?
-  notifikasi                  NotifikasiMahasiswa[]
-  sesi_chatbot_mahasiswa      SesiChatbotMahasiswa[]
-  chat_pribadi                ChatPribadi[]
+model admin {
+  id            Int     @id @default(autoincrement())
+  email         String  @unique(map: "Admin_email_key")
+  password      String
+  nickname      String
+  profile_image String?
 }
 
-model Dosen {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  nip              String
-  password         String
-  nama_lengkap     String
-  no_whatsapp      String
-  profile_image    String?
-  kaprodi          Kaprodi[]
-  dosenpa          DosenPA[]
-  
+model artikel {
+  id      Int      @id @default(autoincrement())
+  judul   String
+  tanggal DateTime
+  isi     String
 }
 
-model DosenPA {
-  id               Int                      @id @default(autoincrement())
-  dosen            Dosen?                   @relation(fields: [dosen_id], references: [id])
-  dosen_id         Int?
-  notifikasi       NotifikasiDosenPA[]
-  chat_pribadi     ChatPribadi[]
-  pengajuan        PengajuanBimbingan[]
-  jadwal           JadwalDosenPA[]
-  mahasiswa        Mahasiswa[]
-  laporan          LaporanBimbingan[]
+model bimbingan {
+  id                     Int                @id @default(autoincrement())
+  pengajuan_bimbingan_id Int
+  laporan_bimbingan_id   Int?
+  laporanbimbingan       laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "Bimbingan_laporan_bimbingan_id_fkey")
+  pengajuanbimbingan     pengajuanbimbingan @relation(fields: [pengajuan_bimbingan_id], references: [id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
+
+  @@index([laporan_bimbingan_id], map: "Bimbingan_laporan_bimbingan_id_fkey")
+  @@index([pengajuan_bimbingan_id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
 }
 
-model Kaprodi {
-  id                      Int                       @id @default(autoincrement())
-  dosen                   Dosen?                    @relation(fields: [dosen_id], references: [id])
-  dosen_id                Int?
-  kaprodi_jurusan         MasterJurusan?            @relation(fields: [kaprodi_jurusan_id], references: [id])
-  kaprodi_jurusan_id      Int
-  notifikasi              NotifikasiKaprodi[]
-  laporan                 LaporanBimbingan[]
-}
-model Admin {
-  id               Int               @id @default(autoincrement())
-  email            String            @unique
-  password         String
-  nickname         String
-  profile_image    String?
+model chatpribadi {
+  id                      Int                  @id @default(autoincrement())
+  mahasiswa_id            Int
+  dosen_pa_id             Int
+  is_pesan_terakhir_read  Boolean
+  pesan_terakhir          String
+  waktu_pesan_terakhir    DateTime
+  pengirim_pesan_terakhir String
+  dosenpa                 dosenpa              @relation(fields: [dosen_pa_id], references: [id], map: "ChatPribadi_dosen_pa_id_fkey")
+  mahasiswa               mahasiswa            @relation(fields: [mahasiswa_id], references: [id], map: "ChatPribadi_mahasiswa_id_fkey")
+  pesanchatdosenpa        pesanchatdosenpa[]
+  pesanchatmahasiswa      pesanchatmahasiswa[]
+
+  @@index([dosen_pa_id], map: "ChatPribadi_dosen_pa_id_fkey")
+  @@index([mahasiswa_id], map: "ChatPribadi_mahasiswa_id_fkey")
 }
 
-model Artikel {
-  id               Int               @id @default(autoincrement())
-  judul            String
-  tanggal          DateTime
-  isi              String
+model dosen {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique(map: "Dosen_email_key")
+  nip           String
+  password      String
+  nama_lengkap  String
+  profile_image String?
+  no_whatsapp   String
+  dosenpa       dosenpa[]
+  kaprodi       kaprodi[]
 }
 
-model NotifikasiMahasiswa {
-  id               Int               @id @default(autoincrement())
-  mahasiswa        Mahasiswa         @relation(fields: [mahasiswa_id], references: [id])
-  mahasiswa_id     Int
-  isi              String
-  tanggal          DateTime
-  read             Boolean
+model dosenpa {
+  id                 Int                  @id @default(autoincrement())
+  dosen_id           Int?
+  chatpribadi        chatpribadi[]
+  dosen              dosen?               @relation(fields: [dosen_id], references: [id], map: "DosenPA_dosen_id_fkey")
+  jadwaldosenpa      jadwaldosenpa[]
+  laporanbimbingan   laporanbimbingan[]
+  mahasiswa          mahasiswa[]
+  notifikasidosenpa  notifikasidosenpa[]
+  pengajuanbimbingan pengajuanbimbingan[]
+
+  @@index([dosen_id], map: "DosenPA_dosen_id_fkey")
 }
 
-model NotifikasiDosenPA {
-  id               Int               @id @default(autoincrement())
-  dosen_pa         DosenPA             @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id      Int
-  isi              String
-  tanggal          DateTime
-  read             Boolean
+model jadwaldosenpa {
+  id          Int     @id @default(autoincrement())
+  dosen_pa_id Int
+  hari        String
+  jam_mulai   String
+  jam_selesai String
+  dosenpa     dosenpa @relation(fields: [dosen_pa_id], references: [id], map: "JadwalDosenPA_dosen_pa_id_fkey")
+
+  @@index([dosen_pa_id], map: "JadwalDosenPA_dosen_pa_id_fkey")
 }
 
-model NotifikasiKaprodi {
-  id               Int               @id @default(autoincrement())
-  kaprodi          Kaprodi           @relation(fields: [kaprodi_id], references: [id])
-  kaprodi_id       Int
-  isi              String
-  tanggal          DateTime
-  read             Boolean
+model kaprodi {
+  id                 Int                 @id @default(autoincrement())
+  dosen_id           Int?
+  kaprodi_jurusan_id Int
+  dosen              dosen?              @relation(fields: [dosen_id], references: [id], map: "Kaprodi_dosen_id_fkey")
+  masterjurusan      masterjurusan       @relation(fields: [kaprodi_jurusan_id], references: [id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
+  laporanbimbingan   laporanbimbingan[]
+  notifikasikaprodi  notifikasikaprodi[]
+
+  @@index([dosen_id], map: "Kaprodi_dosen_id_fkey")
+  @@index([kaprodi_jurusan_id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
 }
 
-model MenuInformasiAkademik {
-  id               Int               @id @default(autoincrement())
-  nama             String
-  submenus         SubmenuInformasiAkademik[]
+model laporanbimbingan {
+  id                Int         @id @default(autoincrement())
+  kaprodi_id        Int?
+  kendala_mahasiswa String
+  solusi            String
+  kesimpulan        String
+  dokumentasi       String?
+  feedback_kaprodi  String?
+  status            String
+  dosen_pa_id       Int?
+  jenis_bimbingan   String
+  sistem_bimbingan  String
+  waktu_bimbingan   String
+  nama_mahasiswa    String
+  bimbingan         bimbingan[]
+  dosenpa           dosenpa?    @relation(fields: [dosen_pa_id], references: [id], map: "LaporanBimbingan_dosen_pa_id_fkey")
+  kaprodi           kaprodi?    @relation(fields: [kaprodi_id], references: [id], map: "LaporanBimbingan_kaprodi_id_fkey")
+
+  @@index([dosen_pa_id], map: "LaporanBimbingan_dosen_pa_id_fkey")
+  @@index([kaprodi_id], map: "LaporanBimbingan_kaprodi_id_fkey")
 }
 
-model SubmenuInformasiAkademik {
-  id                            Int                       @id @default(autoincrement())
-  menu                          MenuInformasiAkademik     @relation(fields: [menu_informasi_akademik_id], references: [id])
-  menu_informasi_akademik_id    Int
-  nama                          String
-  isi                           String
+model mahasiswa {
+  id                   Int                    @id @default(autoincrement())
+  email                String                 @unique(map: "Mahasiswa_email_key")
+  nim                  String
+  password             String
+  no_whatsapp          String
+  peminatan            String
+  jurusan              String
+  nama_lengkap         String
+  profile_image        String?
+  dosen_pa_id          Int?
+  chatpribadi          chatpribadi[]
+  dosenpa              dosenpa?               @relation(fields: [dosen_pa_id], references: [id], map: "Mahasiswa_dosen_pa_id_fkey")
+  notifikasimahasiswa  notifikasimahasiswa[]
+  sesichatbotmahasiswa sesichatbotmahasiswa[]
+
+  @@index([dosen_pa_id], map: "Mahasiswa_dosen_pa_id_fkey")
 }
 
-model PengajuanBimbingan {
-  id                    Int               @id @default(autoincrement())
-  dosen_pa              DosenPA           @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id           Int
-  nama_lengkap          String
-  nim                   String
-  email                 String
-  no_whatsapp           String
-  jadwal_bimbingan      String
-  jenis_bimbingan       String
-  sistem_bimbingan      String
-  status                String
-  keterangan            String?
-  bimbingan             Bimbingan[]
-}
-
-model Bimbingan {
-  id                         Int                        @id @default(autoincrement())
-  pengajuan_bimbingan        PengajuanBimbingan         @relation(fields: [pengajuan_bimbingan_id], references: [id])
-  pengajuan_bimbingan_id     Int
-  laporan_bimbingan          LaporanBimbingan?          @relation(fields: [laporan_bimbingan_id], references: [id])
-  laporan_bimbingan_id       Int?
-}
-
-model LaporanBimbingan {
-  id                    Int                        @id @default(autoincrement())
-  dosen_pa              DosenPA?                   @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id           Int?
-  kaprodi               Kaprodi?                   @relation(fields: [kaprodi_id], references: [id])
-  kaprodi_id            Int?
-  nama_mahasiswa        String
-  waktu_bimbingan       String
-  jenis_bimbingan       String
-  sistem_bimbingan      String
-  kendala_mahasiswa     String
-  solusi                String
-  kesimpulan            String
-  dokumentasi           String?
-  feedback_kaprodi      String?
-  status                String
-  bimbingan             Bimbingan[]
-}
-
-model JadwalDosenPA {
-  id               Int               @id @default(autoincrement())
-  dosen_pa         DosenPA           @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id      Int
-  hari             String
-  jam_mulai        String
-  jam_selesai      String
-}
-
-model SesiChatbotMahasiswa {
-  id                        Int                          @id @default(autoincrement())
-  mahasiswa                 Mahasiswa                    @relation(fields: [mahasiswa_id], references: [id])
-  mahasiswa_id              Int
-  pesan_pertama             String
-  waktu_mulai               DateTime
-  pesan_chatbot_mahasiswa   PesanChatbotMahasiswa[]
-  pesan_bot                 PesanBot[]
-}
-
-model PesanChatbotMahasiswa {
-  id                              Int                     @id @default(autoincrement())
-  sesi_chatbot                    SesiChatbotMahasiswa?    @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
-  sesi_chatbot_mahasiswa_id       Int?
-  pesan                           String
-  waktu_kirim                     DateTime
-}
-
-model PesanBot {
-  id                              Int                     @id @default(autoincrement())
-  sesi_chatbot                    SesiChatbotMahasiswa?   @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
-  sesi_chatbot_mahasiswa_id       Int
-  pesan                           String
-  waktu_kirim                     DateTime
-}
-
-model ChatPribadi {
-  id                        Int                   @id @default(autoincrement())
-  dosen_pa                  DosenPA               @relation(fields: [dosen_pa_id], references: [id])
-  dosen_pa_id               Int
-  mahasiswa                 Mahasiswa             @relation(fields: [mahasiswa_id], references: [id])
-  mahasiswa_id              Int
-  pesan_terakhir            String
-  is_pesan_terakhir_read    Boolean
-  waktu_pesan_terakhir      DateTime
-  pengirim_pesan_terakhir   String
-  pesan_chat_dosen_pa       PesanChatDosenPA[]
-  pesan_chat_mahasiswa      PesanChatMahasiswa[]
-}
-
-model PesanChatDosenPA {
-  id               Int               @id @default(autoincrement())
-  chat_pribadi     ChatPribadi       @relation(fields: [chat_pribadi_id], references: [id])
-  chat_pribadi_id  Int
-  pesan            String
-  waktu_kirim      DateTime
-}
-
-model PesanChatMahasiswa {
-  id               Int               @id @default(autoincrement())
-  chat_pribadi     ChatPribadi       @relation(fields: [chat_pribadi_id], references: [id])
-  chat_pribadi_id  Int
-  pesan            String
-  waktu_kirim      DateTime
-}
-
-model MasterTahunAjaran {
-  id              Int      @id @default(autoincrement())
+model masterjenisbimbingan {
+  id              Int    @id @default(autoincrement())
+  jenis_bimbingan String
   order           Int
-  tahun_ajaran    String
 }
 
-model MasterJurusan {
-  id             Int                @id @default(autoincrement())
-  order          Int
-  jurusan        String
-  peminatan      MasterPeminatan[]
-  kaprodi        Kaprodi[]
+model masterjurusan {
+  id              Int               @id @default(autoincrement())
+  jurusan         String
+  order           Int
+  kaprodi         kaprodi[]
+  masterpeminatan masterpeminatan[]
 }
 
-model MasterPeminatan {
-  id             Int            @id @default(autoincrement())
-  order          Int
-  peminatan      String
-  jurusan        MasterJurusan  @relation(fields: [jurusan_id], references: [id])
-  jurusan_id     Int
+model masterpeminatan {
+  id            Int           @id @default(autoincrement())
+  peminatan     String
+  jurusan_id    Int
+  order         Int
+  masterjurusan masterjurusan @relation(fields: [jurusan_id], references: [id], map: "MasterPeminatan_jurusan_id_fkey")
+
+  @@index([jurusan_id], map: "MasterPeminatan_jurusan_id_fkey")
 }
 
-model MasterJenisBimbingan {
-  id                 Int      @id @default(autoincrement())
-  order              Int
-  jenis_bimbingan    String
+model mastersistembimbingan {
+  id               Int    @id @default(autoincrement())
+  sistem_bimbingan String
+  order            Int
 }
 
-model MasterSistemBimbingan {
-  id                 Int      @id @default(autoincrement())
-  order              Int
-  sistem_bimbingan   String
+model mastertahunajaran {
+  id           Int    @id @default(autoincrement())
+  order        Int
+  tahun_ajaran String
 }
 
+model menuinformasiakademik {
+  id                       Int                        @id @default(autoincrement())
+  nama                     String
+  submenuinformasiakademik submenuinformasiakademik[]
+}
+
+model notifikasidosenpa {
+  id          Int      @id @default(autoincrement())
+  dosen_pa_id Int
+  isi         String
+  tanggal     DateTime
+  read        Boolean
+  dosenpa     dosenpa  @relation(fields: [dosen_pa_id], references: [id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
+
+  @@index([dosen_pa_id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
+}
+
+model notifikasikaprodi {
+  id         Int      @id @default(autoincrement())
+  kaprodi_id Int
+  isi        String
+  tanggal    DateTime
+  read       Boolean
+  kaprodi    kaprodi  @relation(fields: [kaprodi_id], references: [id], map: "NotifikasiKaprodi_kaprodi_id_fkey")
+
+  @@index([kaprodi_id], map: "NotifikasiKaprodi_kaprodi_id_fkey")
+}
+
+model notifikasimahasiswa {
+  id           Int       @id @default(autoincrement())
+  mahasiswa_id Int
+  isi          String
+  tanggal      DateTime
+  read         Boolean
+  mahasiswa    mahasiswa @relation(fields: [mahasiswa_id], references: [id], map: "NotifikasiMahasiswa_mahasiswa_id_fkey")
+
+  @@index([mahasiswa_id], map: "NotifikasiMahasiswa_mahasiswa_id_fkey")
+}
+
+model pengajuanbimbingan {
+  id               Int         @id @default(autoincrement())
+  nama_lengkap     String
+  nim              String
+  email            String
+  no_whatsapp      String
+  jadwal_bimbingan String
+  jenis_bimbingan  String
+  sistem_bimbingan String
+  status           String
+  dosen_pa_id      Int
+  keterangan       String?
+  bimbingan        bimbingan[]
+  dosenpa          dosenpa     @relation(fields: [dosen_pa_id], references: [id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
+
+  @@index([dosen_pa_id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
+}
+
+model pesanbot {
+  id                        Int                  @id @default(autoincrement())
+  sesi_chatbot_mahasiswa_id Int
+  pesan                     String               @db.VarChar(1000)
+  waktu_kirim               DateTime
+  sesichatbotmahasiswa      sesichatbotmahasiswa @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id], map: "PesanBot_sesi_chatbot_mahasiswa_id_fkey")
+
+  @@index([sesi_chatbot_mahasiswa_id], map: "PesanBot_sesi_chatbot_mahasiswa_id_fkey")
+}
+
+model pesanchatbotmahasiswa {
+  id                        Int                   @id @default(autoincrement())
+  sesi_chatbot_mahasiswa_id Int?
+  pesan                     String                @db.VarChar(1000)
+  waktu_kirim               DateTime
+  sesichatbotmahasiswa      sesichatbotmahasiswa? @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id], map: "PesanChatbotMahasiswa_sesi_chatbot_mahasiswa_id_fkey")
+
+  @@index([sesi_chatbot_mahasiswa_id], map: "PesanChatbotMahasiswa_sesi_chatbot_mahasiswa_id_fkey")
+}
+
+model pesanchatdosenpa {
+  id              Int         @id @default(autoincrement())
+  chat_pribadi_id Int
+  pesan           String      @db.VarChar(1000)
+  waktu_kirim     DateTime
+  chatpribadi     chatpribadi @relation(fields: [chat_pribadi_id], references: [id], map: "PesanChatDosenPA_chat_pribadi_id_fkey")
+
+  @@index([chat_pribadi_id], map: "PesanChatDosenPA_chat_pribadi_id_fkey")
+}
+
+model pesanchatmahasiswa {
+  id              Int         @id @default(autoincrement())
+  chat_pribadi_id Int
+  pesan           String      @db.VarChar(1000)
+  waktu_kirim     DateTime
+  chatpribadi     chatpribadi @relation(fields: [chat_pribadi_id], references: [id], map: "PesanChatMahasiswa_chat_pribadi_id_fkey")
+
+  @@index([chat_pribadi_id], map: "PesanChatMahasiswa_chat_pribadi_id_fkey")
+}
+
+model sesichatbotmahasiswa {
+  id                    Int                     @id @default(autoincrement())
+  mahasiswa_id          Int
+  waktu_mulai           DateTime
+  pesan_pertama         String
+  pesanbot              pesanbot[]
+  pesanchatbotmahasiswa pesanchatbotmahasiswa[]
+  historypesanchatbot   historypesanchatbot[]
+  mahasiswa             mahasiswa               @relation(fields: [mahasiswa_id], references: [id], map: "SesiChatbotMahasiswa_mahasiswa_id_fkey")
+
+  @@index([mahasiswa_id], map: "SesiChatbotMahasiswa_mahasiswa_id_fkey")
+}
+
+model historypesanchatbot {
+  id                              Int                     @id @default(autoincrement())
+  sesi_chatbot                    sesichatbotmahasiswa?   @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
+  sesi_chatbot_mahasiswa_id       Int
+  role                            String
+  pesan                           String                   @db.VarChar(1000)
+  waktu_kirim                     DateTime
+}
+
+model submenuinformasiakademik {
+  id                         Int                   @id @default(autoincrement())
+  menu_informasi_akademik_id Int
+  nama                       String
+  isi                        String
+  menuinformasiakademik      menuinformasiakademik @relation(fields: [menu_informasi_akademik_id], references: [id], map: "SubmenuInformasiAkademik_menu_informasi_akademik_id_fkey")
+
+  @@index([menu_informasi_akademik_id], map: "SubmenuInformasiAkademik_menu_informasi_akademik_id_fkey")
+}
