@@ -3,11 +3,12 @@ import prisma from '../../../lib/prisma';
 
 export async function GET(req) {
   try {
-    const PesanBot = await prisma.pesanBot.findMany(
+    const PesanBot = await prisma.pesanbot.findMany(
     );
 
     return new Response(JSON.stringify(PesanBot), {
-      ssesi_chatbot_mahasiswa_ideaders: { 'Content-Type': 'application/json' },
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     // Menangani kesalahan
@@ -31,21 +32,19 @@ export async function POST(req) {
         );
       }
 
-      const PesanBot= await prisma.pesanBot.create({
+      console.log(body)
+
+      const PesanBot= await prisma.pesanbot.create({
         data : {
           sesi_chatbot_mahasiswa_id, pesan, waktu_kirim
         }
     });
 
-    // const existingRecord = await prisma.chatPribadi.findUnique({
-    //   where: { id:chat_pribadi_id },
-    // });
-    
-    // if (!existingRecord) {
-    //   throw new Error('Record not found');
-    // }
-    
-    // const ChatPribadi = await prisma.chatPribadi.update({ where: { id: chat_pribadi_id }, data: { pesan_terakhir: pesan, waktu_pesan_terakhir: waktu_kirim, is_pesan_terakhir_read: false, pengirim_pesan_terakhir: "Dosen PA" } })
+    const RiwayatPesanChatbot= await prisma.riwayatpesanchatbot.create({
+      data : {
+        sesi_chatbot_mahasiswa_id, pesan, role: "assistant" , waktu_kirim
+      }
+  });
     return new Response(JSON.stringify(PesanBot), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },

@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const chatbotMahasiswa = await prisma.pesanChatbotMahasiswa.findMany(
+    const chatbotMahasiswa = await prisma.pesanchatbotmahasiswa.findMany(
     );
     // Mengembalikan data dosen sebagai JSON
     return new Response(JSON.stringify(chatbotMahasiswa), {
@@ -23,21 +23,29 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const body = await req.json();
+    console.log(body)
 
       const { sesi_chatbot_mahasiswa_id, pesan, waktu_kirim, mahasiswa_id} = body;
 
       if(!sesi_chatbot_mahasiswa_id && mahasiswa_id){
-        const SesiChatbotMahasiswa= await prisma.sesiChatbotMahasiswa.create({
+        const SesiChatbotMahasiswa= await prisma.sesichatbotmahasiswa.create({
           data : {
             mahasiswa_id, pesan_pertama: pesan, waktu_mulai: waktu_kirim
           }
       })
 
-      const ChatbotMahasiswa= await prisma.pesanChatbotMahasiswa.create({
+      const ChatbotMahasiswa= await prisma.pesanchatbotmahasiswa.create({
         data : {
           sesi_chatbot_mahasiswa_id: SesiChatbotMahasiswa.id, pesan, waktu_kirim
         }
     });
+
+    const RiwayatPesanChatbot= await prisma.riwayatpesanchatbot.create({
+      data : {
+        sesi_chatbot_mahasiswa_id: SesiChatbotMahasiswa.id, pesan, role: "user", waktu_kirim
+      }
+  });
+    
 
     return new Response(JSON.stringify(ChatbotMahasiswa), {
       status: 201,
@@ -54,11 +62,17 @@ export async function POST(req) {
         );
       }
 
-      const ChatbotMahasiswa= await prisma.pesanChatbotMahasiswa.create({
+      const ChatbotMahasiswa= await prisma.pesanchatbotmahasiswa.create({
         data : {
           sesi_chatbot_mahasiswa_id, pesan, waktu_kirim
         }
     });
+
+    const RiwayatPesanChatbot= await prisma.riwayatpesanchatbot.create({
+      data : {
+        sesi_chatbot_mahasiswa_id, pesan, role: "user", waktu_kirim
+      }
+  });
 
     // const existingRecord = await prisma.chatPribadi.findUnique({
     //   where: { id:chat_pribadi_id },

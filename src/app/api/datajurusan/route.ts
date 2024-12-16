@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const Jurusan = await prisma.masterJurusan.findMany(
+    const Jurusan = await prisma.masterjurusan.findMany(
     );
     
     // Mengembalikan data dosen sebagai JSON
@@ -34,7 +34,7 @@ export async function POST(req) {
         );
       }
 
-      const Jurusan = await prisma.masterJurusan.create({
+      const Jurusan = await prisma.masterjurusan.create({
         data : {
           jurusan, order
         }
@@ -68,7 +68,7 @@ export async function PATCH(req) {
 
     console.log(id, jurusan)
 
-    const existingRecord = await prisma.masterJurusan.findUnique({
+    const existingRecord = await prisma.masterjurusan.findUnique({
       where: { id },
     });
     
@@ -76,7 +76,7 @@ export async function PATCH(req) {
       throw new Error('Record not found');
     }
     
-    const Jurusan = await prisma.masterJurusan.update({ where: { id }, data: { jurusan } })
+    const Jurusan = await prisma.masterjurusan.update({ where: { id }, data: { jurusan } })
 
     return new Response(JSON.stringify(Jurusan), {
       status: 200,
@@ -104,7 +104,7 @@ export async function DELETE(req) {
       );
     }
 
-    const existingRecord = await prisma.masterJurusan.findUnique({
+    const existingRecord = await prisma.masterjurusan.findUnique({
       where: { id },
     });
 
@@ -115,7 +115,7 @@ export async function DELETE(req) {
       );
     }
 
-    await prisma.masterJurusan.delete({
+    await prisma.masterjurusan.delete({
       where: { id },
     });
 

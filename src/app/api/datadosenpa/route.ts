@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const DosenPa = await prisma.dosenPA.findMany({
+    const DosenPa = await prisma.dosenpa.findMany({
       include: {
         dosen: true,
       },

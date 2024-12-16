@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const SistemBimbingan = await prisma.masterSistemBimbingan.findMany(
+    const SistemBimbingan = await prisma.mastersistembimbingan.findMany(
     );
     
     // Mengembalikan data dosen sebagai JSON
@@ -34,7 +34,7 @@ export async function POST(req) {
         );
       }
 
-      const SistemBimbingan = await prisma.masterSistemBimbingan.create({
+      const SistemBimbingan = await prisma.mastersistembimbingan.create({
         data : {
           sistem_bimbingan, order
         }
@@ -68,7 +68,7 @@ export async function PATCH(req) {
 
     console.log(id, sistem_bimbingan)
 
-    const existingRecord = await prisma.masterSistemBimbingan.findUnique({
+    const existingRecord = await prisma.mastersistembimbingan.findUnique({
       where: { id },
     });
     
@@ -76,7 +76,7 @@ export async function PATCH(req) {
       throw new Error('Record not found');
     }
     
-    const SistemBimbingan = await prisma.masterSistemBimbingan.update({ where: { id }, data: { sistem_bimbingan } })
+    const SistemBimbingan = await prisma.mastersistembimbingan.update({ where: { id }, data: { sistem_bimbingan } })
 
     return new Response(JSON.stringify(SistemBimbingan), {
       status: 200,
@@ -104,7 +104,7 @@ export async function DELETE(req) {
       );
     }
 
-    const existingRecord = await prisma.masterSistemBimbingan.findUnique({
+    const existingRecord = await prisma.mastersistembimbingan.findUnique({
       where: { id },
     });
 
@@ -115,7 +115,7 @@ export async function DELETE(req) {
       );
     }
 
-    await prisma.masterSistemBimbingan.delete({
+    await prisma.mastersistembimbingan.delete({
       where: { id },
     });
 

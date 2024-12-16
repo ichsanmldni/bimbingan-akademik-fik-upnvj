@@ -18,7 +18,7 @@ export async function POST(req) {
           );
         }
 
-        const dosenpa = await prisma.dosenPA.findFirst({
+        const dosenpa = await prisma.dosenpa.findFirst({
           where: {
             dosen: {
               nama_lengkap: nama_dosen_PA,

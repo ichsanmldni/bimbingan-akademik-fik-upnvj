@@ -8,7 +8,7 @@ export async function PATCH(req) {
 
       const transaction = await prisma.$transaction(
         data.map((item) =>
-          prisma.masterPeminatan.update({
+          prisma.masterpeminatan.update({
             where: { id: item.id },
             data: { order: item.order },
           })

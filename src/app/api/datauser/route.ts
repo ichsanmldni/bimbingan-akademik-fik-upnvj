@@ -9,7 +9,7 @@ export async function GET() {
     const DosenPA = await prisma.dosen.findMany({
       where: {
         id: {
-          in: (await prisma.dosenPA.findMany({ select: { dosen_id: true } })).map(
+          in: (await prisma.dosenpa.findMany({ select: { dosen_id: true } })).map(
             (pa) => pa.dosen_id
           ),
         },

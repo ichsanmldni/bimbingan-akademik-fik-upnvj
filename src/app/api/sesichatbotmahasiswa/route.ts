@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const SesiChatbotMahasiswa = await prisma.sesiChatbotMahasiswa.findMany(
+    const SesiChatbotMahasiswa = await prisma.sesichatbotmahasiswa.findMany(
         {
             include: {
                 mahasiswa: true,
@@ -39,7 +39,7 @@ export async function POST(req) {
         );
       }
 
-      const SesiChatbotMahasiswa = await prisma.sesiChatbotMahasiswa.create({
+      const SesiChatbotMahasiswa = await prisma.sesichatbotmahasiswa.create({
         data : {
             mahasiswa_id, waktu_mulai
         }

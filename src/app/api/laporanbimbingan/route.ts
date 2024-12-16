@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const LaporanBimbingan = await prisma.laporanBimbingan.findMany(
+    const LaporanBimbingan = await prisma.laporanbimbingan.findMany(
     );
     
     // Mengembalikan data dosen sebagai JSON
@@ -36,22 +36,27 @@ export async function POST(req) {
       }
 
 
-      const LaporanBimbingan = await prisma.laporanBimbingan.create({
+      const LaporanBimbingan = await prisma.laporanbimbingan.create({
         data : {
-          nama_mahasiswa, waktu_bimbingan, status, kaprodi_id, kendala_mahasiswa, solusi, kesimpulan, dokumentasi: dokumentasi || null, jenis_bimbingan, sistem_bimbingan, dosen_pa_id
+          nama_mahasiswa, jumlah_mahasiswa: bimbingan_id.split(",").map(id => id.trim()).length, waktu_bimbingan, status, kaprodi_id, kendala_mahasiswa, solusi, kesimpulan, dokumentasi: dokumentasi || null, jenis_bimbingan, sistem_bimbingan, dosen_pa_id
         }
     });
+    const bimbinganIds = bimbingan_id.split(",").map(id => id.trim()); // Mengubah string menjadi array dan membersihkan spasi
 
-    const UpdateBimbingan = await prisma.bimbingan.update({
-      where: { id: bimbingan_id },
-      data: { laporan_bimbingan_id: LaporanBimbingan.id },
+    const updateBimbinganPromises = bimbinganIds.map(async (id) => {
+      return prisma.bimbingan.update({
+        where: { id: Number(id) }, // Mengonversi id menjadi angka
+        data: { laporan_bimbingan_id: LaporanBimbingan.id },
+      });
     });
+    
+    // Menunggu semua promise selesai
+    await Promise.all(updateBimbinganPromises);
 
     return new Response(
       JSON.stringify({
         message: 'Laporan bimbingan berhasil dibuat dan bimbingan diperbarui',
         LaporanBimbingan,
-        UpdateBimbingan,
       }),
       {
         status: 201,
@@ -81,7 +86,7 @@ export async function PATCH(req) {
       );
     }
 
-    const existingRecord = await prisma.laporanBimbingan.findUnique({
+    const existingRecord = await prisma.laporanbimbingan.findUnique({
       where: { id },
     });
     
@@ -89,7 +94,7 @@ export async function PATCH(req) {
       throw new Error('Record not found');
     }
     
-    const LaporanBimbingan = await prisma.laporanBimbingan.update({ where: { id }, data: { feedback_kaprodi, status } })
+    const LaporanBimbingan = await prisma.laporanbimbingan.update({ where: { id }, data: { feedback_kaprodi, status } })
 
     return new Response(JSON.stringify(LaporanBimbingan), {
       status: 200,

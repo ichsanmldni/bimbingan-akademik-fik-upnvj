@@ -3,7 +3,7 @@ import prisma from '../../../lib/prisma';
 
 export async function GET() {
   try {
-    const JadwalDosenPA = await prisma.jadwalDosenPA.findMany({
+    const JadwalDosenPA = await prisma.jadwaldosenpa.findMany({
       include: {
         dosen_pa: true,
       },

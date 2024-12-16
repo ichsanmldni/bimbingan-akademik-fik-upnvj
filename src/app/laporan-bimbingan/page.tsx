@@ -41,7 +41,19 @@ export default function Home() {
   const [dataSelectedKaprodi, setDataSelectedKaprodi] = useState({});
   const [dataBimbingan, setDataBimbingan] = useState([]);
   const [userProfile, setUserProfile] = useState({});
-  const [selectedBimbingan, setSelectedBimbingan] = useState({});
+  const [selectedBimbingan, setSelectedBimbingan] = useState([]);
+
+  const toggleBimbingan = (data) => {
+    setSelectedBimbingan((prevSelected) => {
+      if (prevSelected.some((bimbingan) => bimbingan.id === data.id)) {
+        // Jika bimbingan sudah dipilih, hapus dari daftar
+        return prevSelected.filter((bimbingan) => bimbingan.id !== data.id);
+      } else {
+        // Jika bimbingan belum dipilih, tambahkan ke daftar
+        return [...prevSelected, data];
+      }
+    });
+  };
 
   const getDataDosenPA = async () => {
     try {
@@ -131,8 +143,20 @@ export default function Home() {
 
     try {
       let laporanBimbinganValue = {
-        nama_mahasiswa: selectedBimbingan.pengajuan_bimbingan.nama_lengkap,
-        waktu_bimbingan: selectedBimbingan.pengajuan_bimbingan.jadwal_bimbingan,
+        nama_mahasiswa: [
+          ...new Set(
+            selectedBimbingan.map(
+              (bimbingan) => bimbingan.pengajuan_bimbingan.nama_lengkap
+            )
+          ),
+        ].join(", "),
+        waktu_bimbingan: [
+          ...new Set(
+            selectedBimbingan.map(
+              (bimbingan) => bimbingan.pengajuan_bimbingan.jadwal_bimbingan
+            )
+          ),
+        ].join(", "),
         kaprodi_id: dataSelectedKaprodi.id,
         kendala_mahasiswa: kendala,
         solusi,
@@ -141,15 +165,31 @@ export default function Home() {
         status: "Menunggu Feedback Kaprodi",
         dosen_pa_id: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
           ?.id,
-        jenis_bimbingan: selectedBimbingan.pengajuan_bimbingan.jenis_bimbingan,
-        sistem_bimbingan:
-          selectedBimbingan.pengajuan_bimbingan.sistem_bimbingan,
-        bimbingan_id: selectedBimbingan.id,
+        jenis_bimbingan: [
+          ...new Set(
+            selectedBimbingan.map(
+              (bimbingan) => bimbingan.pengajuan_bimbingan.jenis_bimbingan
+            )
+          ),
+        ] // Hapus duplikat dengan Set
+          .join(", "), // Gabungkan jenis bimbingan dengan koma
+        sistem_bimbingan: [
+          ...new Set(
+            selectedBimbingan.map(
+              (bimbingan) => bimbingan.pengajuan_bimbingan.sistem_bimbingan
+            )
+          ),
+        ] // Hapus duplikat dengan Set
+          .join(", "), // Gabungkan sistem bimbingan dengan koma
+        bimbingan_id: [
+          ...new Set(selectedBimbingan.map((bimbingan) => bimbingan.id)),
+        ] // Hapus duplikat dengan Set
+          .join(", "), // Gabungkan sistem bimbingan dengan koma,
       };
 
       const result = await addLaporanBimbingan(laporanBimbinganValue);
       console.log(result);
-      setSelectedBimbingan({});
+      setSelectedBimbingan([]);
       setSolusi("");
       setKesimpulan("");
       setKendala("");
@@ -337,20 +377,75 @@ export default function Home() {
                     .filter((data) => data.laporan_bimbingan_id === null)
                     .map((data) => (
                       <div
-                        className={`border rounded-lg flex flex-col gap-1 text-[15px] p-4 cursor-pointer ${selectedBimbingan.id === data.id ? "bg-orange-500 text-white font-medium" : ""}`}
-                        onClick={() => setSelectedBimbingan(data)}
+                        className={`border rounded-lg flex flex-col gap-1 text-[15px] cursor-pointer ${
+                          selectedBimbingan.some(
+                            (bimbingan) => bimbingan.id === data.id
+                          )
+                            ? "bg-orange-500 text-white font-medium"
+                            : ""
+                        }`}
                         key={data.id}
                       >
-                        <p>{data.pengajuan_bimbingan.nama_lengkap}</p>
-                        <p>{data.pengajuan_bimbingan.jadwal_bimbingan}</p>
-                        <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
-                        <p>{data.pengajuan_bimbingan.sistem_bimbingan}</p>
+                        <label className="flex flex-col gap-2 cursor-pointer">
+                          <div className="flex justify-between px-4 pb-4">
+                            <div className="">
+                              <p className="pt-4">
+                                {data.pengajuan_bimbingan.nama_lengkap}
+                              </p>
+                              {(() => {
+                                // Ambil data jadwal_bimbingan
+                                const jadwal =
+                                  data.pengajuan_bimbingan.jadwal_bimbingan;
+
+                                // Pisahkan bagian-bagian dari jadwal
+                                const parts = jadwal.split(" "); // ["Senin,", "16", "Desember", "2024", "09:00-10:00"]
+
+                                if (parts.length === 5) {
+                                  // Ambil bagian hari, tanggal, bulan, tahun dan waktu
+                                  const [day, date, month, year, timeRange] =
+                                    parts;
+
+                                  // Hapus koma pada bagian hari
+                                  const formattedDay = day.replace(",", "");
+
+                                  // Format tanggal
+                                  const formattedDate = `${formattedDay}, ${date} ${month} ${year}`;
+
+                                  // Pisahkan waktu menjadi startTime dan endTime
+                                  const [startTime, endTime] =
+                                    timeRange.split("-");
+
+                                  // Format hasil yang diinginkan
+                                  return (
+                                    <>
+                                      <p>{`${formattedDate}`}</p>
+                                      <p>{`${startTime}-${endTime}`}</p>
+                                    </>
+                                  );
+                                } else {
+                                  // Jika format tidak sesuai
+                                  return <p>Jadwal tidak valid.</p>;
+                                }
+                              })()}
+                              <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
+                              <p>{data.pengajuan_bimbingan.sistem_bimbingan}</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={selectedBimbingan.some(
+                                (bimbingan) => bimbingan.id === data.id
+                              )}
+                              onChange={() => toggleBimbingan(data)}
+                              className="size-4 self-start mt-4 cursor-pointer"
+                            />
+                          </div>
+                        </label>
                       </div>
                     ))}
                 </div>
               </div>
             )}
-            {selectedBimbingan.id ? (
+            {selectedBimbingan.length > 0 ? (
               <div className="flex flex-col gap-4">
                 <InputField
                   type="text"

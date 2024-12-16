@@ -15,7 +15,7 @@ export async function PATCH(req) {
       }
   
   
-      const existingRecord = await prisma.chatPribadi.findUnique({
+      const existingRecord = await prisma.chatpribadi.findUnique({
         where: { id },
       });
       
@@ -23,7 +23,7 @@ export async function PATCH(req) {
         throw new Error('Record not found');
       }
       
-      const ChatPribadi = await prisma.chatPribadi.update({ where: { id }, data: { is_pesan_terakhir_read: true } })
+      const ChatPribadi = await prisma.chatpribadi.update({ where: { id }, data: { is_pesan_terakhir_read: true } })
   
       return new Response(JSON.stringify(ChatPribadi), {
         status: 200,

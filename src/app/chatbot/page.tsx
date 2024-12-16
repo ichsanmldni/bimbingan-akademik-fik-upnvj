@@ -23,6 +23,7 @@ export default function Home() {
   const [dataSesiChatbotMahasiswa, setDataSesiChatbotMahasiswa] = useState([]);
   const [dataChatbotMahasiswa, setDataChatbotMahasiswa] = useState([]);
   const [dataPesanBot, setDataPesanBot] = useState([]);
+  const [dataRiwayatPesanChatbot, setDataRiwayatPesanChatbot] = useState([]);
   const [chatbotData, setChatbotData] = useState([]);
   const [sortedChatbotData, setSortedChatbotData] = useState([]);
   const [dataUser, setDataUser] = useState({});
@@ -176,8 +177,71 @@ export default function Home() {
     }
   };
 
-  const getChatGPTResponse = async (userMessage) => {
+  const getDataRiwayatPesanChatbotBySesiChatbotMahasiswaID = async () => {
+    try {
+      const dataRiwayatPesanChatbot = await axios.get(
+        `http://localhost:3000/api/riwayatpesanchatbot`
+      );
+
+      const dataRiwayatPesanChatbotFiltered =
+        dataRiwayatPesanChatbot.data.filter(
+          (data) =>
+            data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
+        );
+      setDataRiwayatPesanChatbot(dataRiwayatPesanChatbotFiltered);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getChatGPTResponse = async (sesiId, userMessage) => {
     if (!userMessage) throw new Error("Pesan pengguna tidak boleh kosong.");
+
+    const dosenList = customDataConsumeGPT.dosen_pa
+      .map(
+        (dosen) =>
+          `Dosen: ${dosen.name}, Email: ${dosen.email}, Telepon: ${dosen.phone}`
+      )
+      .join("\n");
+
+    const jadwalKosong = customDataConsumeGPT.jadwal_kosong_semua_dosen_pa
+      .map(
+        (jadwal) =>
+          `Dosen ID: ${jadwal.dosen_id}, Jadwal: ${jadwal.jadwal.map((j) => `${j.hari}: ${j.jam}`).join(", ")}`
+      )
+      .join("\n");
+
+    const informasiAkademik = customDataConsumeGPT.informasi_akademik
+      .map((info) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
+      .join("\n");
+
+    const customContext = `
+      Berikut adalah informasi penting: untuk pengetahuan kamu sebelum menjawab pertanyaannya
+      
+      Dosen Pembimbing Akademik:
+      ${dosenList}
+
+      Jadwal Kosong Dosen:
+      ${jadwalKosong}
+
+      Informasi Akademik:
+      ${informasiAkademik}
+    `;
+
+    const filteredMessages = dataRiwayatPesanChatbot
+      .slice(-10)
+      .map(({ role, pesan }) => ({
+        role,
+        content: pesan,
+      }));
+
+    filteredMessages.push({
+      role: "user",
+      content: userMessage,
+    });
+
+    console.log(filteredMessages);
 
     try {
       const { data } = await axios.post(
@@ -187,14 +251,11 @@ export default function Home() {
           messages: [
             {
               role: "system",
-              content: `Anda adalah asisten AI yang memberikan jawaban berdasarkan data berikut, atau menjawab seperti biasa untuk pertanyaan umum yang tidak ada di data ini: ${customDataConsumeGPT}`,
+              content: `Anda adalah asisten ai, ${customContext}`,
             },
-            {
-              role: "user",
-              content: `${userMessage}`,
-            },
+            ...filteredMessages,
           ],
-          max_tokens: 3000,
+          max_tokens: 4000,
         },
         {
           headers: {
@@ -225,11 +286,9 @@ export default function Home() {
   const addPesanBot = (newChat) =>
     postData(`${API_BASE_URL}/pesanbot`, newChat);
 
-  // Fungsi untuk menambahkan chatbot mahasiswa
   const addChatbotMahasiswa = (newChat) =>
     postData(`${API_BASE_URL}/chatbotmahasiswa`, newChat);
 
-  // Fungsi utama untuk menangani penambahan chatbot mahasiswa
   const handleAddChatChatbotMahasiswa = async (newData) => {
     if (!newData || !newData.pesan) {
       console.error("Data baru atau pesan tidak valid.");
@@ -245,7 +304,10 @@ export default function Home() {
 
         await addChatbotMahasiswa(newChat);
 
-        const chatgptResponse = await getChatGPTResponse(newData.pesan);
+        const chatgptResponse = await getChatGPTResponse(
+          activeSesiChatbotMahasiswa,
+          newData.pesan
+        );
 
         const newPesanBot = {
           sesi_chatbot_mahasiswa_id: activeSesiChatbotMahasiswa,
@@ -257,6 +319,7 @@ export default function Home() {
 
         getDataChatbotMahasiswabySesiChatbotMahasiswaID();
         getDataPesanBotBySesiChatbotMahasiswaID();
+        getDataRiwayatPesanChatbotBySesiChatbotMahasiswaID();
       } else {
         const newChat = {
           ...newData,
@@ -265,10 +328,20 @@ export default function Home() {
 
         const result = await addChatbotMahasiswa(newChat);
 
-        setActiveSesiChatbotMahasiswa(result.sesi_chatbot_mahasiswa_id);
+        const chatgptResponse = await getChatGPTResponse(
+          result.sesi_chatbot_mahasiswa_id,
+          newData.pesan
+        );
 
-        const chatgptResponse = await getChatGPTResponse(newData.pesan);
-        console.log("Respons ChatGPT:", chatgptResponse);
+        const newPesanBot = {
+          sesi_chatbot_mahasiswa_id: result.sesi_chatbot_mahasiswa_id,
+          pesan: chatgptResponse,
+          waktu_kirim: new Date().toISOString(),
+        };
+
+        await addPesanBot(newPesanBot);
+
+        setActiveSesiChatbotMahasiswa(result.sesi_chatbot_mahasiswa_id);
       }
     } catch (error) {
       console.error("Error handling chatbot mahasiswa:", error.message);
@@ -345,11 +418,10 @@ export default function Home() {
     getDataSesiChatbotMahasiswa();
   }, []);
 
-  console.log(chatbotData);
-
   useEffect(() => {
     getDataChatbotMahasiswabySesiChatbotMahasiswaID();
     getDataPesanBotBySesiChatbotMahasiswaID();
+    getDataRiwayatPesanChatbotBySesiChatbotMahasiswaID();
     getDataSesiChatbotMahasiswa();
   }, [activeSesiChatbotMahasiswa]);
 

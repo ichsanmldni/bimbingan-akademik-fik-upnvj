@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const chatPribadi = await prisma.chatPribadi.findMany(
+    const chatPribadi = await prisma.chatpribadi.findMany(
         {
             include: {
                 mahasiswa: true,
@@ -40,7 +40,7 @@ export async function POST(req) {
         );
       }
 
-      const ChatPribadi = await prisma.chatPribadi.create({
+      const ChatPribadi = await prisma.chatpribadi.create({
         data : {
             mahasiswa_id, dosen_pa_id, waktu_pesan_terakhir, is_pesan_terakhir_read, pesan_terakhir, pengirim_pesan_terakhir
         }
@@ -74,7 +74,7 @@ export async function PATCH(req) {
     }
 
 
-    const existingRecord = await prisma.chatPribadi.findUnique({
+    const existingRecord = await prisma.chatpribadi.findUnique({
       where: { id },
     });
     
@@ -82,7 +82,7 @@ export async function PATCH(req) {
       throw new Error('Record not found');
     }
     
-    const ChatPribadi = await prisma.chatPribadi.update({ where: { id }, data: { pesan_terakhir, waktu_pesan_terakhir, pengirim_pesan_terakhir } })
+    const ChatPribadi = await prisma.chatpribadi.update({ where: { id }, data: { pesan_terakhir, waktu_pesan_terakhir, pengirim_pesan_terakhir } })
 
     return new Response(JSON.stringify(ChatPribadi), {
       status: 200,

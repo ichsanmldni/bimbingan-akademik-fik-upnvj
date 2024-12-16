@@ -3,12 +3,10 @@ import prisma from '../../../lib/prisma';
 
 export async function GET(req) {
   try {
-    // Mengambil data dosen dari database
-    const chatDosenPA = await prisma.pesanchatdosenpa.findMany(
+    const RiwayatPesanChatbot = await prisma.riwayatpesanchatbot.findMany(
     );
-    
-    // Mengembalikan data dosen sebagai JSON
-    return new Response(JSON.stringify(chatDosenPA), {
+
+    return new Response(JSON.stringify(RiwayatPesanChatbot), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -25,31 +23,31 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-      const { chat_pribadi_id, pesan, waktu_kirim} = body;
+      const { sesi_chatbot_mahasiswa_id, role, pesan, waktu_kirim} = body;
 
-      if (!chat_pribadi_id || !pesan || !waktu_kirim) {
+      if (!sesi_chatbot_mahasiswa_id || !pesan || !waktu_kirim || !role) {
         return new Response(
           JSON.stringify({ message: 'All fields are required' }),
           { status: 400, headers: { 'Content-Type': 'application/json' } }
         );
       }
 
-      const ChatDosenPA= await prisma.pesanchatdosenpa.create({
+      const RiwayatPesanChatbot= await prisma.riwayatpesanchatbot.create({
         data : {
-          chat_pribadi_id, pesan, waktu_kirim
+          sesi_chatbot_mahasiswa_id, pesan, role, waktu_kirim
         }
     });
 
-    const existingRecord = await prisma.chatpribadi.findUnique({
-      where: { id:chat_pribadi_id },
-    });
+    // const existingRecord = await prisma.chatPribadi.findUnique({
+    //   where: { id:chat_pribadi_id },
+    // });
     
-    if (!existingRecord) {
-      throw new Error('Record not found');
-    }
+    // if (!existingRecord) {
+    //   throw new Error('Record not found');
+    // }
     
-    const ChatPribadi = await prisma.chatpribadi.update({ where: { id: chat_pribadi_id }, data: { pesan_terakhir: pesan, waktu_pesan_terakhir: waktu_kirim, is_pesan_terakhir_read: false, pengirim_pesan_terakhir: "Dosen PA" } })
-    return new Response(JSON.stringify(ChatDosenPA), {
+    // const ChatPribadi = await prisma.chatPribadi.update({ where: { id: chat_pribadi_id }, data: { pesan_terakhir: pesan, waktu_pesan_terakhir: waktu_kirim, is_pesan_terakhir_read: false, pengirim_pesan_terakhir: "Dosen PA" } })
+    return new Response(JSON.stringify(RiwayatPesanChatbot), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });

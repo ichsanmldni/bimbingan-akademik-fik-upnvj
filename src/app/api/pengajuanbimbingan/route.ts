@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const PengajuanBimbingan = await prisma.pengajuanBimbingan.findMany(
+    const PengajuanBimbingan = await prisma.pengajuanbimbingan.findMany(
     );
     
     // Mengembalikan data dosen sebagai JSON
@@ -35,7 +35,7 @@ export async function POST(req) {
         }
   
         console.log(nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id)
-        const PengajuanBimbingan = await prisma.pengajuanBimbingan.create({
+        const PengajuanBimbingan = await prisma.pengajuanbimbingan.create({
           data : {
             nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id
           }
@@ -67,7 +67,7 @@ export async function POST(req) {
         );
       }
   
-      const existingRecord = await prisma.pengajuanBimbingan.findUnique({
+      const existingRecord = await prisma.pengajuanbimbingan.findUnique({
         where: { id },
       });
       
@@ -75,7 +75,7 @@ export async function POST(req) {
         throw new Error('Record not found');
       }
       
-      const PengajuanBimbingan = await prisma.pengajuanBimbingan.update({ where: { id }, data: { status, keterangan } })
+      const PengajuanBimbingan = await prisma.pengajuanbimbingan.update({ where: { id }, data: { status, keterangan } })
   
       return new Response(JSON.stringify(PengajuanBimbingan), {
         status: 200,

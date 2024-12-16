@@ -13,7 +13,7 @@ export async function GET(req) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    const JadwalDosenPA = await prisma.jadwalDosenPA.findMany({
+    const JadwalDosenPA = await prisma.jadwaldosenpa.findMany({
       where: {
         dosen_pa_id: parseInt(dosenPaId),
       },
@@ -47,7 +47,7 @@ export async function POST(req) {
         );
       }
 
-      const JadwalDosenPA = await prisma.jadwalDosenPA.create({
+      const JadwalDosenPA = await prisma.jadwaldosenpa.create({
         data : {
           dosen_pa_id, hari, jam_mulai, jam_selesai
         }
@@ -78,7 +78,7 @@ export async function DELETE(req) {
       );
     }
 
-    const existingRecord = await prisma.jadwalDosenPA.findUnique({
+    const existingRecord = await prisma.jadwaldosenpa.findUnique({
       where: { id },
     });
 
@@ -89,7 +89,7 @@ export async function DELETE(req) {
       );
     }
 
-    await prisma.jadwalDosenPA.delete({
+    await prisma.jadwaldosenpa.delete({
       where: { id },
     });
 

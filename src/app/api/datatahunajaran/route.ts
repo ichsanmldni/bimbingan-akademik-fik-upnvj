@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const TahunAjaran = await prisma.masterTahunAjaran.findMany(
+    const TahunAjaran = await prisma.mastertahunajaran.findMany(
     );
     
     // Mengembalikan data dosen sebagai JSON
@@ -34,7 +34,7 @@ export async function POST(req) {
         );
       }
 
-      const TahunAjaran = await prisma.masterTahunAjaran.create({
+      const TahunAjaran = await prisma.mastertahunajaran.create({
         data : {
           tahun_ajaran, order
         }
@@ -68,7 +68,7 @@ export async function PATCH(req) {
 
     console.log(id, tahun_ajaran)
 
-    const existingRecord = await prisma.masterTahunAjaran.findUnique({
+    const existingRecord = await prisma.mastertahunajaran.findUnique({
       where: { id },
     });
     
@@ -76,7 +76,7 @@ export async function PATCH(req) {
       throw new Error('Record not found');
     }
     
-    const TahunAjaran = await prisma.masterTahunAjaran.update({ where: { id }, data: { tahun_ajaran } })
+    const TahunAjaran = await prisma.mastertahunajaran.update({ where: { id }, data: { tahun_ajaran } })
 
     return new Response(JSON.stringify(TahunAjaran), {
       status: 200,
@@ -104,7 +104,7 @@ export async function DELETE(req) {
       );
     }
 
-    const existingRecord = await prisma.masterTahunAjaran.findUnique({
+    const existingRecord = await prisma.mastertahunajaran.findUnique({
       where: { id },
     });
 
@@ -115,7 +115,7 @@ export async function DELETE(req) {
       );
     }
 
-    await prisma.masterTahunAjaran.delete({
+    await prisma.mastertahunajaran.delete({
       where: { id },
     });
 

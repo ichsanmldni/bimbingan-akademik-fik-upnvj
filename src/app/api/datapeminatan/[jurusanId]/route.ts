@@ -13,7 +13,7 @@ export async function GET(req) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    const Peminatan = await prisma.masterPeminatan.findMany({
+    const Peminatan = await prisma.masterpeminatan.findMany({
       where: {
         jurusan_id: parseInt(jurusanid),
       },
@@ -50,7 +50,7 @@ export async function POST(req) {
         );
       }
 
-      const Peminatan = await prisma.masterPeminatan.create({
+      const Peminatan = await prisma.masterpeminatan.create({
         data : {
           peminatan, order, jurusan_id:parseInt(jurusanid)
         }
@@ -84,7 +84,7 @@ export async function PATCH(req) {
 
     console.log(id, peminatan)
 
-    const existingRecord = await prisma.masterPeminatan.findUnique({
+    const existingRecord = await prisma.masterpeminatan.findUnique({
       where: { id },
     });
     
@@ -92,7 +92,7 @@ export async function PATCH(req) {
       throw new Error('Record not found');
     }
     
-    const Peminatan = await prisma.masterPeminatan.update({ where: { id }, data: { peminatan } })
+    const Peminatan = await prisma.masterpeminatan.update({ where: { id }, data: { peminatan } })
 
     return new Response(JSON.stringify(Peminatan), {
       status: 200,
@@ -120,7 +120,7 @@ export async function DELETE(req) {
       );
     }
 
-    const existingRecord = await prisma.masterPeminatan.findUnique({
+    const existingRecord = await prisma.masterpeminatan.findUnique({
       where: { id },
     });
 
@@ -131,7 +131,7 @@ export async function DELETE(req) {
       );
     }
 
-    await prisma.masterPeminatan.delete({
+    await prisma.masterpeminatan.delete({
       where: { id },
     });
 

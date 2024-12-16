@@ -4,7 +4,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const chatMahasiswa = await prisma.pesanChatMahasiswa.findMany(
+    const chatMahasiswa = await prisma.pesanchatmahasiswa.findMany(
     );
     
     // Mengembalikan data dosen sebagai JSON
@@ -32,14 +32,14 @@ export async function POST(req) {
 
       
       if(!chat_pribadi_id){
-        const ChatPribadi = await prisma.chatPribadi.create({
+        const ChatPribadi = await prisma.chatpribadi.create({
           data : {
               mahasiswa_id, dosen_pa_id, waktu_pesan_terakhir: waktu_kirim, is_pesan_terakhir_read : false, pesan_terakhir: pesan, pengirim_pesan_terakhir: "Mahasiswa"
           }
       });
       console.log(ChatPribadi)
 
-      const ChatMahasiswa = await prisma.pesanChatMahasiswa.create({
+      const ChatMahasiswa = await prisma.pesanchatmahasiswa.create({
         data : {
           chat_pribadi_id: ChatPribadi.id, pesan, waktu_kirim
         }
@@ -59,13 +59,13 @@ export async function POST(req) {
         );
       }
 
-      const ChatMahasiswa = await prisma.pesanChatMahasiswa.create({
+      const ChatMahasiswa = await prisma.pesanchatmahasiswa.create({
         data : {
           chat_pribadi_id, pesan, waktu_kirim
         }
     });
 
-    const existingRecord = await prisma.chatPribadi.findUnique({
+    const existingRecord = await prisma.chatpribadi.findUnique({
       where: { id:chat_pribadi_id },
     });
     
@@ -73,7 +73,7 @@ export async function POST(req) {
       throw new Error('Record not found');
     }
     
-    const ChatPribadi = await prisma.chatPribadi.update({ where: { id: chat_pribadi_id }, data: { pesan_terakhir: pesan, waktu_pesan_terakhir: waktu_kirim, is_pesan_terakhir_read: false, pengirim_pesan_terakhir: "Mahasiswa" } })
+    const ChatPribadi = await prisma.chatpribadi.update({ where: { id: chat_pribadi_id }, data: { pesan_terakhir: pesan, waktu_pesan_terakhir: waktu_kirim, is_pesan_terakhir_read: false, pengirim_pesan_terakhir: "Mahasiswa" } })
     return new Response(JSON.stringify(ChatMahasiswa), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
