@@ -165,6 +165,8 @@ export default function Home() {
         status: "Menunggu Feedback Kaprodi",
         dosen_pa_id: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
           ?.id,
+        nama_dosen_pa: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
+          ?.dosen.nama_lengkap,
         jenis_bimbingan: [
           ...new Set(
             selectedBimbingan.map(

@@ -8,20 +8,6 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("authToken")?.value;
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  const decodedToken = jwtDecode(token);
-  const userRole = decodedToken.role;
-
-  if (
-    (pathname.startsWith('/chatbot')) &&
-    userRole !== 'Mahasiswa'
-  ) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
   if (pathname === "/admin") {
     if (token) {
       return NextResponse.redirect(new URL('/', request.url));
@@ -33,6 +19,16 @@ export function middleware(request: NextRequest) {
     if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
+  }
+
+  const decodedToken = jwtDecode(token);
+  const userRole = decodedToken.role;
+
+  if (
+    (pathname.startsWith('/chatbot')) &&
+    userRole !== 'Mahasiswa'
+  ) {
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return NextResponse.next();

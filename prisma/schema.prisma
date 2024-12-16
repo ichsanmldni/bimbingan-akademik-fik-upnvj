@@ -26,8 +26,8 @@ model bimbingan {
   id                     Int                @id @default(autoincrement())
   pengajuan_bimbingan_id Int
   laporan_bimbingan_id   Int?
-  laporan_bimbingan       laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "Bimbingan_laporan_bimbingan_id_fkey")
-  pengajuan_bimbingan     pengajuanbimbingan @relation(fields: [pengajuan_bimbingan_id], references: [id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
+  laporan_bimbingan      laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "Bimbingan_laporan_bimbingan_id_fkey")
+  pengajuan_bimbingan    pengajuanbimbingan @relation(fields: [pengajuan_bimbingan_id], references: [id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
 
   @@index([laporan_bimbingan_id], map: "Bimbingan_laporan_bimbingan_id_fkey")
   @@index([pengajuan_bimbingan_id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
@@ -41,7 +41,7 @@ model chatpribadi {
   pesan_terakhir          String
   waktu_pesan_terakhir    DateTime
   pengirim_pesan_terakhir String
-  dosen_pa                 dosenpa              @relation(fields: [dosen_pa_id], references: [id], map: "ChatPribadi_dosen_pa_id_fkey")
+  dosen_pa                dosenpa              @relation(fields: [dosen_pa_id], references: [id], map: "ChatPribadi_dosen_pa_id_fkey")
   mahasiswa               mahasiswa            @relation(fields: [mahasiswa_id], references: [id], map: "ChatPribadi_mahasiswa_id_fkey")
   pesanchatdosenpa        pesanchatdosenpa[]
   pesanchatmahasiswa      pesanchatmahasiswa[]
@@ -82,7 +82,7 @@ model jadwaldosenpa {
   hari        String
   jam_mulai   String
   jam_selesai String
-  dosen_pa     dosenpa @relation(fields: [dosen_pa_id], references: [id], map: "JadwalDosenPA_dosen_pa_id_fkey")
+  dosen_pa    dosenpa @relation(fields: [dosen_pa_id], references: [id], map: "JadwalDosenPA_dosen_pa_id_fkey")
 
   @@index([dosen_pa_id], map: "JadwalDosenPA_dosen_pa_id_fkey")
 }
@@ -95,28 +95,26 @@ model kaprodi {
   kaprodi_jurusan    masterjurusan       @relation(fields: [kaprodi_jurusan_id], references: [id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
   laporanbimbingan   laporanbimbingan[]
   notifikasikaprodi  notifikasikaprodi[]
-
-  @@index([dosen_id], map: "Kaprodi_dosen_id_fkey")
-  @@index([kaprodi_jurusan_id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
 }
 
 model laporanbimbingan {
   id                Int         @id @default(autoincrement())
   kaprodi_id        Int?
   kendala_mahasiswa String
-  jumlah_mahasiswa  Int
   solusi            String
   kesimpulan        String
   dokumentasi       String?
   feedback_kaprodi  String?
   status            String
   dosen_pa_id       Int?
+  nama_dosen_pa     String
   jenis_bimbingan   String
   sistem_bimbingan  String
   waktu_bimbingan   String
   nama_mahasiswa    String
+  jumlah_mahasiswa  Int
   bimbingan         bimbingan[]
-  dosen_pa           dosenpa?    @relation(fields: [dosen_pa_id], references: [id], map: "LaporanBimbingan_dosen_pa_id_fkey")
+  dosen_pa          dosenpa?    @relation(fields: [dosen_pa_id], references: [id], map: "LaporanBimbingan_dosen_pa_id_fkey")
   kaprodi           kaprodi?    @relation(fields: [kaprodi_id], references: [id], map: "LaporanBimbingan_kaprodi_id_fkey")
 
   @@index([dosen_pa_id], map: "LaporanBimbingan_dosen_pa_id_fkey")
@@ -135,7 +133,7 @@ model mahasiswa {
   profile_image        String?
   dosen_pa_id          Int?
   chatpribadi          chatpribadi[]
-  dosen_pa              dosenpa?               @relation(fields: [dosen_pa_id], references: [id], map: "Mahasiswa_dosen_pa_id_fkey")
+  dosen_pa             dosenpa?               @relation(fields: [dosen_pa_id], references: [id], map: "Mahasiswa_dosen_pa_id_fkey")
   notifikasimahasiswa  notifikasimahasiswa[]
   sesichatbotmahasiswa sesichatbotmahasiswa[]
 
@@ -157,11 +155,11 @@ model masterjurusan {
 }
 
 model masterpeminatan {
-  id            Int           @id @default(autoincrement())
-  peminatan     String
-  jurusan_id    Int
-  order         Int
-  jurusan masterjurusan @relation(fields: [jurusan_id], references: [id], map: "MasterPeminatan_jurusan_id_fkey")
+  id         Int           @id @default(autoincrement())
+  peminatan  String
+  jurusan_id Int
+  order      Int
+  jurusan    masterjurusan @relation(fields: [jurusan_id], references: [id], map: "MasterPeminatan_jurusan_id_fkey")
 
   @@index([jurusan_id], map: "MasterPeminatan_jurusan_id_fkey")
 }
@@ -190,7 +188,7 @@ model notifikasidosenpa {
   isi         String
   tanggal     DateTime
   read        Boolean
-  dosen_pa     dosenpa  @relation(fields: [dosen_pa_id], references: [id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
+  dosen_pa    dosenpa  @relation(fields: [dosen_pa_id], references: [id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
 
   @@index([dosen_pa_id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
 }
@@ -230,7 +228,7 @@ model pengajuanbimbingan {
   dosen_pa_id      Int
   keterangan       String?
   bimbingan        bimbingan[]
-  dosen_pa          dosenpa     @relation(fields: [dosen_pa_id], references: [id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
+  dosen_pa         dosenpa     @relation(fields: [dosen_pa_id], references: [id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
 
   @@index([dosen_pa_id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
 }
@@ -240,7 +238,7 @@ model pesanbot {
   sesi_chatbot_mahasiswa_id Int
   pesan                     String               @db.VarChar(5000)
   waktu_kirim               DateTime
-  sesi_chatbot_mahasiswa      sesichatbotmahasiswa @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id], map: "PesanBot_sesi_chatbot_mahasiswa_id_fkey")
+  sesi_chatbot_mahasiswa    sesichatbotmahasiswa @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id], map: "PesanBot_sesi_chatbot_mahasiswa_id_fkey")
 
   @@index([sesi_chatbot_mahasiswa_id], map: "PesanBot_sesi_chatbot_mahasiswa_id_fkey")
 }
@@ -250,7 +248,7 @@ model pesanchatbotmahasiswa {
   sesi_chatbot_mahasiswa_id Int?
   pesan                     String                @db.VarChar(1000)
   waktu_kirim               DateTime
-  sesi_chatbot_mahasiswa      sesichatbotmahasiswa? @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id], map: "PesanChatbotMahasiswa_sesi_chatbot_mahasiswa_id_fkey")
+  sesi_chatbot_mahasiswa    sesichatbotmahasiswa? @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id], map: "PesanChatbotMahasiswa_sesi_chatbot_mahasiswa_id_fkey")
 
   @@index([sesi_chatbot_mahasiswa_id], map: "PesanChatbotMahasiswa_sesi_chatbot_mahasiswa_id_fkey")
 }
@@ -260,7 +258,7 @@ model pesanchatdosenpa {
   chat_pribadi_id Int
   pesan           String      @db.VarChar(1000)
   waktu_kirim     DateTime
-  chat_pribadi     chatpribadi @relation(fields: [chat_pribadi_id], references: [id], map: "PesanChatDosenPA_chat_pribadi_id_fkey")
+  chat_pribadi    chatpribadi @relation(fields: [chat_pribadi_id], references: [id], map: "PesanChatDosenPA_chat_pribadi_id_fkey")
 
   @@index([chat_pribadi_id], map: "PesanChatDosenPA_chat_pribadi_id_fkey")
 }
@@ -270,7 +268,7 @@ model pesanchatmahasiswa {
   chat_pribadi_id Int
   pesan           String      @db.VarChar(1000)
   waktu_kirim     DateTime
-  chat_pribadi     chatpribadi @relation(fields: [chat_pribadi_id], references: [id], map: "PesanChatMahasiswa_chat_pribadi_id_fkey")
+  chat_pribadi    chatpribadi @relation(fields: [chat_pribadi_id], references: [id], map: "PesanChatMahasiswa_chat_pribadi_id_fkey")
 
   @@index([chat_pribadi_id], map: "PesanChatMahasiswa_chat_pribadi_id_fkey")
 }
@@ -289,12 +287,14 @@ model sesichatbotmahasiswa {
 }
 
 model riwayatpesanchatbot {
-  id                              Int                     @id @default(autoincrement())
-  sesi_chatbot                    sesichatbotmahasiswa?   @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
-  sesi_chatbot_mahasiswa_id       Int
-  role                            String
-  pesan                           String                   @db.VarChar(5000)
-  waktu_kirim                     DateTime
+  id                        Int                  @id @default(autoincrement())
+  sesi_chatbot_mahasiswa_id Int
+  role                      String
+  pesan                     String               @db.VarChar(5000)
+  waktu_kirim               DateTime
+  sesi_chatbot              sesichatbotmahasiswa @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id])
+
+  @@index([sesi_chatbot_mahasiswa_id], map: "riwayatpesanchatbot_sesi_chatbot_mahasiswa_id_fkey")
 }
 
 model submenuinformasiakademik {
@@ -302,7 +302,7 @@ model submenuinformasiakademik {
   menu_informasi_akademik_id Int
   nama                       String
   isi                        String
-  menu_informasi_akademik      menuinformasiakademik @relation(fields: [menu_informasi_akademik_id], references: [id], map: "SubmenuInformasiAkademik_menu_informasi_akademik_id_fkey")
+  menu_informasi_akademik    menuinformasiakademik @relation(fields: [menu_informasi_akademik_id], references: [id], map: "SubmenuInformasiAkademik_menu_informasi_akademik_id_fkey")
 
   @@index([menu_informasi_akademik_id], map: "SubmenuInformasiAkademik_menu_informasi_akademik_id_fkey")
 }

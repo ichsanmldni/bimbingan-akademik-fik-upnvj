@@ -38,6 +38,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [dataBimbinganBySelectedDosenPA, setDataBimbinganBySelectedDosenPA] =
     useState({});
+  const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
 
   const handleDetailLaporanKaprodi = (data) => {
     setSelectedDataLaporanBimbingan(data);
@@ -100,11 +101,13 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
+  console.log(userProfile);
   const getDataDosenById = async () => {
     try {
       const dataDosen = await axios.get("http://localhost:3000/api/datadosen");
+      console.log(dataUser);
 
-      const dosen = dataDosen.data.find((data) => data.id == dataUser.id);
+      const dosen = dataDosen.data.find((data) => data.id === dataUser.id);
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -133,6 +136,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const dataKaprodi = await axios.get(
         `http://localhost:3000/api/datakaprodi`
       );
+
+      console.log(userProfile);
 
       const kaprodi = dataKaprodi.data.find(
         (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
@@ -207,8 +212,21 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
+  const getDataMahasiswa = async () => {
+    try {
+      const dataMahasiswa = await axios.get(
+        `http://localhost:3000/api/datamahasiswa`
+      );
+
+      setDataAllMahasiswa(dataMahasiswa.data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
-    if (dataUser && dataUser.id) {
+    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.id) {
       getDataDosenById();
     }
   }, [dataUser]);
@@ -218,7 +236,11 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   }, [selectedDataDosenPA]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap !== "") {
+    if (
+      userProfile &&
+      Object.keys(userProfile).length > 0 &&
+      userProfile.nama_lengkap
+    ) {
       getDataLaporanBimbinganByKaprodiId();
     }
   }, [userProfile]);
@@ -236,6 +258,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   useEffect(() => {
     getDataDosenPA();
+    getDataMahasiswa();
   }, []);
 
   return (
@@ -425,17 +448,29 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                   return (
                     <div
                       key={data.id}
-                      className="flex items-center gap-4 border rounded-xl p-4 cursor-pointer"
+                      className="flex justify-between border rounded-xl p-4 cursor-pointer"
                       onClick={() => {
                         handleDetailDosenPA(data);
                       }}
                     >
-                      <Image
-                        src={profilePlaceholder}
-                        alt="Profile Image"
-                        className="w-8 h-8 rounded-full cursor-pointer"
-                      />
-                      <p className="self-center">{data.dosen.nama_lengkap}</p>
+                      <div className="flex items-center gap-4">
+                        <Image
+                          src={profilePlaceholder}
+                          alt="Profile Image"
+                          className="w-8 h-8 rounded-full cursor-pointer"
+                        />
+                        <p className="self-center">{data.dosen.nama_lengkap}</p>
+                      </div>
+                      <div className="flex items-center">
+                        {`
+                          ${
+                            dataAllMahasiswa.filter(
+                              (dataMahasiswa) =>
+                                dataMahasiswa.dosen_pa_id === data.id
+                            ).length
+                          } mahasiswa bimbingan
+                        `}
+                      </div>
                     </div>
                   );
                 })}
@@ -456,6 +491,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 <div className="flex flex-col gap-6">
                   {dataLaporanBimbingan.map((data) => (
                     <div
+                      key={data.id}
                       className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
                       onClick={() => handleDetailLaporanKaprodi(data)}
                     >
@@ -464,8 +500,9 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                       </div>
                       <div className="flex justify-between">
                         <div>
-                          <p className="font-medium">{data.nama_mahasiswa}</p>
-                          <p>{data.jenis_bimbingan}</p>
+                          <p className="font-medium">{data.nama_dosen_pa}</p>
+                          <p>{data.jumlah_mahasiswa} Mahasiswa</p>
+                          <p className="font-medium">{data.jenis_bimbingan}</p>
                           <p className="font-medium">{data.sistem_bimbingan}</p>
                         </div>
                         <div
@@ -501,17 +538,28 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                         <p>{selectedDataLaporanBimbingan.waktu_bimbingan}</p>
                       </div>
                       <div className="flex justify-between">
-                        <div>
-                          <p className="font-medium">
-                            {selectedDataLaporanBimbingan.nama_mahasiswa}
-                          </p>
-                          <p>{selectedDataLaporanBimbingan.jenis_bimbingan}</p>
-                          <p className="font-medium">
-                            {selectedDataLaporanBimbingan.sistem_bimbingan}
-                          </p>
+                        <div className="flex flex-col gap-4 w-[55%]">
+                          <div className="flex flex-col gap-2">
+                            <p className="font-medium">{`Peserta Bimbingan (${selectedDataLaporanBimbingan.jumlah_mahasiswa} mahasiswa) :`}</p>
+                            <p>{selectedDataLaporanBimbingan.nama_mahasiswa}</p>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <p className="font-medium">Jenis Bimbingan :</p>
+                            <p>
+                              <p>
+                                {selectedDataLaporanBimbingan.jenis_bimbingan}
+                              </p>
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <p className="font-medium">Sistem Bimbingan :</p>
+                            <p>
+                              {selectedDataLaporanBimbingan.sistem_bimbingan}
+                            </p>
+                          </div>
                         </div>
                         <div
-                          className={`${selectedDataLaporanBimbingan.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} p-3 self-center rounded-lg`}
+                          className={`self-start ${selectedDataLaporanBimbingan.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} p-3 rounded-lg`}
                         >
                           <p className="text-white text-center">
                             {selectedDataLaporanBimbingan.status}

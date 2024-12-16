@@ -4,7 +4,11 @@ import prisma from '../../../lib/prisma';
 export async function GET(req) {
   try {
     // Mengambil data dosen dari database
-    const LaporanBimbingan = await prisma.laporanbimbingan.findMany(
+    const LaporanBimbingan = await prisma.laporanbimbingan.findMany({
+      include: {
+        dosen_pa: true
+      }
+    }
     );
     
     // Mengembalikan data dosen sebagai JSON
@@ -26,9 +30,9 @@ export async function POST(req) {
     const body = await req.json();
     console.log(body)
 
-      const { nama_mahasiswa, waktu_bimbingan, kaprodi_id, status, kendala_mahasiswa, solusi, kesimpulan, dokumentasi, jenis_bimbingan, sistem_bimbingan, dosen_pa_id, bimbingan_id} = body;
+      const { nama_mahasiswa, waktu_bimbingan, kaprodi_id, status, kendala_mahasiswa, solusi, kesimpulan, dokumentasi, jenis_bimbingan, sistem_bimbingan, dosen_pa_id, bimbingan_id, nama_dosen_pa} = body;
 
-      if (!bimbingan_id || !nama_mahasiswa || !waktu_bimbingan || !kaprodi_id || !kendala_mahasiswa || !solusi || !kesimpulan || !jenis_bimbingan || !status || !sistem_bimbingan || !dosen_pa_id) {
+      if (!bimbingan_id || !nama_mahasiswa || !waktu_bimbingan || !kaprodi_id || !kendala_mahasiswa || !solusi || !kesimpulan || !jenis_bimbingan || !status || !sistem_bimbingan || !dosen_pa_id || !nama_dosen_pa) {
         return new Response(
           JSON.stringify({ message: 'All fields are required' }),
           { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -38,7 +42,7 @@ export async function POST(req) {
 
       const LaporanBimbingan = await prisma.laporanbimbingan.create({
         data : {
-          nama_mahasiswa, jumlah_mahasiswa: bimbingan_id.split(",").map(id => id.trim()).length, waktu_bimbingan, status, kaprodi_id, kendala_mahasiswa, solusi, kesimpulan, dokumentasi: dokumentasi || null, jenis_bimbingan, sistem_bimbingan, dosen_pa_id
+          nama_mahasiswa, jumlah_mahasiswa: bimbingan_id.split(",").map(id => id.trim()).length, waktu_bimbingan, status, kaprodi_id, kendala_mahasiswa, solusi, kesimpulan, dokumentasi: dokumentasi || null, jenis_bimbingan, sistem_bimbingan, dosen_pa_id, nama_dosen_pa
         }
     });
     const bimbinganIds = bimbingan_id.split(",").map(id => id.trim()); // Mengubah string menjadi array dan membersihkan spasi

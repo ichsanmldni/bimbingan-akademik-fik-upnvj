@@ -70,6 +70,8 @@ export default function Home() {
     }
   }, []);
 
+  console.log(roleUser);
+
   useEffect(() => {
     if (dataUser.role === "Mahasiswa") {
       setRoleUser("Mahasiswa");
@@ -210,18 +212,24 @@ export default function Home() {
             </div>
           )}
         </div>
-        <DashboardDosenPA
-          selectedSubMenuDashboard={selectedSubMenuDashboard}
-          dataUser={dataUser}
-        />
-        <DashboardMahasiswa
-          selectedSubMenuDashboard={selectedSubMenuDashboard}
-          dataUser={dataUser}
-        />
-        <DashboardKaprodi
-          selectedSubMenuDashboard={selectedSubMenuDashboard}
-          dataUser={dataUser}
-        />
+        {roleUser === "Mahasiswa" && (
+          <DashboardMahasiswa
+            selectedSubMenuDashboard={selectedSubMenuDashboard}
+            dataUser={dataUser}
+          />
+        )}
+        {roleUser === "Dosen PA" && (
+          <DashboardDosenPA
+            selectedSubMenuDashboard={selectedSubMenuDashboard}
+            dataUser={dataUser}
+          />
+        )}
+        {roleUser === "Kaprodi" && (
+          <DashboardKaprodi
+            selectedSubMenuDashboard={selectedSubMenuDashboard}
+            dataUser={dataUser}
+          />
+        )}
       </div>
 
       <div className="border">

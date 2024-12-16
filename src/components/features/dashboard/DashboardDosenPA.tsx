@@ -172,6 +172,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         `http://localhost:3000/api/datadosenpa`
       );
 
+      console.log(userProfile);
+
       const dosenPa = dataDosenPa.data.find(
         (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
@@ -377,7 +379,11 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   }, [dataUser]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap !== "") {
+    if (
+      userProfile &&
+      Object.keys(userProfile).length > 0 &&
+      userProfile.nama_lengkap
+    ) {
       getDataJadwalDosenPaByDosenPa();
     }
   }, [userProfile]);
