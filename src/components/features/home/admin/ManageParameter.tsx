@@ -686,8 +686,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           <p className="text-center flex-1">{index + 1}</p>
                         </div>
                       </td>
-                      <td className="px-4 py-2">{data.jurusan}</td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-2 w-1/2">{data.jurusan}</td>
+                      <td className="px-4 py-4 w-1/4">
                         <div className="flex gap-2 items-center justify-center">
                           <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
                           <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
@@ -768,7 +768,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           <p className="text-center flex-1">{index + 1}</p>
                         </div>
                       </td>
-                      <td className="px-4 py-2 w-1/2">{data.tahunAjaran}</td>
+                      <td className="px-4 py-2 w-1/2">{data.tahun_ajaran}</td>
                       <td className="px-4 py-4 w-1/4">
                         <div className="flex gap-2 items-center justify-center">
                           <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />

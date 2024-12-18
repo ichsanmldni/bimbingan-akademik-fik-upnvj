@@ -15,8 +15,9 @@ import Image from "next/image";
 
 interface NavbarUserProps {
   roleUser: string;
+  dataUser: object;
 }
-const NavbarUser: React.FC<NavbarUserProps> = ({ roleUser }) => {
+const NavbarUser: React.FC<NavbarUserProps> = ({ roleUser, dataUser }) => {
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
   const [isModalProfileOpen, setIsModalProfileOpen] = useState(false);
   const pathname = usePathname();
@@ -101,7 +102,16 @@ const NavbarUser: React.FC<NavbarUserProps> = ({ roleUser }) => {
           onClick={handleNotificationClick}
           className="w-6 h-6 cursor-pointer"
         />
-        <ProfileImage onClick={handleProfileClick} />
+        {dataUser?.profile_image ? (
+          <img
+            src={dataUser.profile_image}
+            alt="Profile"
+            className="rounded-full size-8"
+            onClick={handleProfileClick}
+          />
+        ) : (
+          <ProfileImage className="size-8" onClick={handleProfileClick} />
+        )}
       </div>
       {isModalNotificationOpen && (
         <NotificationModal

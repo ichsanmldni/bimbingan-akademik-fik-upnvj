@@ -41,6 +41,19 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [optionsPeminatan, setOptionsPeminatan] = useState([]);
   const [optionsDosenPA, setOptionsDosenPA] = useState([]);
   const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState([]);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [dataMahasiswa, setDataMahasiswa] = useState({});
+  const [userProfile, setUserProfile] = useState({
+    nama_lengkap: "",
+    email: "",
+    nim: "",
+    no_whatsapp: "",
+    jurusan: "",
+    peminatan: "",
+    dosen_pa: "",
+  });
+  const [isDataChanged, setIsDataChanged] = useState(false);
+  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
 
   function getDate(jadwal) {
     if (!jadwal) return "";
@@ -54,17 +67,39 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     return waktu;
   }
 
-  const [userProfile, setUserProfile] = useState({
-    nama_lengkap: "",
-    email: "",
-    nim: "",
-    no_whatsapp: "",
-    jurusan: "",
-    peminatan: "",
-    dosen_pa: "",
-  });
-  const [isDataChanged, setIsDataChanged] = useState(false);
-  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
+  const [openDay, setOpenDay] = useState(null);
+
+  const toggleDay = (day) => {
+    setOpenDay(openDay === day ? null : day);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      // Validasi ukuran file (maksimal 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Ukuran file melebihi 10MB");
+        return;
+      }
+
+      // Validasi jenis file
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          "Format file tidak diperbolehkan. Gunakan .JPG, .JPEG, atau .PNG"
+        );
+        return;
+      }
+
+      // Menampilkan preview gambar
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const getDataMahasiswaById = async () => {
     try {
@@ -103,6 +138,8 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         peminatan: mahasiswa.peminatan,
         dosen_pa: dosenpa.dosen.nama_lengkap,
       });
+
+      setDataMahasiswa(mahasiswa);
 
       setNamaLengkapMahasiswa(mahasiswa.nama_lengkap);
       setEmailMahasiswa(mahasiswa.email);
@@ -215,14 +252,14 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     }
   };
 
-  const getDataPengajuanBimbinganByNamaLengkapMahasiswa = async () => {
+  const getDataPengajuanBimbinganByIDMahasiswa = async () => {
     try {
       const dataPengajuanBimbingan = await axios.get(
         `http://localhost:3000/api/pengajuanbimbingan`
       );
 
       const pengajuanBimbingan = dataPengajuanBimbingan.data.filter(
-        (data) => data.nama_lengkap === userProfile.nama_lengkap
+        (data) => data.mahasiswa_id === dataUser.id
       );
 
       setDataPengajuanBimbingan(pengajuanBimbingan);
@@ -248,7 +285,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
   const handleEditMahasiswa = async (id) => {
     try {
-      let jurusanValue = {
+      let mahasiswaValue = {
         id,
         nama_lengkap: namaLengkapMahasiswa,
         email: emailMahasiswa,
@@ -259,10 +296,12 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         dosen_pa_id: dataDosenPA.find(
           (data) => data.dosen.nama_lengkap === selectedDosenPA
         )?.id,
+        profile_image: !imagePreview ? null : imagePreview,
       };
 
-      const result = await patchMahasiswa(jurusanValue);
+      const result = await patchMahasiswa(mahasiswaValue);
       getDataMahasiswaById();
+      setImagePreview(null);
       console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
@@ -321,13 +360,13 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   useEffect(() => {
     if (dataUser && dataUser.id) {
       getDataMahasiswaById();
+      getDataPengajuanBimbinganByIDMahasiswa();
     }
   }, [dataUser]);
 
   useEffect(() => {
     if (userProfile && userProfile.nama_lengkap !== "") {
       getDataJadwalDosenPaByDosenPa();
-      getDataPengajuanBimbinganByNamaLengkapMahasiswa();
     }
   }, [userProfile]);
 
@@ -359,11 +398,10 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     getDataDosenPA();
   }, []);
 
-  const [openDay, setOpenDay] = useState(null);
-
-  const toggleDay = (day) => {
-    setOpenDay(openDay === day ? null : day);
-  };
+  useEffect(() => {
+    setImagePreview(null);
+    getDataMahasiswaById();
+  }, [selectedSubMenuDashboard]);
 
   return (
     <>
@@ -371,17 +409,43 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         <div className="w-[75%] pl-[30px] pr-[128px] mb-[200px] py-[30px]">
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
-              <ProfileImage className="size-[200px] rounded-full" />
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Profile"
+                  className="size-[200px] rounded-full object-cover"
+                />
+              ) : dataMahasiswa.profile_image ? (
+                <img
+                  src={dataMahasiswa.profile_image}
+                  alt="Profile"
+                  className="size-[200px] rounded-full object-cover"
+                />
+              ) : (
+                <ProfileImage className="size-[200px] rounded-full" />
+              )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
-                <button className="bg-orange-500 w-[30%] px-4 py-2 text-white rounded-md">
+                {/* Input file yang tersembunyi */}
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept="image/jpeg, image/jpg, image/png"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <label
+                  htmlFor="fileInput"
+                  className="bg-orange-500 hover:bg-orange-600 w-[30%] px-4 py-2 text-white rounded-md text-center cursor-pointer"
+                >
                   Pilih Foto
-                </button>
+                </label>
                 <div>
-                  <p>Besar file: maksimal 10mb</p>
+                  <p>Besar file: maksimal 10MB</p>
                   <p>Ekstensi file yang diperbolehkan: .JPG .JPEG .PNG</p>
                 </div>
               </div>
             </div>
+
             <form className="flex flex-col mt-8 gap-4">
               <InputField
                 type="text"
@@ -451,7 +515,9 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                   e.preventDefault();
                   handleEditMahasiswa(dataUser.id);
                 }}
-                className={`text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg ${!isDataChanged && "hidden"}`}
+                className={`text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg  ${
+                  !isDataChanged && !imagePreview ? "hidden" : ""
+                }`}
               >
                 Simpan
               </button>
@@ -525,29 +591,35 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
             </h1>
 
             <div className="flex flex-col gap-4">
-              {dataPengajuanBimbingan.map((data) => (
-                <div className="flex flex-col border rounded-lg p-6 gap-4">
-                  <div className="flex justify-between text-neutral-600">
-                    <p>{getDate(data.jadwal_bimbingan)}</p>
-                    <p>{getTime(data.jadwal_bimbingan)}</p>
-                  </div>
-                  <div className="flex justify-between">
+              {dataPengajuanBimbingan
+                .slice()
+                .reverse()
+                .map((data) => (
+                  <div
+                    key={data.id}
+                    className="flex flex-col border rounded-lg p-6 gap-4"
+                  >
+                    <div className="flex justify-between text-neutral-600">
+                      <p>{getDate(data.jadwal_bimbingan)}</p>
+                      <p>{getTime(data.jadwal_bimbingan)}</p>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="font-medium">{data.nama_lengkap}</p>
+                        <p>{data.jenis_bimbingan}</p>
+                        <p className="font-medium">{data.sistem_bimbingan}</p>
+                      </div>
+                      <div
+                        className={`${data.status === "Diterima" ? "bg-green-500" : data.status === "Reschedule" ? "bg-red-500" : data.status === "Menunggu Konfirmasi" ? "bg-gray-400" : ""} p-3 self-center rounded-lg`}
+                      >
+                        <p className="text-white text-center">{data.status}</p>
+                      </div>
+                    </div>
                     <div>
-                      <p className="font-medium">{data.nama_lengkap}</p>
-                      <p>{data.jenis_bimbingan}</p>
-                      <p className="font-medium">{data.sistem_bimbingan}</p>
-                    </div>
-                    <div
-                      className={`${data.status === "Diterima" ? "bg-green-500" : data.status === "Reschedule" ? "bg-red-500" : ""} p-3 self-center rounded-lg`}
-                    >
-                      <p className="text-white text-center">{data.status}</p>
+                      <p className="text-[14px]">{data.keterangan}</p>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-[14px]">{data.keterangan}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>

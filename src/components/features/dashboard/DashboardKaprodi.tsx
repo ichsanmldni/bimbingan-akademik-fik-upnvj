@@ -39,6 +39,9 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const [dataBimbinganBySelectedDosenPA, setDataBimbinganBySelectedDosenPA] =
     useState({});
   const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
+  const [dataKaprodi, setDataKaprodi] = useState({});
+  const [dataKaprodiUser, setDataKaprodiUser] = useState({});
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleDetailLaporanKaprodi = (data) => {
     setSelectedDataLaporanBimbingan(data);
@@ -66,13 +69,40 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      // Validasi ukuran file (maksimal 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Ukuran file melebihi 10MB");
+        return;
+      }
+
+      // Validasi jenis file
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          "Format file tidak diperbolehkan. Gunakan .JPG, .JPEG, atau .PNG"
+        );
+        return;
+      }
+
+      // Menampilkan preview gambar
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const patchKaprodi = async (updatedData) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datadosen",
         updatedData
       );
-      console.log(updatedData);
       console.log("Kaprodi updated successfully:", response.data);
       return response.data;
     } catch (error) {
@@ -89,23 +119,21 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         email: emailKaprodi,
         nip,
         no_whatsapp: noTelpKaprodi,
+        profile_image: !imagePreview ? null : imagePreview,
       };
-
-      console.log(jurusanValue);
 
       const result = await patchKaprodi(jurusanValue);
       getDataDosenById();
+      setImagePreview(null);
       console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  console.log(userProfile);
   const getDataDosenById = async () => {
     try {
       const dataDosen = await axios.get("http://localhost:3000/api/datadosen");
-      console.log(dataUser);
 
       const dosen = dataDosen.data.find((data) => data.id === dataUser.id);
 
@@ -121,10 +149,34 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         no_whatsapp: dosen.no_whatsapp,
       });
 
+      setDataKaprodi(dosen);
+
       setNamaLengkapKaprodi(dosen.nama_lengkap);
       setEmailKaprodi(dosen.email);
       setNip(dosen.nip);
       setNoTelpKaprodi(dosen.no_whatsapp);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataKaprodiByDosenId = async () => {
+    try {
+      const dataKaprodi = await axios.get(
+        "http://localhost:3000/api/datakaprodi"
+      );
+
+      const kaprodi = dataKaprodi.data.find(
+        (data) => data.dosen_id == dataUser.id
+      );
+
+      if (!kaprodi) {
+        console.error("Kaprodi tidak ditemukan");
+        return;
+      }
+
+      setDataKaprodiUser(kaprodi);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -136,8 +188,6 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const dataKaprodi = await axios.get(
         `http://localhost:3000/api/datakaprodi`
       );
-
-      console.log(userProfile);
 
       const kaprodi = dataKaprodi.data.find(
         (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
@@ -177,12 +227,14 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
-  const handleEditLaporanBimbingan = async (id, status) => {
+  const handleEditLaporanBimbingan = async (id, dosen_pa_id, status) => {
     try {
       let laporanBimbinganValue = {
         id,
         feedback_kaprodi: feedbackKaprodi,
         status,
+        dosen_pa_id,
+        kaprodi_id: dataKaprodiUser.id,
       };
 
       const result = await patchLaporanBimbingan(laporanBimbinganValue);
@@ -226,8 +278,14 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   };
 
   useEffect(() => {
+    setImagePreview(null);
+    getDataDosenById();
+  }, [selectedSubMenuDashboard]);
+
+  useEffect(() => {
     if (dataUser && Object.keys(dataUser).length > 0 && dataUser.id) {
       getDataDosenById();
+      getDataKaprodiByDosenId();
     }
   }, [dataUser]);
 
@@ -267,13 +325,38 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
-              <ProfileImage className="size-[200px] rounded-full" />
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Profile"
+                  className="size-[200px] rounded-full object-cover"
+                />
+              ) : dataKaprodi.profile_image ? (
+                <img
+                  src={dataKaprodi.profile_image}
+                  alt="Profile"
+                  className="size-[200px] rounded-full object-cover"
+                />
+              ) : (
+                <ProfileImage className="size-[200px] rounded-full" />
+              )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
-                <button className="bg-orange-500 hover:bg-orange-600 w-[30%] px-4 py-2 text-white rounded-md">
+                {/* Input file yang tersembunyi */}
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept="image/jpeg, image/jpg, image/png"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <label
+                  htmlFor="fileInput"
+                  className="bg-orange-500 hover:bg-orange-600 w-[30%] px-4 py-2 text-white rounded-md text-center cursor-pointer"
+                >
                   Pilih Foto
-                </button>
+                </label>
                 <div>
-                  <p>Besar file: maksimal 10mb</p>
+                  <p>Besar file: maksimal 10MB</p>
                   <p>Ekstensi file yang diperbolehkan: .JPG .JPEG .PNG</p>
                 </div>
               </div>
@@ -324,7 +407,9 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                   e.preventDefault();
                   handleEditKaprodi(dataUser.id);
                 }}
-                className={`text-white bg-orange-500 hover:bg-orange-600 text-[14px] py-2 font-medium rounded-lg ${!isDataChanged ? "hidden" : ""}`}
+                className={`text-white bg-orange-500 hover:bg-orange-600 text-[14px] py-2 font-medium rounded-lg ${
+                  !isDataChanged && !imagePreview ? "hidden" : ""
+                }`}
               >
                 Simpan
               </button>
@@ -385,8 +470,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 </div>
                 <div className="flex flex-col gap-4 mt-4 border rounded-xl p-8">
                   <div className="flex gap-6">
-                    <Image
-                      src={profilePlaceholder}
+                    <img
+                      src={selectedDataDosenPA.dosen.profile_image}
                       alt="Profile Image"
                       className="size-[120px] rounded-full cursor-pointer"
                     />
@@ -454,15 +539,18 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                       }}
                     >
                       <div className="flex items-center gap-4">
-                        <Image
-                          src={profilePlaceholder}
+                        <img
+                          src={data.dosen.profile_image}
                           alt="Profile Image"
                           className="w-8 h-8 rounded-full cursor-pointer"
                         />
-                        <p className="self-center">{data.dosen.nama_lengkap}</p>
+                        <p className="self-center font-medium">
+                          {data.dosen.nama_lengkap}
+                        </p>
                       </div>
                       <div className="flex items-center">
-                        {`
+                        <p className="font-semibold text-orange-500">
+                          {`
                           ${
                             dataAllMahasiswa.filter(
                               (dataMahasiswa) =>
@@ -470,6 +558,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                             ).length
                           } mahasiswa bimbingan
                         `}
+                        </p>
                       </div>
                     </div>
                   );
@@ -489,32 +578,39 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
             {dataLaporanBimbingan.length > 0 ? (
               !isDetailLaporanKaprodiClicked ? (
                 <div className="flex flex-col gap-6">
-                  {dataLaporanBimbingan.map((data) => (
-                    <div
-                      key={data.id}
-                      className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
-                      onClick={() => handleDetailLaporanKaprodi(data)}
-                    >
-                      <div className="flex justify-between text-neutral-600">
-                        <p>{data.waktu_bimbingan}</p>
-                      </div>
-                      <div className="flex justify-between">
-                        <div>
-                          <p className="font-medium">{data.nama_dosen_pa}</p>
-                          <p>{data.jumlah_mahasiswa} Mahasiswa</p>
-                          <p className="font-medium">{data.jenis_bimbingan}</p>
-                          <p className="font-medium">{data.sistem_bimbingan}</p>
+                  {dataLaporanBimbingan
+                    .slice()
+                    .reverse()
+                    .map((data) => (
+                      <div
+                        key={data.id}
+                        className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
+                        onClick={() => handleDetailLaporanKaprodi(data)}
+                      >
+                        <div className="flex justify-between text-neutral-600">
+                          <p>{data.waktu_bimbingan}</p>
                         </div>
-                        <div
-                          className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-3 self-center rounded-lg`}
-                        >
-                          <p className="text-white text-center">
-                            {data.status}
-                          </p>
+                        <div className="flex justify-between">
+                          <div>
+                            <p className="font-medium">{data.nama_dosen_pa}</p>
+                            <p>{data.jumlah_mahasiswa} Mahasiswa</p>
+                            <p className="font-medium">
+                              {data.jenis_bimbingan}
+                            </p>
+                            <p className="font-medium">
+                              {data.sistem_bimbingan}
+                            </p>
+                          </div>
+                          <div
+                            className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-3 self-center rounded-lg`}
+                          >
+                            <p className="text-white text-center">
+                              {data.status}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
                 <div>
@@ -572,18 +668,6 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                           <p>
                             {selectedDataLaporanBimbingan.kendala_mahasiswa}
                           </p>
-                          {/* <ol className="list-disc pl-5">
-                            <div className="flex flex-col gap-1">
-                              <li>Kesulitan dalam mengatur waktu</li>
-                              <p>
-                                Banyak mahasiswa yang merasa kesulitan dalam
-                                mengatur waktu antara kuliah, tugas, dan
-                                kegiatan organisasi. Aktivitas yang padat dapat
-                                membuat mereka kewalahan, terlebih jika ada
-                                tenggat waktu yang bersamaan.
-                              </p>
-                            </div>
-                          </ol> */}
                         </div>
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">
@@ -617,34 +701,26 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">Kesimpulan</h3>
                           <p>{selectedDataLaporanBimbingan.kesimpulan}</p>
-                          {/* <p>
-                            Secara keseluruhan, saya melihat bahwa kamu adalah
-                            mahasiswa yang memiliki potensi besar dan komitmen
-                            yang tinggi terhadap studi. Pencapaian akademik kamu
-                            di beberapa mata kuliah menunjukkan bahwa kamu mampu
-                            menguasai materi dengan baik. Namun, masih ada
-                            beberapa area yang perlu perhatian lebih, terutama
-                            dalam hal manajemen waktu dan pemahaman materi pada
-                            beberapa mata kuliah yang lebih kompleks. Saya juga
-                            mengapresiasi keaktifan kamu dalam perkuliahan dan
-                            keterlibatan dalam diskusi, meskipun ada beberapa
-                            aspek yang perlu kamu tingkatkan, seperti
-                            keterlibatan dalam tugas kelompok dan pengelolaan
-                            tugas dengan lebih baik.
-                          </p> */}
                         </div>
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">Dokumentasi</h3>
-                          {selectedDataLaporanBimbingan.dokumentasi !== null ? (
-                            <p>{selectedDataLaporanBimbingan.dokumentasi}</p>
-                          ) : (
-                            <p>-</p>
-                          )}
-                          {/* <Image
-                            className="size-[100px]"
-                            src={upnvjLogo}
-                            alt="upnvjLogo"
-                          /> */}
+                          <div className="grid grid-cols-2 gap-4 items-center">
+                            {selectedDataLaporanBimbingan.dokumentasi ? (
+                              selectedDataLaporanBimbingan.dokumentasi
+                                .split(", ")
+                                .map((data) => (
+                                  <div className="flex justify-center border rounded-lg">
+                                    <img
+                                      src={data}
+                                      alt="dokumentasi"
+                                      className="min-h-[100px] p-4 max-h-[200px]"
+                                    />
+                                  </div>
+                                ))
+                            ) : (
+                              <p>-</p>
+                            )}
+                          </div>
                         </div>
                         <div className="flex flex-col gap-3">
                           <h3 className="font-medium">Feedback Kaprodi</h3>
@@ -671,6 +747,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                                 onClick={() => {
                                   handleEditLaporanBimbingan(
                                     selectedDataLaporanBimbingan.id,
+                                    selectedDataLaporanBimbingan.dosen_pa_id,
                                     "Sudah Diberikan Feedback"
                                   );
                                   setIsDetailLaporanKaprodiClicked(

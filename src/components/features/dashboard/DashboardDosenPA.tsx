@@ -48,17 +48,19 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const [emailDosen, setEmailDosen] = useState("");
   const [nip, setNip] = useState("");
   const [noTelpDosen, setNoTelpDosen] = useState("");
-  const [keteranganKonfirmasi, setKeteranganKonfirmasi] = useState("");
+  const [keteranganKonfirmasi, setKeteranganKonfirmasi] = useState({});
   const [isDetailLaporanDosenClicked, setIsDetailLaporanDosenClicked] =
     useState(true);
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [isAddJadwal, setIsAddJadwal] = useState(false);
   const [dataDosenPA, setDataDosenPA] = useState({});
+  const [dataDosen, setDataDosen] = useState({});
   const [dataClickedLaporanBimbingan, setDataClickedLaporanBimbingan] =
     useState({});
   const [selectedHari, setSelectedHari] = useState("");
   const [jamMulai, setJamMulai] = useState("");
   const [jamSelesai, setJamSelesai] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
 
   const [openDay, setOpenDay] = useState(null);
   const toggleDay = (day) => {
@@ -156,6 +158,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         no_whatsapp: dosen.no_whatsapp,
       });
 
+      setDataDosen(dosen);
+
       setNamaLengkapDosen(dosen.nama_lengkap);
       setEmailDosen(dosen.email);
       setNip(dosen.nip);
@@ -171,8 +175,6 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       const dataDosenPa = await axios.get(
         `http://localhost:3000/api/datadosenpa`
       );
-
-      console.log(userProfile);
 
       const dosenPa = dataDosenPa.data.find(
         (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
@@ -268,7 +270,6 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         "http://localhost:3000/api/datadosen",
         updatedData
       );
-      console.log(updatedData);
       console.log("Dosen PA updated successfully:", response.data);
       return response.data;
     } catch (error) {
@@ -289,20 +290,48 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      // Validasi ukuran file (maksimal 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Ukuran file melebihi 10MB");
+        return;
+      }
+
+      // Validasi jenis file
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          "Format file tidak diperbolehkan. Gunakan .JPG, .JPEG, atau .PNG"
+        );
+        return;
+      }
+
+      // Menampilkan preview gambar
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleEditDosenPA = async (id) => {
     try {
-      let jurusanValue = {
+      let dosenPAValue = {
         id,
         nama_lengkap: namaLengkapDosen,
         email: emailDosen,
         nip,
         no_whatsapp: noTelpDosen,
+        profile_image: !imagePreview ? null : imagePreview,
       };
 
-      console.log(jurusanValue);
-
-      const result = await patchDosenPA(jurusanValue);
+      const result = await patchDosenPA(dosenPAValue);
       getDataDosenById();
+      setImagePreview(null);
       console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
@@ -353,12 +382,18 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
-  const handleEditPengajuanBimbingan = async (id, statusPengajuan) => {
+  const handleEditPengajuanBimbingan = async (
+    id,
+    mahasiswa_id,
+    statusPengajuan
+  ) => {
     try {
       let pengajuanBimbinganValue = {
         id,
         status: statusPengajuan,
-        keterangan: keteranganKonfirmasi,
+        keterangan: keteranganKonfirmasi[id],
+        mahasiswa_id,
+        dosen_pa_id: dataDosenPA.id,
       };
 
       const result = await patchPengajuanBimbingan(pengajuanBimbinganValue);
@@ -377,6 +412,11 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       getDataDosenPAByDosenId();
     }
   }, [dataUser]);
+
+  useEffect(() => {
+    setImagePreview(null);
+    getDataDosenById();
+  }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
     if (
@@ -407,13 +447,38 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
-              <ProfileImage className="size-[200px] rounded-full" />
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Profile"
+                  className="size-[200px] rounded-full object-cover"
+                />
+              ) : dataDosen.profile_image ? (
+                <img
+                  src={dataDosen.profile_image}
+                  alt="Profile"
+                  className="size-[200px] rounded-full object-cover"
+                />
+              ) : (
+                <ProfileImage className="size-[200px] rounded-full" />
+              )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
-                <button className="bg-orange-500 hover:bg-orange-600 w-[30%] px-4 py-2 text-white rounded-md">
+                {/* Input file yang tersembunyi */}
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept="image/jpeg, image/jpg, image/png"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <label
+                  htmlFor="fileInput"
+                  className="bg-orange-500 hover:bg-orange-600 w-[30%] px-4 py-2 text-white rounded-md text-center cursor-pointer"
+                >
                   Pilih Foto
-                </button>
+                </label>
                 <div>
-                  <p>Besar file: maksimal 10mb</p>
+                  <p>Besar file: maksimal 10MB</p>
                   <p>Ekstensi file yang diperbolehkan: .JPG .JPEG .PNG</p>
                 </div>
               </div>
@@ -462,7 +527,9 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                   e.preventDefault();
                   handleEditDosenPA(dataUser.id);
                 }}
-                className={`text-white bg-orange-500 hover:bg-orange-600 text-[14px] py-2 font-medium rounded-lg ${!isDataChanged ? "hidden" : ""}`}
+                className={`text-white bg-orange-500 hover:bg-orange-600 text-[14px] py-2 font-medium rounded-lg ${
+                  !isDataChanged && !imagePreview ? "hidden" : ""
+                }`}
               >
                 Simpan
               </button>
@@ -592,79 +659,94 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
               Pengajuan Bimbingan Konseling Mahasiswa
             </h1>
             <div className="flex flex-col gap-4">
-              {dataPengajuanBimbingan.map((data) => (
-                <div className="flex flex-col border rounded-lg p-6 gap-4">
-                  <div className="flex justify-between text-neutral-600">
-                    <p>{getDate(data.jadwal_bimbingan)}</p>
-                    <p>{getTime(data.jadwal_bimbingan)}</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">{data.nama_lengkap}</p>
-                    <p>{data.jenis_bimbingan}</p>
-                    <p className="font-medium">{data.sistem_bimbingan}</p>
-                  </div>
-                  <InputField
-                    type="text"
-                    placeholder={
-                      data.keterangan === null ? "Input Keterangan" : ""
-                    }
-                    onChange={(e) => {
-                      setKeteranganKonfirmasi(e.target.value);
-                    }}
-                    value={
-                      keteranganKonfirmasi ||
-                      (data.keterangan === null ? "" : data.keterangan)
-                    }
-                    disabled={data.keterangan !== null}
-                    className="px-3 pt-2 pb-10 text-[15px] border rounded-lg"
-                  />
-                  <div className="flex gap-2">
-                    {/* Status Menunggu */}
-                    {data.status === "Menunggu Konfirmasi" && (
-                      <>
+              {dataPengajuanBimbingan
+                .slice()
+                .reverse()
+                .map((data) => (
+                  <div className="flex flex-col border rounded-lg p-6 gap-4">
+                    <div className="flex justify-between text-neutral-600">
+                      <p>{getDate(data.jadwal_bimbingan)}</p>
+                      <p>{getTime(data.jadwal_bimbingan)}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium">{data.nama_lengkap}</p>
+                      <p>{data.jenis_bimbingan}</p>
+                      <p className="font-medium">{data.sistem_bimbingan}</p>
+                    </div>
+                    <InputField
+                      type="text"
+                      placeholder={
+                        data.keterangan === null ? "Input Keterangan" : ""
+                      }
+                      onChange={(e) => {
+                        setKeteranganKonfirmasi((prev) => ({
+                          ...prev,
+                          [data.id]: e.target.value, // Update keterangan untuk pengajuan ini
+                        }));
+                      }}
+                      value={
+                        data.keterangan === null
+                          ? keteranganKonfirmasi[data.id] || ""
+                          : data.keterangan
+                      }
+                      disabled={data.keterangan !== null}
+                      className="px-3 pt-2 pb-10 text-[15px] border rounded-lg"
+                    />
+                    <div className="flex gap-2">
+                      {/* Status Menunggu */}
+                      {data.status === "Menunggu Konfirmasi" && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleEditPengajuanBimbingan(
+                                data.id,
+                                data.mahasiswa_id,
+                                "Reschedule"
+                              )
+                            }
+                            className="w-1/2 bg-red-500 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
+                            disabled={keteranganKonfirmasi === ""}
+                          >
+                            Reschedule
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleEditPengajuanBimbingan(
+                                data.id,
+                                data.mahasiswa_id,
+                                "Diterima"
+                              )
+                            }
+                            className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
+                            disabled={keteranganKonfirmasi === ""}
+                          >
+                            Diterima
+                          </button>
+                        </>
+                      )}
+
+                      {/* Status Diterima */}
+                      {data.status === "Diterima" && (
                         <button
-                          onClick={() =>
-                            handleEditPengajuanBimbingan(data.id, "Reschedule")
-                          }
-                          className="w-1/2 bg-red-500 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
-                          disabled={keteranganKonfirmasi === ""}
-                        >
-                          Reschedule
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleEditPengajuanBimbingan(data.id, "Diterima")
-                          }
-                          className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
-                          disabled={keteranganKonfirmasi === ""}
+                          className="w-full bg-green-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
+                          disabled
                         >
                           Diterima
                         </button>
-                      </>
-                    )}
+                      )}
 
-                    {/* Status Diterima */}
-                    {data.status === "Diterima" && (
-                      <button
-                        className="w-full bg-green-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
-                        disabled
-                      >
-                        Diterima
-                      </button>
-                    )}
-
-                    {/* Status Reschedule */}
-                    {data.status === "Reschedule" && (
-                      <button
-                        className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
-                        disabled
-                      >
-                        Reschedule
-                      </button>
-                    )}
+                      {/* Status Reschedule */}
+                      {data.status === "Reschedule" && (
+                        <button
+                          className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
+                          disabled
+                        >
+                          Reschedule
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>

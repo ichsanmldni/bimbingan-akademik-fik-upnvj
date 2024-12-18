@@ -6,7 +6,6 @@ export async function PATCH(req) {
 
       const data = Object.values(body);
 
-      console.log(data)
 
       const transaction = await prisma.$transaction(
         data.map((item) =>

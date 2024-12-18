@@ -25,19 +25,30 @@ export async function POST(req) {
     try {
       const body = await req.json();
   
-        const { nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id} = body;
+        const { nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id} = body;
   
-        if (!nama_lengkap || !nim || !email || !no_whatsapp || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id) {
+        if (!nama_lengkap || !nim || !email || !no_whatsapp || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id) {
           return new Response(
             JSON.stringify({ message: 'All fields are required' }),
             { status: 400, headers: { 'Content-Type': 'application/json' } }
           );
         }
   
-        console.log(nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id)
         const PengajuanBimbingan = await prisma.pengajuanbimbingan.create({
           data : {
-            nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id
+            nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id
+          }
+      });
+        
+      const NotifikasiMahasiswa = await prisma.notifikasimahasiswa.create({
+          data : {
+            mahasiswa_id, isi: "Pengajuan bimbinganmu berhasil!", read: false, waktu: new Date()
+          }
+      });
+      
+      const NotifikasiDosenPA = await prisma.notifikasidosenpa.create({
+          data : {
+            dosen_pa_id, isi: "Ada pengajuan bimbingan baru!", read: false, waktu: new Date()
           }
       });
       return new Response(JSON.stringify(PengajuanBimbingan), {
@@ -58,7 +69,7 @@ export async function POST(req) {
     try {
       const body = await req.json();
   
-      const {id, status, keterangan} = body;
+      const {id, status, keterangan, mahasiswa_id, dosen_pa_id} = body;
       
       if (!id || !status || !keterangan) {
         return new Response(
@@ -74,6 +85,34 @@ export async function POST(req) {
       if (!existingRecord) {
         throw new Error('Record not found');
       }
+
+      if(status==="Reschedule"){
+        const NotifikasiMahasiswa = await prisma.notifikasimahasiswa.create({
+          data : {
+            mahasiswa_id, isi: "Pengajuan bimbinganmu direschedule!", read: false, waktu: new Date()
+          }
+      });
+
+      const NotifikasiDosenPA = await prisma.notifikasidosenpa.create({
+        data : {
+          dosen_pa_id, isi: "Berhasil reschedule pengajuan bimbingan!", read: false, waktu: new Date()
+        }
+    });
+      } else if(status === "Diterima"){
+        const NotifikasiMahasiswa = await prisma.notifikasimahasiswa.create({
+          data : {
+            mahasiswa_id, isi: "Pengajuan bimbinganmu berhasil diterima!", read: false, waktu: new Date()
+          }
+      });
+        
+      
+      const NotifikasiDosenPA = await prisma.notifikasidosenpa.create({
+          data : {
+            dosen_pa_id, isi: "Berhasil menerima pengajuan bimbingan!", read: false, waktu: new Date()
+          }
+      });
+      }
+    
       
       const PengajuanBimbingan = await prisma.pengajuanbimbingan.update({ where: { id }, data: { status, keterangan } })
   

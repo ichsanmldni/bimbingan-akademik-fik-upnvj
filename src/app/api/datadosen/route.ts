@@ -1,4 +1,5 @@
-// /app/api/datadosen/route.js
+import fs from 'fs/promises';
+import path from 'path';
 import prisma from '../../../lib/prisma';
 
 export async function GET(req) {
@@ -23,9 +24,8 @@ export async function GET(req) {
 export async function PATCH(req) {
   try {
     const body = await req.json();
-    console.log(body)
 
-    const {id, nama_lengkap, email, nip, no_whatsapp} = body;
+    const {id, nama_lengkap, email, nip, no_whatsapp, profile_image} = body;
     
     if (!id || !nama_lengkap || !email || !nip || !no_whatsapp) {
       return new Response(
@@ -41,8 +41,33 @@ export async function PATCH(req) {
     if (!existingRecord) {
       throw new Error('Record not found');
     }
+
+    // Buat direktori jika belum ada
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profile_pictures');
+        await fs.mkdir(uploadDir, { recursive: true }); // Membuat folder secara rekursif
     
-    const Dosen = await prisma.dosen.update({ where: { id }, data: { nama_lengkap, email, nip, no_whatsapp } })
+        // Simpan gambar jika ada
+        let savedImagePath = existingRecord.profile_image; // Gunakan gambar lama jika tidak diupdate
+        if (profile_image) {
+          const base64Data = profile_image.replace(/^data:image\/\w+;base64,/, '');
+          const imageBuffer = Buffer.from(base64Data, 'base64');
+    
+          const filename = `profile_${id}_${Date.now()}.jpg`;
+          savedImagePath = path.join('uploads', 'profile_pictures', filename); // Path relatif
+    
+          if (existingRecord.profile_image) {
+            const oldImagePath = path.join(process.cwd(), 'public', existingRecord.profile_image);
+            try {
+              await fs.unlink(oldImagePath); // Menghapus gambar lama
+            } catch (err) {
+              console.error('Failed to delete old image:', err);
+            }
+          }
+    
+          await fs.writeFile(path.join(process.cwd(), 'public', savedImagePath), imageBuffer); // Simpan gambar di folder public
+        }
+    
+    const Dosen = await prisma.dosen.update({ where: { id }, data: { nama_lengkap, email, nip, no_whatsapp, profile_image: savedImagePath } })
 
     return new Response(JSON.stringify(Dosen), {
       status: 200,

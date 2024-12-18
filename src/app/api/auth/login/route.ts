@@ -33,8 +33,6 @@ export async function POST(req) {
     try {
       const body = await req.json();
 
-      console.log(body)
-
       const { nim, nip, email, password, role } = body;
 
       if (!role || !password || (role === "Mahasiswa" && !nim) || (role === "Dosen" && !nip)) {

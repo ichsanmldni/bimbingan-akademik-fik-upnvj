@@ -135,6 +135,7 @@ model mahasiswa {
   chatpribadi          chatpribadi[]
   dosen_pa             dosenpa?               @relation(fields: [dosen_pa_id], references: [id], map: "Mahasiswa_dosen_pa_id_fkey")
   notifikasimahasiswa  notifikasimahasiswa[]
+  pengajuanbimbingan   pengajuanbimbingan[]
   sesichatbotmahasiswa sesichatbotmahasiswa[]
 
   @@index([dosen_pa_id], map: "Mahasiswa_dosen_pa_id_fkey")
@@ -176,17 +177,18 @@ model mastertahunajaran {
   tahun_ajaran String
 }
 
-model menuinformasiakademik {
+model masterbabinformasiakademik {
   id                       Int                        @id @default(autoincrement())
   nama                     String
-  submenuinformasiakademik submenuinformasiakademik[]
+  order                    Int
+  mastersubbabinformasiakademik mastersubbabinformasiakademik[]
 }
 
 model notifikasidosenpa {
   id          Int      @id @default(autoincrement())
   dosen_pa_id Int
   isi         String
-  tanggal     DateTime
+  waktu       DateTime
   read        Boolean
   dosen_pa    dosenpa  @relation(fields: [dosen_pa_id], references: [id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
 
@@ -197,7 +199,7 @@ model notifikasikaprodi {
   id         Int      @id @default(autoincrement())
   kaprodi_id Int
   isi        String
-  tanggal    DateTime
+  waktu      DateTime
   read       Boolean
   kaprodi    kaprodi  @relation(fields: [kaprodi_id], references: [id], map: "NotifikasiKaprodi_kaprodi_id_fkey")
 
@@ -208,7 +210,7 @@ model notifikasimahasiswa {
   id           Int       @id @default(autoincrement())
   mahasiswa_id Int
   isi          String
-  tanggal      DateTime
+  waktu        DateTime
   read         Boolean
   mahasiswa    mahasiswa @relation(fields: [mahasiswa_id], references: [id], map: "NotifikasiMahasiswa_mahasiswa_id_fkey")
 
@@ -225,9 +227,11 @@ model pengajuanbimbingan {
   jenis_bimbingan  String
   sistem_bimbingan String
   status           String
+  mahasiswa_id     Int
   dosen_pa_id      Int
   keterangan       String?
   bimbingan        bimbingan[]
+  mahasiswa        mahasiswa   @relation(fields: [mahasiswa_id], references: [id], map: "PengajuanBimbingan_mahasiswa_id_fkey")
   dosen_pa         dosenpa     @relation(fields: [dosen_pa_id], references: [id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
 
   @@index([dosen_pa_id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
@@ -297,12 +301,13 @@ model riwayatpesanchatbot {
   @@index([sesi_chatbot_mahasiswa_id], map: "riwayatpesanchatbot_sesi_chatbot_mahasiswa_id_fkey")
 }
 
-model submenuinformasiakademik {
+model mastersubbabinformasiakademik {
   id                         Int                   @id @default(autoincrement())
-  menu_informasi_akademik_id Int
+  bab_informasi_akademik_id Int
   nama                       String
   isi                        String
-  menu_informasi_akademik    menuinformasiakademik @relation(fields: [menu_informasi_akademik_id], references: [id], map: "SubmenuInformasiAkademik_menu_informasi_akademik_id_fkey")
+  order                      Int
+  bab_informasi_akademik    masterbabinformasiakademik @relation(fields: [bab_informasi_akademik_id], references: [id], map: "mastersubbabinformasiakademik_bab_informasi_akademik_id_fkey")
 
-  @@index([menu_informasi_akademik_id], map: "SubmenuInformasiAkademik_menu_informasi_akademik_id_fkey")
+  @@index([bab_informasi_akademik_id], map: "mastersubbabinformasiakademik_bab_informasi_akademik_id_fkey")
 }

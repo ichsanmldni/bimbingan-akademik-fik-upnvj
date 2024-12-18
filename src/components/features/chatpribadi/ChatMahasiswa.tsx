@@ -49,8 +49,6 @@ export default function ChatMahasiswa() {
     }
   };
 
-  console.log(sortedChatData);
-
   const handleAddChatDosenPA = async (newData) => {
     const newChat = {
       ...newData,
@@ -247,7 +245,6 @@ export default function ChatMahasiswa() {
         "http://localhost:3000/api/chatpribadi/updateisread",
         updatedData
       );
-      console.log(updatedData);
       console.log("Dosen PA updated successfully:", response.data);
       return response.data;
     } catch (error) {

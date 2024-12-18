@@ -52,8 +52,6 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
       requestBody.email = email;
     }
 
-    console.log(requestBody);
-
     try {
       // Menggunakan axios untuk melakukan permintaan POST
       const response = await axios.post("/api/auth/login", requestBody, {

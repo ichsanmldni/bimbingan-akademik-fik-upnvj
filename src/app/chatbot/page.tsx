@@ -241,8 +241,6 @@ export default function Home() {
       content: userMessage,
     });
 
-    console.log(filteredMessages);
-
     try {
       const { data } = await axios.post(
         OPENAI_API_URL,

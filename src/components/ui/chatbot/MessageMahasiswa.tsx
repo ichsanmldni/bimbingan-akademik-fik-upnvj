@@ -17,7 +17,7 @@ export default function MessageMahasiswa({ data, onClick }) {
   });
 
   const formattedDateTime = `${formattedDate} ${formattedTime}`;
-  console.log(data);
+
   return (
     <div
       onClick={() => onClick(data.id)}

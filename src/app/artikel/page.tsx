@@ -19,6 +19,8 @@ export default function Home() {
   const [dataUser, setDataUser] = useState({});
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState([]);
+  const [dataDosen, setDataDosen] = useState([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState([]);
   const router = useRouter();
 
   const handleDetailArticle = () => {
@@ -57,9 +59,45 @@ export default function Home() {
     }
   };
 
+  const getDataDosen = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosen");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosen(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/datamahasiswa"
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataMahasiswa(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
+    getDataDosen();
+    getDataMahasiswa();
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
 
@@ -94,7 +132,18 @@ export default function Home() {
 
   return (
     <div>
-      <NavbarUser roleUser={roleUser} />
+      <NavbarUser
+        roleUser={roleUser}
+        dataUser={
+          roleUser === "Mahasiswa"
+            ? dataMahasiswa.find((data) => data.id === dataUser.id)
+            : roleUser === "Dosen PA"
+              ? dataDosen.find((data) => data.id === dataUser.id)
+              : roleUser === "Kaprodi"
+                ? dataDosen.find((data) => data.id === dataUser.id)
+                : ""
+        }
+      />
       <div className="py-[100px] ">
         <h1 className="text-[36px] font-semibold text-center">
           Rekomendasi Berita

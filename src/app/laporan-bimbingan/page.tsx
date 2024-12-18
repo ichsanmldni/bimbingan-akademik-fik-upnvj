@@ -9,24 +9,12 @@ import { useEffect, useState } from "react";
 import ImagePlus from "../../assets/images/image-plus.png";
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
+import cancelIcon from "../../assets/images/cancel-icon.png";
 import axios from "axios";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
-import NavbarMahasiswa from "@/components/ui/NavbarMahasiswa";
-import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
-import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
 
 export default function Home() {
-  const [namaMahasiswa, setNamaMahasiswa] = useState("");
-  const [selectedJenisBimbingan, setSelectedJenisBimbingan] = useState("");
-  const [selectedSistemBimbingan, setSelectedSistemBimbingan] = useState("");
   const [selectedKaprodi, setSelectedKaprodi] = useState("");
-  const [dataJenisBimbingan, setDataJenisBimbingan] = useState([]);
-  const [dataSistemBimbingan, setDataSistemBimbingan] = useState([]);
-  const [selectedHari, setSelectedHari] = useState("");
-  const [selectedDateTime, setSelectedDateTime] = useState("");
   const [kendala, setKendala] = useState("");
   const [solusi, setSolusi] = useState("");
   const [kesimpulan, setKesimpulan] = useState("");
@@ -35,13 +23,14 @@ export default function Home() {
   const [dataUser, setDataUser] = useState({});
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [optionsJenisBimbingan, setOptionsJenisBimbingan] = useState([]);
-  const [optionsSistemBimbingan, setOptionsSistemBimbingan] = useState([]);
   const [optionsKaprodi, setOptionsKaprodi] = useState([]);
   const [dataSelectedKaprodi, setDataSelectedKaprodi] = useState({});
   const [dataBimbingan, setDataBimbingan] = useState([]);
   const [userProfile, setUserProfile] = useState({});
   const [selectedBimbingan, setSelectedBimbingan] = useState([]);
+  const [dataDosen, setDataDosen] = useState([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   const toggleBimbingan = (data) => {
     setSelectedBimbingan((prevSelected) => {
@@ -53,6 +42,40 @@ export default function Home() {
         return [...prevSelected, data];
       }
     });
+  };
+
+  const getDataDosen = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosen");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosen(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/datamahasiswa"
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataMahasiswa(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
   };
 
   const getDataDosenPA = async () => {
@@ -81,44 +104,6 @@ export default function Home() {
 
       const data = await response.data;
       setDataKaprodi(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataJenisBimbingan = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:3000/api/datajenisbimbingan"
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      const sortedDataJenisBimbingan = data.sort((a, b) => a.order - b.order);
-      setDataJenisBimbingan(sortedDataJenisBimbingan);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataSistemBimbingan = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:3000/api/datasistembimbingan"
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      const sortedDataSistemBimbingan = data.sort((a, b) => a.order - b.order);
-      setDataSistemBimbingan(sortedDataSistemBimbingan);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -161,7 +146,10 @@ export default function Home() {
         kendala_mahasiswa: kendala,
         solusi,
         kesimpulan,
-        dokumentasi: dokumentasi !== "" ? dokumentasi : null,
+        dokumentasi:
+          imagePreviews.length > 0
+            ? [...new Set(imagePreviews.map((data) => data))].join(", ")
+            : null,
         status: "Menunggu Feedback Kaprodi",
         dosen_pa_id: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
           ?.id,
@@ -188,6 +176,7 @@ export default function Home() {
         ] // Hapus duplikat dengan Set
           .join(", "), // Gabungkan sistem bimbingan dengan koma,
       };
+      console.log(laporanBimbinganValue);
 
       const result = await addLaporanBimbingan(laporanBimbinganValue);
       console.log(result);
@@ -236,6 +225,8 @@ export default function Home() {
         (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
 
+      console.log(dosenPa);
+
       if (!dosenPa) {
         throw new Error("Dosen PA tidak ditemukan");
       }
@@ -257,11 +248,50 @@ export default function Home() {
     }
   };
 
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files); // Ambil semua file sebagai array
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"]; // Format yang diperbolehkan
+    const maxSize = 10 * 1024 * 1024; // Ukuran maksimum per file (10MB)
+
+    const newPreviews = []; // Array untuk menampung preview gambar baru
+
+    for (const file of files) {
+      // Validasi ukuran file
+      if (file.size > maxSize) {
+        alert(`File "${file.name}" melebihi ukuran maksimal 10MB`);
+        continue; // Skip file ini
+      }
+
+      // Validasi jenis file
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          `Format file "${file.name}" tidak diperbolehkan. Gunakan .JPG, .JPEG, atau .PNG`
+        );
+        continue; // Skip file ini
+      }
+
+      // Membaca file sebagai Data URL untuk preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews((prev) => [...prev, reader.result]); // Tambahkan preview baru ke state
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteImage = (index) => {
+    setImagePreviews((prev) => {
+      // Revoke URL sebelum menghapus untuk mencegah memory leak
+      URL.revokeObjectURL(prev[index].url);
+      return prev.filter((_, i) => i !== index); // Hapus berdasarkan index
+    });
+  };
+
   useEffect(() => {
-    getDataJenisBimbingan();
-    getDataSistemBimbingan();
     getDataDosenPA();
     getDataKaprodi();
+    getDataDosen();
+    getDataMahasiswa();
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
 
@@ -269,39 +299,12 @@ export default function Home() {
       const token = authTokenCookie.split("=")[1];
       try {
         const decodedToken = jwtDecode(token);
-        console.log(decodedToken);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (dataJenisBimbingan.length > 0) {
-      const formattedOptions = dataJenisBimbingan.map((data) => {
-        return {
-          value: data.jenis_bimbingan,
-          label: data.jenis_bimbingan,
-        };
-      });
-
-      setOptionsJenisBimbingan(formattedOptions);
-    }
-  }, [dataJenisBimbingan]);
-
-  useEffect(() => {
-    if (dataSistemBimbingan.length > 0) {
-      const formattedOptions = dataSistemBimbingan.map((data) => {
-        return {
-          value: data.sistem_bimbingan,
-          label: data.sistem_bimbingan,
-        };
-      });
-
-      setOptionsSistemBimbingan(formattedOptions);
-    }
-  }, [dataSistemBimbingan]);
 
   useEffect(() => {
     if (dataKaprodi.length > 0) {
@@ -350,16 +353,25 @@ export default function Home() {
   }, [dataUser, dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap !== "") {
+    if (userProfile && userProfile.nama_lengkap) {
       getDataBimbinganByDosenPaId();
     }
   }, [userProfile]);
 
-  console.log(dataBimbingan);
-
   return (
     <div>
-      <NavbarUser roleUser={roleUser} />
+      <NavbarUser
+        roleUser={roleUser}
+        dataUser={
+          roleUser === "Mahasiswa"
+            ? dataMahasiswa.find((data) => data.id === dataUser.id)
+            : roleUser === "Dosen PA"
+              ? dataDosen.find((data) => data.id === dataUser.id)
+              : roleUser === "Kaprodi"
+                ? dataDosen.find((data) => data.id === dataUser.id)
+                : ""
+        }
+      />
       <div className="pt-[100px]">
         <div className="mt-4 mb-[400px] mx-[130px] border rounded-lg">
           <h1 className="font-semibold text-[30px] text-center pt-8">
@@ -477,20 +489,65 @@ export default function Home() {
                   placeholder="Pilih Kaprodi"
                   className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
                 />
-                <div className="flex flex-col gap-2 h-[300px] px-3 py-2 text-[15px] border rounded-lg">
-                  <label className="text-neutral-400">Dokumentasi</label>
-                  <label className="cursor-pointer w-full h-full flex justify-center items-center">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setDokumentasi(e.target.value)}
-                      className="hidden"
-                    />
-                    <div className="w-full h-full flex justify-center items-center">
-                      <Image src={ImagePlus} alt="imagePlus" />
+                {imagePreviews.length > 0 ? (
+                  <div className="border rounded-lg px-3 py-2">
+                    <label className="text-[15px] text-neutral-400">
+                      Dokumentasi
+                    </label>
+                    <div className="grid grid-cols-3 gap-4 m-6">
+                      {imagePreviews.map((src, index) => (
+                        <div
+                          key={index}
+                          className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
+                        >
+                          <img
+                            src={src}
+                            alt={`Preview ${index + 1}`}
+                            className="max-h-[200px]"
+                          />
+                          <button
+                            onClick={(e) => handleDeleteImage(index)}
+                            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
+                          >
+                            <Image
+                              src={cancelIcon}
+                              alt={`cancelicon`}
+                              className="p-2"
+                            />
+                          </button>
+                        </div>
+                      ))}
+                      <label className="cursor-pointer flex justify-center items-center border-dashed border-2 border-gray-300 rounded-lg h-[200px] w-full col-span-3">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <div className="flex justify-center items-center">
+                          <Image src={ImagePlus} alt="imagePlus" />
+                        </div>
+                      </label>
                     </div>
-                  </label>
-                </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 h-[300px] px-3 py-2 text-[15px] border rounded-lg">
+                    <label className="text-neutral-400">Dokumentasi</label>
+                    <label className="cursor-pointer w-full h-full flex justify-center items-center">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <div className="w-full h-full flex justify-center items-center">
+                        <Image src={ImagePlus} alt="imagePlus" />
+                      </div>
+                    </label>
+                  </div>
+                )}
                 <button
                   onClick={(e) => handleAddLaporanBimbingan(e)}
                   className="bg-orange-500 hover:bg-orange-600 rounded-lg py-[6px] text-white font-medium"

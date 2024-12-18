@@ -66,8 +66,6 @@ export async function PATCH(req) {
       );
     }
 
-    console.log(id, jenis_bimbingan)
-
     const existingRecord = await prisma.masterjenisbimbingan.findUnique({
       where: { id },
     });

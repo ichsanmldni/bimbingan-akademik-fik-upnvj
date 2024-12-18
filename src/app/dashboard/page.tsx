@@ -15,12 +15,29 @@ import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
 
 export default function Home() {
   const [dataUser, setDataUser] = useState({});
+  const [dataDosen, setDataDosen] = useState([]);
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState([]);
 
   const [selectedSubMenuDashboard, setSelectedSubMenuDashboard] = useState("");
   const [roleUser, setRoleUser] = useState("");
 
+  const getDataDosen = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosen");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosen(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get("http://localhost:3000/api/datadosenpa");
@@ -53,9 +70,29 @@ export default function Home() {
     }
   };
 
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/datamahasiswa"
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataMahasiswa(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
+    getDataDosen();
     getDataDosenPA();
     getDataKaprodi();
+    getDataMahasiswa();
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
 
@@ -69,8 +106,6 @@ export default function Home() {
       }
     }
   }, []);
-
-  console.log(roleUser);
 
   useEffect(() => {
     if (dataUser.role === "Mahasiswa") {
@@ -97,7 +132,18 @@ export default function Home() {
 
   return (
     <div>
-      <NavbarUser roleUser={roleUser} />
+      <NavbarUser
+        roleUser={roleUser}
+        dataUser={
+          roleUser === "Mahasiswa"
+            ? dataMahasiswa.find((data) => data.id === dataUser.id)
+            : roleUser === "Dosen PA"
+              ? dataDosen.find((data) => data.id === dataUser.id)
+              : roleUser === "Kaprodi"
+                ? dataDosen.find((data) => data.id === dataUser.id)
+                : ""
+        }
+      />
       <div className="flex w-full pt-[80px]">
         <div className="flex flex-col w-[25%] border ml-32 gap-6 pt-8 pb-6 px-8">
           <h1 className="text-[18px] font-semibold">Dashboard {roleUser}</h1>

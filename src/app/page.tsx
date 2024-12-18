@@ -19,7 +19,42 @@ export default function Home() {
   const [activeNavbar, setActiveNavbar] = useState("Dashboard");
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState([]);
+  const [dataDosen, setDataDosen] = useState([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState([]);
+  const [dataUser, setDataUser] = useState({});
 
+  const getDataDosen = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosen");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosen(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/datamahasiswa"
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataMahasiswa(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get("http://localhost:3000/api/datadosenpa");
@@ -60,6 +95,7 @@ export default function Home() {
       const token = authTokenCookie.split("=")[1];
       try {
         const decodedToken = jwtDecode(token);
+        setDataUser(decodedToken);
 
         if (decodedToken.role === "Mahasiswa") {
           setRoleUser("Mahasiswa");
@@ -85,13 +121,26 @@ export default function Home() {
   useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
+    getDataDosen();
+    getDataMahasiswa();
   }, []);
 
   return (
     <div>
       {["Mahasiswa", "Dosen PA", "Kaprodi"].includes(roleUser) && (
         <div>
-          <NavbarUser roleUser={roleUser} />
+          <NavbarUser
+            roleUser={roleUser}
+            dataUser={
+              roleUser === "Mahasiswa"
+                ? dataMahasiswa.find((data) => data.id === dataUser.id)
+                : roleUser === "Dosen PA"
+                  ? dataDosen.find((data) => data.id === dataUser.id)
+                  : roleUser === "Kaprodi"
+                    ? dataDosen.find((data) => data.id === dataUser.id)
+                    : ""
+            }
+          />
           <div className="bg-slate-100 h-screen">
             <div className="flex h-full items-center gap-[80px] mx-[128px]">
               {roleUser === "Mahasiswa" && (

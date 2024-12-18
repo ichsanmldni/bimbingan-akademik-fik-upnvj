@@ -188,8 +188,6 @@ export default function ChatDosenPA() {
         (data) => data.chat_pribadi_id === selectedDataChatPribadi.id
       );
 
-      console.log(dataChat);
-
       if (!dataChat) {
         setIsMahasiswaChatting(false);
         return; // Hentikan eksekusi jika dosen PA tidak ditemukan
@@ -210,8 +208,6 @@ export default function ChatDosenPA() {
       const dataChat = dataChatMahasiswa.data.filter(
         (data) => data.chat_pribadi_id === selectedDataChatPribadi.id
       );
-
-      console.log(dataChat);
 
       if (!dataChat) {
         setIsMahasiswaChatting(false);
@@ -257,9 +253,6 @@ export default function ChatDosenPA() {
 
     setChatData(combinedChatData);
   }, [chatMahasiswaData, chatDosenPAData]);
-
-  console.log(chatMahasiswaData);
-  console.log(chatDosenPAData);
 
   useEffect(() => {
     const cookies = document.cookie.split("; ");

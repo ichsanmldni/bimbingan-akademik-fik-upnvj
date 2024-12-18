@@ -1,5 +1,6 @@
 import Image from "next/image";
 import profilePlaceholder from "../../assets/images/profile.png";
+import blankProfile from "../../assets/images/user.png";
 
 interface ProfileImageProps {
   onClick: () => void;
@@ -9,7 +10,7 @@ interface ProfileImageProps {
 const ProfileImage: React.FC<ProfileImageProps> = ({ onClick, className }) => {
   return (
     <Image
-      src={profilePlaceholder}
+      src={blankProfile}
       alt="Profile Image"
       className={className}
       onClick={onClick}

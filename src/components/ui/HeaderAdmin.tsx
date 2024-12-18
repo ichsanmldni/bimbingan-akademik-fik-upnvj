@@ -38,7 +38,7 @@ const HeaderAdmin: React.FC<HeaderAdminProps> = ({ activeNavbar }) => {
           onClick={handleNotificationClick}
           className="w-6 h-6 cursor-pointer"
         />
-        <ProfileImage onClick={handleProfileClick} />
+        <ProfileImage className="size-8" onClick={handleProfileClick} />
       </div>
       {isModalNotificationOpen && (
         <NotificationModal

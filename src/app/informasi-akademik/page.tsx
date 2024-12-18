@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import searchIcon from "../../assets/images/search.png";
 import dropdownIcon from "../../assets/images/dropdown.png";
+import dropupIcon from "../../assets/images/upIcon.png";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -14,14 +15,90 @@ import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
 import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
 
 export default function Home() {
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState("");
   const [roleUser, setRoleUser] = useState("");
   const [dataUser, setDataUser] = useState({});
+  const [dataBab, setDataBab] = useState([]);
+  const [dataSubBab, setDataSubBab] = useState([]);
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState([]);
+  const [selectedSubBab, setSelectedSubBab] = useState({});
+  const [selectedSubBabData, setSelectedSubBabData] = useState({});
 
-  const toggleMenu = (menuName: string) => {
-    setOpenMenu(openMenu === menuName ? null : menuName);
+  const toggleMenu = (menuName) => {
+    setOpenMenu(openMenu === menuName ? "" : menuName);
+  };
+
+  const getDataBab = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/databab");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      const sortedDataBab = data.sort((a, b) => a.order - b.order);
+      setDataBab(sortedDataBab);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataSubBabByBab = async (selectedBab) => {
+    try {
+      const dataBab = await axios.get("http://localhost:3000/api/databab");
+
+      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+
+      if (!bab) {
+        throw new Error("Bab tidak ditemukan");
+      }
+
+      const babid = bab.id;
+
+      const response = await axios.get(
+        `http://localhost:3000/api/datasubbab/${babid}`
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      const sortedDataSubBab = data.sort((a, b) => a.order - b.order);
+      setDataSubBab(sortedDataSubBab);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataSubBabBySubBabNama = async (selectedBab, selectedSubBab) => {
+    try {
+      const dataBab = await axios.get("http://localhost:3000/api/databab");
+
+      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+
+      if (!bab) {
+        throw new Error("Bab tidak ditemukan");
+      }
+
+      const babid = bab.id;
+
+      const dataSubBab = await axios.get(
+        `http://localhost:3000/api/datasubbab/${babid}`
+      );
+      const subbab = dataSubBab.data.find(
+        (data) => data.nama === selectedSubBab
+      );
+
+      setSelectedSubBabData(subbab);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
   };
 
   const getDataDosenPA = async () => {
@@ -59,6 +136,7 @@ export default function Home() {
   useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
+    getDataBab();
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
 
@@ -114,113 +192,59 @@ export default function Home() {
               </span>
             </div>
           </div>
-
-          <div className="flex flex-col">
-            <div
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleMenu("menu1")}
-            >
-              <h1 className="font-semibold text-[14px]">
-                Profil Fakultas Ilmu Komputer Universitas Pembangunan Nasional
-                Veteran Jakarta
-              </h1>
-              <Image
-                src={dropdownIcon}
-                alt="Dropdown Icon"
-                width={20}
-                height={20}
-              />
-            </div>
-            {openMenu === "menu1" && (
-              <div className="mt-2 text-[14px] text-gray-700">
-                <p className="mt-2">Sejarah</p>
-                <p className="mt-2">Visi dan Misi</p>
-                <p className="mt-2">Struktur Organisasi</p>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col">
-            <div
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleMenu("menu2")}
-            >
-              <h1 className="font-semibold text-[14px]">
-                Penyelenggaraan Pendidikan, Peraturan Akademik Dan Kemahasiswaan
-              </h1>
-              <Image
-                src={dropdownIcon}
-                alt="Dropdown Icon"
-                width={20}
-                height={20}
-              />
-            </div>
-
-            {openMenu === "menu2" && (
-              <div className="mt-2 text-[14px] text-gray-700">
-                <p className="mt-2">Peraturan Akademik</p>
-                <p className="mt-2">Beasiswa</p>
-                <p className="mt-2">Layanan Kemahasiswaan</p>
-              </div>
-            )}
+          <div className="flex flex-col gap-4">
+            {dataBab.map((data, index) => {
+              return (
+                <div key={data.id}>
+                  <div
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => {
+                      toggleMenu(data.nama);
+                      getDataSubBabByBab(data.nama);
+                    }}
+                  >
+                    <h1 className="font-semibold text-[14px]">{data.nama}</h1>
+                    <div className="">
+                      {openMenu === data.nama ? (
+                        <Image
+                          src={dropupIcon}
+                          alt="Dropup Icon"
+                          className="size-4 p-1"
+                        />
+                      ) : (
+                        <Image
+                          src={dropdownIcon}
+                          alt="Dropdown Icon"
+                          className="size-4 p-1"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  {openMenu === data.nama && (
+                    <div className="text-[14px] text-gray-700">
+                      {dataSubBab.map((data, index) => (
+                        <p
+                          key={data.id}
+                          onClick={() =>
+                            getDataSubBabBySubBabNama(openMenu, data.nama)
+                          }
+                          className="mt-2 cursor-pointer"
+                        >
+                          {data.nama}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-        <div className="w-[75%] py-10 px-[100px]">
-          <h1 className="font-bold text-[18px]">
-            SEJARAH SINGKAT FAKULTAS ILMU KOMPUTER
-          </h1>
+        {/* ini isi */}
+        <div className="w-[75%] h-[500px] py-10 px-[100px]">
+          <h1 className="font-bold text-[18px]">{selectedSubBabData.nama}</h1>
           <p className="mt-5 leading-[26px] text-justify">
-            Sejarah Fakultas Ilmu Komputer UPN “Veteran” Jakarta tidak dapat
-            dipisahkan dari sejarah UPN “Veteran” Jakarta itu sendiri. Sebelum
-            menjadi institusi pendidikan tinggi yang berdiri sendiri, UPN
-            “Veteran” Jakarta memiliki rangkaian perjalanan sejarah yang cukup
-            panjang yaitu berdasarkan Akte Notaris R. Kardiman Nomor: 14 tanggal
-            7 Januari 1963, Lembaga Pembinaan Kader Pembangunan (LPKP)
-            mendirikan 3 (tiga) akademi, yaitu: 1) Akademi Bank; 2) Akademi
-            Tekstil; dan 3) Akademi Tata Laksana Pelayaran Niaga “Yos Sudarso”.
-            Pada tahun 1967, ketiga akademi tersebut diintegrasikan kedalam PTPN
-            Veteran dengan nama PTPN Veteran Cabang Jakarta melalui Surat
-            Keputusan Menteri Urusan Veteran dan Demobilisasi RI Nomor :
-            09/Kpts/Menved/1967, tanggal 21 Pebruari 1967. Kemudian berdasarkan
-            Surat Keputusan Menhankam/Pangab Nomor: Skep/1555/1977 tanggal 30
-            November 1977 PTPN “Veteran” Jakarta berubah nama menjadi
-            Universitas Pembangunan Nasional (UPN) “Veteran” Cabang Jakarta.
-            Pada tahun 1980, UPN “Veteran” Cabang Jakarta menambah program
-            pendidikannya, yaitu Pendidikan Ahli Teknik Informatika dan Komputer
-            (PATIK) dengan jenjang pendidikan Diploma 3. Program Pendidikan Ahli
-            Teknik Informatika dan Komputer UPN “Veteran” Cabang Jakarta
-            merupakan salah satu program pendidikan yang banyak diminati oleh
-            masyarakat, karena saat itu program pendidikan teknik informatika
-            dan komputer masih sangat langka di wilayah Jakarta dan sekitarnya.
-            Seiring perjalanan waktu, pada tahun 1993, UPN “Veteran” Cabang
-            Jakarta menjadi perguruan tinggi yang mandiri berdasarkan Keputusan
-            Menhankam Nomor: Kep/03/II/1993 tanggal 27 Februari 1993 terdiri
-            dari 3 (tiga) Fakultas yang menyelenggarakan Program Pendidikan S-1
-            dan D-III dengan status “Kedinasan”. Pada tanggal 1 Mei 1995,
-            berdasarkan Surat Keputusan Rektor UPN “Veteran” Jakarta Nomor:
-            Skep/031/V/1995 tentang Perubahan Fakultas Teknik menjadi tiga
-            fakultas, yaitu: 1) Fakultas Teknologi Industri; 2) Fakultas Ilmu
-            Komputer; dan 3) Fakultas Teknologi Kelautan yang diikuti dengan
-            terbitnya Keputusan Mendikbud Nomor Kep./017.018.019/D/0/1995
-            tentang perubahan UPN “Veteran” Jakarta yang semula perguruan tinggi
-            dengan status “Kedinasan” berubah menjadi perguruan tinggi swasta
-            dengan status “DISAMAKAN” untuk seluruh jenjang pendidikan Diploma
-            3, dan status “TERDAFTAR” untuk seluruh jenjang pendidikan Strata 1.
-            Berdasarkan instruksi Menteri Pertahanan dan Keamanan Nomor:
-            Inst/01/II/1996 tanggal 6 Februari 1996 tentang Pelaksanaan
-            Pelimpahan Wewenang dan Tanggung Jawab Pembinaan UPN “Veteran”
-            Jakarta ke Yayasan Kejuangan Panglima Besar Sudirman (YKPBS), maka
-            UPN “Veteran” Jakarta yang semula pembinaannya di bawah Departemen
-            Pertahanan dan Keamanan dialihkan di bawah YKPBS. Setelah ± 12 tahun
-            lamanya dibina oleh YKPBS, pada tahun 2008 pengelolaan UPN “Veteran”
-            Jakarta dialihkan ke Yayasan Kesejahteraan Pendidikan dan Perumahan
-            (YKPP) berdasarkan Keputusan Menteri Hukum dan HAM R.I. Nomor:
-            AHU-103.AH.01.05 tahun 2008 tanggal 17 Januari 2008. Pada tanggal 6
-            Oktober 2014, berdasarkan Peraturan Presiden Nomor 120 tahun 2014
-            tentang Pendirian UPN “Veteran” Jakarta, maka UPN “Veteran” Jakarta
-            berubah dari Perguruan Tinggi Swasta (PTS) menjadi Perguruan Tinggi
-            Negeri (PTN) di bawah pembinaan Kementerian Riset, Teknologi, dan
-            Pendidikan Tinggi.
+            {selectedSubBabData.isi}
           </p>
         </div>
       </div>

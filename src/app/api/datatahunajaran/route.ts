@@ -66,7 +66,6 @@ export async function PATCH(req) {
       );
     }
 
-    console.log(id, tahun_ajaran)
 
     const existingRecord = await prisma.mastertahunajaran.findUnique({
       where: { id },
