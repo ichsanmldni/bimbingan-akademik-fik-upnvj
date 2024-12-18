@@ -95,6 +95,9 @@ model kaprodi {
   kaprodi_jurusan    masterjurusan       @relation(fields: [kaprodi_jurusan_id], references: [id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
   laporanbimbingan   laporanbimbingan[]
   notifikasikaprodi  notifikasikaprodi[]
+
+  @@index([dosen_id], map: "Kaprodi_dosen_id_fkey")
+  @@index([kaprodi_jurusan_id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
 }
 
 model laporanbimbingan {
@@ -177,19 +180,12 @@ model mastertahunajaran {
   tahun_ajaran String
 }
 
-model masterbabinformasiakademik {
-  id                       Int                        @id @default(autoincrement())
-  nama                     String
-  order                    Int
-  mastersubbabinformasiakademik mastersubbabinformasiakademik[]
-}
-
 model notifikasidosenpa {
   id          Int      @id @default(autoincrement())
   dosen_pa_id Int
   isi         String
-  waktu       DateTime
   read        Boolean
+  waktu       DateTime
   dosen_pa    dosenpa  @relation(fields: [dosen_pa_id], references: [id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
 
   @@index([dosen_pa_id], map: "NotifikasiDosenPA_dosen_pa_id_fkey")
@@ -199,8 +195,8 @@ model notifikasikaprodi {
   id         Int      @id @default(autoincrement())
   kaprodi_id Int
   isi        String
-  waktu      DateTime
   read       Boolean
+  waktu      DateTime
   kaprodi    kaprodi  @relation(fields: [kaprodi_id], references: [id], map: "NotifikasiKaprodi_kaprodi_id_fkey")
 
   @@index([kaprodi_id], map: "NotifikasiKaprodi_kaprodi_id_fkey")
@@ -210,8 +206,8 @@ model notifikasimahasiswa {
   id           Int       @id @default(autoincrement())
   mahasiswa_id Int
   isi          String
-  waktu        DateTime
   read         Boolean
+  waktu        DateTime
   mahasiswa    mahasiswa @relation(fields: [mahasiswa_id], references: [id], map: "NotifikasiMahasiswa_mahasiswa_id_fkey")
 
   @@index([mahasiswa_id], map: "NotifikasiMahasiswa_mahasiswa_id_fkey")
@@ -227,14 +223,15 @@ model pengajuanbimbingan {
   jenis_bimbingan  String
   sistem_bimbingan String
   status           String
-  mahasiswa_id     Int
   dosen_pa_id      Int
   keterangan       String?
+  mahasiswa_id     Int
   bimbingan        bimbingan[]
-  mahasiswa        mahasiswa   @relation(fields: [mahasiswa_id], references: [id], map: "PengajuanBimbingan_mahasiswa_id_fkey")
   dosen_pa         dosenpa     @relation(fields: [dosen_pa_id], references: [id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
+  mahasiswa        mahasiswa   @relation(fields: [mahasiswa_id], references: [id], map: "PengajuanBimbingan_mahasiswa_id_fkey")
 
   @@index([dosen_pa_id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
+  @@index([mahasiswa_id], map: "PengajuanBimbingan_mahasiswa_id_fkey")
 }
 
 model pesanbot {
@@ -251,7 +248,7 @@ model pesanchatbotmahasiswa {
   id                        Int                   @id @default(autoincrement())
   sesi_chatbot_mahasiswa_id Int?
   pesan                     String                @db.VarChar(1000)
-  waktu_kirim               DateTime
+  waktu_kirim               DateTime              @db.DateTime(0)
   sesi_chatbot_mahasiswa    sesichatbotmahasiswa? @relation(fields: [sesi_chatbot_mahasiswa_id], references: [id], map: "PesanChatbotMahasiswa_sesi_chatbot_mahasiswa_id_fkey")
 
   @@index([sesi_chatbot_mahasiswa_id], map: "PesanChatbotMahasiswa_sesi_chatbot_mahasiswa_id_fkey")
@@ -301,13 +298,20 @@ model riwayatpesanchatbot {
   @@index([sesi_chatbot_mahasiswa_id], map: "riwayatpesanchatbot_sesi_chatbot_mahasiswa_id_fkey")
 }
 
+model masterbabinformasiakademik {
+  id                            Int                             @id @default(autoincrement())
+  nama                          String
+  order                         Int
+  mastersubbabinformasiakademik mastersubbabinformasiakademik[]
+}
+
 model mastersubbabinformasiakademik {
-  id                         Int                   @id @default(autoincrement())
-  bab_informasi_akademik_id Int
+  id                         Int                        @id @default(autoincrement())
+  bab_informasi_akademik_id  Int
   nama                       String
   isi                        String
   order                      Int
-  bab_informasi_akademik    masterbabinformasiakademik @relation(fields: [bab_informasi_akademik_id], references: [id], map: "mastersubbabinformasiakademik_bab_informasi_akademik_id_fkey")
+  masterbabinformasiakademik masterbabinformasiakademik @relation(fields: [bab_informasi_akademik_id], references: [id])
 
   @@index([bab_informasi_akademik_id], map: "mastersubbabinformasiakademik_bab_informasi_akademik_id_fkey")
 }
