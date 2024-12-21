@@ -311,7 +311,7 @@ model mastersubbabinformasiakademik {
   nama                       String
   isi                        String
   order                      Int
-  masterbabinformasiakademik masterbabinformasiakademik @relation(fields: [bab_informasi_akademik_id], references: [id])
+  bab_informasi_akademik     masterbabinformasiakademik @relation(fields: [bab_informasi_akademik_id], references: [id])
 
   @@index([bab_informasi_akademik_id], map: "mastersubbabinformasiakademik_bab_informasi_akademik_id_fkey")
 }

@@ -31,7 +31,7 @@ export default function Home() {
     dosen_pa: [
       {
         id: 1,
-        name: "Dr. Andi",
+        name: "Neny",
         email: "andi@example.com",
         phone: "081234567890",
       },
