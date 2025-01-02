@@ -50,7 +50,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const [noTelpDosen, setNoTelpDosen] = useState("");
   const [keteranganKonfirmasi, setKeteranganKonfirmasi] = useState({});
   const [isDetailLaporanDosenClicked, setIsDetailLaporanDosenClicked] =
-    useState(true);
+    useState(false);
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [isAddJadwal, setIsAddJadwal] = useState(false);
   const [dataDosenPA, setDataDosenPA] = useState({});
