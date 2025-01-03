@@ -21,6 +21,17 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("authToken")?.value;
 
+  // Menambahkan header CORS
+  const response = NextResponse.next();
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Menangani permintaan OPTIONS
+  if (request.method === 'OPTIONS') {
+    return response;
+  }
+
   if (pathname === "/admin") {
     if (token) {
       return NextResponse.redirect(new URL('/', request.url));
@@ -43,7 +54,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
