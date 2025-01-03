@@ -16,18 +16,24 @@ function convertTimeToSeconds(timeString: string): number {
   const unit = match[2];
   switch (unit) {
     case 'h':
-      return value * 3600; 
+      return value * 3600;
     case 'm':
       return value * 60;
     case 's':
-      return value;  
+      return value;
     default:
       throw new Error('Invalid time unit. Use "h", "m", or "s".');
   }
 }
 
 const SECRET_KEY = env.JWT_SECRET as string;
-const EXPIRED_TIME = convertTimeToSeconds(env.JWT_EXPIRED as string);
+const JWT_EXPIRED = env.JWT_EXPIRED as string;
+
+if (!JWT_EXPIRED) {
+  throw new Error('JWT_EXPIRED environment variable is not set.');
+}
+
+const EXPIRED_TIME = convertTimeToSeconds(JWT_EXPIRED);
 
 interface User {
   id: number;
