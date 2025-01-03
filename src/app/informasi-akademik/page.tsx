@@ -69,7 +69,7 @@ export default function Home() {
   const [selectedSubBabData, setSelectedSubBabData] =
     useState<SubBabData | null>(null);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? "" : menuName);

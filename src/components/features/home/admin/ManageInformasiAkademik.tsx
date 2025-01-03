@@ -73,7 +73,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
     { value: string; label: string }[]
   >([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const areArraysEqual = (arr1: any[], arr2: any[]) => {
     if (arr1.length !== arr2.length) return false;

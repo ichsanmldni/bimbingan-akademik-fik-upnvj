@@ -83,7 +83,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const [dataKaprodiUser, setDataKaprodiUser] = useState<any>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const handleDetailLaporanKaprodi = (data: LaporanBimbingan) => {
     setSelectedDataLaporanBimbingan(data);

@@ -74,7 +74,7 @@ export default function Home() {
   const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]); // Adjust type as needed
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const toggleBimbingan = (data: Bimbingan) => {
     setSelectedBimbingan((prevSelected) => {

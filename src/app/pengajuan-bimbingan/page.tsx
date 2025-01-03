@@ -94,7 +94,7 @@ export default function Home() {
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
   const [dataDosen, setDataDosen] = useState<any[]>([]); // Adjust type as needed
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const getDataJadwalDosenPaByDosenPa = async () => {
     try {

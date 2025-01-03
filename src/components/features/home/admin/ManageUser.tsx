@@ -36,7 +36,7 @@ const ManageUser: React.FC<ManageUserProps> = () => {
   const [dataTahunAjaran, setDataTahunAjaran] = useState<TahunAjaran[]>([]);
   const [dataUser, setDataUser] = useState<User[]>([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const getDataTahunAjaran = async () => {
     try {

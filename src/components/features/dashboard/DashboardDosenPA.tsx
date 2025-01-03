@@ -123,7 +123,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [openDay, setOpenDay] = useState<string | null>(null);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const toggleDay = (day: string) => {
     setOpenDay(openDay === day ? null : day);

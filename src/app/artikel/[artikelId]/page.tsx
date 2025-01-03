@@ -30,7 +30,7 @@ export default function Home() {
   const [dataDosen, setDataDosen] = useState<any[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const router = useRouter();
 

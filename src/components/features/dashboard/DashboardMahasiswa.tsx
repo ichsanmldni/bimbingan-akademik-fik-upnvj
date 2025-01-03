@@ -101,7 +101,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<any[]>([]); // Adjust type as needed
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   function getDate(jadwal: string) {
     if (!jadwal) return "";

@@ -96,7 +96,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     setSelectedSistemBimbinganDeleteModal,
   ] = useState<any>({});
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const openModal = (type: any, data = null) => {
     setModalType(type);

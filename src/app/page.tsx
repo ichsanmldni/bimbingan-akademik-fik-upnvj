@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import chatbotIcon from "../assets/images/chatbot.png";
-import { env } from "process";
 
 interface User {
   id: number;
@@ -34,6 +33,8 @@ interface Kaprodi {
   // Add other properties based on your kaprodi data structure
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+
 export default function Home() {
   const cards = Array(9).fill(null);
 
@@ -44,8 +45,6 @@ export default function Home() {
   const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
   const [dataUser, setDataUser] = useState<User | null>(null);
-
-  const API_BASE_URL = env.API_BASE_URL as string;
 
   const getDataDosen = async () => {
     try {

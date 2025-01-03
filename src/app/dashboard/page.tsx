@@ -43,7 +43,7 @@ export default function Home() {
   const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const [selectedSubMenuDashboard, setSelectedSubMenuDashboard] =
     useState<string>("");

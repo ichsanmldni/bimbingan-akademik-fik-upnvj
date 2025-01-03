@@ -47,7 +47,7 @@ export default function Home() {
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
   const router = useRouter();
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const handleDetailArticle = () => {
     router.push("/artikel/123");

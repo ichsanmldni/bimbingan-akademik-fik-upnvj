@@ -52,7 +52,7 @@ const RegistrationForm = () => {
     { value: string; label: string }[]
   >([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const getDataJurusan = async () => {
     try {

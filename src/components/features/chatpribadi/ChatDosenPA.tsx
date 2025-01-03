@@ -47,7 +47,7 @@ export default function ChatDosenPA() {
   const [chatDosenPAData, setChatDosenPAData] = useState<ChatData[]>([]);
   const [sortedChatData, setSortedChatData] = useState<ChatData[]>([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const addChatMahasiswa = async (newChat: any) => {
     try {

@@ -96,7 +96,7 @@ export default function Home() {
 
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
   const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
   const formatDate = (dateString: string) => {

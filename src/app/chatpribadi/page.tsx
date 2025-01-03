@@ -26,7 +26,7 @@ export default function ChatPribadi() {
   const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
   const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
 
-  const API_BASE_URL = env.API_BASE_URL as string;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const getDataDosenPA = async () => {
     try {
