@@ -2,15 +2,27 @@
 
 import React, { useEffect, useState } from "react";
 
-export default function SidebarChatbot({
+interface ChatbotSession {
+  id: number;
+  waktu_mulai: string; // Assuming this is a date string
+  pesan_pertama: string;
+}
+
+interface SidebarChatbotProps {
+  data: ChatbotSession[];
+  activeSesiChatbotMahasiswa: number | string; // Assuming it can be a number or string
+  setActiveSesiChatbotMahasiswa: (id: number) => void;
+}
+
+const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
   data,
   activeSesiChatbotMahasiswa,
   setActiveSesiChatbotMahasiswa,
-}) {
-  const [grouped, setGrouped] = useState([]);
+}) => {
+  const [grouped, setGrouped] = useState<Record<string, ChatbotSession[]>>({});
 
-  const groupDataByDate = (data) => {
-    const grouped = {};
+  const groupDataByDate = (data: ChatbotSession[]) => {
+    const grouped: Record<string, ChatbotSession[]> = {};
 
     data.forEach((item) => {
       const itemDate = new Date(item.waktu_mulai).toLocaleString("id-ID", {
@@ -45,10 +57,11 @@ export default function SidebarChatbot({
       }
     });
 
-    // Urutkan data di dalam setiap grup berdasarkan waktu_mulai (terbaru di atas)
+    // Sort data within each group by waktu_mulai (latest on top)
     Object.keys(grouped).forEach((key) => {
       grouped[key].sort(
-        (a, b) => new Date(b.waktu_mulai) - new Date(a.waktu_mulai)
+        (a, b) =>
+          new Date(b.waktu_mulai).getTime() - new Date(a.waktu_mulai).getTime()
       );
     });
 
@@ -64,7 +77,7 @@ export default function SidebarChatbot({
       <p className="font-semibold text-[16px] px-1 py-2">Riwayat Chatbot</p>
       <div className="flex flex-col w-full">
         <button
-          onClick={() => setActiveSesiChatbotMahasiswa("New Session")}
+          onClick={() => setActiveSesiChatbotMahasiswa(0)}
           className={`mb-1 text-[14px] text-left py-2 px-3 shadow-sm hover:bg-gray-50 rounded-lg ${
             activeSesiChatbotMahasiswa === "New Session"
               ? "bg-gray-50 shadow-md"
@@ -74,13 +87,13 @@ export default function SidebarChatbot({
           New Chat
         </button>
 
-        {/* Render berdasarkan kelompok */}
+        {/* Render based on groups */}
         {Object.keys(grouped)
           .sort((a, b) => {
-            // Pastikan "Hari Ini" berada di urutan pertama
+            // Ensure "Hari Ini" is first
             if (a === "Hari Ini") return -1;
             if (b === "Hari Ini") return 1;
-            return a.localeCompare(b, "id-ID", { sensitivity: "base" }); // Urutkan secara alfabet untuk bulan/tahun
+            return a.localeCompare(b, "id-ID", { sensitivity: "base" }); // Sort alphabetically for month/year
           })
           .map((group, groupIndex) => (
             <div key={groupIndex} className="w-full mt-2">
@@ -106,4 +119,6 @@ export default function SidebarChatbot({
       </div>
     </div>
   );
-}
+};
+
+export default SidebarChatbot;

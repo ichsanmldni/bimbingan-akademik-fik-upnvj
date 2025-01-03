@@ -1,6 +1,6 @@
 import React from "react";
 
-const ChatBubble = ({ message, role }) => {
+const ChatBubble = ({ message, role }: any) => {
   return (
     <div
       className={`w-full flex ${

@@ -7,43 +7,88 @@ import downIcon from "../../../assets/images/downIcon.png";
 import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
 import ProfileImage from "@/components/ui/ProfileImage";
-import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 interface DashboardMahasiswaProps {
   selectedSubMenuDashboard: string;
-  dataUser: object;
+  dataUser: Record<string, any>; // Adjust type as needed
+}
+
+interface Jurusan {
+  id: string;
+  jurusan: string;
+  order: number;
+}
+
+interface Peminatan {
+  id: string;
+  peminatan: string;
+  order: number;
+}
+
+interface DosenPA {
+  id: string;
+  dosen: {
+    nama_lengkap: string;
+  };
+}
+
+interface PengajuanBimbingan {
+  id: string;
+  mahasiswa_id: string;
+  nama_lengkap: string;
+  jenis_bimbingan: string;
+  sistem_bimbingan: string;
+  keterangan: string;
+  jadwal_bimbingan: string;
+  status: string;
 }
 
 const schedule = {
-  Senin: ["07.00 - 08.00", "13.00 - 15.00"],
-  Selasa: ["09.00 - 11.00", "15.00 - 17.00"],
-  Rabu: ["09.00 - 11.00", "15.00 - 17.00"],
-  Kamis: ["09.00 - 11.00", "15.00 - 17.00"],
-  Jumat: ["09.00 - 11.00", "15.00 - 17.00"],
+  Senin: [],
+  Selasa: [],
+  Rabu: [],
+  Kamis: [],
+  Jumat: [],
 };
 
 const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   selectedSubMenuDashboard,
   dataUser,
 }) => {
-  const [namaLengkapMahasiswa, setNamaLengkapMahasiswa] = useState("");
-  const [emailMahasiswa, setEmailMahasiswa] = useState("");
-  const [nim, setNim] = useState("");
-  const [noTelpMahasiswa, setNoTelpMahasiswa] = useState("");
-  const [selectedJurusan, setSelectedJurusan] = useState("");
-  const [selectedPeminatan, setSelectedPeminatan] = useState("");
-  const [selectedDosenPA, setSelectedDosenPA] = useState("");
-  const [dataJurusan, setDataJurusan] = useState([]);
-  const [dataPeminatan, setDataPeminatan] = useState([]);
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [optionsJurusan, setOptionsJurusan] = useState([]);
-  const [optionsPeminatan, setOptionsPeminatan] = useState([]);
-  const [optionsDosenPA, setOptionsDosenPA] = useState([]);
-  const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState([]);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [dataMahasiswa, setDataMahasiswa] = useState({});
-  const [userProfile, setUserProfile] = useState({
+  const [namaLengkapMahasiswa, setNamaLengkapMahasiswa] = useState<string>("");
+  const [emailMahasiswa, setEmailMahasiswa] = useState<string>("");
+  const [nim, setNim] = useState<string>("");
+  const [noTelpMahasiswa, setNoTelpMahasiswa] = useState<string>("");
+  const [selectedJurusan, setSelectedJurusan] = useState<string>("");
+  const [selectedPeminatan, setSelectedPeminatan] = useState<string>("");
+  const [selectedDosenPA, setSelectedDosenPA] = useState<string>("");
+  const [dataJurusan, setDataJurusan] = useState<Jurusan[]>([]);
+  const [dataPeminatan, setDataPeminatan] = useState<Peminatan[]>([]);
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [optionsJurusan, setOptionsJurusan] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [optionsPeminatan, setOptionsPeminatan] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [optionsDosenPA, setOptionsDosenPA] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState<
+    PengajuanBimbingan[]
+  >([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [dataMahasiswa, setDataMahasiswa] = useState<Record<string, any>>({});
+  const [userProfile, setUserProfile] = useState<{
+    nama_lengkap: string;
+    email: string;
+    nim: string;
+    no_whatsapp: string;
+    jurusan: string;
+    peminatan: string;
+    dosen_pa: string;
+  }>({
     nama_lengkap: "",
     email: "",
     nim: "",
@@ -52,29 +97,29 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     peminatan: "",
     dosen_pa: "",
   });
-  const [isDataChanged, setIsDataChanged] = useState(false);
-  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
+  const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
+  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<any[]>([]); // Adjust type as needed
 
-  function getDate(jadwal) {
+  function getDate(jadwal: string) {
     if (!jadwal) return "";
     const parts = jadwal.split(" ");
     return `${parts[0]} ${parts[1]} ${parts[2]} ${parts[3]}`;
   }
 
-  function getTime(jadwal) {
+  function getTime(jadwal: string) {
     if (!jadwal) return "";
     const waktu = jadwal.split(" ").slice(-1)[0];
     return waktu;
   }
 
-  const [openDay, setOpenDay] = useState(null);
+  const [openDay, setOpenDay] = useState<string | null>(null);
 
-  const toggleDay = (day) => {
+  const toggleDay = (day: string) => {
     setOpenDay(openDay === day ? null : day);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
 
     if (file) {
       // Validasi ukuran file (maksimal 10MB)
@@ -95,7 +140,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       // Menampilkan preview gambar
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -106,17 +151,15 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       const dataMahasiswa = await axios.get(
         "http://localhost:3000/api/datamahasiswa"
       );
-
       const dataDosenPA = await axios.get(
         "http://localhost:3000/api/datadosenpa"
       );
 
       const mahasiswa = dataMahasiswa.data.find(
-        (data) => data.id == dataUser.id
+        (data: any) => data.id === dataUser.id
       );
-
       const dosenpa = dataDosenPA.data.find(
-        (data) => data.id === mahasiswa.dosen_pa_id
+        (data: any) => data.id === mahasiswa.dosen_pa_id
       );
 
       if (!dosenpa) {
@@ -161,7 +204,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       );
 
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userProfile.dosen_pa
+        (data: any) => data.dosen.nama_lengkap === userProfile.dosen_pa
       );
 
       if (!dosenPa) {
@@ -195,7 +238,9 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       }
 
       const data = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
+      const sortedDataJurusan = data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataJurusan(sortedDataJurusan);
     } catch (error) {
       console.error("Error:", error);
@@ -203,14 +248,14 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     }
   };
 
-  const getDataPeminatanByJurusan = async (selectedJurusan) => {
+  const getDataPeminatanByJurusan = async (selectedJurusan: string) => {
     try {
       const dataJurusan = await axios.get(
         "http://localhost:3000/api/datajurusan"
       );
 
       const jurusan = dataJurusan.data.find(
-        (data) => data.jurusan === selectedJurusan
+        (data: any) => data.jurusan === selectedJurusan
       );
 
       if (!jurusan) {
@@ -228,7 +273,9 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       }
 
       const data = await response.data;
-      const sortedDataPeminatan = data.sort((a, b) => a.order - b.order);
+      const sortedDataPeminatan = data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataPeminatan(sortedDataPeminatan);
     } catch (error) {
       console.error("Error:", error);
@@ -259,7 +306,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       );
 
       const pengajuanBimbingan = dataPengajuanBimbingan.data.filter(
-        (data) => data.mahasiswa_id === dataUser.id
+        (data: any) => data.mahasiswa_id === dataUser.id
       );
 
       setDataPengajuanBimbingan(pengajuanBimbingan);
@@ -269,7 +316,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     }
   };
 
-  const patchMahasiswa = async (updatedData) => {
+  const patchMahasiswa = async (updatedData: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datamahasiswa",
@@ -283,7 +330,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     }
   };
 
-  const handleEditMahasiswa = async (id) => {
+  const handleEditMahasiswa = async (id: string) => {
     try {
       let mahasiswaValue = {
         id,
@@ -422,7 +469,10 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : (
-                <ProfileImage className="size-[200px] rounded-full" />
+                <ProfileImage
+                  onClick={() => {}}
+                  className="size-[200px] rounded-full"
+                />
               )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
                 {/* Input file yang tersembunyi */}
@@ -448,6 +498,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
             <form className="flex flex-col mt-8 gap-4">
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={
                   namaLengkapMahasiswa === ""
@@ -461,6 +512,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={emailMahasiswa === "" ? "Email" : emailMahasiswa}
                 onChange={(e) => {
@@ -470,6 +522,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={nim === "" ? "NIM" : nim}
                 onChange={(e) => {
@@ -479,6 +532,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={
                   noTelpMahasiswa === "" ? "No Telp" : noTelpMahasiswa
@@ -627,4 +681,5 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     </>
   );
 };
+
 export default DashboardMahasiswa;

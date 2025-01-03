@@ -16,102 +16,158 @@ import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
 import TrashButton from "@/components/ui/TrashButton";
 import { format } from "date-fns";
-import { div } from "framer-motion/client";
+
+interface UserProfile {
+  nama_lengkap: string;
+  email: string;
+  nip: string;
+  no_whatsapp: string;
+}
+
+interface DataDosenPA {
+  id: number;
+  dosen_id: number;
+  nama_lengkap: string;
+  email: string;
+  nip: string;
+  no_whatsapp: string;
+  profile_image?: string;
+}
+
+interface DataJadwalDosenPA {
+  id: number;
+  dosen_pa_id: number;
+  hari: string;
+  jam_mulai: string;
+  jam_selesai: string;
+}
+
+interface DataPengajuanBimbingan {
+  id: number;
+  mahasiswa_id: number;
+  dosen_pa_id: number;
+  jadwal_bimbingan: string;
+  nama_lengkap: string;
+  jenis_bimbingan: string;
+  sistem_bimbingan: string;
+  keterangan: string | null;
+  status: string;
+}
+
+interface DataLaporanBimbingan {
+  id: number;
+  waktu_bimbingan: string;
+  nama_mahasiswa: string;
+  jenis_bimbingan: string;
+  sistem_bimbingan: string;
+  status: string;
+  kendala_mahasiswa: string;
+  solusi: string;
+  kesimpulan: string;
+  dokumentasi: string | null;
+  feedback_kaprodi: string | null;
+  dosen_pa_id: number;
+}
 
 interface DashboardDosenPAProps {
   selectedSubMenuDashboard: string;
-  dataUser: object;
+  dataUser: { id: number; [key: string]: any };
 }
 
-const schedule = {
-  Senin: ["07.00 - 08.00", "13.00 - 15.00"],
-  Selasa: ["09.00 - 11.00", "15.00 - 17.00"],
-  Rabu: ["09.00 - 11.00", "15.00 - 17.00"],
-  Kamis: ["09.00 - 11.00", "15.00 - 17.00"],
-  Jumat: ["09.00 - 11.00", "15.00 - 17.00"],
+const schedule: Record<string, string[]> = {
+  Senin: [],
+  Selasa: [],
+  Rabu: [],
+  Kamis: [],
+  Jumat: [],
 };
 
 const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   selectedSubMenuDashboard,
   dataUser,
 }) => {
-  const [userProfile, setUserProfile] = useState({
+  const [userProfile, setUserProfile] = useState<UserProfile>({
     nama_lengkap: "",
     email: "",
     nip: "",
     no_whatsapp: "",
   });
-  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
-  const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState([]);
-  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
-  const [namaLengkapDosen, setNamaLengkapDosen] = useState("");
-  const [emailDosen, setEmailDosen] = useState("");
-  const [nip, setNip] = useState("");
-  const [noTelpDosen, setNoTelpDosen] = useState("");
-  const [keteranganKonfirmasi, setKeteranganKonfirmasi] = useState({});
+  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<
+    DataJadwalDosenPA[]
+  >([]);
+  const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState<
+    DataPengajuanBimbingan[]
+  >([]);
+  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState<
+    DataLaporanBimbingan[]
+  >([]);
+  const [namaLengkapDosen, setNamaLengkapDosen] = useState<string>("");
+  const [emailDosen, setEmailDosen] = useState<string>("");
+  const [nip, setNip] = useState<string>("");
+  const [noTelpDosen, setNoTelpDosen] = useState<string>("");
+  const [keteranganKonfirmasi, setKeteranganKonfirmasi] = useState<
+    Record<number, string>
+  >({});
   const [isDetailLaporanDosenClicked, setIsDetailLaporanDosenClicked] =
-    useState(false);
-  const [isDataChanged, setIsDataChanged] = useState(false);
-  const [isAddJadwal, setIsAddJadwal] = useState(false);
-  const [dataDosenPA, setDataDosenPA] = useState({});
-  const [dataDosen, setDataDosen] = useState({});
+    useState<boolean>(false);
+  const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
+  const [isAddJadwal, setIsAddJadwal] = useState<boolean>(false);
+  const [dataDosenPA, setDataDosenPA] = useState<DataDosenPA | null>(null);
+  const [dataDosen, setDataDosen] = useState<DataDosenPA | null>(null);
   const [dataClickedLaporanBimbingan, setDataClickedLaporanBimbingan] =
-    useState({});
-  const [selectedHari, setSelectedHari] = useState("");
-  const [jamMulai, setJamMulai] = useState("");
-  const [jamSelesai, setJamSelesai] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
+    useState<DataLaporanBimbingan | null>(null);
+  const [selectedHari, setSelectedHari] = useState<string>("");
+  const [jamMulai, setJamMulai] = useState<string>("");
+  const [jamSelesai, setJamSelesai] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [openDay, setOpenDay] = useState<string | null>(null);
 
-  const [openDay, setOpenDay] = useState(null);
-  const toggleDay = (day) => {
+  const toggleDay = (day: string) => {
     setOpenDay(openDay === day ? null : day);
   };
 
-  function getDate(jadwal) {
+  const getDate = (jadwal: string) => {
     if (!jadwal) return "";
     const parts = jadwal.split(" ");
     return `${parts[0]} ${parts[1]} ${parts[2]} ${parts[3]}`;
-  }
+  };
 
-  function getTime(jadwal) {
+  const getTime = (jadwal: string) => {
     if (!jadwal) return "";
     const waktu = jadwal.split(" ").slice(-1)[0];
     return waktu;
-  }
+  };
 
-  const addJadwalDosen = async (newData) => {
+  const addJadwalDosen = async (newData: DataJadwalDosenPA) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/datajadwaldosenpa/${dataDosenPA.id}`,
+        `http://localhost:3000/api/datajadwaldosenpa/${dataDosenPA?.id}`,
         newData
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const deleteJadwalDosen = async (deletedData) => {
+  const deleteJadwalDosen = async (deletedData: DataJadwalDosenPA) => {
     try {
       const response = await axios.delete(
         `http://localhost:3000/api/datajadwaldosenpa/${deletedData.id}`,
         { data: deletedData }
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const patchPengajuanBimbingan = async (updatedData) => {
+  const patchPengajuanBimbingan = async (updatedData: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/pengajuanbimbingan",
         updatedData
       );
-
       return response.data;
     } catch (error) {
       throw error;
@@ -123,9 +179,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       const dataDosenPA = await axios.get(
         "http://localhost:3000/api/datadosenpa"
       );
-
       const dosen = dataDosenPA.data.find(
-        (data) => data.dosen_id == dataUser.id
+        (data: DataDosenPA) => data.dosen_id === dataUser.id
       );
 
       if (!dosen) {
@@ -143,8 +198,9 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const getDataDosenById = async () => {
     try {
       const dataDosen = await axios.get("http://localhost:3000/api/datadosen");
-
-      const dosen = dataDosen.data.find((data) => data.id == dataUser.id);
+      const dosen = dataDosen.data.find(
+        (data: DataDosenPA) => data.id === dataUser.id
+      );
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -159,7 +215,6 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       });
 
       setDataDosen(dosen);
-
       setNamaLengkapDosen(dosen.nama_lengkap);
       setEmailDosen(dosen.email);
       setNip(dosen.nip);
@@ -175,9 +230,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       const dataDosenPa = await axios.get(
         `http://localhost:3000/api/datadosenpa`
       );
-
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
 
       if (!dosenPa) {
@@ -185,7 +239,6 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       }
 
       const dosenpaid = dosenPa.id;
-
       const response = await axios.get(
         `http://localhost:3000/api/datajadwaldosenpa/${dosenpaid}`
       );
@@ -207,9 +260,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       const dataDosenPa = await axios.get(
         `http://localhost:3000/api/datadosenpa`
       );
-
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
 
       if (!dosenPa) {
@@ -217,15 +269,13 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       }
 
       const dosenpaid = dosenPa.id;
-
       const dataPengajuanBimbingan = await axios.get(
         `http://localhost:3000/api/pengajuanbimbingan`
       );
 
       const pengajuanBimbingan = dataPengajuanBimbingan.data.filter(
-        (data) => data.dosen_pa_id === dosenpaid
+        (data: DataPengajuanBimbingan) => data.dosen_pa_id === dosenpaid
       );
-
       setDataPengajuanBimbingan(pengajuanBimbingan);
     } catch (error) {
       console.error("Error:", error);
@@ -238,9 +288,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       const dataDosenPa = await axios.get(
         `http://localhost:3000/api/datadosenpa`
       );
-
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
 
       if (!dosenPa) {
@@ -248,15 +297,13 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       }
 
       const dosenpaid = dosenPa.id;
-
       const dataLaporanBimbingan = await axios.get(
         `http://localhost:3000/api/laporanbimbingan`
       );
 
       const laporanBimbingan = dataLaporanBimbingan.data.filter(
-        (data) => data.dosen_pa_id === dosenpaid
+        (data: DataLaporanBimbingan) => data.dosen_pa_id === dosenpaid
       );
-
       setDataLaporanBimbingan(laporanBimbingan);
     } catch (error) {
       console.error("Error:", error);
@@ -264,7 +311,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
-  const patchDosenPA = async (updatedData) => {
+  const patchDosenPA = async (updatedData: DataDosenPA) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datadosen",
@@ -278,20 +325,19 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
-  const addBimbingan = async (idPengajuan) => {
+  const addBimbingan = async (idPengajuan: number) => {
     try {
       const response = await axios.post(`http://localhost:3000/api/bimbingan`, {
         pengajuan_bimbingan_id: idPengajuan,
       });
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
 
     if (file) {
       // Validasi ukuran file (maksimal 10MB)
@@ -312,21 +358,21 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       // Menampilkan preview gambar
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleEditDosenPA = async (id) => {
+  const handleEditDosenPA = async (id: number) => {
     try {
-      let dosenPAValue = {
+      let dosenPAValue: any = {
         id,
         nama_lengkap: namaLengkapDosen,
         email: emailDosen,
         nip,
         no_whatsapp: noTelpDosen,
-        profile_image: !imagePreview ? null : imagePreview,
+        profile_image: imagePreview ? imagePreview : undefined,
       };
 
       const result = await patchDosenPA(dosenPAValue);
@@ -338,54 +384,50 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
-  const handleDetailLaporanDosen = (data) => {
+  const handleDetailLaporanDosen = (data: DataLaporanBimbingan) => {
     setDataClickedLaporanBimbingan(data);
     setIsDetailLaporanDosenClicked((prev) => !prev);
   };
 
-  const handleAddJadwalDosen = async (e) => {
+  const handleAddJadwalDosen = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      let jadwalDosenValue = {
-        dosen_pa_id: dataDosenPA.id,
+      let jadwalDosenValue: any = {
+        dosen_pa_id: dataDosenPA?.id as number,
         hari: selectedHari,
         jam_mulai: jamMulai,
         jam_selesai: jamSelesai,
       };
 
       const result = await addJadwalDosen(jadwalDosenValue);
-
       getDataJadwalDosenPaByDosenPa();
       setJamMulai("");
       setJamSelesai("");
       setIsAddJadwal(false);
-
       console.log(result);
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleDeleteJadwalDosen = async (id) => {
+  const handleDeleteJadwalDosen = async (id: number) => {
     try {
-      let jadwalDosenValue = {
+      let jadwalDosenValue: any = {
         id,
       };
       const result = await deleteJadwalDosen(jadwalDosenValue);
-
       getDataJadwalDosenPaByDosenPa();
-
       console.log(result);
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
   const handleEditPengajuanBimbingan = async (
-    id,
-    mahasiswa_id,
-    statusPengajuan
+    id: number,
+    mahasiswa_id: number,
+    statusPengajuan: string
   ) => {
     try {
       let pengajuanBimbinganValue = {
@@ -393,16 +435,16 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         status: statusPengajuan,
         keterangan: keteranganKonfirmasi[id],
         mahasiswa_id,
-        dosen_pa_id: dataDosenPA.id,
+        dosen_pa_id: dataDosenPA?.id as number,
       };
 
       const result = await patchPengajuanBimbingan(pengajuanBimbinganValue);
       await addBimbingan(id);
       console.log(result);
-      setKeteranganKonfirmasi("");
+      setKeteranganKonfirmasi((prev) => ({ ...prev, [id]: "" }));
       getDataPengajuanBimbinganByDosenPaId();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
@@ -453,14 +495,17 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
-              ) : dataDosen.profile_image ? (
+              ) : dataDosen?.profile_image ? (
                 <img
                   src={dataDosen.profile_image}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : (
-                <ProfileImage className="size-[200px] rounded-full" />
+                <ProfileImage
+                  onClick={() => {}}
+                  className="size-[200px] rounded-full"
+                />
               )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
                 {/* Input file yang tersembunyi */}
@@ -485,6 +530,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
             </div>
             <form className="flex flex-col mt-8 gap-4">
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={
                   namaLengkapDosen === "" ? "Nama Lengkap" : namaLengkapDosen
@@ -496,6 +542,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={emailDosen === "" ? "Email" : emailDosen}
                 onChange={(e) => {
@@ -505,6 +552,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={nip === "" ? "NIP" : nip}
                 onChange={(e) => {
@@ -514,6 +562,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={noTelpDosen === "" ? "No Telp" : noTelpDosen}
                 onChange={(e) => {
@@ -551,7 +600,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                     onClick={() => {
                       toggleDay(day);
                       setIsAddJadwal(false);
-                      setKeteranganKonfirmasi("");
+                      setKeteranganKonfirmasi({});
                       setSelectedHari(day);
                     }}
                   >
@@ -591,6 +640,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                         {isAddJadwal ? (
                           <div className="flex gap-2">
                             <InputField
+                              disabled={false}
                               type="text"
                               placeholder="00:00"
                               onChange={(e) => {
@@ -601,6 +651,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                             />
                             -
                             <InputField
+                              disabled={false}
                               type="text"
                               placeholder="00:00"
                               onChange={(e) => {
@@ -626,7 +677,10 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                         )}
                       </div>
                       {isAddJadwal && (
-                        <form className="flex justify-end gap-4 mt-2">
+                        <form
+                          className="flex justify-end gap-4 mt-2"
+                          onSubmit={handleAddJadwalDosen}
+                        >
                           <button
                             onClick={() => {
                               setIsAddJadwal(false);
@@ -636,7 +690,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                             Cancel
                           </button>
                           <button
-                            onClick={handleAddJadwalDosen}
+                            type="submit"
                             className="bg-green-500 py-1 px-2 text-white hover:bg-green-600 rounded-md text-[13px]"
                           >
                             Submit
@@ -663,7 +717,10 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 .slice()
                 .reverse()
                 .map((data) => (
-                  <div className="flex flex-col border rounded-lg p-6 gap-4">
+                  <div
+                    key={data.id}
+                    className="flex flex-col border rounded-lg p-6 gap-4"
+                  >
                     <div className="flex justify-between text-neutral-600">
                       <p>{getDate(data.jadwal_bimbingan)}</p>
                       <p>{getTime(data.jadwal_bimbingan)}</p>
@@ -760,8 +817,9 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 <h1 className="font-semibold text-[24px]">
                   Riwayat Laporan Bimbingan Konseling
                 </h1>
-                {dataLaporanBimbingan.map((data) => (
+                {dataLaporanBimbingan.map((data, index) => (
                   <div
+                    key={index}
                     className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
                     onClick={() => handleDetailLaporanDosen(data)}
                   >
@@ -791,7 +849,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                       setIsDetailLaporanDosenClicked(
                         !isDetailLaporanDosenClicked
                       );
-                      setDataClickedLaporanBimbingan({});
+                      setDataClickedLaporanBimbingan(null);
                     }}
                     className="cursor-pointer"
                   />
@@ -800,127 +858,60 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 <div className="mt-4">
                   <div className="flex flex-col border rounded-lg p-6 gap-4">
                     <div className="flex justify-between text-neutral-600">
-                      {dataClickedLaporanBimbingan.waktu_bimbingan}
+                      {dataClickedLaporanBimbingan?.waktu_bimbingan}
                     </div>
                     <div className="flex justify-between">
                       <div>
                         <p className="font-medium">
-                          {dataClickedLaporanBimbingan.nama_mahasiswa}
+                          {dataClickedLaporanBimbingan?.nama_mahasiswa}
                         </p>
-                        <p>{dataClickedLaporanBimbingan.jenis_bimbingan}</p>
+                        <p>{dataClickedLaporanBimbingan?.jenis_bimbingan}</p>
                         <p className="font-medium">
-                          {dataClickedLaporanBimbingan.sistem_bimbingan}
+                          {dataClickedLaporanBimbingan?.sistem_bimbingan}
                         </p>
                       </div>
                       <div
-                        className={`${dataClickedLaporanBimbingan.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-3 self-center rounded-lg`}
+                        className={`${
+                          dataClickedLaporanBimbingan?.status ===
+                          "Menunggu Feedback Kaprodi"
+                            ? "bg-red-500"
+                            : "bg-green-500"
+                        } p-3 self-center rounded-lg`}
                       >
                         <p className="text-white text-center">
-                          {dataClickedLaporanBimbingan.status}
+                          {dataClickedLaporanBimbingan?.status}
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col gap-4">
                       <div>
                         <h3 className="font-medium">Kendala Mahasiswa</h3>
-                        <p>{dataClickedLaporanBimbingan.kendala_mahasiswa}</p>
-                        {/* <ol className="list-disc pl-5">
-                          <div>
-                            <li>
-                              {dataClickedLaporanBimbingan.kendala_mahasiswa}
-                            </li>
-                            <p>
-                              Banyak mahasiswa yang merasa kesulitan dalam
-                              mengatur waktu antara kuliah, tugas, dan kegiatan
-                              organisasi. Aktivitas yang padat dapat membuat
-                              mereka kewalahan, terlebih jika ada tenggat waktu
-                              yang bersamaan.
-                            </p>
-                          </div>
-                        </ol> */}
+                        <p>{dataClickedLaporanBimbingan?.kendala_mahasiswa}</p>
                       </div>
                       <div>
                         <h3 className="font-medium">Solusi yang ditawarkan</h3>
-                        <p>{dataClickedLaporanBimbingan.solusi}</p>
-                        {/* <ol className="list-decimal pl-5">
-                          <div>
-                            <li>Mengatur Waktu dan Prioritas</li>
-                            <ol className="list-disc pl-5">
-                              <li>
-                                Solusi : Dosen pembimbing akademik dapat
-                                membantu mahasiswa dalam membuat jadwal yang
-                                realistis dan mengajarkan teknik manajemen waktu
-                                yang efektif, seperti metode time blocking, atau
-                                menggunakan aplikasi perencanaan waktu.
-                              </li>
-                              <li>
-                                Cara Implementasi : Dosen pembimbing akademik
-                                dapat membantu mahasiswa dalam membuat jadwal
-                                yang realistis dan mengajarkan teknik manajemen
-                                waktu yang efektif, seperti metode time
-                                blocking, atau menggunakan aplikasi perencanaan
-                                waktu.
-                              </li>
-                            </ol>
-                          </div>
-                        </ol> */}
+                        <p>{dataClickedLaporanBimbingan?.solusi}</p>
                       </div>
                       <div>
                         <h3 className="font-medium">Kesimpulan</h3>
-                        <p>{dataClickedLaporanBimbingan.kesimpulan}</p>
-                        {/* <p>
-                          Secara keseluruhan, saya melihat bahwa kamu adalah
-                          mahasiswa yang memiliki potensi besar dan komitmen
-                          yang tinggi terhadap studi. Pencapaian akademik kamu
-                          di beberapa mata kuliah menunjukkan bahwa kamu mampu
-                          menguasai materi dengan baik. Namun, masih ada
-                          beberapa area yang perlu perhatian lebih, terutama
-                          dalam hal manajemen waktu dan pemahaman materi pada
-                          beberapa mata kuliah yang lebih kompleks. Saya juga
-                          mengapresiasi keaktifan kamu dalam perkuliahan dan
-                          keterlibatan dalam diskusi, meskipun ada beberapa
-                          aspek yang perlu kamu tingkatkan, seperti keterlibatan
-                          dalam tugas kelompok dan pengelolaan tugas dengan
-                          lebih baik.
-                        </p> */}
+                        <p>{dataClickedLaporanBimbingan?.kesimpulan}</p>
                       </div>
                       <div>
                         <h3 className="font-medium">Dokumentasi</h3>
-                        {dataClickedLaporanBimbingan.dokumentasi === null ? (
+                        {dataClickedLaporanBimbingan?.dokumentasi === null ? (
                           "-"
                         ) : (
-                          <p>{dataClickedLaporanBimbingan.dokumentasi}</p>
+                          <p>{dataClickedLaporanBimbingan?.dokumentasi}</p>
                         )}
-                        {/* <Image
-                          className="size-[100px]"
-                          src={upnvjLogo}
-                          alt="upnvjLogo"
-                        /> */}
                       </div>
                       <div>
                         <h3 className="font-medium">Feedback Kaprodi</h3>
-                        {dataClickedLaporanBimbingan.feedback_kaprodi ===
+                        {dataClickedLaporanBimbingan?.feedback_kaprodi ===
                         null ? (
                           "-"
                         ) : (
-                          <p>{dataClickedLaporanBimbingan.feedback_kaprodi}</p>
+                          <p>{dataClickedLaporanBimbingan?.feedback_kaprodi}</p>
                         )}
-                        {/* <p>
-                          Secara umum, saya melihat bahwa kamu telah menunjukkan
-                          kemajuan yang baik dalam beberapa mata kuliah,
-                          terutama pada [sebutkan mata kuliah yang dikuasai
-                          dengan baik]. Nilai-nilai yang kamu peroleh
-                          menunjukkan bahwa kamu memahami dengan baik materi
-                          yang diberikan oleh dosen pengampu. Konsistensi dalam
-                          hasil akademik kamu juga patut diacungi jempol. Namun,
-                          terdapat beberapa mata kuliah seperti [sebutkan mata
-                          kuliah yang mengalami kesulitan] yang nilai atau
-                          pemahaman kamu masih perlu diperbaiki. Saya
-                          menganjurkan agar kamu lebih banyak meluangkan waktu
-                          untuk memahami topik-topik tersebut dan mengikuti
-                          bimbingan atau konsultasi dengan dosen pengampu untuk
-                          mendapatkan penjelasan yang lebih mendalam.
-                        </p> */}
                       </div>
                     </div>
                   </div>
@@ -933,4 +924,5 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     </>
   );
 };
+
 export default DashboardDosenPA;

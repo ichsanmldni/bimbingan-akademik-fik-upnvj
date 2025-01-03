@@ -1,7 +1,7 @@
 import React from "react";
 import { UserRound } from "lucide-react";
 
-export default function MessageMahasiswa({ data, onClick }) {
+export default function MessageMahasiswa({ data, onClick }: any) {
   const date = new Date(data.waktu_pesan_terakhir);
   const formattedDate = date.toLocaleDateString("en-US", {
     year: "numeric",

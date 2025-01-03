@@ -1,6 +1,5 @@
 "use client";
 
-import FilterField from "@/components/ui/FilterField";
 import SelectField from "@/components/ui/SelectField";
 import searchIcon from "../../../../assets/images/search-icon.png";
 import TrashButton from "@/components/ui/TrashButton";
@@ -9,19 +8,36 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import EditButton from "@/components/ui/EditButton";
 
+interface TahunAjaran {
+  tahun_ajaran: string;
+  order: number;
+}
+
+interface User {
+  id: number;
+  nama_lengkap: string;
+  nim?: string;
+  nip?: string;
+  email: string;
+  no_whatsapp: string;
+  role: string;
+}
+
+interface LaporanBimbingan {
+  // Define the structure of LaporanBimbingan based on your API response
+}
+
 interface ManageUserProps {}
-const ManageUser: React.FC<ManageUserProps> = ({}) => {
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
-  const [selectedRoleManageUser, setSelectedRoleManageUser] = useState("");
-  const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
-  const [dataUser, setDataUser] = useState([]);
-  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
-  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState([]);
+
+const ManageUser: React.FC<ManageUserProps> = () => {
+  const [selectedRoleManageUser, setSelectedRoleManageUser] =
+    useState<string>("");
+  const [dataTahunAjaran, setDataTahunAjaran] = useState<TahunAjaran[]>([]);
+  const [dataUser, setDataUser] = useState<User[]>([]);
 
   const getDataTahunAjaran = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<TahunAjaran[]>(
         "http://localhost:3000/api/datatahunajaran"
       );
 
@@ -29,8 +45,7 @@ const ManageUser: React.FC<ManageUserProps> = ({}) => {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
+      const sortedDataJurusan = response.data.sort((a, b) => a.order - b.order);
       setDataTahunAjaran(sortedDataJurusan);
     } catch (error) {
       console.error("Error:", error);
@@ -40,48 +55,23 @@ const ManageUser: React.FC<ManageUserProps> = ({}) => {
 
   const getDataUser = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/datauser`);
+      const response = await axios.get<User[]>(
+        `http://localhost:3000/api/datauser`
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      setDataUser(data);
+      setDataUser(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
-
-  const getDataLaporanBimbingan = async () => {
-    try {
-      const dataLaporanBimbingan = await axios.get(
-        `http://localhost:3000/api/laporanbimbingan`
-      );
-      setDataLaporanBimbingan(dataLaporanBimbingan.data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  useEffect(() => {
-    if (dataTahunAjaran.length > 0) {
-      const formattedOptions = dataTahunAjaran.map((data) => {
-        return {
-          value: data.tahun_ajaran,
-          label: data.tahun_ajaran,
-        };
-      });
-
-      setOptionsTahunAjaran(formattedOptions);
-    }
-  }, [dataTahunAjaran]);
 
   useEffect(() => {
     getDataTahunAjaran();
-    getDataLaporanBimbingan();
     getDataUser();
   }, []);
 
@@ -126,7 +116,7 @@ const ManageUser: React.FC<ManageUserProps> = ({}) => {
             </thead>
             <tbody>
               {dataUser.map((data, index) => (
-                <tr key={(data.id, index)} className="text-center">
+                <tr key={data.id} className="text-center">
                   <td className="border-b border-gray-200 px-4 py-6">
                     {index + 1}
                   </td>
@@ -153,8 +143,14 @@ const ManageUser: React.FC<ManageUserProps> = ({}) => {
                   </td>
                   <td className="border-b border-gray-200 px-4 py-6">
                     <div className="flex gap-2 items-center justify-center">
-                      <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 size-8" />
-                      <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 size-8" />
+                      <EditButton
+                        onClick={() => {}}
+                        className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 size-8"
+                      />
+                      <TrashButton
+                        onClick={() => {}}
+                        className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 size-8"
+                      />
                     </div>
                   </td>
                 </tr>
@@ -166,4 +162,5 @@ const ManageUser: React.FC<ManageUserProps> = ({}) => {
     </div>
   );
 };
+
 export default ManageUser;

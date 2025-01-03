@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const NotificationChatbot = ({ message, type, show, onClose }) => {
+const NotificationChatbot = ({ message, type, show, onClose }: any) => {
   // State untuk melacak apakah pesan sudah dibaca
   const [isMessageRead, setIsMessageRead] = useState(false);
 

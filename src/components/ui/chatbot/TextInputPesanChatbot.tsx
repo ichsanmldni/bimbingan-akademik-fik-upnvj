@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SendHorizontal } from "lucide-react";
 
 export default function TextInputPesanChatbot({
-  handleAddChatChatbotMahasiswa = (newMessage) => {},
+  handleAddChatChatbotMahasiswa = (newMessage: any) => {},
 }) {
   const [text, setText] = useState("");
 

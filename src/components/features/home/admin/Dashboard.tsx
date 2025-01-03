@@ -1,16 +1,23 @@
 "use client";
 
 import FilterField from "@/components/ui/FilterField";
-import SelectField from "@/components/ui/SelectField";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+interface TahunAjaran {
+  tahun_ajaran: string;
+  order: number;
+}
+
 interface DashboardProps {}
-const Dashboard: React.FC<DashboardProps> = ({}) => {
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
-  const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
-  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState([]);
+
+const Dashboard: React.FC<DashboardProps> = () => {
+  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState<string>("");
+  const [selectedSemester, setSelectedSemester] = useState<string>("");
+  const [dataTahunAjaran, setDataTahunAjaran] = useState<TahunAjaran[]>([]);
+  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   const getDataTahunAjaran = async () => {
     try {
@@ -22,7 +29,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const data: TahunAjaran[] = await response.data;
       const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
       setDataTahunAjaran(sortedDataJurusan);
     } catch (error) {
@@ -33,12 +40,10 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
 
   useEffect(() => {
     if (dataTahunAjaran.length > 0) {
-      const formattedOptions = dataTahunAjaran.map((data) => {
-        return {
-          value: data.tahun_ajaran,
-          label: data.tahun_ajaran,
-        };
-      });
+      const formattedOptions = dataTahunAjaran.map((data) => ({
+        value: data.tahun_ajaran,
+        label: data.tahun_ajaran,
+      }));
 
       setOptionsTahunAjaran(formattedOptions);
     }
@@ -72,7 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
           onChange={(e) => setSelectedSemester(e.target.value)}
           value={selectedSemester}
           placeholder="All Semester"
-          disabled={selectedTahunAjaran === "" && true}
+          disabled={selectedTahunAjaran === ""}
           className={`px-3 py-2 text-[15px] border rounded-lg focus:outline-none ${selectedTahunAjaran === "" && "hidden"} appearance-none w-[150px]`}
         />
       </div>
@@ -87,4 +92,5 @@ const Dashboard: React.FC<DashboardProps> = ({}) => {
     </div>
   );
 };
+
 export default Dashboard;

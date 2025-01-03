@@ -2,22 +2,15 @@
 
 import Link from "next/link";
 import Logo from "./LogoUPNVJ";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import ProfileImage from "./ProfileImage";
 import NotificationModal from "./NotificationModal";
 import ProfileModal from "./ProfileModal";
 import NotificationButton from "./NotificationButton";
-import { jwtDecode } from "jwt-decode";
-import axios from "axios";
 import { MessageSquareText } from "lucide-react";
-import Image from "next/image";
 
-interface NavbarUserProps {
-  roleUser: string;
-  dataUser: object;
-}
-const NavbarUser: React.FC<NavbarUserProps> = ({ roleUser, dataUser }) => {
+const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
   const [isModalProfileOpen, setIsModalProfileOpen] = useState(false);
   const pathname = usePathname();
@@ -41,6 +34,8 @@ const NavbarUser: React.FC<NavbarUserProps> = ({ roleUser, dataUser }) => {
   };
 
   const isActive = (path: string) => pathname === path;
+
+  console.log(dataUser);
 
   return (
     <div className="fixed z-[999] w-full bg-white border flex justify-between py-5 px-[128px]">
@@ -104,7 +99,7 @@ const NavbarUser: React.FC<NavbarUserProps> = ({ roleUser, dataUser }) => {
         />
         {dataUser?.profile_image ? (
           <img
-            src={dataUser.profile_image}
+            src={`../${dataUser.profile_image}`}
             alt="Profile"
             className="rounded-full size-8"
             onClick={handleProfileClick}

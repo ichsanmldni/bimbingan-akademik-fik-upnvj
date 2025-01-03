@@ -1,29 +1,42 @@
+// /app/api/datadosen/route.ts
 import fs from 'fs/promises';
 import path from 'path';
 import prisma from '../../../lib/prisma';
 
-export async function GET(req) {
+interface MahasiswaRequestBody {
+  id: number; // Assuming this is a string; change to number if needed
+  nama_lengkap: string;
+  email: string;
+  nim: string;
+  no_whatsapp: string;
+  jurusan: string;
+  peminatan: string;
+  dosen_pa_id: number; // Assuming this is a string; change to number if needed
+  profile_image?: string; // Optional, as it may not be provided
+}
+
+export async function GET(req: Request): Promise<Response> {
   try {
-    // Mengambil data dosen dari database
-    const Mahasiswa = await prisma.mahasiswa.findMany();
-    
-    // Mengembalikan data dosen sebagai JSON
-    return new Response(JSON.stringify(Mahasiswa), {
+    // Fetching data from the database
+    const mahasiswa = await prisma.mahasiswa.findMany();
+
+    // Returning data as JSON
+    return new Response(JSON.stringify(mahasiswa), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    // Menangani kesalahan
+    // Handling errors
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-export async function PATCH(req) {
+export async function PATCH(req: Request): Promise<Response> {
   try {
-    const body = await req.json();
+    const body: MahasiswaRequestBody = await req.json();
 
     const {
       id,
@@ -37,7 +50,7 @@ export async function PATCH(req) {
       profile_image,
     } = body;
 
-    // Validasi input
+    // Validate input
     if (!id || !nama_lengkap || !email || !nim || !no_whatsapp || !jurusan || !peminatan || !dosen_pa_id) {
       return new Response(
         JSON.stringify({ message: 'Invalid data' }),
@@ -45,42 +58,45 @@ export async function PATCH(req) {
       );
     }
 
-    // Cek jika record ada di database
+    // Check if record exists in the database
     const existingRecord = await prisma.mahasiswa.findUnique({
       where: { id },
     });
 
     if (!existingRecord) {
-      throw new Error('Record not found');
+      return new Response(
+        JSON.stringify({ message: 'Record not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Buat direktori jika belum ada
+    // Create directory if it doesn't exist
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profile_pictures');
-    await fs.mkdir(uploadDir, { recursive: true }); // Membuat folder secara rekursif
+    await fs.mkdir(uploadDir, { recursive: true }); // Create folder recursively
 
-    // Simpan gambar jika ada
-    let savedImagePath = existingRecord.profile_image; // Gunakan gambar lama jika tidak diupdate
+    // Save image if provided
+    let savedImagePath = existingRecord.profile_image; // Use old image if not updated
     if (profile_image) {
       const base64Data = profile_image.replace(/^data:image\/\w+;base64,/, '');
       const imageBuffer = Buffer.from(base64Data, 'base64');
 
       const filename = `profile_${id}_${Date.now()}.jpg`;
-      savedImagePath = path.join('uploads', 'profile_pictures', filename); // Path relatif
+      savedImagePath = path.join('uploads', 'profile_pictures', filename); // Relative path
 
       if (existingRecord.profile_image) {
         const oldImagePath = path.join(process.cwd(), 'public', existingRecord.profile_image);
         try {
-          await fs.unlink(oldImagePath); // Menghapus gambar lama
+          await fs.unlink(oldImagePath); // Delete old image
         } catch (err) {
           console.error('Failed to delete old image:', err);
         }
       }
 
-      await fs.writeFile(path.join(process.cwd(), 'public', savedImagePath), imageBuffer); // Simpan gambar di folder public
+      await fs.writeFile(path.join(process.cwd(), 'public', savedImagePath), imageBuffer); // Save image in public folder
     }
 
-    // Update data di database
-    const Mahasiswa = await prisma.mahasiswa.update({
+    // Update data in the database
+    const mahasiswa = await prisma.mahasiswa.update({
       where: { id },
       data: {
         nama_lengkap,
@@ -90,20 +106,18 @@ export async function PATCH(req) {
         jurusan,
         peminatan,
         dosen_pa_id,
-        profile_image: savedImagePath, // Simpan path relatif di DB
+        profile_image: savedImagePath, // Save relative path in DB
       },
     });
 
-    return new Response(JSON.stringify(Mahasiswa), {
+    return new Response(JSON.stringify(mahasiswa), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
-
-

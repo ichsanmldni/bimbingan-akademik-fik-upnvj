@@ -23,35 +23,56 @@ import InputField from "@/components/ui/InputField";
 import { CSS } from "@dnd-kit/utilities";
 
 interface ManageInformasiAkademikProps {}
-const ManageInformasiAkademik: React.FC<
-  ManageInformasiAkademikProps
-> = ({}) => {
-  const [selectedBab, setSelectedBab] = useState("");
-  const [activeTab, setActiveTab] = useState("Bab");
-  const tabs = ["Bab", "Sub Bab"];
-  const [afterOrderEditDataBab, setAfterOrderEditDataBab] = useState([]);
-  const [afterOrderEditDataSubBab, setAfterOrderEditDataSubBab] = useState([]);
-  const [modalType, setModalType] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditOrder, setIsEditOrder] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [dataBab, setDataBab] = useState([]);
-  const [valueBabAddModal, setValueBabAddModal] = useState("");
-  const [valueBabEditModal, setValueBabEditModal] = useState("");
-  const [selectedBabEditModal, setSelectedBabEditModal] = useState({});
-  const [selectedBabDeleteModal, setSelectedBabDeleteModal] = useState({});
-  const [dataSubBab, setDataSubBab] = useState([]);
-  const [valueSubBabAddModal, setValueSubBabAddModal] = useState("");
-  const [valueSubBabEditModal, setValueSubBabEditModal] = useState("");
-  const [valueIsiSubBabAddModal, setValueIsiSubBabAddModal] = useState("");
-  const [valueIsiSubBabEditModal, setValueIsiSubBabEditModal] = useState("");
-  const [selectedSubBabEditModal, setSelectedSubBabEditModal] = useState({});
-  const [selectedSubBabDeleteModal, setSelectedSubBabDeleteModal] = useState(
-    {}
-  );
-  const [optionsBab, setOptionsBab] = useState([]);
 
-  const areArraysEqual = (arr1, arr2) => {
+interface Bab {
+  id: number;
+  nama: string;
+  order: number;
+}
+
+interface SubBab {
+  id: number;
+  nama: string;
+  isi: string;
+  order: number;
+}
+
+const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
+  const [selectedBab, setSelectedBab] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("Bab");
+  const tabs = ["Bab", "Sub Bab"];
+  const [afterOrderEditDataBab, setAfterOrderEditDataBab] = useState<Bab[]>([]);
+  const [afterOrderEditDataSubBab, setAfterOrderEditDataSubBab] = useState<
+    SubBab[]
+  >([]);
+  const [modalType, setModalType] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEditOrder, setIsEditOrder] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [dataBab, setDataBab] = useState<Bab[]>([]);
+  const [valueBabAddModal, setValueBabAddModal] = useState<string>("");
+  const [valueBabEditModal, setValueBabEditModal] = useState<string>("");
+  const [selectedBabEditModal, setSelectedBabEditModal] = useState<Bab | null>(
+    null
+  );
+  const [selectedBabDeleteModal, setSelectedBabDeleteModal] =
+    useState<Bab | null>(null);
+  const [dataSubBab, setDataSubBab] = useState<SubBab[]>([]);
+  const [valueSubBabAddModal, setValueSubBabAddModal] = useState<string>("");
+  const [valueSubBabEditModal, setValueSubBabEditModal] = useState<string>("");
+  const [valueIsiSubBabAddModal, setValueIsiSubBabAddModal] =
+    useState<string>("");
+  const [valueIsiSubBabEditModal, setValueIsiSubBabEditModal] =
+    useState<string>("");
+  const [selectedSubBabEditModal, setSelectedSubBabEditModal] =
+    useState<SubBab | null>(null);
+  const [selectedSubBabDeleteModal, setSelectedSubBabDeleteModal] =
+    useState<SubBab | null>(null);
+  const [optionsBab, setOptionsBab] = useState<
+    { value: string; label: string }[]
+  >([]);
+
+  const areArraysEqual = (arr1: any[], arr2: any[]) => {
     if (arr1.length !== arr2.length) return false;
     return arr1.every(
       (item, index) => JSON.stringify(item) === JSON.stringify(arr2[index])
@@ -68,7 +89,17 @@ const ManageInformasiAkademik: React.FC<
     setValueIsiSubBabEditModal("");
   };
 
-  function DraggableRow({ id, index, data, tab }) {
+  function DraggableRow({
+    id,
+    index,
+    data,
+    tab,
+  }: {
+    id: string;
+    index: number;
+    data: any;
+    tab: string;
+  }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } =
       useSortable({
         id,
@@ -81,188 +112,138 @@ const ManageInformasiAkademik: React.FC<
       cursor: isDragging ? "grabbing" : "grab",
     };
 
-    if (tab === "Bab") {
-      return (
-        <tr
-          ref={setNodeRef}
-          className={`text-center ${isDragging ? "cursor-grabbing" : ""}`}
-        >
-          <td className="border-b border-gray-200 px-4 py-2">
-            <div className="flex items-center">
-              <div
-                {...attributes}
-                {...listeners}
-                className={`size-4 mr-2 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-              >
-                <Image src={dragIcon} alt="Drag Icon" />
-              </div>
-              <p className="text-center flex-1">{index + 1}</p>
+    return (
+      <tr
+        ref={setNodeRef}
+        className={`text-center ${isDragging ? "cursor-grabbing" : ""}`}
+      >
+        <td className="border-b border-gray-200 px-4 py-2">
+          <div className="flex items-center">
+            <div
+              {...attributes}
+              {...listeners}
+              className={`size-4 mr-2 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+            >
+              <Image src={dragIcon} alt="Drag Icon" />
             </div>
-          </td>
-          <td className="border-b border-gray-200 px-4 py-2">{data.nama}</td>
+            <p className="text-center flex-1">{index + 1}</p>
+          </div>
+        </td>
+        <td className="border-b border-gray-200 px-4 py-2">{data.nama}</td>
+        {tab === "Bab" ? (
           <td className="border-b border-gray-200 px-4 py-4">
             <div className="flex gap-2 items-center justify-center">
               <EditButton
                 onClick={() => {
                   setValueBabEditModal(data.nama);
-                  setSelectedBabEditModal(data);
+                  setSelectedBabEditModal(data as Bab);
                   openModal("Edit");
                 }}
                 className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
               />
               <TrashButton
                 onClick={() => {
-                  setSelectedBabDeleteModal(data);
+                  setSelectedBabDeleteModal(data as Bab);
                   openModal("Delete");
                 }}
                 className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
               />
             </div>
           </td>
-          <DragOverlay>
-            {isDragging ? (
-              <>
-                <table className="min-w-full text-[16px] border-collapse table-fixed bg-white bg-opacity-10 backdrop-blur-sm rounded-lg">
-                  <thead className="hidden">
-                    <tr className="bg-gray-100 text-center">
-                      <th className="pr-4 py-2 pl-12 rounded-tl-lg rounded-bl-lg">
-                        No
-                      </th>
-                      <th className="px-4 py-2">Bab</th>
-                      <th className="px-4 py-2 rounded-tr-lg rounded-br-lg">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="text-center">
-                      <td className="px-4 py-2">
-                        <div className="flex items-center">
-                          <Image
-                            className="size-4 mr-2"
-                            src={dragIcon}
-                            alt="Drag Icon"
-                          />
-                          <p className="text-center flex-1">{index + 1}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 w-1/2">{data.nama}</td>
-                      <td className="px-4 py-4 w-1/4">
-                        <div className="flex gap-2 items-center justify-center">
-                          <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                          <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </>
-            ) : null}
-          </DragOverlay>
-        </tr>
-      );
-    } else if (tab === "Sub Bab") {
-      return (
-        <tr
-          ref={setNodeRef}
-          className={`text-center ${isDragging ? "cursor-grabbing" : ""}`}
-        >
-          <td className="border-b border-gray-200 px-4 py-2">
-            <div className="flex items-center">
-              <div
-                {...attributes}
-                {...listeners}
-                className={`size-4 mr-2 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-              >
-                <Image src={dragIcon} alt="Drag Icon" />
+        ) : (
+          <>
+            <td className="border-b border-gray-200 px-4 py-2">{data.isi}</td>
+            <td className="border-b border-gray-200 px-4 py-4">
+              <div className="flex gap-2 items-center justify-center">
+                <EditButton
+                  onClick={() => {
+                    setValueSubBabEditModal(data.nama);
+                    setValueIsiSubBabEditModal(data.isi);
+                    setSelectedSubBabEditModal(data as SubBab);
+                    openModal("Edit");
+                  }}
+                  className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                />
+                <TrashButton
+                  onClick={() => {
+                    setSelectedSubBabDeleteModal(data as SubBab);
+                    openModal("Delete");
+                  }}
+                  className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                />
               </div>
-              <p className="text-center flex-1">{index + 1}</p>
-            </div>
-          </td>
-          <td className="border-b border-gray-200 px-4 w-1/4 py-2">
-            {data.nama}
-          </td>
-          <td className="border-b border-gray-200 px-4 w-1/4 py-2">
-            {data.isi}
-          </td>
-          <td className="border-b border-gray-200 px-4 py-4">
-            <div className="flex gap-2 items-center justify-center">
-              <EditButton
-                onClick={() => {
-                  setValueSubBabEditModal(data.nama);
-                  setValueIsiSubBabEditModal(data.isi);
-                  setSelectedSubBabEditModal(data);
-                  openModal("Edit");
-                }}
-                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-              />
-              <TrashButton
-                onClick={() => {
-                  setSelectedSubBabDeleteModal(data);
-                  openModal("Delete");
-                }}
-                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-              />
-            </div>
-          </td>
-          <DragOverlay>
-            {isDragging ? (
-              <>
-                <table className="min-w-full text-[16px] border-collapse table-fixed bg-white bg-opacity-10 backdrop-blur-sm rounded-lg">
-                  <thead className="hidden">
-                    <tr className="bg-gray-100 text-center">
-                      <th className="px-4 py-2 pl-10 w-1/4 rounded-tl-lg rounded-bl-lg">
-                        No
-                      </th>
-                      <th className="px-4 py-2 w-1/4">Sub Bab</th>
-                      <th className="px-4 py-2 w-1/4">Isi</th>
-                      <th className="px-4 py-2 w-1/4 rounded-tr-lg rounded-br-lg">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="text-center">
-                      <td className="px-4 py-2">
-                        <div className="flex items-center">
-                          <Image
-                            className="size-4 mr-2"
-                            src={dragIcon}
-                            alt="Drag Icon"
-                          />
-                          <p className="text-center flex-1">{index + 1}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 w-1/4">{data.nama}</td>
-                      <td className="px-4 py-2 w-1/4">{data.isi}</td>
-                      <td className="px-4 py-4 w-1/4">
-                        <div className="flex gap-2 items-center justify-center">
-                          <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                          <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </>
-            ) : null}
-          </DragOverlay>
-        </tr>
-      );
-    }
+            </td>
+          </>
+        )}
+        <DragOverlay>
+          {isDragging ? (
+            <table className="min-w-full text-[16px] border-collapse table-fixed bg-white bg-opacity-10 backdrop-blur-sm rounded-lg">
+              <thead className="hidden">
+                <tr className="bg-gray-100 text-center">
+                  <th className="pr-4 py-2 pl-12 rounded-tl-lg rounded-bl-lg">
+                    No
+                  </th>
+                  <th className="px-4 py-2">
+                    {tab === "Bab" ? "Bab" : "Sub Bab"}
+                  </th>
+                  {tab === "Sub Bab" && <th className="px-4 py-2">Isi</th>}
+                  <th className="px-4 py-2 rounded-tr-lg rounded-br-lg">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="text-center">
+                  <td className="px-4 py-2">
+                    <div className="flex items-center">
+                      <Image
+                        className="size-4 mr-2"
+                        src={dragIcon}
+                        alt="Drag Icon"
+                      />
+                      <p className="text-center flex-1">{index + 1}</p>
+                    </div>
+                  </td>
+                  <td
+                    className={`px-4 py-2 ${tab === "Sub Bab" ? "w-1/4" : "w-1/2"}`}
+                  >
+                    {data.nama}
+                  </td>
+                  {tab === "Sub Bab" && (
+                    <td className="px-4 py-2 w-1/4">{data.isi}</td>
+                  )}
+                  <td className="px-4 py-4 w-1/4">
+                    <div className="flex gap-2 items-center justify-center">
+                      <EditButton
+                        onClick={() => {}}
+                        className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                      />
+                      <TrashButton
+                        onClick={() => {}}
+                        className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : null}
+        </DragOverlay>
+      </tr>
+    );
   }
 
-  const openModal = (type, data = null) => {
+  const openModal = (type: string, data: any = null) => {
     setModalType(type);
     setIsModalOpen(true);
   };
 
-  const handleClickTab = (tab) => {
+  const handleClickTab = (tab: string) => {
     setActiveTab(tab);
     setSelectedBab("");
   };
 
-  const handleDragEndBab = (event) => {
+  const handleDragEndBab = (event: any) => {
     const { active, over } = event;
 
     if (!over) {
@@ -270,38 +251,31 @@ const ManageInformasiAkademik: React.FC<
       return;
     }
 
-    if (!over) {
-      setAfterOrderEditDataBab([...dataBab]);
-      return;
-    }
+    const oldIndex = afterOrderEditDataBab.findIndex(
+      (item) => item.id === +active.id
+    );
+    const newIndex = afterOrderEditDataBab.findIndex(
+      (item) => item.id === +over.id
+    );
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newDataBab = [...afterOrderEditDataBab];
 
-    if (over !== null) {
-      const oldIndex = afterOrderEditDataBab.findIndex(
-        (item) => item.id === +active.id
-      );
-      const newIndex = afterOrderEditDataBab.findIndex(
-        (item) => item.id === +over.id
-      );
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newDataBab = [...afterOrderEditDataBab];
-
-        const updatedData = newDataBab.map((item, index) => {
-          if (index === oldIndex) {
-            return { ...item, order: newIndex + 1 }; // Set order ke posisi baru
-          }
-          if (index === newIndex) {
-            return { ...item, order: oldIndex + 1 }; // Set order ke posisi lama
-          }
-          return item; // Tidak ubah item lainnya
-        });
-        const sortedDataBab = updatedData.sort((a, b) => a.order - b.order);
-        setAfterOrderEditDataBab(sortedDataBab);
-        setIsEditOrder(true);
-      }
+      const updatedData = newDataBab.map((item, index) => {
+        if (index === oldIndex) {
+          return { ...item, order: newIndex + 1 }; // Set order ke posisi baru
+        }
+        if (index === newIndex) {
+          return { ...item, order: oldIndex + 1 }; // Set order ke posisi lama
+        }
+        return item; // Tidak ubah item lainnya
+      });
+      const sortedDataBab = updatedData.sort((a, b) => a.order - b.order);
+      setAfterOrderEditDataBab(sortedDataBab);
+      setIsEditOrder(true);
     }
   };
 
-  const handleDragEndSubBab = (event) => {
+  const handleDragEndSubBab = (event: any) => {
     const { active, over } = event;
 
     if (!over) {
@@ -309,102 +283,86 @@ const ManageInformasiAkademik: React.FC<
       return;
     }
 
-    if (!over) {
-      setAfterOrderEditDataSubBab([...dataSubBab]);
-      return;
-    }
+    const oldIndex = afterOrderEditDataSubBab.findIndex(
+      (item) => item.id === +active.id
+    );
+    const newIndex = afterOrderEditDataSubBab.findIndex(
+      (item) => item.id === +over.id
+    );
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newDataSubBab = [...afterOrderEditDataSubBab];
 
-    if (over !== null) {
-      const oldIndex = afterOrderEditDataSubBab.findIndex(
-        (item) => item.id === +active.id
-      );
-      const newIndex = afterOrderEditDataSubBab.findIndex(
-        (item) => item.id === +over.id
-      );
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newDataSubBab = [...afterOrderEditDataSubBab];
-
-        const updatedData = newDataSubBab.map((item, index) => {
-          if (index === oldIndex) {
-            return { ...item, order: newIndex + 1 }; // Set order ke posisi baru
-          }
-          if (index === newIndex) {
-            return { ...item, order: oldIndex + 1 }; // Set order ke posisi lama
-          }
-          return item; // Tidak ubah item lainnya
-        });
-        const sortedDataSubBab = updatedData.sort((a, b) => a.order - b.order);
-        setAfterOrderEditDataSubBab(sortedDataSubBab);
-        setIsEditOrder(true);
-      }
+      const updatedData = newDataSubBab.map((item, index) => {
+        if (index === oldIndex) {
+          return { ...item, order: newIndex + 1 }; // Set order ke posisi baru
+        }
+        if (index === newIndex) {
+          return { ...item, order: oldIndex + 1 }; // Set order ke posisi lama
+        }
+        return item; // Tidak ubah item lainnya
+      });
+      const sortedDataSubBab = updatedData.sort((a, b) => a.order - b.order);
+      setAfterOrderEditDataSubBab(sortedDataSubBab);
+      setIsEditOrder(true);
     }
   };
 
-  const addBab = async (newData) => {
+  const addBab = async (newData: Bab) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/databab",
         newData
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const patchBab = async (updatedData) => {
-    console.log(updatedData);
+  const patchBab = async (updatedData: Bab) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/databab",
         updatedData
       );
-      console.log("Bab updated successfully:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
 
-  const deleteBab = async (deletedData) => {
+  const deleteBab = async (deletedData: Bab) => {
     try {
       const response = await axios.delete("http://localhost:3000/api/databab", {
         data: deletedData,
       });
-      console.log("Bab updated successfully:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
 
-  const handleAddBab = async (e) => {
+  const handleAddBab = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      let babValue = {
+      let babValue: any = {
         nama: valueBabAddModal,
         order: dataBab.length + 1,
       };
 
       const result = await addBab(babValue);
-
-      console.log(result);
-
       getDataBab();
       setIsEditOrder(false);
       closeModal();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleEditBab = async (id) => {
+  const handleEditBab = async (id: number) => {
     try {
-      let babValue = {
+      let babValue: any = {
         id,
         nama: valueBabEditModal,
       };
@@ -413,28 +371,26 @@ const ManageInformasiAkademik: React.FC<
       getDataBab();
       setIsEditOrder(false);
       closeModal();
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  const handleDeleteBab = async (id) => {
+  const handleDeleteBab = async (id: number) => {
     try {
-      let babValue = {
+      let babValue: any = {
         id,
       };
 
       const result = await deleteBab(babValue);
       closeModal();
       getDataBab();
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  const patchBabOrder = async (updatedOrder) => {
+  const patchBabOrder = async (updatedOrder: Bab[]) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/databab/updateorder",
@@ -442,12 +398,10 @@ const ManageInformasiAkademik: React.FC<
           ...updatedOrder,
         }
       );
-      console.log("Order updated successfully:", response.data);
       getDataBab();
       setIsEditOrder(false);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -455,7 +409,6 @@ const ManageInformasiAkademik: React.FC<
   const handleSaveBabOrder = async () => {
     try {
       const result = await patchBabOrder(afterOrderEditDataBab);
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
@@ -470,7 +423,7 @@ const ManageInformasiAkademik: React.FC<
       }
 
       const data = await response.data;
-      const sortedDataBab = data.sort((a, b) => a.order - b.order);
+      const sortedDataBab = data.sort((a: Bab, b: Bab) => a.order - b.order);
       setDataBab(sortedDataBab);
       if (data.length === 0) {
         setAfterOrderEditDataBab([]);
@@ -481,11 +434,14 @@ const ManageInformasiAkademik: React.FC<
     }
   };
 
-  const addSubBab = async (newData) => {
+  const addSubBab = async (newData: SubBab) => {
     try {
-      const dataBab = await axios.get("http://localhost:3000/api/databab");
-
-      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+      const dataBabResponse = await axios.get(
+        "http://localhost:3000/api/databab"
+      );
+      const bab = dataBabResponse.data.find(
+        (data: Bab) => data.nama === selectedBab
+      );
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -497,44 +453,45 @@ const ManageInformasiAkademik: React.FC<
         `http://localhost:3000/api/datasubbab/${babid}`,
         newData
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const patchSubBab = async (updatedData) => {
-    console.log(updatedData);
+  const patchSubBab = async (updatedData: SubBab) => {
     try {
-      const dataBab = await axios.get("http://localhost:3000/api/databab");
-
-      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+      const dataBabResponse = await axios.get(
+        "http://localhost:3000/api/databab"
+      );
+      const bab = dataBabResponse.data.find(
+        (data: Bab) => data.nama === selectedBab
+      );
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
       }
 
       const babid = bab.id;
-      console.log(updatedData);
 
       const response = await axios.patch(
         `http://localhost:3000/api/datasubbab/${babid}`,
         updatedData
       );
-      console.log("Sub bab updated successfully:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
 
-  const deleteSubBab = async (deletedData) => {
+  const deleteSubBab = async (deletedData: SubBab) => {
     try {
-      const dataBab = await axios.get("http://localhost:3000/api/databab");
-
-      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+      const dataBabResponse = await axios.get(
+        "http://localhost:3000/api/databab"
+      );
+      const bab = dataBabResponse.data.find(
+        (data: Bab) => data.nama === selectedBab
+      );
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -546,41 +503,35 @@ const ManageInformasiAkademik: React.FC<
         `http://localhost:3000/api/datasubbab/${babid}`,
         { data: deletedData }
       );
-      console.log("Sub bab updated successfully:", response.data);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
 
-  const handleAddSubBab = async (e) => {
+  const handleAddSubBab = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      let subBabValue = {
+      let subBabValue: any = {
         nama: valueSubBabAddModal,
         isi: valueIsiSubBabAddModal,
         order: dataSubBab.length + 1,
       };
 
       const result = await addSubBab(subBabValue);
-
-      console.log(result);
-
       getDataSubBabByBab(selectedBab);
       setIsEditOrder(false);
       closeModal();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleEditSubBab = async (id) => {
+  const handleEditSubBab = async (id: number) => {
     try {
-      let subBabValue = {
+      let subBabValue: any = {
         id,
-
         nama: valueSubBabEditModal,
         isi: valueIsiSubBabEditModal,
       };
@@ -589,32 +540,33 @@ const ManageInformasiAkademik: React.FC<
       getDataSubBabByBab(selectedBab);
       setIsEditOrder(false);
       closeModal();
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  const handleDeleteSubBab = async (id) => {
+  const handleDeleteSubBab = async (id: number) => {
     try {
-      let subBabValue = {
+      let subBabValue: any = {
         id,
       };
 
       const result = await deleteSubBab(subBabValue);
       getDataSubBabByBab(selectedBab);
       closeModal();
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  const patchSubBabOrder = async (updatedOrder) => {
+  const patchSubBabOrder = async (updatedOrder: SubBab[]) => {
     try {
-      const dataBab = await axios.get("http://localhost:3000/api/databab");
-
-      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+      const dataBabResponse = await axios.get(
+        "http://localhost:3000/api/databab"
+      );
+      const bab = dataBabResponse.data.find(
+        (data: Bab) => data.nama === selectedBab
+      );
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -632,7 +584,6 @@ const ManageInformasiAkademik: React.FC<
       setIsEditOrder(false);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -640,17 +591,19 @@ const ManageInformasiAkademik: React.FC<
   const handleSaveSubBabOrder = async () => {
     try {
       const result = await patchSubBabOrder(afterOrderEditDataSubBab);
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  const getDataSubBabByBab = async (selectedBab) => {
+  const getDataSubBabByBab = async (selectedBab: string) => {
     try {
-      const dataBab = await axios.get("http://localhost:3000/api/databab");
-
-      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+      const dataBabResponse = await axios.get(
+        "http://localhost:3000/api/databab"
+      );
+      const bab = dataBabResponse.data.find(
+        (data: Bab) => data.nama === selectedBab
+      );
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -667,7 +620,9 @@ const ManageInformasiAkademik: React.FC<
       }
 
       const data = await response.data;
-      const sortedDataSubBab = data.sort((a, b) => a.order - b.order);
+      const sortedDataSubBab = data.sort(
+        (a: SubBab, b: SubBab) => a.order - b.order
+      );
       setDataSubBab(sortedDataSubBab);
       if (data.length === 0) {
         setAfterOrderEditDataSubBab([]);
@@ -756,7 +711,6 @@ const ManageInformasiAkademik: React.FC<
                 <DndContext onDragEnd={handleDragEndBab}>
                   <SortableContext
                     items={afterOrderEditDataBab.map((item) => item.id)}
-                    strategy={sortableKeyboardCoordinates}
                   >
                     <table className="min-w-full text-[16px] border-collapse table-fixed">
                       <thead>
@@ -804,7 +758,6 @@ const ManageInformasiAkademik: React.FC<
                 <DndContext onDragEnd={handleDragEndBab}>
                   <SortableContext
                     items={afterOrderEditDataBab.map((item) => item.id)}
-                    strategy={sortableKeyboardCoordinates}
                   >
                     <table className="min-w-full text-[16px] border-collapse table-fixed">
                       <thead>
@@ -909,7 +862,7 @@ const ManageInformasiAkademik: React.FC<
             {modalType === "Delete" && (
               <p>
                 Apakah Anda yakin ingin menghapus bab [
-                {selectedBabDeleteModal.nama}] ?
+                {selectedBabDeleteModal?.nama}] ?
               </p>
             )}
           </Modal>
@@ -945,7 +898,6 @@ const ManageInformasiAkademik: React.FC<
                 <DndContext onDragEnd={handleDragEndSubBab}>
                   <SortableContext
                     items={afterOrderEditDataSubBab.map((item) => item.id)}
-                    strategy={sortableKeyboardCoordinates}
                   >
                     <table className="min-w-full text-[16px] border-collapse table-fixed">
                       <thead>
@@ -994,7 +946,6 @@ const ManageInformasiAkademik: React.FC<
                 <DndContext onDragEnd={handleDragEndSubBab}>
                   <SortableContext
                     items={afterOrderEditDataSubBab.map((item) => item.id)}
-                    strategy={sortableKeyboardCoordinates}
                   >
                     <table className="min-w-full text-[16px] border-collapse table-fixed">
                       <thead>
@@ -1121,7 +1072,7 @@ const ManageInformasiAkademik: React.FC<
             {modalType === "Delete" && (
               <p>
                 Apakah Anda yakin ingin menghapus sub bab [
-                {selectedSubBabDeleteModal.nama}] ?
+                {selectedSubBabDeleteModal?.nama}] ?
               </p>
             )}
           </Modal>
@@ -1130,4 +1081,5 @@ const ManageInformasiAkademik: React.FC<
     </div>
   );
 };
+
 export default ManageInformasiAkademik;

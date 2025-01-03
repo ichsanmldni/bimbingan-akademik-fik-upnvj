@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { SendHorizontal } from "lucide-react";
 
-export default function TextInput({ onSubmitHandler = (newMessage) => {} }) {
+export default function TextInput({
+  onSubmitHandler = (newMessage: any) => {},
+}) {
   const [text, setText] = useState("");
   return (
     <div className="flex gap-4">

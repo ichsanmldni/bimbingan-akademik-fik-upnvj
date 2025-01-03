@@ -1,7 +1,5 @@
 "use client";
 
-import FilterField from "@/components/ui/FilterField";
-import SelectField from "@/components/ui/SelectField";
 import searchIcon from "../../../../assets/images/search-icon.png";
 import TrashButton from "@/components/ui/TrashButton";
 import axios from "axios";
@@ -9,12 +7,26 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 interface ManageLaporanBimbinganProps {}
-const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = ({}) => {
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
-  const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
-  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
-  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState([]);
+
+interface TahunAjaran {
+  tahun_ajaran: string;
+  order: number;
+}
+
+interface LaporanBimbingan {
+  id: number;
+  nama_kaprodi: string;
+  nama_dosen_pa: string;
+  tanggal: string;
+  sistem_bimbingan: string;
+  status: string;
+}
+
+const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = () => {
+  const [dataTahunAjaran, setDataTahunAjaran] = useState<TahunAjaran[]>([]);
+  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState<
+    LaporanBimbingan[]
+  >([]);
 
   const getDataTahunAjaran = async () => {
     try {
@@ -27,7 +39,9 @@ const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = ({}) => {
       }
 
       const data = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
+      const sortedDataJurusan = data.sort(
+        (a: TahunAjaran, b: TahunAjaran) => a.order - b.order
+      );
       setDataTahunAjaran(sortedDataJurusan);
     } catch (error) {
       console.error("Error:", error);
@@ -37,28 +51,15 @@ const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = ({}) => {
 
   const getDataLaporanBimbingan = async () => {
     try {
-      const dataLaporanBimbingan = await axios.get(
+      const response = await axios.get(
         `http://localhost:3000/api/laporanbimbingan`
       );
-      setDataLaporanBimbingan(dataLaporanBimbingan.data);
+      setDataLaporanBimbingan(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
-
-  useEffect(() => {
-    if (dataTahunAjaran.length > 0) {
-      const formattedOptions = dataTahunAjaran.map((data) => {
-        return {
-          value: data.tahun_ajaran,
-          label: data.tahun_ajaran,
-        };
-      });
-
-      setOptionsTahunAjaran(formattedOptions);
-    }
-  }, [dataTahunAjaran]);
 
   useEffect(() => {
     getDataTahunAjaran();
@@ -67,7 +68,7 @@ const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = ({}) => {
 
   return (
     <div className="m-8">
-      <div className="flex px-3 py-2 bg-[#F8FAFC] items-center gap-3 rounded-lg mr-6 ml-auto w-[20%] hover:bg-orange-600]">
+      <div className="flex px-3 py-2 bg-[#F8FAFC] items-center gap-3 rounded-lg mr-6 ml-auto w-[20%] hover:bg-orange-600">
         <Image src={searchIcon} alt="Search Icon" className="size-4" />
         <input
           className="text-[#525252] bg-[#F8FAFC] text-[14px] focus:outline-none w-[80%]"
@@ -91,23 +92,30 @@ const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = ({}) => {
             {dataLaporanBimbingan.length > 0 ? (
               dataLaporanBimbingan.map((data, index) => (
                 <tr key={data.id || index} className="text-center">
-                  <td className="border-b border-gray-200 px-4 py-6">1</td>
                   <td className="border-b border-gray-200 px-4 py-6">
-                    Widya Cholil
+                    {index + 1}
                   </td>
                   <td className="border-b border-gray-200 px-4 py-6">
-                    Neny Rosmawarni
+                    {data.nama_kaprodi}
                   </td>
                   <td className="border-b border-gray-200 px-4 py-6">
-                    8 September 2024
+                    {data.nama_dosen_pa}
                   </td>
-                  <td className="border-b border-gray-200 px-4 py-6">Online</td>
                   <td className="border-b border-gray-200 px-4 py-6">
-                    Belum diberi feedback
+                    {data.tanggal}
+                  </td>
+                  <td className="border-b border-gray-200 px-4 py-6">
+                    {data.sistem_bimbingan}
+                  </td>
+                  <td className="border-b border-gray-200 px-4 py-6">
+                    {data.status}
                   </td>
                   <td className="border-b border-gray-200 px-4 py-6">
                     <div className="flex gap-2 items-center justify-center">
-                      <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+                      <TrashButton
+                        onClick={() => {}}
+                        className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                      />
                     </div>
                   </td>
                 </tr>
@@ -125,4 +133,5 @@ const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = ({}) => {
     </div>
   );
 };
+
 export default ManageLaporanBimbingan;

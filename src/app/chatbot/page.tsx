@@ -3,89 +3,102 @@
 import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
 import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
 import ChatbotHeader from "@/components/ui/chatbot/ChatbotHeader";
-import LandingPageHeader from "@/components/ui/chatbot/ChatbotHeader";
-import HeaderChatbot from "@/components/ui/chatbot/ChatDosenHeader";
 import NavbarChatbot from "@/components/ui/chatbot/NavbarChatbot";
 import SidebarChatbot from "@/components/ui/chatbot/SidebarChatbot";
 import TextInputPesanChatbot from "@/components/ui/chatbot/TextInputPesanChatbot";
-import TextInputPesanMahasiswa from "@/components/ui/chatbot/TextInputPesanMahasiswa";
-import TextInput from "@/components/ui/chatbot/TextInputPesanMahasiswa";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+
+interface User {
+  id: number;
+  role: string;
+  // Add other user properties as needed
+}
+
+interface ChatMessageBot {
+  sesi_chatbot_mahasiswa_id: number;
+  pesan: string;
+  waktu_kirim: string; // Adjust type according to your schema
+}
+
+interface ChatMessageMahasiswa {
+  sesi_chatbot_mahasiswa_id: number;
+  pesan: string;
+  waktu_kirim: string; // Adjust type according to your schema
+}
+
+interface RiwayatPesanChatbot {
+  sesi_chatbot_mahasiswa_id: number;
+  pesan: string;
+  role: string;
+  waktu_kirim: string; // Adjust type according to your schema
+}
+
+interface PesanChatbot {
+  sesi_chatbot_mahasiswa_id: number;
+  pesan: string;
+  role: string;
+  waktu_kirim: string; // Adjust type according to your schema
+}
+
+interface DosenPA {
+  dosen_id: number;
+  name: string;
+  email: string;
+  phone: string;
+}
+
+interface JadwalKosong {
+  dosen_id: number;
+  jadwal: { hari: string; jam: string }[];
+}
+
+interface InformasiAkademik {
+  id: number;
+  judul: string;
+  deskripsi: string;
+}
 
 export default function Home() {
-  const id = uuidv4();
-  const [roleUser, setRoleUser] = useState("");
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [dataSesiChatbotMahasiswa, setDataSesiChatbotMahasiswa] = useState([]);
-  const [dataChatbotMahasiswa, setDataChatbotMahasiswa] = useState([]);
-  const [dataPesanBot, setDataPesanBot] = useState([]);
-  const [dataRiwayatPesanChatbot, setDataRiwayatPesanChatbot] = useState([]);
-  const [chatbotData, setChatbotData] = useState([]);
-  const [sortedChatbotData, setSortedChatbotData] = useState([]);
-  const [dataUser, setDataUser] = useState({});
-  const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState({
-    dosen_pa: [
-      {
-        id: 1,
-        name: "Neny",
-        email: "andi@example.com",
-        phone: "081234567890",
-      },
-      {
-        id: 2,
-        name: "Dr. Budi",
-        email: "budi@example.com",
-        phone: "081298765432",
-      },
-    ],
-    jadwal_kosong_semua_dosen_pa: [
-      {
-        dosen_id: 1,
-        jadwal: [
-          { hari: "Senin", jam: "10:00 - 12:00" },
-          { hari: "Rabu", jam: "14:00 - 16:00" },
-        ],
-      },
-      {
-        dosen_id: 2,
-        jadwal: [
-          { hari: "Selasa", jam: "08:00 - 10:00" },
-          { hari: "Kamis", jam: "13:00 - 15:00" },
-        ],
-      },
-    ],
-    jadwal_kosong_dosen_pa_user: {
-      dosen_id: 1,
-      jadwal: [
-        { hari: "Senin", jam: "10:00 - 12:00" },
-        { hari: "Rabu", jam: "14:00 - 16:00" },
-      ],
-    },
-    informasi_akademik: [
-      {
-        id: 1,
-        judul: "Pendaftaran Semester Ganjil",
-        deskripsi:
-          "Pendaftaran untuk semester ganjil dibuka hingga 30 September.",
-      },
-      {
-        id: 2,
-        judul: "Pengumuman Libur Nasional",
-        deskripsi: "Libur nasional akan berlangsung pada tanggal 17 Agustus.",
-      },
-    ],
+  const [roleUser, setRoleUser] = useState<string>("");
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any[]>([]);
+  const [dataSesiChatbotMahasiswa, setDataSesiChatbotMahasiswa] = useState<
+    any[]
+  >([]);
+  const [dataChatbotMahasiswa, setDataChatbotMahasiswa] = useState<
+    ChatMessageMahasiswa[]
+  >([]);
+  const [dataPesanBot, setDataPesanBot] = useState<ChatMessageBot[]>([]);
+  const [dataRiwayatPesanChatbot, setDataRiwayatPesanChatbot] = useState<
+    RiwayatPesanChatbot[]
+  >([]);
+  const [chatbotData, setChatbotData] = useState<PesanChatbot[]>([]);
+  const [sortedChatbotData, setSortedChatbotData] = useState<PesanChatbot[]>(
+    []
+  );
+  const [dataUser, setDataUser] = useState<User | null>(null);
+  const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState<{
+    dosen_pa: DosenPA[];
+    jadwal_kosong_semua_dosen_pa: JadwalKosong[];
+    jadwal_kosong_dosen_pa_user: JadwalKosong;
+    informasi_akademik: InformasiAkademik[];
+  }>({
+    dosen_pa: [],
+    jadwal_kosong_semua_dosen_pa: [],
+    jadwal_kosong_dosen_pa_user: { dosen_id: 0, jadwal: [] },
+    informasi_akademik: [],
   });
+  const [activeSesiChatbotMahasiswa, setActiveSesiChatbotMahasiswa] =
+    useState<number>(0);
 
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
   const API_BASE_URL = "http://localhost:3000/api";
   const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("id-ID", {
       timeZone: "Asia/Jakarta",
       weekday: "long",
@@ -95,15 +108,11 @@ export default function Home() {
     });
   };
 
-  let previousDate = null;
-  const messageEndRef = useRef(null);
-
-  const [activeSesiChatbotMahasiswa, setActiveSesiChatbotMahasiswa] =
-    useState("New Session");
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get(`${API_BASE_URL}/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -119,7 +128,7 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get(`${API_BASE_URL}/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -135,10 +144,8 @@ export default function Home() {
 
   const getDataSesiChatbotMahasiswa = async () => {
     try {
-      const dataSesiChatbotMahasiswa = await axios.get(
-        `http://localhost:3000/api/sesichatbotmahasiswa`
-      );
-      setDataSesiChatbotMahasiswa(dataSesiChatbotMahasiswa.data);
+      const response = await axios.get(`${API_BASE_URL}/sesichatbotmahasiswa`);
+      setDataSesiChatbotMahasiswa(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -147,12 +154,11 @@ export default function Home() {
 
   const getDataChatbotMahasiswabySesiChatbotMahasiswaID = async () => {
     try {
-      const dataChatbotMahasiswa = await axios.get(
-        `http://localhost:3000/api/chatbotmahasiswa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/chatbotmahasiswa`);
 
-      const dataChatbotMahasiswaFiltered = dataChatbotMahasiswa.data.filter(
-        (data) => data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
+      const dataChatbotMahasiswaFiltered = response.data.filter(
+        (data: PesanChatbot) =>
+          data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
       );
       setDataChatbotMahasiswa(dataChatbotMahasiswaFiltered);
     } catch (error) {
@@ -163,12 +169,11 @@ export default function Home() {
 
   const getDataPesanBotBySesiChatbotMahasiswaID = async () => {
     try {
-      const dataPesanBot = await axios.get(
-        `http://localhost:3000/api/pesanbot`
-      );
+      const response = await axios.get(`${API_BASE_URL}/pesanbot`);
 
-      const dataPesanBotFiltered = dataPesanBot.data.filter(
-        (data) => data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
+      const dataPesanBotFiltered = response.data.filter(
+        (data: PesanChatbot) =>
+          data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
       );
       setDataPesanBot(dataPesanBotFiltered);
     } catch (error) {
@@ -179,15 +184,12 @@ export default function Home() {
 
   const getDataRiwayatPesanChatbotBySesiChatbotMahasiswaID = async () => {
     try {
-      const dataRiwayatPesanChatbot = await axios.get(
-        `http://localhost:3000/api/riwayatpesanchatbot`
-      );
+      const response = await axios.get(`${API_BASE_URL}/riwayatpesanchatbot`);
 
-      const dataRiwayatPesanChatbotFiltered =
-        dataRiwayatPesanChatbot.data.filter(
-          (data) =>
-            data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
-        );
+      const dataRiwayatPesanChatbotFiltered = response.data.filter(
+        (data: RiwayatPesanChatbot) =>
+          data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
+      );
       setDataRiwayatPesanChatbot(dataRiwayatPesanChatbotFiltered);
     } catch (error) {
       console.error("Error:", error);
@@ -195,7 +197,7 @@ export default function Home() {
     }
   };
 
-  const getChatGPTResponse = async (sesiId, userMessage) => {
+  const getChatGPTResponse = async (sesiId: number, userMessage: string) => {
     if (!userMessage) throw new Error("Pesan pengguna tidak boleh kosong.");
 
     const dosenList = customDataConsumeGPT.dosen_pa
@@ -266,35 +268,40 @@ export default function Home() {
         data.choices[0]?.message?.content || "Tidak ada respons dari model."
       );
     } catch (error) {
-      console.error("Error getting ChatGPT response:", error.message);
+      console.error(
+        "Error getting ChatGPT response:",
+        (error as Error).message
+      );
       throw new Error("Gagal mendapatkan respons dari ChatGPT.");
     }
   };
 
-  const postData = async (url, payload) => {
+  const postData = async (url: string, payload: any) => {
     try {
       const { data } = await axios.post(url, payload);
       return data;
     } catch (error) {
-      console.error(`Error posting to ${url}:`, error.message);
+      console.error(`Error posting to ${url}:`, (error as Error).message);
       throw new Error(`Gagal mengirim data ke ${url}.`);
     }
   };
 
-  const addPesanBot = (newChat) =>
+  const addPesanBot = (newChat: ChatMessageBot) =>
     postData(`${API_BASE_URL}/pesanbot`, newChat);
 
-  const addChatbotMahasiswa = (newChat) =>
+  const addChatbotMahasiswa = (newChat: ChatMessageMahasiswa) =>
     postData(`${API_BASE_URL}/chatbotmahasiswa`, newChat);
 
-  const handleAddChatChatbotMahasiswa = async (newData) => {
+  const handleAddChatChatbotMahasiswa = async (
+    newData: ChatMessageMahasiswa
+  ) => {
     if (!newData || !newData.pesan) {
       console.error("Data baru atau pesan tidak valid.");
       return;
     }
 
     try {
-      if (activeSesiChatbotMahasiswa !== "New Session") {
+      if (activeSesiChatbotMahasiswa !== 0) {
         const newChat = {
           ...newData,
           sesi_chatbot_mahasiswa_id: activeSesiChatbotMahasiswa,
@@ -321,7 +328,7 @@ export default function Home() {
       } else {
         const newChat = {
           ...newData,
-          mahasiswa_id: dataUser.id,
+          mahasiswa_id: dataUser?.id,
         };
 
         const result = await addChatbotMahasiswa(newChat);
@@ -342,13 +349,17 @@ export default function Home() {
         setActiveSesiChatbotMahasiswa(result.sesi_chatbot_mahasiswa_id);
       }
     } catch (error) {
-      console.error("Error handling chatbot mahasiswa:", error.message);
+      console.error(
+        "Error handling chatbot mahasiswa:",
+        (error as Error).message
+      );
     }
   };
 
   useEffect(() => {
     const sortedChatbotData = [...chatbotData].sort(
-      (a, b) => new Date(a.waktu_kirim) - new Date(b.waktu_kirim)
+      (a, b) =>
+        new Date(a.waktu_kirim).getTime() - new Date(b.waktu_kirim).getTime()
     );
 
     setSortedChatbotData(sortedChatbotData);
@@ -367,7 +378,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
+        const decodedToken = jwtDecode<User>(token);
         setDataUser(decodedToken);
 
         if (decodedToken.role === "Mahasiswa") {
@@ -443,26 +454,15 @@ export default function Home() {
                 id="message-container"
                 className="flex-1 w-full flex flex-col"
               >
-                {sortedChatbotData.map((data, index) => {
-                  const currentDate = formatDate(data.waktu_kirim);
-                  const showDateHeader = currentDate !== previousDate;
-                  previousDate = currentDate;
-
-                  return (
-                    <React.Fragment key={index}>
-                      {showDateHeader && (
-                        <div className="text-center my-4 text-gray-500 text-sm">
-                          {currentDate}
-                        </div>
-                      )}
-                      {data.role === "Mahasiswa" ? (
-                        <BubbleChatEnd key={index + "message"} data={data} />
-                      ) : (
-                        <BubbleChatStart key={index + "message"} data={data} />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
+                {sortedChatbotData.map((data, index) => (
+                  <React.Fragment key={index}>
+                    {data.role === "Mahasiswa" ? (
+                      <BubbleChatEnd key={index + "message"} data={data} />
+                    ) : (
+                      <BubbleChatStart key={index + "message"} data={data} />
+                    )}
+                  </React.Fragment>
+                ))}
                 <div ref={messageEndRef} />
               </div>
             </div>

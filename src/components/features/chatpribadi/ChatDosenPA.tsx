@@ -1,123 +1,93 @@
 "use client";
-import ChatBubble from "@/components/ui/chatbot/BubbleChatStart";
+
 import HeaderChatbot from "@/components/ui/chatbot/ChatDosenHeader";
 import NavbarChatbot from "@/components/ui/chatbot/NavbarChatbot";
-import SidebarChatbot from "@/components/ui/chatbot/SidebarChatbot";
 import TextInputPesanMahasiswa from "@/components/ui/chatbot/TextInputPesanMahasiswa";
 import backIcon from "../../../assets/images/back-icon-black.png";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { MessageSquareText, Sidebar } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
-import BubbleChat from "@/components/ui/chatbot/BubbleChatStart";
 import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
 import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
 
-export default function ChatDosenPA() {
-  const [dataUser, setDataUser] = useState({});
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [userDosenPA, setUserDosenPA] = useState({});
-  const [isMahasiswaChatting, setIsMahasiswaChatting] = useState(false);
-  const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState({});
-  const [chatData, setChatData] = useState([]);
-  const [chatMahasiswaData, setChatMahasiswaData] = useState([]);
-  const [chatDosenPAData, setChatDosenPAData] = useState([]);
-  const [sortedChatData, setSortedChatData] = useState([]);
+interface User {
+  id: number;
+  [key: string]: any;
+}
 
-  const addChatMahasiswa = async (newChat) => {
+interface DosenPA {
+  id: number;
+  dosen: {
+    nama_lengkap: string;
+  };
+  dosen_id: number;
+}
+
+interface ChatData {
+  id: number;
+  waktu_kirim: string;
+  chat_pribadi_id: number;
+  role: string; // "Mahasiswa" or "Dosen PA"
+  [key: string]: any; // Allow additional properties
+}
+
+export default function ChatDosenPA() {
+  const [dataUser, setDataUser] = useState<User>({} as User);
+  const [userDosenPA, setUserDosenPA] = useState<DosenPA | null>(null);
+  const [isMahasiswaChatting, setIsMahasiswaChatting] =
+    useState<boolean>(false);
+  const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState<any>(
+    {}
+  );
+  const [chatData, setChatData] = useState<ChatData[]>([]);
+  const [chatMahasiswaData, setChatMahasiswaData] = useState<ChatData[]>([]);
+  const [chatDosenPAData, setChatDosenPAData] = useState<ChatData[]>([]);
+  const [sortedChatData, setSortedChatData] = useState<ChatData[]>([]);
+
+  const addChatMahasiswa = async (newChat: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/chatmahasiswa",
         newChat
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const handleAddChatMahasiswa = async (newData) => {
-    if (selectedDataChatPribadi.id) {
-      const newChat = {
-        ...newData,
-        chat_pribadi_id: selectedDataChatPribadi.id,
-      };
-      try {
-        const result = await addChatMahasiswa(newChat);
-        getDataChatPribadiByMahasiswaId();
-      } catch (error) {
-        console.error("Registration error:", error.message);
-      }
-    } else {
-      const newChat = {
-        ...newData,
-        mahasiswa_id: dataUser.id,
-        dosen_pa_id: userDosenPA.id,
-      };
-      try {
-        const result = await addChatMahasiswa(newChat);
-        getDataChatPribadiByMahasiswaId();
-      } catch (error) {
-        console.error("Registration error:", error.message);
-      }
-    }
-  };
+  const handleAddChatMahasiswa = async (newData: any) => {
+    const newChat = {
+      ...newData,
+      chat_pribadi_id: selectedDataChatPribadi.id || undefined,
+      mahasiswa_id: dataUser.id,
+      dosen_pa_id: userDosenPA?.id,
+    };
 
-  //   const onSubmitHandler = (newMessage) => {};
-
-  const messageEndRef = useRef(null);
-
-  const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataDosenPA(data);
+      await addChatMahasiswa(newChat);
+      getDataChatPribadiByMahasiswaId();
     } catch (error) {
-      console.error("Error:", error);
-      throw error;
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const getDataKaprodi = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataKaprodi(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const getDataDosenPaByMahasiswaID = async () => {
     try {
-      const dataDosenPa = await axios.get(
+      const dataDosenPa = await axios.get<DosenPA[]>(
         `http://localhost:3000/api/datadosenpa`
       );
-
-      const dataMahasiswa = await axios.get(
+      const dataMahasiswa = await axios.get<any[]>(
         `http://localhost:3000/api/datamahasiswa`
       );
 
       const dataUserMahasiswa = dataMahasiswa.data.find(
         (data) => data.id === dataUser.id
       );
-
       const dosenPa = dataDosenPa.data.find(
         (data) => data.id === dataUserMahasiswa.dosen_pa_id
       );
@@ -133,9 +103,31 @@ export default function ChatDosenPA() {
     }
   };
 
+  const getDataDosenPAByDosenId = async () => {
+    try {
+      const dataDosenPA = await axios.get<DosenPA[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
+
+      const dosen = dataDosenPA.data.find(
+        (data) => data.dosen_id == dataUser.id
+      );
+
+      if (!dosen) {
+        console.error("Dosen tidak ditemukan");
+        return;
+      }
+
+      setUserDosenPA(dosen);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   const getDataChatPribadiByMahasiswaId = async () => {
     try {
-      const dataChatPribadi = await axios.get(
+      const dataChatPribadi = await axios.get<any[]>(
         `http://localhost:3000/api/chatpribadi`
       );
 
@@ -156,31 +148,9 @@ export default function ChatDosenPA() {
     }
   };
 
-  const getDataDosenPAByDosenId = async () => {
-    try {
-      const dataDosenPA = await axios.get(
-        "http://localhost:3000/api/datadosenpa"
-      );
-
-      const dosen = dataDosenPA.data.find(
-        (data) => data.dosen_id == dataUser.id
-      );
-
-      if (!dosen) {
-        console.error("Dosen tidak ditemukan");
-        return;
-      }
-
-      setUserDosenPA(dosen);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
   const getDataChatDosenPAByChatPribadiId = async () => {
     try {
-      const dataChatDosenPA = await axios.get(
+      const dataChatDosenPA = await axios.get<ChatData[]>(
         `http://localhost:3000/api/chatdosenpa`
       );
 
@@ -201,7 +171,7 @@ export default function ChatDosenPA() {
 
   const getDataChatMahasiswaByChatPribadiId = async () => {
     try {
-      const dataChatMahasiswa = await axios.get(
+      const dataChatMahasiswa = await axios.get<ChatData[]>(
         `http://localhost:3000/api/chatmahasiswa`
       );
 
@@ -222,21 +192,31 @@ export default function ChatDosenPA() {
   };
 
   useEffect(() => {
-    if (location.state) {
-      setChatData((prev) => [...prev, location.state]);
+    const cookies = document.cookie.split("; ");
+    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
+    if (authTokenCookie) {
+      const token = authTokenCookie.split("=")[1];
+      try {
+        const decodedToken = jwtDecode<User>(token);
+        setDataUser(decodedToken);
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
     }
   }, []);
 
   useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (dataUser && dataUser.id) {
+      getDataDosenPAByDosenId();
+      getDataDosenPaByMahasiswaID();
+      getDataChatPribadiByMahasiswaId();
     }
-    const sortedChatData = [...chatData].sort(
-      (a, b) => new Date(a.waktu_kirim) - new Date(b.waktu_kirim)
-    );
+  }, [dataUser]);
 
-    setSortedChatData(sortedChatData);
-  }, [chatData]);
+  useEffect(() => {
+    getDataChatMahasiswaByChatPribadiId();
+    getDataChatDosenPAByChatPribadiId();
+  }, [isMahasiswaChatting, selectedDataChatPribadi]);
 
   useEffect(() => {
     const mahasiswaDataWithRole = chatMahasiswaData.map((item) => ({
@@ -255,35 +235,18 @@ export default function ChatDosenPA() {
   }, [chatMahasiswaData, chatDosenPAData]);
 
   useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken = jwtDecode(token);
-        setDataUser(decodedToken);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-    getDataDosenPA();
-    getDataKaprodi();
-  }, []);
+    const sortedChatData = [...chatData].sort(
+      (a, b) =>
+        new Date(a.waktu_kirim).getTime() - new Date(b.waktu_kirim).getTime()
+    );
 
-  useEffect(() => {
-    getDataChatMahasiswaByChatPribadiId();
-    getDataChatDosenPAByChatPribadiId();
-  }, [isMahasiswaChatting, selectedDataChatPribadi]);
+    setSortedChatData(sortedChatData);
+  }, [chatData]);
 
-  useEffect(() => {
-    if (dataUser && dataUser.id) {
-      getDataDosenPAByDosenId();
-      getDataDosenPaByMahasiswaID();
-      getDataChatPribadiByMahasiswaId();
-    }
-  }, [dataUser]);
-
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("id-ID", {
       timeZone: "Asia/Jakarta",
       weekday: "long",
@@ -293,7 +256,7 @@ export default function ChatDosenPA() {
     });
   };
 
-  let previousDate = null;
+  let previousDate: string | null = null;
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -303,7 +266,7 @@ export default function ChatDosenPA() {
 
   return (
     <div className="h-full">
-      <NavbarChatbot />
+      <NavbarChatbot isPathChatbot={false} />
       <div className="flex">
         <div className="flex flex-col h-screen w-full pt-[72px]">
           <div className="pl-4 flex border items-center">

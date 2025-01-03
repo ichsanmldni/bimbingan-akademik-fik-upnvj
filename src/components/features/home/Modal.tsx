@@ -5,15 +5,26 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, ReactNode } from "react";
 import saveIcon from "../../../assets/images/save-icon.png";
 import addIcon from "../../../assets/images/add-data-icon.png";
 import cancelIcon from "../../../assets/images/cancel-icon.png";
 import trashIcon from "../../../assets/images/trash-icon.png";
-import plusIcon from "../../../assets/images/plus.png";
 import Image from "next/image";
 
-const Modal = ({
+interface ModalProps {
+  isOpen: boolean;
+  onClose: any;
+  onAdd?: any;
+  onEdit?: any;
+  onDelete?: any;
+  modalType: any;
+  title: string;
+  children: ReactNode;
+  initialData?: any;
+}
+
+const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   onAdd,
@@ -67,15 +78,19 @@ const Modal = ({
                     </p>
                   </button>
                   <button
-                    className={`flex px-3 py-2 w-[100px] justify-center ${modalType === "Delete" ? "bg-red-500 hover:bg-red-1000" : "bg-green-500 hover:bg-green-600"} items-center gap-2 rounded-lg`}
+                    className={`flex px-3 py-2 w-[100px] justify-center ${
+                      modalType === "Delete"
+                        ? "bg-red-500 hover:bg-red-600"
+                        : "bg-green-500 hover:bg-green-600"
+                    } items-center gap-2 rounded-lg`}
                     onClick={
                       modalType === "Tambah"
                         ? onAdd
                         : modalType === "Edit"
-                          ? () => onEdit(initialData.id)
+                          ? () => onEdit?.(initialData?.id!)
                           : modalType === "Delete"
-                            ? () => onDelete(initialData.id)
-                            : ""
+                            ? () => onDelete?.(initialData?.id!)
+                            : undefined
                     }
                   >
                     {modalType === "Tambah" ? (
@@ -88,7 +103,7 @@ const Modal = ({
                       <Image
                         src={saveIcon}
                         className="size-[18px]"
-                        alt="Add Icon"
+                        alt="Save Icon"
                       />
                     ) : modalType === "Delete" ? (
                       <Image
@@ -96,9 +111,7 @@ const Modal = ({
                         className="size-[18px]"
                         alt="Trash Icon"
                       />
-                    ) : (
-                      ""
-                    )}
+                    ) : null}
                     <p className="text-white font-medium text-[14px]">
                       {modalType === "Tambah"
                         ? "Tambah"

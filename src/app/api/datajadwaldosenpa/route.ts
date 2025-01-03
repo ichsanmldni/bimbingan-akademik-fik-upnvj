@@ -1,21 +1,21 @@
-// /app/api/datadosen/route.js
+// /app/api/datadosen/route.ts
 import prisma from '../../../lib/prisma';
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
-    const JadwalDosenPA = await prisma.jadwaldosenpa.findMany({
+    const jadwalDosenPA = await prisma.jadwaldosenpa.findMany({
       include: {
         dosen_pa: true,
       },
     });
-    
-    return new Response(JSON.stringify(JadwalDosenPA), {
+
+    return new Response(JSON.stringify(jadwalDosenPA), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

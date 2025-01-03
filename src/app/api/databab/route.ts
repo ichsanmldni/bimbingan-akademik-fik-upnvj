@@ -1,64 +1,69 @@
-// /app/api/datadosen/route.js
+// /app/api/datadosen/route.ts
 import prisma from '../../../lib/prisma';
 
-export async function GET(req) {
+interface BabInformasiAkademikRequestBody {
+  id?: number;
+  nama: string;
+  order?: number;
+}
+
+export async function GET(req: Request): Promise<Response> {
   try {
-    // Mengambil data dosen dari database
-    const Bab = await prisma.masterbabinformasiakademik.findMany(
-    );
-    
-    // Mengembalikan data dosen sebagai JSON
-    return new Response(JSON.stringify(Bab), {
+    // Fetching data from the database
+    const bab = await prisma.masterbabinformasiakademik.findMany();
+
+    // Returning data as JSON
+    return new Response(JSON.stringify(bab), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    // Menangani kesalahan
+    // Handling errors
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-export async function POST(req) {
+export async function POST(req: Request): Promise<Response> {
   try {
-    const body = await req.json();
+    const body: BabInformasiAkademikRequestBody = await req.json();
+    const { nama, order } = body;
 
-      const { nama, order} = body;
+    // Validate required fields
+    if (!nama || order === undefined) {
+      return new Response(
+        JSON.stringify({ message: 'All fields are required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-      if (!nama || !order) {
-        return new Response(
-          JSON.stringify({ message: 'All fields are required' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const Bab = await prisma.masterbabinformasiakademik.create({
-        data : {
-          nama, order
-        }
+    const bab = await prisma.masterbabinformasiakademik.create({
+      data: {
+        nama,
+        order,
+      },
     });
-    return new Response(JSON.stringify(Bab), {
+
+    return new Response(JSON.stringify(bab), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
-    
-    
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-export async function PATCH(req) {
+export async function PATCH(req: Request): Promise<Response> {
   try {
-    const body = await req.json();
+    const body: BabInformasiAkademikRequestBody = await req.json();
+    const { id, nama } = body;
 
-    const {id, nama} = body;
-    
+    // Validate required fields
     if (!id || !nama) {
       return new Response(
         JSON.stringify({ message: 'Invalid data' }),
@@ -69,32 +74,37 @@ export async function PATCH(req) {
     const existingRecord = await prisma.masterbabinformasiakademik.findUnique({
       where: { id },
     });
-    
-    if (!existingRecord) {
-      throw new Error('Record not found');
-    }
-    
-    const Bab = await prisma.masterbabinformasiakademik.update({ where: { id }, data: { nama } })
 
-    return new Response(JSON.stringify(Bab), {
+    if (!existingRecord) {
+      return new Response(
+        JSON.stringify({ message: 'Record not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const bab = await prisma.masterbabinformasiakademik.update({
+      where: { id },
+      data: { nama },
+    });
+
+    return new Response(JSON.stringify(bab), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-    
-    
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-export async function DELETE(req) {
+export async function DELETE(req: Request): Promise<Response> {
   try {
-    const body = await req.json();
+    const body: BabInformasiAkademikRequestBody = await req.json();
     const { id } = body;
 
+    // Validate required fields
     if (!id) {
       return new Response(
         JSON.stringify({ message: 'Invalid ID' }),
@@ -123,7 +133,7 @@ export async function DELETE(req) {
     );
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

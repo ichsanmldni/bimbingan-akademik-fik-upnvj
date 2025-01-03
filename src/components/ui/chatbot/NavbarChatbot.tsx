@@ -2,13 +2,12 @@
 import React, { useState } from "react";
 import { Bell, MessageSquareText } from "lucide-react";
 import Notification from "./NotificationChatbot";
-import upnvjLogo from "../../../assets/images/LOGO-UPNVJ.png";
 import Image from "next/image";
 import Logo from "@/components/ui/LogoUPNVJ";
-import Link from "next/link";
 import backIcon from "../../../assets/images/back-icon-black.png";
+import Link from "next/link";
 
-export default function NavbarChatbot({ isPathChatbot }) {
+export default function NavbarChatbot({ isPathChatbot }: any) {
   const [showNotification, setShowNotification] = useState(false);
 
   const handleShowNotification = () => {
@@ -41,9 +40,9 @@ export default function NavbarChatbot({ isPathChatbot }) {
         <button onClick={handleShowNotification}>
           <Bell className="hover:text-[#FB923C] cursor-pointer" />
         </button>
-        <button onClick={() => navigate("/chatmahasiswa")}>
+        <Link href="/chatpribadi">
           <MessageSquareText className="hover:text-[#FB923C] cursor-pointer" />
-        </button>
+        </Link>
       </div>
       <Notification
         message="This is a success notification!"

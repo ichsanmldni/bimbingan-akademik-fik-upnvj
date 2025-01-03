@@ -9,46 +9,85 @@ import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
 import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
-import { p } from "framer-motion/client";
 
 interface DashboardKaprodiProps {
   selectedSubMenuDashboard: string;
-  dataUser: object;
+  dataUser: { id: number; [key: string]: any };
 }
+
+interface UserProfile {
+  nama_lengkap: string;
+  email: string;
+  nip: string;
+  no_whatsapp: string;
+}
+
+interface DosenPA {
+  id: number;
+  dosen: {
+    profile_image: string;
+    nama_lengkap: string;
+    nip: string;
+    email: string;
+    no_whatsapp: string;
+  };
+}
+
+interface LaporanBimbingan {
+  id: number;
+  nama_mahasiswa: string;
+  waktu_bimbingan: string;
+  nama_dosen_pa: string;
+  jumlah_mahasiswa: number;
+  jenis_bimbingan: string;
+  sistem_bimbingan: string;
+  status: string;
+  kendala_mahasiswa: string;
+  solusi: string;
+  kesimpulan: string;
+  dokumentasi: string | null;
+  feedback_kaprodi: string | null;
+  dosen_pa_id: number;
+}
+
 const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   selectedSubMenuDashboard,
   dataUser,
 }) => {
-  const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState("");
-  const [emailKaprodi, setEmailKaprodi] = useState("");
-  const [nip, setNip] = useState("");
-  const [noTelpKaprodi, setNoTelpKaprodi] = useState("");
-  const [userProfile, setUserProfile] = useState({});
+  const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState<string>("");
+  const [emailKaprodi, setEmailKaprodi] = useState<string>("");
+  const [nip, setNip] = useState<string>("");
+  const [noTelpKaprodi, setNoTelpKaprodi] = useState<string>("");
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [selectedDataLaporanBimbingan, setSelectedDataLaporanBimbingan] =
-    useState({});
-  const [selectedDataDosenPA, setSelectedDataDosenPA] = useState({});
-  const [feedbackKaprodi, setFeedbackKaprodi] = useState("");
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
+    useState<LaporanBimbingan | null>(null);
+  const [selectedDataDosenPA, setSelectedDataDosenPA] =
+    useState<DosenPA | null>(null);
+  const [feedbackKaprodi, setFeedbackKaprodi] = useState<string>("");
+  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState<string>("");
+  const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [isDetailLaporanKaprodiClicked, setIsDetailLaporanKaprodiClicked] =
-    useState(false);
-  const [isDetailDosenPAClicked, setIsDetailDosenPAClicked] = useState(false);
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
-  const [isDataChanged, setIsDataChanged] = useState(false);
+    useState<boolean>(false);
+  const [isDetailDosenPAClicked, setIsDetailDosenPAClicked] =
+    useState<boolean>(false);
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState<
+    LaporanBimbingan[]
+  >([]);
+  const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataBimbinganBySelectedDosenPA, setDataBimbinganBySelectedDosenPA] =
-    useState({});
-  const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState({});
-  const [dataKaprodiUser, setDataKaprodiUser] = useState({});
-  const [imagePreview, setImagePreview] = useState(null);
+    useState<any[]>([]);
+  const [dataAllMahasiswa, setDataAllMahasiswa] = useState<any[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any>({});
+  const [dataKaprodiUser, setDataKaprodiUser] = useState<any>({});
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const handleDetailLaporanKaprodi = (data) => {
+  const handleDetailLaporanKaprodi = (data: LaporanBimbingan) => {
     setSelectedDataLaporanBimbingan(data);
     setIsDetailLaporanKaprodiClicked((prev) => !prev);
   };
 
-  const handleDetailDosenPA = (data) => {
+  const handleDetailDosenPA = (data: DosenPA) => {
     setSelectedDataDosenPA(data);
     setIsDetailDosenPAClicked((prev) => !prev);
   };
@@ -69,8 +108,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
 
     if (file) {
       // Validasi ukuran file (maksimal 10MB)
@@ -91,13 +130,13 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       // Menampilkan preview gambar
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const patchKaprodi = async (updatedData) => {
+  const patchKaprodi = async (updatedData: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datadosen",
@@ -111,7 +150,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
-  const handleEditKaprodi = async (id) => {
+  const handleEditKaprodi = async (id: number) => {
     try {
       let jurusanValue = {
         id,
@@ -135,7 +174,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     try {
       const dataDosen = await axios.get("http://localhost:3000/api/datadosen");
 
-      const dosen = dataDosen.data.find((data) => data.id === dataUser.id);
+      const dosen = dataDosen.data.find((data: any) => data.id === dataUser.id);
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -168,7 +207,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       );
 
       const kaprodi = dataKaprodi.data.find(
-        (data) => data.dosen_id == dataUser.id
+        (data: any) => data.dosen_id == dataUser.id
       );
 
       if (!kaprodi) {
@@ -190,7 +229,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       );
 
       const kaprodi = dataKaprodi.data.find(
-        (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data: any) => data.dosen.nama_lengkap === userProfile?.nama_lengkap
       );
 
       if (!kaprodi) {
@@ -204,7 +243,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       );
 
       const laporanBimbingan = dataLaporanBimbingan.data.filter(
-        (data) => data.kaprodi_id === kaprodiid
+        (data: any) => data.kaprodi_id === kaprodiid
       );
 
       setDataLaporanBimbingan(laporanBimbingan);
@@ -214,7 +253,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
-  const patchLaporanBimbingan = async (updatedData) => {
+  const patchLaporanBimbingan = async (updatedData: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/laporanbimbingan",
@@ -227,7 +266,11 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
-  const handleEditLaporanBimbingan = async (id, dosen_pa_id, status) => {
+  const handleEditLaporanBimbingan = async (
+    id: number,
+    dosen_pa_id: number,
+    status: string
+  ) => {
     try {
       let laporanBimbinganValue = {
         id,
@@ -242,7 +285,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       setFeedbackKaprodi("");
       getDataLaporanBimbinganByKaprodiId();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
@@ -253,8 +296,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       );
 
       const bimbingan = dataBimbingan.data.filter(
-        (data) =>
-          data.pengajuan_bimbingan.dosen_pa_id === selectedDataDosenPA.id
+        (data: any) =>
+          data.pengajuan_bimbingan.dosen_pa_id === selectedDataDosenPA?.id
       );
 
       setDataBimbinganBySelectedDosenPA(bimbingan);
@@ -338,7 +381,10 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : (
-                <ProfileImage className="size-[200px] rounded-full" />
+                <ProfileImage
+                  onClick={() => {}}
+                  className="size-[200px] rounded-full"
+                />
               )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
                 {/* Input file yang tersembunyi */}
@@ -363,6 +409,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
             </div>
             <form className="flex flex-col mt-8 gap-4">
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={
                   namaLengkapKaprodi === ""
@@ -376,6 +423,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={emailKaprodi === "" ? "Email" : emailKaprodi}
                 onChange={(e) => {
@@ -385,6 +433,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={nip === "" ? "NIP" : nip}
                 onChange={(e) => {
@@ -394,6 +443,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
+                disabled={false}
                 type="text"
                 placeholder={noTelpKaprodi === "" ? "No Telp" : noTelpKaprodi}
                 onChange={(e) => {
@@ -462,7 +512,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                     alt="backIconOrange"
                     onClick={() => {
                       setIsDetailDosenPAClicked(!isDetailDosenPAClicked);
-                      setSelectedDataDosenPA({});
+                      setSelectedDataDosenPA(null);
                     }}
                     className="cursor-pointer"
                   />
@@ -471,22 +521,22 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 <div className="flex flex-col gap-4 mt-4 border rounded-xl p-8">
                   <div className="flex gap-6">
                     <img
-                      src={selectedDataDosenPA.dosen.profile_image}
+                      src={selectedDataDosenPA?.dosen.profile_image}
                       alt="Profile Image"
                       className="size-[120px] rounded-full cursor-pointer"
                     />
                     <div className="font-medium mt-2">
                       <p className="self-center">
-                        {selectedDataDosenPA.dosen.nama_lengkap}
+                        {selectedDataDosenPA?.dosen.nama_lengkap}
                       </p>
                       <p className="self-center">
-                        {selectedDataDosenPA.dosen.nip}
+                        {selectedDataDosenPA?.dosen.nip}
                       </p>
                       <p className="self-center">
-                        {selectedDataDosenPA.dosen.email}
+                        {selectedDataDosenPA?.dosen.email}
                       </p>
                       <p className="self-center">
-                        {selectedDataDosenPA.dosen.no_whatsapp}
+                        {selectedDataDosenPA?.dosen.no_whatsapp}
                       </p>
                     </div>
                   </div>
@@ -622,7 +672,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                         setIsDetailLaporanKaprodiClicked(
                           !isDetailLaporanKaprodiClicked
                         );
-                        setSelectedDataLaporanBimbingan({});
+                        setSelectedDataLaporanBimbingan(null);
                       }}
                       className="cursor-pointer"
                     />
@@ -631,34 +681,36 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                   <div className="mt-4">
                     <div className="flex flex-col border rounded-lg p-6 gap-4">
                       <div className="flex justify-between text-neutral-600">
-                        <p>{selectedDataLaporanBimbingan.waktu_bimbingan}</p>
+                        <p>{selectedDataLaporanBimbingan?.waktu_bimbingan}</p>
                       </div>
                       <div className="flex justify-between">
                         <div className="flex flex-col gap-4 w-[55%]">
                           <div className="flex flex-col gap-2">
-                            <p className="font-medium">{`Peserta Bimbingan (${selectedDataLaporanBimbingan.jumlah_mahasiswa} mahasiswa) :`}</p>
-                            <p>{selectedDataLaporanBimbingan.nama_mahasiswa}</p>
+                            <p className="font-medium">{`Peserta Bimbingan (${selectedDataLaporanBimbingan?.jumlah_mahasiswa} mahasiswa) :`}</p>
+                            <p>
+                              {selectedDataLaporanBimbingan?.nama_mahasiswa}
+                            </p>
                           </div>
                           <div className="flex flex-col gap-2">
                             <p className="font-medium">Jenis Bimbingan :</p>
                             <p>
                               <p>
-                                {selectedDataLaporanBimbingan.jenis_bimbingan}
+                                {selectedDataLaporanBimbingan?.jenis_bimbingan}
                               </p>
                             </p>
                           </div>
                           <div className="flex flex-col gap-2">
                             <p className="font-medium">Sistem Bimbingan :</p>
                             <p>
-                              {selectedDataLaporanBimbingan.sistem_bimbingan}
+                              {selectedDataLaporanBimbingan?.sistem_bimbingan}
                             </p>
                           </div>
                         </div>
                         <div
-                          className={`self-start ${selectedDataLaporanBimbingan.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} p-3 rounded-lg`}
+                          className={`self-start ${selectedDataLaporanBimbingan?.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} p-3 rounded-lg`}
                         >
                           <p className="text-white text-center">
-                            {selectedDataLaporanBimbingan.status}
+                            {selectedDataLaporanBimbingan?.status}
                           </p>
                         </div>
                       </div>
@@ -666,50 +718,30 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">Kendala Mahasiswa</h3>
                           <p>
-                            {selectedDataLaporanBimbingan.kendala_mahasiswa}
+                            {selectedDataLaporanBimbingan?.kendala_mahasiswa}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">
                             Solusi yang ditawarkan
                           </h3>
-                          <p>{selectedDataLaporanBimbingan.solusi}</p>
-                          {/* <ol className="list-decimal pl-5">
-                            <div className="flex flex-col gap-1">
-                              <li>Mengatur Waktu dan Prioritas</li>
-                              <ol className="list-disc pl-5 flex flex-col gap-1">
-                                <li>
-                                  Solusi : Dosen pembimbing akademik dapat
-                                  membantu mahasiswa dalam membuat jadwal yang
-                                  realistis dan mengajarkan teknik manajemen
-                                  waktu yang efektif, seperti metode time
-                                  blocking, atau menggunakan aplikasi
-                                  perencanaan waktu.
-                                </li>
-                                <li>
-                                  Cara Implementasi : Dosen pembimbing akademik
-                                  dapat membantu mahasiswa dalam membuat jadwal
-                                  yang realistis dan mengajarkan teknik
-                                  manajemen waktu yang efektif, seperti metode
-                                  time blocking, atau menggunakan aplikasi
-                                  perencanaan waktu.
-                                </li>
-                              </ol>
-                            </div>
-                          </ol> */}
+                          <p>{selectedDataLaporanBimbingan?.solusi}</p>
                         </div>
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">Kesimpulan</h3>
-                          <p>{selectedDataLaporanBimbingan.kesimpulan}</p>
+                          <p>{selectedDataLaporanBimbingan?.kesimpulan}</p>
                         </div>
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">Dokumentasi</h3>
                           <div className="grid grid-cols-2 gap-4 items-center">
-                            {selectedDataLaporanBimbingan.dokumentasi ? (
+                            {selectedDataLaporanBimbingan?.dokumentasi ? (
                               selectedDataLaporanBimbingan.dokumentasi
                                 .split(", ")
-                                .map((data) => (
-                                  <div className="flex justify-center border rounded-lg">
+                                .map((data, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex justify-center border rounded-lg"
+                                  >
                                     <img
                                       src={data}
                                       alt="dokumentasi"
@@ -724,10 +756,10 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                         </div>
                         <div className="flex flex-col gap-3">
                           <h3 className="font-medium">Feedback Kaprodi</h3>
-                          {selectedDataLaporanBimbingan.feedback_kaprodi !==
+                          {selectedDataLaporanBimbingan?.feedback_kaprodi !==
                           null ? (
                             <p>
-                              {selectedDataLaporanBimbingan.feedback_kaprodi}
+                              {selectedDataLaporanBimbingan?.feedback_kaprodi}
                             </p>
                           ) : (
                             <div className="flex flex-col gap-3">
@@ -746,14 +778,14 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                               <button
                                 onClick={() => {
                                   handleEditLaporanBimbingan(
-                                    selectedDataLaporanBimbingan.id,
-                                    selectedDataLaporanBimbingan.dosen_pa_id,
+                                    selectedDataLaporanBimbingan?.id,
+                                    selectedDataLaporanBimbingan?.dosen_pa_id,
                                     "Sudah Diberikan Feedback"
                                   );
                                   setIsDetailLaporanKaprodiClicked(
                                     !isDetailLaporanKaprodiClicked
                                   );
-                                  setSelectedDataLaporanBimbingan({});
+                                  setSelectedDataLaporanBimbingan(null);
                                 }}
                                 className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg w-1/5"
                               >
@@ -778,4 +810,5 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     </>
   );
 };
+
 export default DashboardKaprodi;

@@ -19,83 +19,83 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import Modal from "../Modal";
 import InputField from "@/components/ui/InputField";
-import { after } from "node:test";
 
 interface ManageParameterProps {
   activeNavbar: string;
 }
 const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditOrder, setIsEditOrder] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [modalType, setModalType] = useState("");
-  const [selectedParameter, setSelectedParameter] = useState("");
-  const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState<any>(false);
+  const [isEditOrder, setIsEditOrder] = useState<any>(false);
+  const [isLoading, setIsLoading] = useState<any>(false);
+  const [modalType, setModalType] = useState<any>("");
+  const [selectedParameter, setSelectedParameter] = useState<any>("");
+  const [dataTahunAjaran, setDataTahunAjaran] = useState<any>([]);
   const [afterOrderEditDataTahunAjaran, setAfterOrderEditDataTahunAjaran] =
-    useState([]);
-  const [dataJurusan, setDataJurusan] = useState([]);
-  const [afterOrderEditDataJurusan, setAfterOrderEditDataJurusan] = useState(
-    []
-  );
-  const [dataPeminatan, setDataPeminatan] = useState([]);
+    useState<any>([]);
+  const [dataJurusan, setDataJurusan] = useState<any>([]);
+  const [afterOrderEditDataJurusan, setAfterOrderEditDataJurusan] =
+    useState<any>([]);
+  const [dataPeminatan, setDataPeminatan] = useState<any>([]);
   const [afterOrderEditDataPeminatan, setAfterOrderEditDataPeminatan] =
-    useState([]);
-  const [dataJenisBimbingan, setDataJenisBimbingan] = useState([]);
+    useState<any>([]);
+  const [dataJenisBimbingan, setDataJenisBimbingan] = useState<any>([]);
   const [
     afterOrderEditDataJenisBimbingan,
     setAfterOrderEditDataJenisBimbingan,
-  ] = useState([]);
-  const [dataSistemBimbingan, setDataSistemBimbingan] = useState([]);
+  ] = useState<any>([]);
+  const [dataSistemBimbingan, setDataSistemBimbingan] = useState<any>([]);
   const [
     afterOrderEditDataSistemBimbingan,
     setAfterOrderEditDataSistemBimbingan,
-  ] = useState([]);
-  const [selectedJurusan, setSelectedJurusan] = useState("");
-  const [optionsJurusan, setOptionsJurusan] = useState([]);
-  const [valueTahunAjaranAddModal, setValueTahunAjaranAddModal] = useState("");
+  ] = useState<any>([]);
+  const [selectedJurusan, setSelectedJurusan] = useState<any>("");
+  const [optionsJurusan, setOptionsJurusan] = useState<any>([]);
+  const [valueTahunAjaranAddModal, setValueTahunAjaranAddModal] =
+    useState<any>("");
   const [valueTahunAjaranEditModal, setValueTahunAjaranEditModal] =
-    useState("");
+    useState<any>("");
   const [selectedTahunAjaranEditModal, setSelectedTahunAjaranEditModal] =
-    useState({});
+    useState<any>({});
   const [selectedTahunAjaranDeleteModal, setSelectedTahunAjaranDeleteModal] =
-    useState({});
-  const [valueJurusanAddModal, setValueJurusanAddModal] = useState("");
-  const [valueJurusanEditModal, setValueJurusanEditModal] = useState("");
-  const [selectedJurusanEditModal, setSelectedJurusanEditModal] = useState({});
-  const [selectedJurusanDeleteModal, setSelectedJurusanDeleteModal] = useState(
+    useState<any>({});
+  const [valueJurusanAddModal, setValueJurusanAddModal] = useState<any>("");
+  const [valueJurusanEditModal, setValueJurusanEditModal] = useState<any>("");
+  const [selectedJurusanEditModal, setSelectedJurusanEditModal] = useState<any>(
     {}
   );
-  const [valuePeminatanAddModal, setValuePeminatanAddModal] = useState("");
-  const [valuePeminatanEditModal, setValuePeminatanEditModal] = useState("");
-  const [selectedPeminatanEditModal, setSelectedPeminatanEditModal] = useState(
-    {}
-  );
+  const [selectedJurusanDeleteModal, setSelectedJurusanDeleteModal] =
+    useState<any>({});
+  const [valuePeminatanAddModal, setValuePeminatanAddModal] = useState<any>("");
+  const [valuePeminatanEditModal, setValuePeminatanEditModal] =
+    useState<any>("");
+  const [selectedPeminatanEditModal, setSelectedPeminatanEditModal] =
+    useState<any>({});
   const [selectedPeminatanDeleteModal, setSelectedPeminatanDeleteModal] =
-    useState({});
+    useState<any>({});
   const [valueJenisBimbinganAddModal, setValueJenisBimbinganAddModal] =
-    useState("");
+    useState<any>("");
   const [valueJenisBimbinganEditModal, setValueJenisBimbinganEditModal] =
-    useState("");
+    useState<any>("");
   const [selectedJenisBimbinganEditModal, setSelectedJenisBimbinganEditModal] =
-    useState({});
+    useState<any>({});
   const [
     selectedJenisBimbinganDeleteModal,
     setSelectedJenisBimbinganDeleteModal,
-  ] = useState({});
+  ] = useState<any>({});
   const [valueSistemBimbinganAddModal, setValueSistemBimbinganAddModal] =
-    useState("");
+    useState<any>("");
   const [valueSistemBimbinganEditModal, setValueSistemBimbinganEditModal] =
-    useState("");
+    useState<any>("");
   const [
     selectedSistemBimbinganEditModal,
     setSelectedSistemBimbinganEditModal,
-  ] = useState({});
+  ] = useState<any>({});
   const [
     selectedSistemBimbinganDeleteModal,
     setSelectedSistemBimbinganDeleteModal,
-  ] = useState({});
+  ] = useState<any>({});
 
-  const openModal = (type, data = null) => {
+  const openModal = (type: any, data = null) => {
     setModalType(type);
     setIsModalOpen(true);
   };
@@ -114,7 +114,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     setValueSistemBimbinganEditModal("");
   };
 
-  const handleDragEndJurusan = (event) => {
+  const handleDragEndJurusan = (event: any) => {
     const { active, over } = event;
 
     if (!over) {
@@ -129,10 +129,10 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
     if (over !== null) {
       const oldIndex = afterOrderEditDataJurusan.findIndex(
-        (item) => item.id === +active.id
+        (item: any) => item.id === +active.id
       );
       const newIndex = afterOrderEditDataJurusan.findIndex(
-        (item) => item.id === +over.id
+        (item: any) => item.id === +over.id
       );
       if (oldIndex !== -1 && newIndex !== -1) {
         // Salin array dataJurusan
@@ -155,7 +155,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDragEndTahunAjaran = (event) => {
+  const handleDragEndTahunAjaran = (event: any) => {
     const { active, over } = event;
 
     if (!over) {
@@ -170,10 +170,10 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
     if (over !== null) {
       const oldIndex = afterOrderEditDataTahunAjaran.findIndex(
-        (item) => item.id === +active.id
+        (item: any) => item.id === +active.id
       );
       const newIndex = afterOrderEditDataTahunAjaran.findIndex(
-        (item) => item.id === +over.id
+        (item: any) => item.id === +over.id
       );
       if (oldIndex !== -1 && newIndex !== -1) {
         // Salin array dataTahunAjaran
@@ -198,7 +198,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDragEndPeminatan = (event) => {
+  const handleDragEndPeminatan = (event: any) => {
     const { active, over } = event;
 
     if (!over) {
@@ -213,10 +213,10 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
     if (over !== null) {
       const oldIndex = afterOrderEditDataPeminatan.findIndex(
-        (item) => item.id === +active.id
+        (item: any) => item.id === +active.id
       );
       const newIndex = afterOrderEditDataPeminatan.findIndex(
-        (item) => item.id === +over.id
+        (item: any) => item.id === +over.id
       );
       if (oldIndex !== -1 && newIndex !== -1) {
         // Salin array dataPeminatan
@@ -241,7 +241,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDragEndJenisBimbingan = (event) => {
+  const handleDragEndJenisBimbingan = (event: any) => {
     const { active, over } = event;
 
     if (!over) {
@@ -256,10 +256,10 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
     if (over !== null) {
       const oldIndex = afterOrderEditDataJenisBimbingan.findIndex(
-        (item) => item.id === +active.id
+        (item: any) => item.id === +active.id
       );
       const newIndex = afterOrderEditDataJenisBimbingan.findIndex(
-        (item) => item.id === +over.id
+        (item: any) => item.id === +over.id
       );
       if (oldIndex !== -1 && newIndex !== -1) {
         // Salin array dataJenisBimbingan
@@ -284,7 +284,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDragEndSistemBimbingan = (event) => {
+  const handleDragEndSistemBimbingan = (event: any) => {
     const { active, over } = event;
 
     if (!over) {
@@ -299,10 +299,10 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
     if (over !== null) {
       const oldIndex = afterOrderEditDataSistemBimbingan.findIndex(
-        (item) => item.id === +active.id
+        (item: any) => item.id === +active.id
       );
       const newIndex = afterOrderEditDataSistemBimbingan.findIndex(
-        (item) => item.id === +over.id
+        (item: any) => item.id === +over.id
       );
       if (oldIndex !== -1 && newIndex !== -1) {
         // Salin array dataSistemBimbingan
@@ -327,14 +327,15 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const areArraysEqual = (arr1, arr2) => {
+  const areArraysEqual = (arr1: any, arr2: any) => {
     if (arr1.length !== arr2.length) return false;
     return arr1.every(
-      (item, index) => JSON.stringify(item) === JSON.stringify(arr2[index])
+      (item: any, index: any) =>
+        JSON.stringify(item) === JSON.stringify(arr2[index])
     );
   };
 
-  const patchJurusanOrder = async (updatedOrder) => {
+  const patchJurusanOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datajurusan/updateorder",
@@ -352,7 +353,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchTahunAjaranOrder = async (updatedOrder) => {
+  const patchTahunAjaranOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datatahunajaran/updateorder",
@@ -370,14 +371,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchPeminatanOrder = async (updatedOrder) => {
+  const patchPeminatanOrder = async (updatedOrder: any) => {
     try {
       const dataJurusan = await axios.get(
         "http://localhost:3000/api/datajurusan"
       );
 
       const jurusan = dataJurusan.data.find(
-        (data) => data.jurusan === selectedJurusan
+        (data: any) => data.jurusan === selectedJurusan
       );
 
       if (!jurusan) {
@@ -401,7 +402,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchJenisBimbinganOrder = async (updatedOrder) => {
+  const patchJenisBimbinganOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datajenisbimbingan/updateorder",
@@ -419,7 +420,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchSistemBimbinganOrder = async (updatedOrder) => {
+  const patchSistemBimbinganOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
         "http://localhost:3000/api/datasistembimbingan/updateorder",
@@ -497,7 +498,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       }
 
       const data = await response.data;
-      const sortedDataTahunAjaran = data.sort((a, b) => a.order - b.order);
+      const sortedDataTahunAjaran = data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataTahunAjaran(sortedDataTahunAjaran);
       if (data.length === 0) {
         setAfterOrderEditDataTahunAjaran([]);
@@ -517,7 +520,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       }
 
       const data = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
+      const sortedDataJurusan = data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataJurusan(sortedDataJurusan);
       if (data.length === 0) {
         setAfterOrderEditDataJurusan([]);
@@ -528,14 +533,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const getDataPeminatanByJurusan = async (selectedJurusan) => {
+  const getDataPeminatanByJurusan = async (selectedJurusan: any) => {
     try {
       const dataJurusan = await axios.get(
         "http://localhost:3000/api/datajurusan"
       );
 
       const jurusan = dataJurusan.data.find(
-        (data) => data.jurusan === selectedJurusan
+        (data: any) => data.jurusan === selectedJurusan
       );
 
       if (!jurusan) {
@@ -553,7 +558,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       }
 
       const data = await response.data;
-      const sortedDataPeminatan = data.sort((a, b) => a.order - b.order);
+      const sortedDataPeminatan = data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataPeminatan(sortedDataPeminatan);
       if (data.length === 0) {
         setAfterOrderEditDataPeminatan([]);
@@ -575,7 +582,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       }
 
       const data = await response.data;
-      const sortedDataJenisBimbingan = data.sort((a, b) => a.order - b.order);
+      const sortedDataJenisBimbingan = data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataJenisBimbingan(sortedDataJenisBimbingan);
       if (data.length === 0) {
         setAfterOrderEditDataJenisBimbingan([]);
@@ -597,7 +606,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       }
 
       const data = await response.data;
-      const sortedDataSistemBimbingan = data.sort((a, b) => a.order - b.order);
+      const sortedDataSistemBimbingan = data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataSistemBimbingan(sortedDataSistemBimbingan);
       if (data.length === 0) {
         setAfterOrderEditDataSistemBimbingan([]);
@@ -608,7 +619,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  function DraggableRow({ id, index, data, parameter }) {
+  function DraggableRow({ id, index, data, parameter }: any) {
     const { attributes, listeners, setNodeRef, transform, isDragging } =
       useSortable({
         id,
@@ -689,8 +700,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                       <td className="px-4 py-2 w-1/2">{data.jurusan}</td>
                       <td className="px-4 py-4 w-1/4">
                         <div className="flex gap-2 items-center justify-center">
-                          <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                          <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+                          <EditButton
+                            onClick={() => {}}
+                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                          />
+                          <TrashButton
+                            onClick={() => {}}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -771,8 +788,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                       <td className="px-4 py-2 w-1/2">{data.tahun_ajaran}</td>
                       <td className="px-4 py-4 w-1/4">
                         <div className="flex gap-2 items-center justify-center">
-                          <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                          <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+                          <EditButton
+                            onClick={() => {}}
+                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                          />
+                          <TrashButton
+                            onClick={() => {}}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -853,8 +876,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                       <td className="px-4 py-2 w-1/2">{data.peminatan}</td>
                       <td className="px-4 py-4 w-1/4">
                         <div className="flex gap-2 items-center justify-center">
-                          <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                          <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+                          <EditButton
+                            onClick={() => {}}
+                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                          />
+                          <TrashButton
+                            onClick={() => {}}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -937,8 +966,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                       </td>
                       <td className="px-4 py-4 w-1/4">
                         <div className="flex gap-2 items-center justify-center">
-                          <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                          <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+                          <EditButton
+                            onClick={() => {}}
+                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                          />
+                          <TrashButton
+                            onClick={() => {}}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -1021,8 +1056,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                       </td>
                       <td className="px-4 py-4 w-1/4">
                         <div className="flex gap-2 items-center justify-center">
-                          <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                          <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+                          <EditButton
+                            onClick={() => {}}
+                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                          />
+                          <TrashButton
+                            onClick={() => {}}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -1036,7 +1077,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   }
 
-  const addTahunAjaran = async (newData) => {
+  const addTahunAjaran = async (newData: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/datatahunajaran",
@@ -1049,7 +1090,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchTahunAjaran = async (updatedData) => {
+  const patchTahunAjaran = async (updatedData: any) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
@@ -1064,7 +1105,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const deleteTahunAjaran = async (deletedData) => {
+  const deleteTahunAjaran = async (deletedData: any) => {
     try {
       const response = await axios.delete(
         "http://localhost:3000/api/datatahunajaran",
@@ -1078,7 +1119,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleAddTahunAjaran = async (e) => {
+  const handleAddTahunAjaran = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -1095,11 +1136,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       setIsEditOrder(false);
       closeModal();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleEditTahunAjaran = async (id) => {
+  const handleEditTahunAjaran = async (id: any) => {
     try {
       let tahunAjaranValue = {
         id,
@@ -1116,7 +1157,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDeleteTahunAjaran = async (id) => {
+  const handleDeleteTahunAjaran = async (id: any) => {
     try {
       let tahunAjaranValue = {
         id,
@@ -1131,7 +1172,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const addJurusan = async (newData) => {
+  const addJurusan = async (newData: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/datajurusan",
@@ -1144,7 +1185,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchJurusan = async (updatedData) => {
+  const patchJurusan = async (updatedData: any) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
@@ -1159,7 +1200,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const deleteJurusan = async (deletedData) => {
+  const deleteJurusan = async (deletedData: any) => {
     try {
       const response = await axios.delete(
         "http://localhost:3000/api/datajurusan",
@@ -1173,7 +1214,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleAddJurusan = async (e) => {
+  const handleAddJurusan = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -1190,11 +1231,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       setIsEditOrder(false);
       closeModal();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleEditJurusan = async (id) => {
+  const handleEditJurusan = async (id: any) => {
     try {
       let jurusanValue = {
         id,
@@ -1211,7 +1252,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDeleteJurusan = async (id) => {
+  const handleDeleteJurusan = async (id: any) => {
     try {
       let jurusanValue = {
         id,
@@ -1226,14 +1267,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const addPeminatan = async (newData) => {
+  const addPeminatan = async (newData: any) => {
     try {
       const dataJurusan = await axios.get(
         "http://localhost:3000/api/datajurusan"
       );
 
       const jurusan = dataJurusan.data.find(
-        (data) => data.jurusan === selectedJurusan
+        (data: any) => data.jurusan === selectedJurusan
       );
 
       if (!jurusan) {
@@ -1253,7 +1294,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchPeminatan = async (updatedData) => {
+  const patchPeminatan = async (updatedData: any) => {
     console.log(updatedData);
     try {
       const dataJurusan = await axios.get(
@@ -1261,7 +1302,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       );
 
       const jurusan = dataJurusan.data.find(
-        (data) => data.jurusan === selectedJurusan
+        (data: any) => data.jurusan === selectedJurusan
       );
 
       if (!jurusan) {
@@ -1282,14 +1323,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const deletePeminatan = async (deletedData) => {
+  const deletePeminatan = async (deletedData: any) => {
     try {
       const dataJurusan = await axios.get(
         "http://localhost:3000/api/datajurusan"
       );
 
       const jurusan = dataJurusan.data.find(
-        (data) => data.jurusan === selectedJurusan
+        (data: any) => data.jurusan === selectedJurusan
       );
 
       if (!jurusan) {
@@ -1310,7 +1351,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleAddPeminatan = async (e) => {
+  const handleAddPeminatan = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -1327,11 +1368,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       setIsEditOrder(false);
       closeModal();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleEditPeminatan = async (id) => {
+  const handleEditPeminatan = async (id: any) => {
     try {
       let peminatanValue = {
         id,
@@ -1348,7 +1389,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDeletePeminatan = async (id) => {
+  const handleDeletePeminatan = async (id: any) => {
     try {
       let peminatanValue = {
         id,
@@ -1363,7 +1404,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const addJenisBimbingan = async (newData) => {
+  const addJenisBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/datajenisbimbingan",
@@ -1376,7 +1417,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchJenisBimbingan = async (updatedData) => {
+  const patchJenisBimbingan = async (updatedData: any) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
@@ -1391,7 +1432,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const deleteJenisBimbingan = async (deletedData) => {
+  const deleteJenisBimbingan = async (deletedData: any) => {
     try {
       const response = await axios.delete(
         "http://localhost:3000/api/datajenisbimbingan",
@@ -1405,7 +1446,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleAddJenisBimbingan = async (e) => {
+  const handleAddJenisBimbingan = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -1422,11 +1463,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       setIsEditOrder(false);
       closeModal();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleEditJenisBimbingan = async (id) => {
+  const handleEditJenisBimbingan = async (id: any) => {
     try {
       let jenisBimbinganValue = {
         id,
@@ -1443,7 +1484,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDeleteJenisBimbingan = async (id) => {
+  const handleDeleteJenisBimbingan = async (id: any) => {
     try {
       let jenisBimbinganValue = {
         id,
@@ -1458,7 +1499,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const addSistemBimbingan = async (newData) => {
+  const addSistemBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/datasistembimbingan",
@@ -1471,7 +1512,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const patchSistemBimbingan = async (updatedData) => {
+  const patchSistemBimbingan = async (updatedData: any) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
@@ -1486,7 +1527,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const deleteSistemBimbingan = async (deletedData) => {
+  const deleteSistemBimbingan = async (deletedData: any) => {
     try {
       const response = await axios.delete(
         "http://localhost:3000/api/datasistembimbingan",
@@ -1500,7 +1541,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleAddSistemBimbingan = async (e) => {
+  const handleAddSistemBimbingan = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -1517,11 +1558,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       setIsEditOrder(false);
       closeModal();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  const handleEditSistemBimbingan = async (id) => {
+  const handleEditSistemBimbingan = async (id: any) => {
     try {
       let sistemBimbinganValue = {
         id,
@@ -1538,7 +1579,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleDeleteSistemBimbingan = async (id) => {
+  const handleDeleteSistemBimbingan = async (id: any) => {
     try {
       let sistemBimbinganValue = {
         id,
@@ -1555,7 +1596,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   useEffect(() => {
     if (dataJurusan.length > 0) {
-      const formattedOptions = dataJurusan.map((data) => {
+      const formattedOptions = dataJurusan.map((data: any) => {
         return {
           value: data.jurusan,
           label: data.jurusan,
@@ -1564,7 +1605,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
       setOptionsJurusan(formattedOptions);
 
-      const afterOrder = dataJurusan.map((data) => {
+      const afterOrder = dataJurusan.map((data: any) => {
         return {
           ...data,
         };
@@ -1575,7 +1616,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   useEffect(() => {
     if (dataTahunAjaran.length > 0) {
-      const afterOrder = dataTahunAjaran.map((data) => {
+      const afterOrder = dataTahunAjaran.map((data: any) => {
         return {
           ...data,
         };
@@ -1586,7 +1627,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   useEffect(() => {
     if (dataPeminatan.length > 0) {
-      const afterOrder = dataPeminatan.map((data) => {
+      const afterOrder = dataPeminatan.map((data: any) => {
         return {
           ...data,
         };
@@ -1597,7 +1638,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   useEffect(() => {
     if (dataJenisBimbingan.length > 0) {
-      const afterOrder = dataJenisBimbingan.map((data) => {
+      const afterOrder = dataJenisBimbingan.map((data: any) => {
         return {
           ...data,
         };
@@ -1608,7 +1649,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   useEffect(() => {
     if (dataSistemBimbingan.length > 0) {
-      const afterOrder = dataSistemBimbingan.map((data) => {
+      const afterOrder = dataSistemBimbingan.map((data: any) => {
         return {
           ...data,
         };
@@ -1743,9 +1784,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <DndContext onDragEnd={handleDragEndTahunAjaran}>
                     <SortableContext
                       items={afterOrderEditDataTahunAjaran.map(
-                        (item) => item.id
+                        (item: any) => item.id
                       )}
-                      strategy={sortableKeyboardCoordinates}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -1792,9 +1832,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <DndContext onDragEnd={handleDragEndTahunAjaran}>
                     <SortableContext
                       items={afterOrderEditDataTahunAjaran.map(
-                        (item) => item.id
+                        (item: any) => item.id
                       )}
-                      strategy={sortableKeyboardCoordinates}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -1809,15 +1848,17 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {afterOrderEditDataTahunAjaran.map((data, index) => (
-                            <DraggableRow
-                              key={data.id}
-                              id={data.id.toString()}
-                              index={index}
-                              data={data}
-                              parameter="Tahun Ajaran"
-                            />
-                          ))}
+                          {afterOrderEditDataTahunAjaran.map(
+                            (data: any, index: any) => (
+                              <DraggableRow
+                                key={data.id}
+                                id={data.id.toString()}
+                                index={index}
+                                data={data}
+                                parameter="Tahun Ajaran"
+                              />
+                            )
+                          )}
                         </tbody>
                       </table>
                     </SortableContext>
@@ -1834,7 +1875,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <button
                     className={`flex  py-2 bg-red-500 w-[88px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataTahunAjaran, afterOrderEditDataTahunAjaran) || !isEditOrder ? "hidden" : ""}`}
                     onClick={() => {
-                      const afterOrder = dataTahunAjaran.map((data) => {
+                      const afterOrder = dataTahunAjaran.map((data: any) => {
                         return {
                           ...data,
                         };
@@ -1921,8 +1962,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 <div className="overflow-x-auto mt-6 mb-6">
                   <DndContext onDragEnd={handleDragEndJurusan}>
                     <SortableContext
-                      items={afterOrderEditDataJurusan.map((item) => item.id)}
-                      strategy={sortableKeyboardCoordinates}
+                      items={afterOrderEditDataJurusan.map(
+                        (item: any) => item.id
+                      )}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -1969,8 +2011,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 <div className="overflow-x-auto mt-6 mb-6">
                   <DndContext onDragEnd={handleDragEndJurusan}>
                     <SortableContext
-                      items={afterOrderEditDataJurusan.map((item) => item.id)}
-                      strategy={sortableKeyboardCoordinates}
+                      items={afterOrderEditDataJurusan.map(
+                        (item: any) => item.id
+                      )}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -1985,15 +2028,17 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {afterOrderEditDataJurusan.map((data, index) => (
-                            <DraggableRow
-                              key={data.id}
-                              id={data.id.toString()}
-                              index={index}
-                              data={data}
-                              parameter="Jurusan"
-                            />
-                          ))}
+                          {afterOrderEditDataJurusan.map(
+                            (data: any, index: any) => (
+                              <DraggableRow
+                                key={data.id}
+                                id={data.id.toString()}
+                                index={index}
+                                data={data}
+                                parameter="Jurusan"
+                              />
+                            )
+                          )}
                         </tbody>
                       </table>
                     </SortableContext>
@@ -2010,7 +2055,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <button
                     className={`flex px-3 py-2 bg-red-500 w-[90px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataJurusan, afterOrderEditDataJurusan) || !isEditOrder ? "hidden" : ""}`}
                     onClick={() => {
-                      const afterOrder = dataJurusan.map((data) => {
+                      const afterOrder = dataJurusan.map((data: any) => {
                         return {
                           ...data,
                         };
@@ -2102,8 +2147,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 <div className="overflow-x-auto mt-6 mb-6">
                   <DndContext onDragEnd={handleDragEndPeminatan}>
                     <SortableContext
-                      items={afterOrderEditDataPeminatan.map((item) => item.id)}
-                      strategy={sortableKeyboardCoordinates}
+                      items={afterOrderEditDataPeminatan.map(
+                        (item: any) => item.id
+                      )}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -2150,8 +2196,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                 <div className="overflow-x-auto mt-6 mb-6">
                   <DndContext onDragEnd={handleDragEndPeminatan}>
                     <SortableContext
-                      items={afterOrderEditDataPeminatan.map((item) => item.id)}
-                      strategy={sortableKeyboardCoordinates}
+                      items={afterOrderEditDataPeminatan.map(
+                        (item: any) => item.id
+                      )}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -2166,15 +2213,17 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {afterOrderEditDataPeminatan.map((data, index) => (
-                            <DraggableRow
-                              key={data.id}
-                              id={data.id.toString()}
-                              index={index}
-                              data={data}
-                              parameter="Peminatan"
-                            />
-                          ))}
+                          {afterOrderEditDataPeminatan.map(
+                            (data: any, index: any) => (
+                              <DraggableRow
+                                key={data.id}
+                                id={data.id.toString()}
+                                index={index}
+                                data={data}
+                                parameter="Peminatan"
+                              />
+                            )
+                          )}
                         </tbody>
                       </table>
                     </SortableContext>
@@ -2191,7 +2240,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <button
                     className={`flex px-3 py-2 bg-red-500 w-[90px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataPeminatan, afterOrderEditDataPeminatan) || !isEditOrder ? "hidden" : ""}`}
                     onClick={() => {
-                      const afterOrder = dataPeminatan.map((data) => {
+                      const afterOrder = dataPeminatan.map((data: any) => {
                         return {
                           ...data,
                         };
@@ -2282,9 +2331,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <DndContext onDragEnd={handleDragEndJenisBimbingan}>
                     <SortableContext
                       items={afterOrderEditDataJenisBimbingan.map(
-                        (item) => item.id
+                        (item: any) => item.id
                       )}
-                      strategy={sortableKeyboardCoordinates}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -2334,9 +2382,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <DndContext onDragEnd={handleDragEndJenisBimbingan}>
                     <SortableContext
                       items={afterOrderEditDataJenisBimbingan.map(
-                        (item) => item.id
+                        (item: any) => item.id
                       )}
-                      strategy={sortableKeyboardCoordinates}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -2352,7 +2399,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                         </thead>
                         <tbody>
                           {afterOrderEditDataJenisBimbingan.map(
-                            (data, index) => (
+                            (data: any, index: any) => (
                               <DraggableRow
                                 key={data.id}
                                 id={data.id.toString()}
@@ -2378,7 +2425,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <button
                     className={`flex px-3 py-2 bg-red-500 w-[90px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataJenisBimbingan, afterOrderEditDataJenisBimbingan) || !isEditOrder ? "hidden" : ""}`}
                     onClick={() => {
-                      const afterOrder = dataJenisBimbingan.map((data) => {
+                      const afterOrder = dataJenisBimbingan.map((data: any) => {
                         return {
                           ...data,
                         };
@@ -2468,9 +2515,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <DndContext onDragEnd={handleDragEndSistemBimbingan}>
                     <SortableContext
                       items={afterOrderEditDataSistemBimbingan.map(
-                        (item) => item.id
+                        (item: any) => item.id
                       )}
-                      strategy={sortableKeyboardCoordinates}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -2522,9 +2568,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <DndContext onDragEnd={handleDragEndSistemBimbingan}>
                     <SortableContext
                       items={afterOrderEditDataSistemBimbingan.map(
-                        (item) => item.id
+                        (item: any) => item.id
                       )}
-                      strategy={sortableKeyboardCoordinates}
                     >
                       <table className="min-w-full text-[16px] border-collapse table-fixed">
                         <thead>
@@ -2542,7 +2587,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                         </thead>
                         <tbody>
                           {afterOrderEditDataSistemBimbingan.map(
-                            (data, index) => (
+                            (data: any, index: any) => (
                               <DraggableRow
                                 key={data.id}
                                 id={data.id.toString()}
@@ -2568,11 +2613,13 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                   <button
                     className={`flex px-3 py-2 bg-red-500 w-[90px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataSistemBimbingan, afterOrderEditDataSistemBimbingan) || !isEditOrder ? "hidden" : ""}`}
                     onClick={() => {
-                      const afterOrder = dataSistemBimbingan.map((data) => {
-                        return {
-                          ...data,
-                        };
-                      });
+                      const afterOrder = dataSistemBimbingan.map(
+                        (data: any) => {
+                          return {
+                            ...data,
+                          };
+                        }
+                      );
                       setAfterOrderEditDataSistemBimbingan(afterOrder);
                     }}
                   >

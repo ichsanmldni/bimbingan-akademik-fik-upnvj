@@ -1,7 +1,18 @@
-// /app/api/datadosen/route.js
+// /app/api/datadosen/route.ts
 import prisma from '../../../../lib/prisma';
 
-export async function GET(req) {
+interface JadwalDosenPARequestBody {
+  dosen_pa_id: number;
+  hari: string;
+  jam_mulai: string;
+  jam_selesai: string;
+}
+
+interface DeleteRequestBody {
+  id: number;
+}
+
+export async function GET(req: Request): Promise<Response> {
   try {
     const url = new URL(req.url);
     const pathSegments = url.pathname.split('/');
@@ -13,7 +24,8 @@ export async function GET(req) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    const JadwalDosenPA = await prisma.jadwaldosenpa.findMany({
+
+    const jadwalDosenPA = await prisma.jadwaldosenpa.findMany({
       where: {
         dosen_pa_id: parseInt(dosenPaId),
       },
@@ -21,54 +33,55 @@ export async function GET(req) {
         dosen_pa: true,
       },
     });
-    
-    return new Response(JSON.stringify(JadwalDosenPA), {
+
+    return new Response(JSON.stringify(jadwalDosenPA), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-export async function POST(req) {
+export async function POST(req: Request): Promise<Response> {
   try {
-    const body = await req.json();
+    const body: JadwalDosenPARequestBody = await req.json();
+    const { dosen_pa_id, hari, jam_mulai, jam_selesai } = body;
 
-      const { dosen_pa_id, hari, jam_mulai, jam_selesai} = body;
+    if (!dosen_pa_id || !hari || !jam_mulai || !jam_selesai) {
+      return new Response(
+        JSON.stringify({ message: 'All fields are required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-      if (!dosen_pa_id || !hari || !jam_mulai || !jam_selesai) {
-        return new Response(
-          JSON.stringify({ message: 'All fields are required' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const JadwalDosenPA = await prisma.jadwaldosenpa.create({
-        data : {
-          dosen_pa_id, hari, jam_mulai, jam_selesai
-        }
+    const jadwalDosenPA = await prisma.jadwaldosenpa.create({
+      data: {
+        dosen_pa_id,
+        hari,
+        jam_mulai,
+        jam_selesai,
+      },
     });
-    return new Response(JSON.stringify(JadwalDosenPA), {
+
+    return new Response(JSON.stringify(jadwalDosenPA), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
-    
-    
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-export async function DELETE(req) {
+export async function DELETE(req: Request): Promise<Response> {
   try {
-    const body = await req.json();
+    const body: DeleteRequestBody = await req.json();
     const { id } = body;
 
     if (!id) {
@@ -99,7 +112,7 @@ export async function DELETE(req) {
     );
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

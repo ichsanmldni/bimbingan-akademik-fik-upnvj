@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import InputField from "@/components/ui/InputField";
@@ -6,28 +7,55 @@ import SelectField from "@/components/ui/SelectField";
 import Link from "next/link";
 import PasswordInput from "../../ui/PasswordInput";
 
+interface DosenPA {
+  id: number;
+  dosen: {
+    nama_lengkap: string;
+  };
+}
+
+interface Jurusan {
+  id: number;
+  jurusan: string;
+  order: number;
+}
+
+interface Peminatan {
+  id: number;
+  peminatan: string;
+  order: number;
+}
+
 const RegistrationForm = () => {
-  const [namaLengkap, setNamaLengkap] = useState("");
-  const [email, setEmail] = useState("");
-  const [nim, setNim] = useState("");
-  const [nip, setNip] = useState("");
-  const [noWa, setNoWa] = useState("");
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataJurusan, setDataJurusan] = useState([]);
-  const [dataPeminatan, setDataPeminatan] = useState([]);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [selectedDosen, setSelectedDosen] = useState("");
-  const [selectedJurusan, setSelectedJurusan] = useState("");
-  const [selectedPeminatan, setSelectedPeminatan] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [optionsDosenPA, setOptionsDosenPA] = useState([]);
-  const [optionsJurusan, setOptionsJurusan] = useState([]);
-  const [optionsPeminatan, setOptionsPeminatan] = useState([]);
+  const [namaLengkap, setNamaLengkap] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [nim, setNim] = useState<string>("");
+  const [nip, setNip] = useState<string>("");
+  const [noWa, setNoWa] = useState<string>("");
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataJurusan, setDataJurusan] = useState<Jurusan[]>([]);
+  const [dataPeminatan, setDataPeminatan] = useState<Peminatan[]>([]);
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [selectedDosen, setSelectedDosen] = useState<string>("");
+  const [selectedJurusan, setSelectedJurusan] = useState<string>("");
+  const [selectedPeminatan, setSelectedPeminatan] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [optionsDosenPA, setOptionsDosenPA] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [optionsJurusan, setOptionsJurusan] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [optionsPeminatan, setOptionsPeminatan] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   const getDataJurusan = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datajurusan");
+      const response = await axios.get<Jurusan[]>(
+        "http://localhost:3000/api/datajurusan"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -42,9 +70,9 @@ const RegistrationForm = () => {
     }
   };
 
-  const getDataPeminatanByJurusan = async (selectedJurusan) => {
+  const getDataPeminatanByJurusan = async (selectedJurusan: string) => {
     try {
-      const dataJurusan = await axios.get(
+      const dataJurusan = await axios.get<Jurusan[]>(
         "http://localhost:3000/api/datajurusan"
       );
 
@@ -58,7 +86,7 @@ const RegistrationForm = () => {
 
       const jurusanid = jurusan.id;
 
-      const response = await axios.get(
+      const response = await axios.get<Peminatan[]>(
         `http://localhost:3000/api/datapeminatan/${jurusanid}`
       );
 
@@ -77,7 +105,9 @@ const RegistrationForm = () => {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get<DosenPA[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -97,7 +127,6 @@ const RegistrationForm = () => {
         "http://localhost:3000/api/auth/registration",
         userData
       );
-
       return response.data;
     } catch (error) {
       throw error;
@@ -113,7 +142,7 @@ const RegistrationForm = () => {
     }
 
     try {
-      let userData = {
+      let userData: any = {
         role: selectedRole,
         email,
         password,
@@ -142,7 +171,7 @@ const RegistrationForm = () => {
 
       window.location.href = "/login";
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
@@ -154,7 +183,9 @@ const RegistrationForm = () => {
 
   useEffect(() => {
     setOptionsPeminatan([]);
-    getDataPeminatanByJurusan(selectedJurusan);
+    if (selectedJurusan) {
+      getDataPeminatanByJurusan(selectedJurusan);
+    }
   }, [selectedJurusan]);
 
   useEffect(() => {
@@ -232,9 +263,7 @@ const RegistrationForm = () => {
           <InputField
             type="text"
             placeholder="Nama Lengkap"
-            onChange={(e) => {
-              setNamaLengkap(e.target.value);
-            }}
+            onChange={(e) => setNamaLengkap(e.target.value)}
             value={namaLengkap}
             disabled={selectedRole === ""}
             className="px-3 py-2 mt-4 text-[15px] border rounded-lg"

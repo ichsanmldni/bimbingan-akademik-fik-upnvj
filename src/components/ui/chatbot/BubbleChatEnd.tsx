@@ -1,6 +1,6 @@
 import React from "react";
 
-const BubbleChatEnd = ({ data }) => {
+const BubbleChatEnd = ({ data }: any) => {
   const formattedTime = new Date(data.waktu_kirim).toLocaleTimeString("id-ID", {
     hour: "2-digit",
     minute: "2-digit",

@@ -6,57 +6,162 @@ import articleImage from "../../../assets/images/article-image.png";
 import backIcon from "../../../assets/images/back-icon-black.png";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NotificationModal from "@/components/ui/NotificationModal";
 import { useRouter } from "next/navigation";
 import NotificationButton from "@/components/ui/NotificationButton";
+import NavbarUser from "@/components/ui/NavbarUser";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+
+interface User {
+  id: number;
+  role: string;
+  // Add other user properties as needed
+}
 
 export default function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [roleUser, setRoleUser] = useState<string>("");
+  const [dataUser, setDataUser] = useState<User | null>(null);
+  const [dataDosenPA, setDataDosenPA] = useState<any[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any[]>([]);
+  const [dataDosen, setDataDosen] = useState<any[]>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]);
 
   const router = useRouter();
 
   const handleBack = () => {
     router.push("/artikel");
   };
+
   const handleNotificationClick = () => {
     setIsModalOpen(true);
   };
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
+  const getDataDosenPA = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosenPA(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataKaprodi = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataKaprodi(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataDosen = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/datadosen");
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataDosen(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/datamahasiswa"
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataMahasiswa(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    getDataDosenPA();
+    getDataKaprodi();
+    getDataDosen();
+    getDataMahasiswa();
+    const cookies = document.cookie.split("; ");
+    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
+
+    if (authTokenCookie) {
+      const token = authTokenCookie.split("=")[1];
+      try {
+        const decodedToken = jwtDecode<User>(token);
+        setDataUser(decodedToken);
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (dataUser) {
+      if (dataUser.role === "Mahasiswa") {
+        setRoleUser("Mahasiswa");
+      } else if (dataUser.role === "Dosen") {
+        const isDosenPA = dataDosenPA.find(
+          (data) => data.dosen_id === dataUser.id
+        );
+        const isKaprodi = dataKaprodi.find(
+          (data) => data.dosen_id === dataUser.id
+        );
+        if (isDosenPA) {
+          setRoleUser("Dosen PA");
+        } else if (isKaprodi) {
+          setRoleUser("Kaprodi");
+        }
+      }
+    }
+  }, [dataUser, dataDosenPA, dataKaprodi]);
+
+  console.log(dataUser);
+
   return (
     <div>
-      <div className="fixed w-full bg-white border flex justify-between py-5 px-[128px] z-20">
-        <div className="flex items-center gap-5">
-          <Logo className="size-[40px]" />
-          <a href="/" className="font-semibold">
-            Bimbingan Konseling Mahasiswa FIK
-          </a>
-        </div>
-        <div className="flex items-center gap-6">
-          <a href="/">Beranda</a>
-          <Link href="/informasi-akademik">Informasi Akademik</Link>
-          <Link href="/pengajuan-bimbingan">Pengajuan</Link>
-          <Link className="text-orange-500 font-bold" href="/artikel">
-            Artikel
-          </Link>
-        </div>
-        <div className="flex gap-8 items-center">
-          <NotificationButton
-            onClick={handleNotificationClick}
-            className="w-6 h-6 cursor-pointer"
-          />
-          <ProfileImage className="w-8 h-8 rounded-full cursor-pointer" />
-        </div>
-        {isModalOpen && (
-          <NotificationModal
-            className="fixed inset-0 flex items-start mt-[70px] mr-[180px] justify-end z-50"
-            onClose={closeModal}
-          />
-        )}
-      </div>
+      <NavbarUser
+        roleUser={roleUser}
+        dataUser={
+          roleUser === "Mahasiswa"
+            ? dataMahasiswa.find((data) => data.id === dataUser?.id)
+            : roleUser === "Dosen PA" || roleUser === "Kaprodi"
+              ? dataDosen.find((data) => data.id === dataUser?.id)
+              : ""
+        }
+      />
 
       <div className="pt-[100px] mx-32">
         <div className="flex items-center text-[28px] font-semibold gap-2">

@@ -9,18 +9,41 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import NavbarMahasiswa from "@/components/ui/NavbarMahasiswa";
-import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
-import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
+
+interface User {
+  id: number;
+  role: string;
+  // Add other user properties as needed
+}
+
+interface DosenPA {
+  dosen_id: number;
+  // Add other Dosen PA properties as needed
+}
+
+interface Kaprodi {
+  dosen_id: number;
+  // Add other Kaprodi properties as needed
+}
+
+interface Dosen {
+  id: number;
+  // Add other Dosen properties as needed
+}
+
+interface Mahasiswa {
+  id: number;
+  // Add other Mahasiswa properties as needed
+}
 
 export default function Home() {
   const cards = Array(9).fill(null);
-  const [roleUser, setRoleUser] = useState("");
-  const [dataUser, setDataUser] = useState({});
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [dataDosen, setDataDosen] = useState([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState([]);
+  const [roleUser, setRoleUser] = useState<string>("");
+  const [dataUser, setDataUser] = useState<User | null>(null);
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
+  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
   const router = useRouter();
 
   const handleDetailArticle = () => {
@@ -29,13 +52,15 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get<DosenPA[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const data = response.data;
       setDataDosenPA(data);
     } catch (error) {
       console.error("Error:", error);
@@ -45,13 +70,15 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get<Kaprodi[]>(
+        "http://localhost:3000/api/datakaprodi"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const data = response.data;
       setDataKaprodi(data);
     } catch (error) {
       console.error("Error:", error);
@@ -61,13 +88,15 @@ export default function Home() {
 
   const getDataDosen = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosen");
+      const response = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosen"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const data = response.data;
       setDataDosen(data);
     } catch (error) {
       console.error("Error:", error);
@@ -77,7 +106,7 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<Mahasiswa[]>(
         "http://localhost:3000/api/datamahasiswa"
       );
 
@@ -85,7 +114,7 @@ export default function Home() {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const data = response.data;
       setDataMahasiswa(data);
     } catch (error) {
       console.error("Error:", error);
@@ -104,7 +133,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
+        const decodedToken = jwtDecode<User>(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -113,19 +142,21 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (dataUser.role === "Mahasiswa") {
-      setRoleUser("Mahasiswa");
-    } else if (dataUser.role === "Dosen") {
-      const isDosenPA = dataDosenPA.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      const isKaprodi = dataKaprodi.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      if (isDosenPA) {
-        setRoleUser("Dosen PA");
-      } else if (isKaprodi) {
-        setRoleUser("Kaprodi");
+    if (dataUser) {
+      if (dataUser.role === "Mahasiswa") {
+        setRoleUser("Mahasiswa");
+      } else if (dataUser.role === "Dosen") {
+        const isDosenPA = dataDosenPA.find(
+          (data) => data.dosen_id === dataUser.id
+        );
+        const isKaprodi = dataKaprodi.find(
+          (data) => data.dosen_id === dataUser.id
+        );
+        if (isDosenPA) {
+          setRoleUser("Dosen PA");
+        } else if (isKaprodi) {
+          setRoleUser("Kaprodi");
+        }
       }
     }
   }, [dataUser, dataDosenPA, dataKaprodi]);
@@ -136,12 +167,12 @@ export default function Home() {
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.id === dataUser.id)
+            ? dataMahasiswa.find((data) => data.id === dataUser?.id) || {}
             : roleUser === "Dosen PA"
-              ? dataDosen.find((data) => data.id === dataUser.id)
+              ? dataDosen.find((data) => data.id === dataUser?.id) || {}
               : roleUser === "Kaprodi"
-                ? dataDosen.find((data) => data.id === dataUser.id)
-                : ""
+                ? dataDosen.find((data) => data.id === dataUser?.id) || {}
+                : {}
         }
       />
       <div className="py-[100px] ">
@@ -157,7 +188,7 @@ export default function Home() {
           {cards.map((_, index) => (
             <div
               key={index}
-              className="border rounded-lg"
+              className="border rounded-lg cursor-pointer"
               onClick={handleDetailArticle}
             >
               <Image src={landingPageImage} alt="contoh" />

@@ -10,35 +10,79 @@ import dropupIcon from "../../assets/images/upIcon.png";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import NavbarMahasiswa from "@/components/ui/NavbarMahasiswa";
-import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
-import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
+
+interface User {
+  id: number;
+  role: string;
+}
+
+interface Bab {
+  id: number;
+  nama: string;
+  order: number;
+}
+
+interface SubBab {
+  id: number;
+  nama: string;
+  isi: string;
+  order: number;
+}
+
+interface Dosen {
+  id: number;
+  // Add other dosen properties as needed
+}
+
+interface DosenPA {
+  dosen_id: number;
+  // Add other Dosen PA properties as needed
+}
+
+interface Kaprodi {
+  dosen_id: number;
+  // Add other Kaprodi properties as needed
+}
+
+interface Mahasiswa {
+  id: number;
+  // Add other mahasiswa properties as needed
+}
+
+interface SubBabData {
+  id: number;
+  nama: string;
+  isi: string;
+}
 
 export default function Home() {
-  const [openMenu, setOpenMenu] = useState("");
-  const [roleUser, setRoleUser] = useState("");
-  const [dataUser, setDataUser] = useState({});
-  const [dataBab, setDataBab] = useState([]);
-  const [dataSubBab, setDataSubBab] = useState([]);
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [selectedSubBab, setSelectedSubBab] = useState({});
-  const [selectedSubBabData, setSelectedSubBabData] = useState({});
+  const [openMenu, setOpenMenu] = useState<string>("");
+  const [roleUser, setRoleUser] = useState<string>("");
+  const [dataUser, setDataUser] = useState<User | null>(null);
+  const [dataBab, setDataBab] = useState<Bab[]>([]);
+  const [dataSubBab, setDataSubBab] = useState<SubBab[]>([]);
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
+  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
+  const [selectedSubBabData, setSelectedSubBabData] =
+    useState<SubBabData | null>(null);
 
-  const toggleMenu = (menuName) => {
+  const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? "" : menuName);
   };
 
   const getDataBab = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/databab");
+      const response = await axios.get<Bab[]>(
+        "http://localhost:3000/api/databab"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      const sortedDataBab = data.sort((a, b) => a.order - b.order);
+      const sortedDataBab = response.data.sort((a, b) => a.order - b.order);
       setDataBab(sortedDataBab);
     } catch (error) {
       console.error("Error:", error);
@@ -46,11 +90,13 @@ export default function Home() {
     }
   };
 
-  const getDataSubBabByBab = async (selectedBab) => {
+  const getDataSubBabByBab = async (selectedBab: string) => {
     try {
-      const dataBab = await axios.get("http://localhost:3000/api/databab");
+      const response = await axios.get<Bab[]>(
+        "http://localhost:3000/api/databab"
+      );
 
-      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+      const bab = response.data.find((data) => data.nama === selectedBab);
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -58,16 +104,17 @@ export default function Home() {
 
       const babid = bab.id;
 
-      const response = await axios.get(
+      const subBabResponse = await axios.get<SubBab[]>(
         `http://localhost:3000/api/datasubbab/${babid}`
       );
 
-      if (response.status !== 200) {
+      if (subBabResponse.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      const sortedDataSubBab = data.sort((a, b) => a.order - b.order);
+      const sortedDataSubBab = subBabResponse.data.sort(
+        (a, b) => a.order - b.order
+      );
       setDataSubBab(sortedDataSubBab);
     } catch (error) {
       console.error("Error:", error);
@@ -75,11 +122,16 @@ export default function Home() {
     }
   };
 
-  const getDataSubBabBySubBabNama = async (selectedBab, selectedSubBab) => {
+  const getDataSubBabBySubBabNama = async (
+    selectedBab: string,
+    selectedSubBab: string
+  ) => {
     try {
-      const dataBab = await axios.get("http://localhost:3000/api/databab");
+      const response = await axios.get<Bab[]>(
+        "http://localhost:3000/api/databab"
+      );
 
-      const bab = dataBab.data.find((data) => data.nama === selectedBab);
+      const bab = response.data.find((data) => data.nama === selectedBab);
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -87,14 +139,32 @@ export default function Home() {
 
       const babid = bab.id;
 
-      const dataSubBab = await axios.get(
+      const subBabResponse = await axios.get<SubBab[]>(
         `http://localhost:3000/api/datasubbab/${babid}`
       );
-      const subbab = dataSubBab.data.find(
+      const subbab = subBabResponse.data.find(
         (data) => data.nama === selectedSubBab
       );
 
-      setSelectedSubBabData(subbab);
+      setSelectedSubBabData(subbab || null);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataDosen = async () => {
+    try {
+      const response = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosen"
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = response.data;
+      setDataDosen(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -103,13 +173,15 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get<DosenPA[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const data = response.data;
       setDataDosenPA(data);
     } catch (error) {
       console.error("Error:", error);
@@ -119,13 +191,15 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get<Kaprodi[]>(
+        "http://localhost:3000/api/datakaprodi"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const data = response.data;
       setDataKaprodi(data);
     } catch (error) {
       console.error("Error:", error);
@@ -133,9 +207,29 @@ export default function Home() {
     }
   };
 
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get<Mahasiswa[]>(
+        "http://localhost:3000/api/datamahasiswa"
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = response.data;
+      setDataMahasiswa(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
+    getDataDosen();
     getDataDosenPA();
     getDataKaprodi();
+    getDataMahasiswa();
     getDataBab();
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
@@ -143,7 +237,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
+        const decodedToken = jwtDecode<User>(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -152,9 +246,9 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (dataUser.role === "Mahasiswa") {
+    if (dataUser?.role === "Mahasiswa") {
       setRoleUser("Mahasiswa");
-    } else if (dataUser.role === "Dosen") {
+    } else if (dataUser?.role === "Dosen") {
       const isDosenPA = dataDosenPA.find(
         (data) => data.dosen_id === dataUser.id
       );
@@ -171,7 +265,18 @@ export default function Home() {
 
   return (
     <div>
-      <NavbarUser roleUser={roleUser} />
+      <NavbarUser
+        roleUser={roleUser}
+        dataUser={
+          roleUser === "Mahasiswa"
+            ? dataMahasiswa.find((data) => data.id === dataUser?.id) || {}
+            : roleUser === "Dosen PA"
+              ? dataDosen.find((data) => data.id === dataUser?.id) || {}
+              : roleUser === "Kaprodi"
+                ? dataDosen.find((data) => data.id === dataUser?.id) || {}
+                : {}
+        }
+      />
       <div className="flex w-full pt-[80px]">
         <div className="flex flex-col w-[25%] border ml-32 gap-6 pt-10 pb-6 px-8">
           <div className="flex flex-col gap-4">
@@ -193,7 +298,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex flex-col gap-4">
-            {dataBab.map((data, index) => {
+            {dataBab.map((data) => {
               return (
                 <div key={data.id}>
                   <div
@@ -222,7 +327,7 @@ export default function Home() {
                   </div>
                   {openMenu === data.nama && (
                     <div className="text-[14px] text-gray-700">
-                      {dataSubBab.map((data, index) => (
+                      {dataSubBab.map((data) => (
                         <p
                           key={data.id}
                           onClick={() =>
@@ -242,9 +347,9 @@ export default function Home() {
         </div>
         {/* ini isi */}
         <div className="w-[75%] h-[500px] py-10 px-[100px]">
-          <h1 className="font-bold text-[18px]">{selectedSubBabData.nama}</h1>
+          <h1 className="font-bold text-[18px]">{selectedSubBabData?.nama}</h1>
           <p className="mt-5 leading-[26px] text-justify">
-            {selectedSubBabData.isi}
+            {selectedSubBabData?.isi}
           </p>
         </div>
       </div>

@@ -13,32 +13,71 @@ import cancelIcon from "../../assets/images/cancel-icon.png";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function Home() {
-  const [selectedKaprodi, setSelectedKaprodi] = useState("");
-  const [kendala, setKendala] = useState("");
-  const [solusi, setSolusi] = useState("");
-  const [kesimpulan, setKesimpulan] = useState("");
-  const [dokumentasi, setDokumentasi] = useState("");
-  const [roleUser, setRoleUser] = useState("");
-  const [dataUser, setDataUser] = useState({});
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [optionsKaprodi, setOptionsKaprodi] = useState([]);
-  const [dataSelectedKaprodi, setDataSelectedKaprodi] = useState({});
-  const [dataBimbingan, setDataBimbingan] = useState([]);
-  const [userProfile, setUserProfile] = useState({});
-  const [selectedBimbingan, setSelectedBimbingan] = useState([]);
-  const [dataDosen, setDataDosen] = useState([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState([]);
-  const [imagePreviews, setImagePreviews] = useState([]);
+interface User {
+  id: number;
+  role: string;
+  [key: string]: any; // Allow additional properties
+}
 
-  const toggleBimbingan = (data) => {
+interface Dosen {
+  id: number;
+  nama_lengkap: string;
+  [key: string]: any; // Allow additional properties
+}
+
+interface Kaprodi {
+  id: number;
+  dosen: Dosen;
+  dosen_id: number;
+  kaprodi_jurusan: {
+    jurusan: string;
+  };
+}
+
+interface Bimbingan {
+  id: number;
+  pengajuan_bimbingan: {
+    nama_lengkap: string;
+    jadwal_bimbingan: string;
+    jenis_bimbingan: string;
+    sistem_bimbingan: string;
+    dosen_pa_id: number;
+  };
+  laporan_bimbingan_id: string | null;
+}
+
+export default function Home() {
+  const [selectedKaprodi, setSelectedKaprodi] = useState<string>("");
+  const [kendala, setKendala] = useState<string>("");
+  const [solusi, setSolusi] = useState<string>("");
+  const [kesimpulan, setKesimpulan] = useState<string>("");
+  const [dokumentasi, setDokumentasi] = useState<string>("");
+  const [roleUser, setRoleUser] = useState<string>("");
+  const [dataUser, setDataUser] = useState<User>({} as User);
+  const [dataDosenPA, setDataDosenPA] = useState<Dosen[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
+  const [optionsKaprodi, setOptionsKaprodi] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [dataSelectedKaprodi, setDataSelectedKaprodi] =
+    useState<Kaprodi | null>(null);
+  const [dataBimbingan, setDataBimbingan] = useState<Bimbingan[]>([]);
+  const [userProfile, setUserProfile] = useState<{
+    nama_lengkap: string;
+    email: string;
+    nip: string;
+    no_whatsapp: string;
+  } | null>(null);
+  const [selectedBimbingan, setSelectedBimbingan] = useState<Bimbingan[]>([]);
+  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]); // Adjust type as needed
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  const toggleBimbingan = (data: Bimbingan) => {
     setSelectedBimbingan((prevSelected) => {
       if (prevSelected.some((bimbingan) => bimbingan.id === data.id)) {
-        // Jika bimbingan sudah dipilih, hapus dari daftar
         return prevSelected.filter((bimbingan) => bimbingan.id !== data.id);
       } else {
-        // Jika bimbingan belum dipilih, tambahkan ke daftar
         return [...prevSelected, data];
       }
     });
@@ -46,14 +85,13 @@ export default function Home() {
 
   const getDataDosen = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosen");
-
+      const response = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosen"
+      );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
-
-      const data = await response.data;
-      setDataDosen(data);
+      setDataDosen(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -62,16 +100,13 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<any[]>(
         "http://localhost:3000/api/datamahasiswa"
       );
-
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
-
-      const data = await response.data;
-      setDataMahasiswa(data);
+      setDataMahasiswa(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -80,14 +115,13 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
-
+      const response = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
-
-      const data = await response.data;
-      setDataDosenPA(data);
+      setDataDosenPA(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -96,38 +130,38 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
-
+      const response = await axios.get<Kaprodi[]>(
+        "http://localhost:3000/api/datakaprodi"
+      );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
-
-      const data = await response.data;
-      setDataKaprodi(data);
+      setDataKaprodi(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
 
-  const addLaporanBimbingan = async (newData) => {
+  const addLaporanBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/laporanbimbingan",
         newData
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const handleAddLaporanBimbingan = async (e) => {
+  const handleAddLaporanBimbingan = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     try {
-      let laporanBimbinganValue = {
+      const laporanBimbinganValue = {
         nama_mahasiswa: [
           ...new Set(
             selectedBimbingan.map(
@@ -142,7 +176,7 @@ export default function Home() {
             )
           ),
         ].join(", "),
-        kaprodi_id: dataSelectedKaprodi.id,
+        kaprodi_id: dataSelectedKaprodi?.id,
         kendala_mahasiswa: kendala,
         solusi,
         kesimpulan,
@@ -161,20 +195,17 @@ export default function Home() {
               (bimbingan) => bimbingan.pengajuan_bimbingan.jenis_bimbingan
             )
           ),
-        ] // Hapus duplikat dengan Set
-          .join(", "), // Gabungkan jenis bimbingan dengan koma
+        ].join(", "),
         sistem_bimbingan: [
           ...new Set(
             selectedBimbingan.map(
               (bimbingan) => bimbingan.pengajuan_bimbingan.sistem_bimbingan
             )
           ),
-        ] // Hapus duplikat dengan Set
-          .join(", "), // Gabungkan sistem bimbingan dengan koma
+        ].join(", "),
         bimbingan_id: [
           ...new Set(selectedBimbingan.map((bimbingan) => bimbingan.id)),
-        ] // Hapus duplikat dengan Set
-          .join(", "), // Gabungkan sistem bimbingan dengan koma,
+        ].join(", "),
       };
       console.log(laporanBimbinganValue);
 
@@ -188,15 +219,16 @@ export default function Home() {
       setDokumentasi("");
       getDataBimbinganByDosenPaId();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
   const getDataDosenById = async () => {
     try {
-      const dataDosen = await axios.get("http://localhost:3000/api/datadosen");
-
-      const dosen = dataDosen.data.find((data) => data.id == dataUser.id);
+      const dataDosen = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosen"
+      );
+      const dosen = dataDosen.data.find((data) => data.id === dataUser.id);
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -217,12 +249,11 @@ export default function Home() {
 
   const getDataBimbinganByDosenPaId = async () => {
     try {
-      const dataDosenPa = await axios.get(
-        `http://localhost:3000/api/datadosenpa`
+      const dataDosenPa = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosenpa"
       );
-
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data) => data.dosen.nama_lengkap === userProfile?.nama_lengkap
       );
 
       console.log(dosenPa);
@@ -233,10 +264,9 @@ export default function Home() {
 
       const dosenpaid = dosenPa.id;
 
-      const dataBimbingan = await axios.get(
-        `http://localhost:3000/api/bimbingan`
+      const dataBimbingan = await axios.get<Bimbingan[]>(
+        "http://localhost:3000/api/bimbingan"
       );
-
       const bimbingan = dataBimbingan.data.filter(
         (data) => data.pengajuan_bimbingan.dosen_pa_id === dosenpaid
       );
@@ -248,12 +278,12 @@ export default function Home() {
     }
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files); // Ambil semua file sebagai array
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []); // Ambil semua file sebagai array
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"]; // Format yang diperbolehkan
     const maxSize = 10 * 1024 * 1024; // Ukuran maksimum per file (10MB)
 
-    const newPreviews = []; // Array untuk menampung preview gambar baru
+    const newPreviews: string[] = []; // Array untuk menampung preview gambar baru
 
     for (const file of files) {
       // Validasi ukuran file
@@ -273,16 +303,19 @@ export default function Home() {
       // Membaca file sebagai Data URL untuk preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreviews((prev) => [...prev, reader.result]); // Tambahkan preview baru ke state
+        setImagePreviews((prev) => [...prev, reader.result as string]); // Tambahkan preview baru ke state
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleDeleteImage = (e, index) => {
+  const handleDeleteImage = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    index: number
+  ) => {
     e.preventDefault();
     setImagePreviews((prev) => {
-      URL.revokeObjectURL(prev[index].url);
+      URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -298,7 +331,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
+        const decodedToken = jwtDecode<User>(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -330,7 +363,7 @@ export default function Home() {
       const data = dataKaprodi.find(
         (data) => data.dosen.nama_lengkap === selectedKaprodi
       );
-      setDataSelectedKaprodi(data);
+      setDataSelectedKaprodi(data || null);
     }
   }, [selectedKaprodi]);
 
@@ -369,7 +402,7 @@ export default function Home() {
               ? dataDosen.find((data) => data.id === dataUser.id)
               : roleUser === "Kaprodi"
                 ? dataDosen.find((data) => data.id === dataUser.id)
-                : ""
+                : undefined
         }
       />
       <div className="pt-[100px]">
@@ -377,7 +410,10 @@ export default function Home() {
           <h1 className="font-semibold text-[30px] text-center pt-8">
             Laporan Bimbingan Konseling Mahasiswa
           </h1>
-          <form className="flex flex-col gap-4 p-8">
+          <form
+            className="flex flex-col gap-4 p-8"
+            onSubmit={handleAddLaporanBimbingan}
+          >
             {dataBimbingan.filter((data) => data.laporan_bimbingan_id === null)
               .length === 0 ? (
               <p className="col-span-3 text-center text-gray-500">
@@ -407,29 +443,18 @@ export default function Home() {
                                 {data.pengajuan_bimbingan.nama_lengkap}
                               </p>
                               {(() => {
-                                // Ambil data jadwal_bimbingan
                                 const jadwal =
                                   data.pengajuan_bimbingan.jadwal_bimbingan;
-
-                                // Pisahkan bagian-bagian dari jadwal
-                                const parts = jadwal.split(" "); // ["Senin,", "16", "Desember", "2024", "09:00-10:00"]
+                                const parts = jadwal.split(" ");
 
                                 if (parts.length === 5) {
-                                  // Ambil bagian hari, tanggal, bulan, tahun dan waktu
                                   const [day, date, month, year, timeRange] =
                                     parts;
-
-                                  // Hapus koma pada bagian hari
                                   const formattedDay = day.replace(",", "");
-
-                                  // Format tanggal
                                   const formattedDate = `${formattedDay}, ${date} ${month} ${year}`;
-
-                                  // Pisahkan waktu menjadi startTime dan endTime
                                   const [startTime, endTime] =
                                     timeRange.split("-");
 
-                                  // Format hasil yang diinginkan
                                   return (
                                     <>
                                       <p>{`${formattedDate}`}</p>
@@ -437,7 +462,6 @@ export default function Home() {
                                     </>
                                   );
                                 } else {
-                                  // Jika format tidak sesuai
                                   return <p>Jadwal tidak valid.</p>;
                                 }
                               })()}
@@ -462,6 +486,7 @@ export default function Home() {
             {selectedBimbingan.length > 0 ? (
               <div className="flex flex-col gap-4">
                 <InputField
+                  disabled={false}
                   type="text"
                   placeholder="Kendala Mahasiswa"
                   onChange={(e) => setKendala(e.target.value)}
@@ -469,6 +494,7 @@ export default function Home() {
                   className="px-3 py-2 text-[15px] border rounded-lg"
                 />
                 <InputField
+                  disabled={false}
                   type="text"
                   placeholder="Solusi Yang Ditawarkan"
                   onChange={(e) => setSolusi(e.target.value)}
@@ -476,6 +502,7 @@ export default function Home() {
                   className="px-3 py-2 text-[15px] border rounded-lg"
                 />
                 <InputField
+                  disabled={false}
                   type="text"
                   placeholder="Kesimpulan"
                   onChange={(e) => setKesimpulan(e.target.value)}
@@ -549,7 +576,7 @@ export default function Home() {
                   </div>
                 )}
                 <button
-                  onClick={(e) => handleAddLaporanBimbingan(e)}
+                  type="submit"
                   className="bg-orange-500 hover:bg-orange-600 rounded-lg py-[6px] text-white font-medium"
                 >
                   Buat Laporan

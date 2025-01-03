@@ -1,32 +1,42 @@
+// /app/api/datadosen/route.ts
 import fs from 'fs/promises';
 import path from 'path';
 import prisma from '../../../lib/prisma';
 
-export async function GET(req) {
+interface DosenRequestBody {
+  id: number;
+  nama_lengkap: string;
+  email: string;
+  nip: string;
+  no_whatsapp: string;
+  profile_image?: string;
+}
+
+export async function GET(req: Request): Promise<Response> {
   try {
-    // Mengambil data dosen dari database
-    const Dosen = await prisma.dosen.findMany();
-    
-    // Mengembalikan data dosen sebagai JSON
-    return new Response(JSON.stringify(Dosen), {
+    // Fetching data from the database
+    const dosen = await prisma.dosen.findMany();
+
+    // Returning data as JSON
+    return new Response(JSON.stringify(dosen), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    // Menangani kesalahan
+    // Handling errors
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-export async function PATCH(req) {
+export async function PATCH(req: Request): Promise<Response> {
   try {
-    const body = await req.json();
+    const body: DosenRequestBody = await req.json();
+    const { id, nama_lengkap, email, nip, no_whatsapp, profile_image } = body;
 
-    const {id, nama_lengkap, email, nip, no_whatsapp, profile_image} = body;
-    
+    // Validate required fields
     if (!id || !nama_lengkap || !email || !nip || !no_whatsapp) {
       return new Response(
         JSON.stringify({ message: 'Invalid data' }),
@@ -37,47 +47,51 @@ export async function PATCH(req) {
     const existingRecord = await prisma.dosen.findUnique({
       where: { id },
     });
-    
+
     if (!existingRecord) {
-      throw new Error('Record not found');
+      return new Response(
+        JSON.stringify({ message: 'Record not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Buat direktori jika belum ada
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profile_pictures');
-        await fs.mkdir(uploadDir, { recursive: true }); // Membuat folder secara rekursif
-    
-        // Simpan gambar jika ada
-        let savedImagePath = existingRecord.profile_image; // Gunakan gambar lama jika tidak diupdate
-        if (profile_image) {
-          const base64Data = profile_image.replace(/^data:image\/\w+;base64,/, '');
-          const imageBuffer = Buffer.from(base64Data, 'base64');
-    
-          const filename = `profile_${id}_${Date.now()}.jpg`;
-          savedImagePath = path.join('uploads', 'profile_pictures', filename); // Path relatif
-    
-          if (existingRecord.profile_image) {
-            const oldImagePath = path.join(process.cwd(), 'public', existingRecord.profile_image);
-            try {
-              await fs.unlink(oldImagePath); // Menghapus gambar lama
-            } catch (err) {
-              console.error('Failed to delete old image:', err);
-            }
-          }
-    
-          await fs.writeFile(path.join(process.cwd(), 'public', savedImagePath), imageBuffer); // Simpan gambar di folder public
-        }
-    
-    const Dosen = await prisma.dosen.update({ where: { id }, data: { nama_lengkap, email, nip, no_whatsapp, profile_image: savedImagePath } })
+    // Create directory if it doesn't exist
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profile_pictures');
+    await fs.mkdir(uploadDir, { recursive: true }); // Create folder recursively
 
-    return new Response(JSON.stringify(Dosen), {
+    // Save image if provided
+    let savedImagePath = existingRecord.profile_image; // Use old image if not updated
+    if (profile_image) {
+      const base64Data = profile_image.replace(/^data:image\/\w+;base64,/, '');
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+
+      const filename = `profile_${id}_${Date.now()}.jpg`;
+      savedImagePath = path.join('uploads', 'profile_pictures', filename); // Relative path
+
+      if (existingRecord.profile_image) {
+        const oldImagePath = path.join(process.cwd(), 'public', existingRecord.profile_image);
+        try {
+          await fs.unlink(oldImagePath); // Delete old image
+        } catch (err) {
+          console.error('Failed to delete old image:', err);
+        }
+      }
+
+      await fs.writeFile(path.join(process.cwd(), 'public', savedImagePath), imageBuffer); // Save image in public folder
+    }
+
+    const dosen = await prisma.dosen.update({
+      where: { id },
+      data: { nama_lengkap, email, nip, no_whatsapp, profile_image: savedImagePath },
+    });
+
+    return new Response(JSON.stringify(dosen), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-    
-    
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

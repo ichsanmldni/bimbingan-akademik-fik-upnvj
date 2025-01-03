@@ -1,7 +1,7 @@
 import React from "react";
 import { UserRound } from "lucide-react";
 
-export default function ChatDosenHeader({ namaDosenPA }) {
+export default function ChatDosenHeader({ namaDosenPA }: any) {
   return (
     <div className="flex gap-4 p-4 items-center">
       <div className="p-1 rounded-full bg-orange-200">

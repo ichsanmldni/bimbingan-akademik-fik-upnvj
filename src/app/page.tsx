@@ -12,35 +12,58 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import chatbotIcon from "../assets/images/chatbot.png";
 
+interface User {
+  id: number;
+  role: string;
+  // Add other properties based on your user data structure
+}
+
+interface Dosen {
+  id: number;
+  // Add other properties based on your dosen data structure
+}
+
+interface Mahasiswa {
+  id: number;
+  // Add other properties based on your mahasiswa data structure
+}
+
+interface Kaprodi {
+  id: number;
+  // Add other properties based on your kaprodi data structure
+}
+
 export default function Home() {
   const cards = Array(9).fill(null);
 
-  const [roleUser, setRoleUser] = useState("");
-  const [activeNavbar, setActiveNavbar] = useState("Dashboard");
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [dataDosen, setDataDosen] = useState([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState([]);
-  const [dataUser, setDataUser] = useState({});
+  const [roleUser, setRoleUser] = useState<string>("");
+  const [activeNavbar, setActiveNavbar] = useState<string>("Dashboard");
+  const [dataDosenPA, setDataDosenPA] = useState<Dosen[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
+  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
+  const [dataUser, setDataUser] = useState<User | null>(null);
 
   const getDataDosen = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosen");
+      const response = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosen"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      setDataDosen(data);
+      setDataDosen(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
+
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<Mahasiswa[]>(
         "http://localhost:3000/api/datamahasiswa"
       );
 
@@ -48,23 +71,24 @@ export default function Home() {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      setDataMahasiswa(data);
+      setDataMahasiswa(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
+
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get<Dosen[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      setDataDosenPA(data);
+      setDataDosenPA(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -73,14 +97,15 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get<Kaprodi[]>(
+        "http://localhost:3000/api/datakaprodi"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      setDataKaprodi(data);
+      setDataKaprodi(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -94,19 +119,19 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
+        const decodedToken = jwtDecode<User>(token);
         setDataUser(decodedToken);
 
         if (decodedToken.role === "Mahasiswa") {
           setRoleUser("Mahasiswa");
         } else if (
           decodedToken.role === "Dosen" &&
-          dataDosenPA.find((data) => data.dosen_id === decodedToken.id)
+          dataDosenPA.find((data) => data.id === decodedToken.id)
         ) {
           setRoleUser("Dosen PA");
         } else if (
           decodedToken.role === "Dosen" &&
-          dataKaprodi.find((data) => data.dosen_id === decodedToken.id)
+          dataKaprodi.find((data) => data.id === decodedToken.id)
         ) {
           setRoleUser("Kaprodi");
         } else if (decodedToken.role === "Admin") {
@@ -133,12 +158,12 @@ export default function Home() {
             roleUser={roleUser}
             dataUser={
               roleUser === "Mahasiswa"
-                ? dataMahasiswa.find((data) => data.id === dataUser.id)
+                ? dataMahasiswa.find((data) => data.id === dataUser?.id)
                 : roleUser === "Dosen PA"
-                  ? dataDosen.find((data) => data.id === dataUser.id)
+                  ? dataDosen.find((data) => data.id === dataUser?.id)
                   : roleUser === "Kaprodi"
-                    ? dataDosen.find((data) => data.id === dataUser.id)
-                    : ""
+                    ? dataDosen.find((data) => data.id === dataUser?.id)
+                    : null
             }
           />
           <div className="bg-slate-100 h-screen">

@@ -25,7 +25,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
     document.cookie = "authToken=; max-age=0; path=/;";
   }, []);
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const role = selectedRole === "" ? "Admin" : selectedRole;
 
@@ -70,7 +70,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
       if (axios.isAxiosError(error)) {
         console.log("Error response:", error.response?.data);
       } else {
-        console.log("Error:", error.message);
+        console.log("Error:", (error as Error).message);
       }
     }
   };
@@ -124,6 +124,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
           onChange={(e) => setNip(e.target.value)}
         />
         <PasswordInput
+          value={password}
           className="px-3 py-2 mt-4 text-[15px] border rounded-lg w-full appearance-none"
           onChange={(e) => setPassword(e.target.value)}
           disabled={!isAdmin && selectedRole === ""}

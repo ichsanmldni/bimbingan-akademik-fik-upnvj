@@ -12,42 +12,95 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import NavbarMahasiswa from "@/components/ui/NavbarMahasiswa";
-import NavbarDosenPA from "@/components/ui/NavbarDosenPA";
-import NavbarKaprodi from "@/components/ui/NavbarKaprodi";
+
+interface User {
+  id: number;
+  role: string;
+  [key: string]: any; // Allow additional properties
+}
+
+interface DosenPA {
+  id: number;
+  dosen: {
+    nama_lengkap: string;
+  };
+  dosen_id: number;
+}
+
+interface Mahasiswa {
+  id: number;
+  nama_lengkap: string;
+  nim: string;
+  email: string;
+  no_whatsapp: string;
+  dosen_pa_id: number;
+}
+
+interface JadwalDosenPA {
+  id: number;
+  hari: string;
+  jam_mulai: string;
+  jam_selesai: string;
+}
+
+interface JenisBimbingan {
+  id: number;
+  jenis_bimbingan: string;
+  order: number;
+}
+
+interface SistemBimbingan {
+  id: number;
+  sistem_bimbingan: string;
+  order: number;
+}
 
 export default function Home() {
-  const [namaLengkap, setNamaLengkap] = useState("");
-  const [nim, setNim] = useState("");
-  const [email, setEmail] = useState("");
-  const [noWa, setNoWa] = useState("");
-  const [roleUser, setRoleUser] = useState("");
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [selectedDateTime, setSelectedDateTime] = useState(null);
-  const [selectedHari, setSelectedHari] = useState("");
-  const [selectedJam, setSelectedJam] = useState("");
-  const [dataUser, setDataUser] = useState({});
-  const [dataJadwalDosenPa, setDataJadwalDosenPa] = useState([]);
-  const [selectedJenisBimbingan, setSelectedJenisBimbingan] = useState("");
-  const [dataJenisBimbingan, setDataJenisBimbingan] = useState([]);
-  const [optionsJenisBimbingan, setOptionsJenisBimbingan] = useState([]);
-  const [selectedSistemBimbingan, setSelectedSistemBimbingan] = useState("");
-  const [dataSistemBimbingan, setDataSistemBimbingan] = useState([]);
-  const [optionsSistemBimbingan, setOptionsSistemBimbingan] = useState([]);
-  const [userDosenPa, setuserDosenPa] = useState({});
-  const [dataMahasiswaUser, setDataMahasiswaUser] = useState({});
-  const [dataMahasiswa, setDataMahasiswa] = useState([]);
-  const [dataDosen, setDataDosen] = useState([]);
+  const [namaLengkap, setNamaLengkap] = useState<string>("");
+  const [nim, setNim] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [noWa, setNoWa] = useState<string>("");
+  const [roleUser, setRoleUser] = useState<string>("");
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any[]>([]); // Adjust type as needed
+  const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
+  const [selectedHari, setSelectedHari] = useState<string>("");
+  const [selectedJam, setSelectedJam] = useState<string>("");
+  const [dataUser, setDataUser] = useState<User>({} as User);
+  const [dataJadwalDosenPa, setDataJadwalDosenPa] = useState<JadwalDosenPA[]>(
+    []
+  );
+  const [selectedJenisBimbingan, setSelectedJenisBimbingan] =
+    useState<string>("");
+  const [dataJenisBimbingan, setDataJenisBimbingan] = useState<
+    JenisBimbingan[]
+  >([]);
+  const [optionsJenisBimbingan, setOptionsJenisBimbingan] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [selectedSistemBimbingan, setSelectedSistemBimbingan] =
+    useState<string>("");
+  const [dataSistemBimbingan, setDataSistemBimbingan] = useState<
+    SistemBimbingan[]
+  >([]);
+  const [optionsSistemBimbingan, setOptionsSistemBimbingan] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [userDosenPa, setuserDosenPa] = useState<DosenPA | null>(null);
+  const [dataMahasiswaUser, setDataMahasiswaUser] = useState<Mahasiswa | null>(
+    null
+  );
+  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
+  const [dataDosen, setDataDosen] = useState<any[]>([]); // Adjust type as needed
 
   const getDataJadwalDosenPaByDosenPa = async () => {
     try {
-      const dataDosenPa = await axios.get(
+      const dataDosenPa = await axios.get<DosenPA[]>(
         `http://localhost:3000/api/datadosenpa`
       );
 
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userDosenPa.dosen.nama_lengkap
+        (data) => data.dosen.nama_lengkap === userDosenPa?.dosen.nama_lengkap
       );
 
       if (!dosenPa) {
@@ -56,7 +109,7 @@ export default function Home() {
 
       const dosenpaid = dosenPa.id;
 
-      const response = await axios.get(
+      const response = await axios.get<JadwalDosenPA[]>(
         `http://localhost:3000/api/datajadwaldosenpa/${dosenpaid}`
       );
 
@@ -74,12 +127,12 @@ export default function Home() {
 
   const getDataDosenPaByMahasiswa = async () => {
     try {
-      const dataDosenPa = await axios.get(
+      const dataDosenPa = await axios.get<DosenPA[]>(
         `http://localhost:3000/api/datadosenpa`
       );
 
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.id === dataMahasiswaUser.dosen_pa_id
+        (data) => data.id === dataMahasiswaUser?.dosen_pa_id
       );
 
       if (!dosenPa) {
@@ -96,7 +149,7 @@ export default function Home() {
 
   const getDataMahasiswaByUser = async () => {
     try {
-      const dataMahasiswa = await axios.get(
+      const dataMahasiswa = await axios.get<Mahasiswa[]>(
         `http://localhost:3000/api/datamahasiswa`
       );
 
@@ -117,7 +170,7 @@ export default function Home() {
 
   const getDataJenisBimbingan = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<JenisBimbingan[]>(
         "http://localhost:3000/api/datajenisbimbingan"
       );
 
@@ -136,7 +189,7 @@ export default function Home() {
 
   const getDataSistemBimbingan = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<SistemBimbingan[]>(
         "http://localhost:3000/api/datasistembimbingan"
       );
 
@@ -153,23 +206,24 @@ export default function Home() {
     }
   };
 
-  const addPengajuanBimbingan = async (newData) => {
+  const addPengajuanBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/pengajuanbimbingan",
         newData
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const handleAddPengajuanBimbingan = async (e) => {
+  const handleAddPengajuanBimbingan = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
-    const formattedDate = format(selectedDateTime, "dd MMMM yyyy", {
+    const formattedDate = format(selectedDateTime as Date, "dd MMMM yyyy", {
       locale: id,
     });
 
@@ -184,7 +238,7 @@ export default function Home() {
         sistem_bimbingan: selectedSistemBimbingan,
         mahasiswa_id: dataUser.id,
         status: "Menunggu Konfirmasi",
-        dosen_pa_id: userDosenPa.id,
+        dosen_pa_id: userDosenPa?.id,
       };
 
       const result = await addPengajuanBimbingan(pengajuanBimbinganValue);
@@ -200,19 +254,23 @@ export default function Home() {
       setSelectedSistemBimbingan("");
 
       setTimeout(() => {
-        setNamaLengkap(dataMahasiswaUser.nama_lengkap);
-        setNim(dataMahasiswaUser.nim);
-        setEmail(dataMahasiswaUser.email);
-        setNoWa(dataMahasiswaUser.no_whatsapp);
+        if (dataMahasiswaUser) {
+          setNamaLengkap(dataMahasiswaUser.nama_lengkap);
+          setNim(dataMahasiswaUser.nim);
+          setEmail(dataMahasiswaUser.email);
+          setNoWa(dataMahasiswaUser.no_whatsapp);
+        }
       }, 1000);
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get<DosenPA[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -228,7 +286,9 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get<any[]>(
+        "http://localhost:3000/api/datakaprodi"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -244,7 +304,9 @@ export default function Home() {
 
   const getDataDosen = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosen");
+      const response = await axios.get<any[]>(
+        "http://localhost:3000/api/datadosen"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -260,7 +322,7 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<Mahasiswa[]>(
         "http://localhost:3000/api/datamahasiswa"
       );
 
@@ -355,7 +417,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
+        const decodedToken = jwtDecode<User>(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -363,7 +425,7 @@ export default function Home() {
     }
   }, []);
 
-  const getDayName = (date) => {
+  const getDayName = (date: Date) => {
     return format(date, "EEEE", { locale: id });
   };
 
@@ -378,7 +440,7 @@ export default function Home() {
               ? dataDosen.find((data) => data.id === dataUser.id)
               : roleUser === "Kaprodi"
                 ? dataDosen.find((data) => data.id === dataUser.id)
-                : ""
+                : undefined
         }
       />
       <div className="pt-[100px]">
@@ -386,8 +448,12 @@ export default function Home() {
           <h1 className="font-semibold text-[30px] text-center pt-4">
             Pengajuan Bimbingan Konseling Mahasiswa
           </h1>
-          <form className="flex flex-col gap-4 p-8">
+          <form
+            className="flex flex-col gap-4 p-8"
+            onSubmit={handleAddPengajuanBimbingan}
+          >
             <InputField
+              disabled={false}
               type="text"
               placeholder="Nama Lengkap"
               onChange={(e) => setNamaLengkap(e.target.value)}
@@ -395,6 +461,7 @@ export default function Home() {
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
             <InputField
+              disabled={false}
               type="text"
               placeholder="NIM"
               onChange={(e) => setNim(e.target.value)}
@@ -402,6 +469,7 @@ export default function Home() {
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
             <InputField
+              disabled={false}
               type="text"
               placeholder="E-mail"
               onChange={(e) => setEmail(e.target.value)}
@@ -409,6 +477,7 @@ export default function Home() {
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
             <InputField
+              disabled={false}
               type="text"
               placeholder="No Whatsapp"
               onChange={(e) => setNoWa(e.target.value)}
@@ -420,7 +489,9 @@ export default function Home() {
                 selected={selectedDateTime}
                 onChange={(date) => {
                   setSelectedDateTime(date);
-                  setSelectedHari(getDayName(date));
+                  if (date) {
+                    setSelectedHari(getDayName(date));
+                  }
                 }}
                 popperContainer={({ children }) => (
                   <div className="relative z-10">{children}</div>
@@ -486,7 +557,7 @@ export default function Home() {
               className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
             />
             <button
-              onClick={handleAddPengajuanBimbingan}
+              type="submit"
               className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-[6px] font-medium"
             >
               Ajukan

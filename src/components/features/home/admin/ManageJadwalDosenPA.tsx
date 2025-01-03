@@ -1,7 +1,5 @@
 "use client";
 
-import FilterField from "@/components/ui/FilterField";
-import SelectField from "@/components/ui/SelectField";
 import searchIcon from "../../../../assets/images/search-icon.png";
 import TrashButton from "@/components/ui/TrashButton";
 import axios from "axios";
@@ -10,15 +8,36 @@ import Image from "next/image";
 import EditButton from "@/components/ui/EditButton";
 
 interface ManageJadwalDosenPAProps {}
-const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = ({}) => {
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
-  const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
-  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
-  const [groupedSchedules, setGroupedSchedules] = useState({});
-  const [dataDosen, setDataDosen] = useState([]);
-  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
-  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState([]);
+
+interface TahunAjaran {
+  tahun_ajaran: string;
+  order: number;
+}
+
+interface Dosen {
+  id: number;
+  nama_lengkap: string;
+}
+
+interface JadwalDosenPA {
+  dosen_pa_id: number;
+  dosen_pa: {
+    dosen_id: number;
+  };
+  hari: string;
+  jam_mulai: string;
+  jam_selesai: string;
+}
+
+const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
+  const [dataTahunAjaran, setDataTahunAjaran] = useState<TahunAjaran[]>([]);
+  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<JadwalDosenPA[]>(
+    []
+  );
+  const [groupedSchedules, setGroupedSchedules] = useState<
+    Record<string, Record<string, string[]>>
+  >({});
+  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
 
   const getDataTahunAjaran = async () => {
     try {
@@ -31,20 +50,10 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = ({}) => {
       }
 
       const data = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
-      setDataTahunAjaran(sortedDataJurusan);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataLaporanBimbingan = async () => {
-    try {
-      const dataLaporanBimbingan = await axios.get(
-        `http://localhost:3000/api/laporanbimbingan`
+      const sortedDataJurusan = data.sort(
+        (a: TahunAjaran, b: TahunAjaran) => a.order - b.order
       );
-      setDataLaporanBimbingan(dataLaporanBimbingan.data);
+      setDataTahunAjaran(sortedDataJurusan);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -85,12 +94,11 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = ({}) => {
     }
   };
 
-  const groupSchedules = (schedules) => {
-    const grouped = {};
+  const groupSchedules = (schedules: JadwalDosenPA[]) => {
+    const grouped: Record<string, Record<string, string[]>> = {};
 
     schedules.forEach(
       ({ dosen_pa_id, dosen_pa, hari, jam_mulai, jam_selesai }) => {
-        console.log(dosen_pa);
         const dosen = dataDosen.find((data) => data.id === dosen_pa.dosen_id);
         const dosenName = dosen ? dosen.nama_lengkap : `Dosen ${dosen_pa_id}`; // Default jika nama tidak ditemukan
         if (!grouped[dosenName]) {
@@ -109,24 +117,8 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = ({}) => {
     return grouped;
   };
 
-  console.log(groupedSchedules);
-
-  useEffect(() => {
-    if (dataTahunAjaran.length > 0) {
-      const formattedOptions = dataTahunAjaran.map((data) => {
-        return {
-          value: data.tahun_ajaran,
-          label: data.tahun_ajaran,
-        };
-      });
-
-      setOptionsTahunAjaran(formattedOptions);
-    }
-  }, [dataTahunAjaran]);
-
   useEffect(() => {
     getDataTahunAjaran();
-    getDataLaporanBimbingan();
     getDataJadwalDosenPa();
     getDataDosen();
   }, []);
@@ -192,8 +184,14 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = ({}) => {
                     )}
                     <td className="border-b border-gray-200 px-4 py-6">
                       <div className="flex gap-2 items-center justify-center">
-                        <EditButton className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600" />
-                        <TrashButton className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600" />
+                        <EditButton
+                          onClick={() => {}}
+                          className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                        />
+                        <TrashButton
+                          onClick={() => {}}
+                          className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                        />
                       </div>
                     </td>
                   </tr>
@@ -206,4 +204,5 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = ({}) => {
     </div>
   );
 };
+
 export default ManageJadwalDosenPA;

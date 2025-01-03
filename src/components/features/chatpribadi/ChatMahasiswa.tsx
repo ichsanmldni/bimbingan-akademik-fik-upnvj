@@ -1,76 +1,108 @@
 "use client";
-import BubbleChat from "@/components/ui/chatbot/BubbleChatStart";
+
 import ChatMahasiswaHeader from "@/components/ui/chatbot/ChatMahasiswaHeader";
-import NavbarChatbot from "@/components/ui/chatbot/NavbarChatbot";
-import SidebarChatbot from "@/components/ui/chatbot/SidebarChatbot";
 import TextInputPesanDosenPA from "@/components/ui/chatbot/TextInputPesanDosenPA";
 import backIcon from "../../../assets/images/back-icon-black.png";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { MessageSquareText, Sidebar } from "lucide-react";
+import { MessageSquareText } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
 import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
 import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
-import { div } from "framer-motion/client";
+
+interface User {
+  id: number;
+  [key: string]: any; // Allow additional properties
+}
+
+interface DosenPA {
+  id: number;
+  dosen: {
+    nama_lengkap: string;
+  };
+  dosen_id: number;
+}
+
+interface ChatData {
+  id: number;
+  waktu_kirim: string;
+  chat_pribadi_id: string;
+  role: string; // "Mahasiswa" or "Dosen PA"
+  [key: string]: any; // Allow additional properties
+}
 
 export default function ChatMahasiswa() {
-  const [dataUser, setDataUser] = useState({});
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [userDosenPA, setUserDosenPA] = useState({});
-  const [dataChatPribadi, setDataChatPribadi] = useState([]);
-  const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState({});
-  const [isDetailChatClicked, setIsDetailChatClicked] = useState(false);
-  const [sortedChatData, setSortedChatData] = useState([]);
+  const [dataUser, setDataUser] = useState<User>({} as User);
+  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any[]>([]); // Adjust type as needed
+  const [userDosenPA, setUserDosenPA] = useState<DosenPA | null>(null);
+  const [dataChatPribadi, setDataChatPribadi] = useState<any[]>([]);
+  const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState<any>(
+    {}
+  );
+  const [isDetailChatClicked, setIsDetailChatClicked] =
+    useState<boolean>(false);
+  const [sortedChatData, setSortedChatData] = useState<ChatData[]>([]);
+  const [chatData, setChatData] = useState<ChatData[]>([]);
+  const [chatMahasiswaData, setChatMahasiswaData] = useState<ChatData[]>([]);
+  const [chatDosenPAData, setChatDosenPAData] = useState<ChatData[]>([]);
 
-  useEffect(() => {
-    if (location.state) {
-      setChatData((prev) => [...prev, location.state]);
-    }
-  }, []);
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  const [chatData, setChatData] = useState([]);
-  const [chatMahasiswaData, setChatMahasiswaData] = useState([]);
-  const [chatDosenPAData, setChatDosenPAData] = useState([]);
-
-  const addChatDosenPA = async (newChat) => {
+  const addChatDosenPA = async (newChat: any) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/chatdosenpa",
         newChat
       );
-
       return response.data;
     } catch (error) {
       throw error;
     }
   };
 
-  const handleAddChatDosenPA = async (newData) => {
+  const handleClickDetailChat = (data: any) => {
+    setSelectedDataChatPribadi(data);
+    setIsDetailChatClicked(true);
+    if (!data.is_pesan_terakhir_read) {
+      handleEditChatPribadi(data);
+    }
+  };
+
+  const handleEditChatPribadi = async (data: any) => {
+    const updatedData = {
+      id: data.id,
+    };
+
+    try {
+      const result = await patchChatPribadi(updatedData);
+    } catch (error) {
+      console.error("Registration error:", (error as Error).message);
+    }
+  };
+
+  const handleAddChatDosenPA = async (newData: any) => {
     const newChat = {
       ...newData,
       chat_pribadi_id: selectedDataChatPribadi.id,
     };
 
     try {
-      const result = await addChatDosenPA(newChat);
+      await addChatDosenPA(newChat);
       getDataChatMahasiswaBySelectedChatPribadiId();
       getDataChatDosenPABySelectedChatPribadiId();
     } catch (error) {
-      console.error("Registration error:", error.message);
+      console.error("Registration error:", (error as Error).message);
     }
   };
 
-  //   const onSubmitHandler = (newMessage) => {};
-
-  const messageEndRef = useRef(null);
-
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get<DosenPA[]>(
+        "http://localhost:3000/api/datadosenpa"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -86,7 +118,9 @@ export default function ChatMahasiswa() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get<any[]>(
+        "http://localhost:3000/api/datakaprodi"
+      );
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -102,18 +136,16 @@ export default function ChatMahasiswa() {
 
   const getDataDosenPaByMahasiswaID = async () => {
     try {
-      const dataDosenPa = await axios.get(
+      const dataDosenPa = await axios.get<DosenPA[]>(
         `http://localhost:3000/api/datadosenpa`
       );
-
-      const dataMahasiswa = await axios.get(
+      const dataMahasiswa = await axios.get<any[]>(
         `http://localhost:3000/api/datamahasiswa`
       );
 
       const dataUserMahasiswa = dataMahasiswa.data.find(
         (data) => data.id === dataUser.id
       );
-
       const dosenPa = dataDosenPa.data.find(
         (data) => data.id === dataUserMahasiswa.dosen_pa_id
       );
@@ -129,14 +161,28 @@ export default function ChatMahasiswa() {
     }
   };
 
+  const patchChatPribadi = async (updatedData: any) => {
+    try {
+      const response = await axios.patch(
+        "http://localhost:3000/api/chatpribadi/updateisread",
+        updatedData
+      );
+      console.log("Dosen PA updated successfully:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
   const getDataDosenPAByDosenId = async () => {
     try {
-      const dataDosenPA = await axios.get(
+      const dataDosenPA = await axios.get<DosenPA[]>(
         "http://localhost:3000/api/datadosenpa"
       );
 
       const dosen = dataDosenPA.data.find(
-        (data) => data.dosen_id == dataUser.id
+        (data) => data.dosen_id === dataUser.id
       );
 
       if (!dosen) {
@@ -153,12 +199,12 @@ export default function ChatMahasiswa() {
 
   const getDataChatPribadiByDosenPAId = async () => {
     try {
-      const dataChatPribadi = await axios.get(
+      const dataChatPribadi = await axios.get<any[]>(
         `http://localhost:3000/api/chatpribadi`
       );
 
       const dataChat = dataChatPribadi.data.filter(
-        (data) => data.dosen_pa_id === userDosenPA.id
+        (data) => data.dosen_pa_id === userDosenPA?.id
       );
 
       if (!dataChat) {
@@ -174,7 +220,7 @@ export default function ChatMahasiswa() {
 
   const getDataChatDosenPABySelectedChatPribadiId = async () => {
     try {
-      const dataChatDosenPA = await axios.get(
+      const dataChatDosenPA = await axios.get<ChatData[]>(
         `http://localhost:3000/api/chatdosenpa`
       );
 
@@ -194,7 +240,7 @@ export default function ChatMahasiswa() {
 
   const getDataChatMahasiswaBySelectedChatPribadiId = async () => {
     try {
-      const dataChatMahasiswa = await axios.get(
+      const dataChatMahasiswa = await axios.get<ChatData[]>(
         `http://localhost:3000/api/chatmahasiswa`
       );
 
@@ -213,23 +259,12 @@ export default function ChatMahasiswa() {
   };
 
   useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-    const sortedChatData = [...chatData].sort(
-      (a, b) => new Date(a.waktu_kirim) - new Date(b.waktu_kirim)
-    );
-
-    setSortedChatData(sortedChatData);
-  }, [chatData]);
-
-  useEffect(() => {
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
+        const decodedToken = jwtDecode<User>(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -239,31 +274,18 @@ export default function ChatMahasiswa() {
     getDataKaprodi();
   }, []);
 
-  const patchChatPribadi = async (updatedData) => {
-    try {
-      const response = await axios.patch(
-        "http://localhost:3000/api/chatpribadi/updateisread",
-        updatedData
-      );
-      console.log("Dosen PA updated successfully:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
+  useEffect(() => {
+    if (dataUser && dataUser.id) {
+      getDataDosenPAByDosenId();
+      getDataDosenPaByMahasiswaID();
     }
-  };
+  }, [dataUser]);
 
-  const handleEditChatPribadi = async (data) => {
-    const updatedData = {
-      id: data.id,
-    };
-
-    try {
-      const result = await patchChatPribadi(updatedData);
-    } catch (error) {
-      console.error("Registration error:", error.message);
+  useEffect(() => {
+    if (userDosenPA && userDosenPA.id) {
+      getDataChatPribadiByDosenPAId();
     }
-  };
+  }, [userDosenPA]);
 
   useEffect(() => {
     getDataChatMahasiswaBySelectedChatPribadiId();
@@ -287,33 +309,12 @@ export default function ChatMahasiswa() {
   }, [chatMahasiswaData, chatDosenPAData]);
 
   useEffect(() => {
-    if (userDosenPA && userDosenPA.id) {
-      getDataChatPribadiByDosenPAId();
-    }
-  }, [userDosenPA]);
-
-  useEffect(() => {
-    if (dataUser && dataUser.id) {
-      getDataDosenPAByDosenId();
-      getDataDosenPaByMahasiswaID();
-    }
-  }, [dataUser]);
-
-  const handleClickDetailChat = (data) => {
-    setSelectedDataChatPribadi(data);
-    setIsDetailChatClicked(true);
-    if (!data.is_pesan_terakhir_read) {
-      handleEditChatPribadi(data);
-    }
-  };
-
-  useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [sortedChatData]);
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("id-ID", {
       timeZone: "Asia/Jakarta",
       weekday: "long",
@@ -323,7 +324,7 @@ export default function ChatMahasiswa() {
     });
   };
 
-  let previousDate = null;
+  let previousDate: string | null = null;
 
   return (
     <div>

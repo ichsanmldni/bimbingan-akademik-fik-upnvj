@@ -1,24 +1,24 @@
-// /app/api/datadosen/route.js
+// /app/api/datadosen/route.ts
 import prisma from '../../../lib/prisma';
 
-export async function GET(req) {
+export async function GET(req: Request): Promise<Response> {
   try {
-    // Mengambil data dosen dari database
-    const DosenPa = await prisma.dosenpa.findMany({
+    // Fetching data from the database
+    const dosenPa = await prisma.dosenpa.findMany({
       include: {
         dosen: true,
       },
     });
-    
-    // Mengembalikan data dosen sebagai JSON
-    return new Response(JSON.stringify(DosenPa), {
+
+    // Returning data as JSON
+    return new Response(JSON.stringify(dosenPa), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    // Menangani kesalahan
+    // Handling errors
     return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error.message }),
+      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
