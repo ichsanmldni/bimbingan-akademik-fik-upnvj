@@ -281,6 +281,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
       const result = await patchLaporanBimbingan(laporanBimbinganValue);
       console.log(result);
+
       setFeedbackKaprodi("");
       getDataLaporanBimbinganByKaprodiId();
     } catch (error) {
