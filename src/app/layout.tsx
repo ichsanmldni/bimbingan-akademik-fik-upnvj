@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "Next.js",
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={jakarta.className}>
       <body>{children}</body>
+      <Analytics />
     </html>
   );
 }
