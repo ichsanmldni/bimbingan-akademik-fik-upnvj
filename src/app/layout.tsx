@@ -22,8 +22,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={jakarta.className}>
       <body>{children}</body>
-      <Analytics />
-      <SpeedInsights />
     </html>
   );
 }

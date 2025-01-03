@@ -2,17 +2,22 @@
 
 import Link from "next/link";
 import Logo from "./LogoUPNVJ";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import ProfileImage from "./ProfileImage";
 import NotificationModal from "./NotificationModal";
 import ProfileModal from "./ProfileModal";
 import NotificationButton from "./NotificationButton";
 import { MessageSquareText } from "lucide-react";
+import axios from "axios";
 
 const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
   const [isModalProfileOpen, setIsModalProfileOpen] = useState(false);
+  const [dataNotifikasi, setDataNotifikasi] = useState([]);
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+
   const pathname = usePathname();
 
   const handleNotificationClick = () => {
@@ -36,6 +41,57 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const isActive = (path: string) => pathname === path;
 
   console.log(dataUser);
+
+  const getDataNotifikasiByUserId = async () => {
+    try {
+      let response;
+      roleUser === "Mahasiswa"
+        ? (response = await axios.get(
+            `${API_BASE_URL}/api/datanotifikasimahasiswa`
+          ))
+        : roleUser === "Dosen PA"
+          ? (response = await axios.get(
+              `${API_BASE_URL}/api/datanotifikasidosenpa`
+            ))
+          : roleUser === "Kaprodi"
+            ? (response = await axios.get(
+                `${API_BASE_URL}/api/datanotifikasikaprodi`
+              ))
+            : (response = {});
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      let notifikasiUser;
+
+      roleUser === "Mahasiswa"
+        ? (notifikasiUser = response.data.filter(
+            (data: any) => data.mahasiswa_id === dataUser.id
+          ))
+        : roleUser === "Dosen PA"
+          ? (notifikasiUser = response.data.filter(
+              (data: any) => data.dosen_pa_id === dataUser.id
+            ))
+          : roleUser === "Kaprodi"
+            ? (notifikasiUser = response.data.filter(
+                (data: any) => data.kaprodi_id === dataUser.id
+              ))
+            : (notifikasiUser = {});
+
+      const data = await response.data;
+      setDataNotifikasi(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  console.log(dataNotifikasi);
+
+  useEffect(() => {
+    getDataNotifikasiByUserId();
+  }, [dataUser]);
 
   return (
     <div className="fixed z-[999] w-full bg-white border flex justify-between py-5 px-[128px]">
@@ -110,6 +166,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
       </div>
       {isModalNotificationOpen && (
         <NotificationModal
+          dataNotifikasi={dataNotifikasi}
           className="fixed inset-0 flex items-start mt-[70px] mr-[180px] justify-end z-50"
           onClose={closeNotificationModal}
         />
