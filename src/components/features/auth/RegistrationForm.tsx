@@ -6,6 +6,7 @@ import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
 import Link from "next/link";
 import PasswordInput from "../../ui/PasswordInput";
+import { env } from "process";
 
 interface DosenPA {
   id: number;
@@ -51,10 +52,12 @@ const RegistrationForm = () => {
     { value: string; label: string }[]
   >([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const getDataJurusan = async () => {
     try {
       const response = await axios.get<Jurusan[]>(
-        "http://localhost:3000/api/datajurusan"
+        `${API_BASE_URL}/api/datajurusan`
       );
 
       if (response.status !== 200) {
@@ -73,7 +76,7 @@ const RegistrationForm = () => {
   const getDataPeminatanByJurusan = async (selectedJurusan: string) => {
     try {
       const dataJurusan = await axios.get<Jurusan[]>(
-        "http://localhost:3000/api/datajurusan"
+        `${API_BASE_URL}/api/datajurusan`
       );
 
       const jurusan = dataJurusan.data.find(
@@ -87,7 +90,7 @@ const RegistrationForm = () => {
       const jurusanid = jurusan.id;
 
       const response = await axios.get<Peminatan[]>(
-        `http://localhost:3000/api/datapeminatan/${jurusanid}`
+        `${API_BASE_URL}/api/datapeminatan/${jurusanid}`
       );
 
       if (response.status !== 200) {
@@ -106,7 +109,7 @@ const RegistrationForm = () => {
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<DosenPA[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       if (response.status !== 200) {
@@ -124,7 +127,7 @@ const RegistrationForm = () => {
   const registerUser = async (userData: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/registration",
+        `${API_BASE_URL}/api/auth/registration`,
         userData
       );
       return response.data;

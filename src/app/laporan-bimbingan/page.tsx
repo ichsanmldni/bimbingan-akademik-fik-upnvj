@@ -12,6 +12,7 @@ import { jwtDecode } from "jwt-decode";
 import cancelIcon from "../../assets/images/cancel-icon.png";
 import axios from "axios";
 import "react-datepicker/dist/react-datepicker.css";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -73,6 +74,8 @@ export default function Home() {
   const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]); // Adjust type as needed
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const toggleBimbingan = (data: Bimbingan) => {
     setSelectedBimbingan((prevSelected) => {
       if (prevSelected.some((bimbingan) => bimbingan.id === data.id)) {
@@ -86,7 +89,7 @@ export default function Home() {
   const getDataDosen = async () => {
     try {
       const response = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosen"
+        `${API_BASE_URL}/api/datadosen`
       );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -101,7 +104,7 @@ export default function Home() {
   const getDataMahasiswa = async () => {
     try {
       const response = await axios.get<any[]>(
-        "http://localhost:3000/api/datamahasiswa"
+        `${API_BASE_URL}/api/datamahasiswa`
       );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -116,7 +119,7 @@ export default function Home() {
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -131,7 +134,7 @@ export default function Home() {
   const getDataKaprodi = async () => {
     try {
       const response = await axios.get<Kaprodi[]>(
-        "http://localhost:3000/api/datakaprodi"
+        `${API_BASE_URL}/api/datakaprodi`
       );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -146,7 +149,7 @@ export default function Home() {
   const addLaporanBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/laporanbimbingan",
+        `${API_BASE_URL}/api/laporanbimbingan`,
         newData
       );
       return response.data;
@@ -226,7 +229,7 @@ export default function Home() {
   const getDataDosenById = async () => {
     try {
       const dataDosen = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosen"
+        `${API_BASE_URL}/api/datadosen`
       );
       const dosen = dataDosen.data.find((data) => data.id === dataUser.id);
 
@@ -250,7 +253,7 @@ export default function Home() {
   const getDataBimbinganByDosenPaId = async () => {
     try {
       const dataDosenPa = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
       const dosenPa = dataDosenPa.data.find(
         (data) => data.dosen.nama_lengkap === userProfile?.nama_lengkap
@@ -265,7 +268,7 @@ export default function Home() {
       const dosenpaid = dosenPa.id;
 
       const dataBimbingan = await axios.get<Bimbingan[]>(
-        "http://localhost:3000/api/bimbingan"
+        `${API_BASE_URL}/api/bimbingan`
       );
       const bimbingan = dataBimbingan.data.filter(
         (data) => data.pengajuan_bimbingan.dosen_pa_id === dosenpaid

@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import ChatDosenPA from "@/components/features/chatpribadi/ChatDosenPA";
 import ChatMahasiswa from "@/components/features/chatpribadi/ChatMahasiswa";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -25,9 +26,11 @@ export default function ChatPribadi() {
   const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
   const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -43,7 +46,7 @@ export default function ChatPribadi() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");

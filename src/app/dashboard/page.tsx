@@ -9,6 +9,7 @@ import DashboardDosenPA from "@/components/features/dashboard/DashboardDosenPA";
 import DashboardMahasiswa from "@/components/features/dashboard/DashboardMahasiswa";
 import DashboardKaprodi from "@/components/features/dashboard/DashboardKaprodi";
 import axios from "axios";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -42,6 +43,8 @@ export default function Home() {
   const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const [selectedSubMenuDashboard, setSelectedSubMenuDashboard] =
     useState<string>("");
   const [roleUser, setRoleUser] = useState<string>("");
@@ -49,7 +52,7 @@ export default function Home() {
   const getDataDosen = async () => {
     try {
       const response = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosen"
+        `${API_BASE_URL}/api/datadosen`
       );
 
       if (response.status !== 200) {
@@ -67,7 +70,7 @@ export default function Home() {
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<DosenPA[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       if (response.status !== 200) {
@@ -85,7 +88,7 @@ export default function Home() {
   const getDataKaprodi = async () => {
     try {
       const response = await axios.get<Kaprodi[]>(
-        "http://localhost:3000/api/datakaprodi"
+        `${API_BASE_URL}/api/datakaprodi`
       );
 
       if (response.status !== 200) {
@@ -103,7 +106,7 @@ export default function Home() {
   const getDataMahasiswa = async () => {
     try {
       const response = await axios.get<Mahasiswa[]>(
-        "http://localhost:3000/api/datamahasiswa"
+        `${API_BASE_URL}/api/datamahasiswa`
       );
 
       if (response.status !== 200) {

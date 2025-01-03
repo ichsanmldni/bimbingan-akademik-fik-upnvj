@@ -10,6 +10,7 @@ import dropupIcon from "../../assets/images/upIcon.png";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -68,15 +69,15 @@ export default function Home() {
   const [selectedSubBabData, setSelectedSubBabData] =
     useState<SubBabData | null>(null);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? "" : menuName);
   };
 
   const getDataBab = async () => {
     try {
-      const response = await axios.get<Bab[]>(
-        "http://localhost:3000/api/databab"
-      );
+      const response = await axios.get<Bab[]>(`${API_BASE_URL}/api/databab`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -92,9 +93,7 @@ export default function Home() {
 
   const getDataSubBabByBab = async (selectedBab: string) => {
     try {
-      const response = await axios.get<Bab[]>(
-        "http://localhost:3000/api/databab"
-      );
+      const response = await axios.get<Bab[]>(`${API_BASE_URL}/api/databab`);
 
       const bab = response.data.find((data) => data.nama === selectedBab);
 
@@ -105,7 +104,7 @@ export default function Home() {
       const babid = bab.id;
 
       const subBabResponse = await axios.get<SubBab[]>(
-        `http://localhost:3000/api/datasubbab/${babid}`
+        `${API_BASE_URL}/api/datasubbab/${babid}`
       );
 
       if (subBabResponse.status !== 200) {
@@ -127,9 +126,7 @@ export default function Home() {
     selectedSubBab: string
   ) => {
     try {
-      const response = await axios.get<Bab[]>(
-        "http://localhost:3000/api/databab"
-      );
+      const response = await axios.get<Bab[]>(`${API_BASE_URL}/api/databab`);
 
       const bab = response.data.find((data) => data.nama === selectedBab);
 
@@ -140,7 +137,7 @@ export default function Home() {
       const babid = bab.id;
 
       const subBabResponse = await axios.get<SubBab[]>(
-        `http://localhost:3000/api/datasubbab/${babid}`
+        `${API_BASE_URL}/api/datasubbab/${babid}`
       );
       const subbab = subBabResponse.data.find(
         (data) => data.nama === selectedSubBab
@@ -156,7 +153,7 @@ export default function Home() {
   const getDataDosen = async () => {
     try {
       const response = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosen"
+        `${API_BASE_URL}/api/datadosen`
       );
 
       if (response.status !== 200) {
@@ -174,7 +171,7 @@ export default function Home() {
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<DosenPA[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       if (response.status !== 200) {
@@ -192,7 +189,7 @@ export default function Home() {
   const getDataKaprodi = async () => {
     try {
       const response = await axios.get<Kaprodi[]>(
-        "http://localhost:3000/api/datakaprodi"
+        `${API_BASE_URL}/api/datakaprodi`
       );
 
       if (response.status !== 200) {
@@ -210,7 +207,7 @@ export default function Home() {
   const getDataMahasiswa = async () => {
     try {
       const response = await axios.get<Mahasiswa[]>(
-        "http://localhost:3000/api/datamahasiswa"
+        `${API_BASE_URL}/api/datamahasiswa`
       );
 
       if (response.status !== 200) {

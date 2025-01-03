@@ -16,6 +16,7 @@ import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
 import TrashButton from "@/components/ui/TrashButton";
 import { format } from "date-fns";
+import { env } from "process";
 
 interface UserProfile {
   nama_lengkap: string;
@@ -122,6 +123,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [openDay, setOpenDay] = useState<string | null>(null);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const toggleDay = (day: string) => {
     setOpenDay(openDay === day ? null : day);
   };
@@ -141,7 +144,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const addJadwalDosen = async (newData: DataJadwalDosenPA) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/datajadwaldosenpa/${dataDosenPA?.id}`,
+        `${API_BASE_URL}/api/datajadwaldosenpa/${dataDosenPA?.id}`,
         newData
       );
       return response.data;
@@ -153,7 +156,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const deleteJadwalDosen = async (deletedData: DataJadwalDosenPA) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3000/api/datajadwaldosenpa/${deletedData.id}`,
+        `${API_BASE_URL}/api/datajadwaldosenpa/${deletedData.id}`,
         { data: deletedData }
       );
       return response.data;
@@ -165,7 +168,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const patchPengajuanBimbingan = async (updatedData: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/pengajuanbimbingan",
+        `${API_BASE_URL}/api/pengajuanbimbingan`,
         updatedData
       );
       return response.data;
@@ -176,9 +179,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
   const getDataDosenPAByDosenId = async () => {
     try {
-      const dataDosenPA = await axios.get(
-        "http://localhost:3000/api/datadosenpa"
-      );
+      const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosen = dataDosenPA.data.find(
         (data: DataDosenPA) => data.dosen_id === dataUser.id
       );
@@ -197,7 +198,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
   const getDataDosenById = async () => {
     try {
-      const dataDosen = await axios.get("http://localhost:3000/api/datadosen");
+      const dataDosen = await axios.get(`${API_BASE_URL}/api/datadosen`);
       const dosen = dataDosen.data.find(
         (data: DataDosenPA) => data.id === dataUser.id
       );
@@ -227,9 +228,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
   const getDataJadwalDosenPaByDosenPa = async () => {
     try {
-      const dataDosenPa = await axios.get(
-        `http://localhost:3000/api/datadosenpa`
-      );
+      const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosenPa = dataDosenPa.data.find(
         (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
@@ -240,7 +239,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
       const dosenpaid = dosenPa.id;
       const response = await axios.get(
-        `http://localhost:3000/api/datajadwaldosenpa/${dosenpaid}`
+        `${API_BASE_URL}/api/datajadwaldosenpa/${dosenpaid}`
       );
 
       if (response.status !== 200) {
@@ -257,9 +256,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
   const getDataPengajuanBimbinganByDosenPaId = async () => {
     try {
-      const dataDosenPa = await axios.get(
-        `http://localhost:3000/api/datadosenpa`
-      );
+      const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosenPa = dataDosenPa.data.find(
         (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
@@ -270,7 +267,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
       const dosenpaid = dosenPa.id;
       const dataPengajuanBimbingan = await axios.get(
-        `http://localhost:3000/api/pengajuanbimbingan`
+        `${API_BASE_URL}/api/pengajuanbimbingan`
       );
 
       const pengajuanBimbingan = dataPengajuanBimbingan.data.filter(
@@ -285,9 +282,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
   const getDataLaporanBimbinganByDosenPaId = async () => {
     try {
-      const dataDosenPa = await axios.get(
-        `http://localhost:3000/api/datadosenpa`
-      );
+      const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosenPa = dataDosenPa.data.find(
         (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
       );
@@ -298,7 +293,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
       const dosenpaid = dosenPa.id;
       const dataLaporanBimbingan = await axios.get(
-        `http://localhost:3000/api/laporanbimbingan`
+        `${API_BASE_URL}/api/laporanbimbingan`
       );
 
       const laporanBimbingan = dataLaporanBimbingan.data.filter(
@@ -314,7 +309,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const patchDosenPA = async (updatedData: DataDosenPA) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datadosen",
+        `${API_BASE_URL}/api/datadosen`,
         updatedData
       );
       console.log("Dosen PA updated successfully:", response.data);
@@ -327,7 +322,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
   const addBimbingan = async (idPengajuan: number) => {
     try {
-      const response = await axios.post(`http://localhost:3000/api/bimbingan`, {
+      const response = await axios.post(`${API_BASE_URL}/api/bimbingan`, {
         pengajuan_bimbingan_id: idPengajuan,
       });
       return response.data;

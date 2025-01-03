@@ -9,6 +9,7 @@ import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
 import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
+import { env } from "process";
 
 interface DashboardKaprodiProps {
   selectedSubMenuDashboard: string;
@@ -82,6 +83,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const [dataKaprodiUser, setDataKaprodiUser] = useState<any>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const handleDetailLaporanKaprodi = (data: LaporanBimbingan) => {
     setSelectedDataLaporanBimbingan(data);
     setIsDetailLaporanKaprodiClicked((prev) => !prev);
@@ -94,7 +97,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -139,7 +142,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const patchKaprodi = async (updatedData: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datadosen",
+        `${API_BASE_URL}/api/datadosen`,
         updatedData
       );
       console.log("Kaprodi updated successfully:", response.data);
@@ -172,7 +175,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   const getDataDosenById = async () => {
     try {
-      const dataDosen = await axios.get("http://localhost:3000/api/datadosen");
+      const dataDosen = await axios.get(`${API_BASE_URL}/api/datadosen`);
 
       const dosen = dataDosen.data.find((data: any) => data.id === dataUser.id);
 
@@ -202,9 +205,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   const getDataKaprodiByDosenId = async () => {
     try {
-      const dataKaprodi = await axios.get(
-        "http://localhost:3000/api/datakaprodi"
-      );
+      const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       const kaprodi = dataKaprodi.data.find(
         (data: any) => data.dosen_id == dataUser.id
@@ -224,9 +225,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   const getDataLaporanBimbinganByKaprodiId = async () => {
     try {
-      const dataKaprodi = await axios.get(
-        `http://localhost:3000/api/datakaprodi`
-      );
+      const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       const kaprodi = dataKaprodi.data.find(
         (data: any) => data.dosen.nama_lengkap === userProfile?.nama_lengkap
@@ -239,7 +238,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const kaprodiid = kaprodi.id;
 
       const dataLaporanBimbingan = await axios.get(
-        `http://localhost:3000/api/laporanbimbingan`
+        `${API_BASE_URL}/api/laporanbimbingan`
       );
 
       const laporanBimbingan = dataLaporanBimbingan.data.filter(
@@ -256,7 +255,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const patchLaporanBimbingan = async (updatedData: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/laporanbimbingan",
+        `${API_BASE_URL}/api/laporanbimbingan`,
         updatedData
       );
 
@@ -291,9 +290,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   const getDataBimbinganByDosenPaId = async () => {
     try {
-      const dataBimbingan = await axios.get(
-        `http://localhost:3000/api/bimbingan`
-      );
+      const dataBimbingan = await axios.get(`${API_BASE_URL}/api/bimbingan`);
 
       const bimbingan = dataBimbingan.data.filter(
         (data: any) =>
@@ -310,7 +307,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const getDataMahasiswa = async () => {
     try {
       const dataMahasiswa = await axios.get(
-        `http://localhost:3000/api/datamahasiswa`
+        `${API_BASE_URL}/api/datamahasiswa`
       );
 
       setDataAllMahasiswa(dataMahasiswa.data);

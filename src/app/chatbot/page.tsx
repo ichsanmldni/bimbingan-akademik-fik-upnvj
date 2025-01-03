@@ -8,6 +8,7 @@ import SidebarChatbot from "@/components/ui/chatbot/SidebarChatbot";
 import TextInputPesanChatbot from "@/components/ui/chatbot/TextInputPesanChatbot";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { env } from "process";
 import React, { useEffect, useRef, useState } from "react";
 
 interface User {
@@ -95,7 +96,7 @@ export default function Home() {
 
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
-  const API_BASE_URL = "http://localhost:3000/api";
+  const API_BASE_URL = env.API_BASE_URL as string;
   const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
   const formatDate = (dateString: string) => {
@@ -112,7 +113,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/datadosenpa`);
+      const response = await axios.get(`${API_BASE_URL}/api/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -128,7 +129,7 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/datakaprodi`);
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -144,7 +145,9 @@ export default function Home() {
 
   const getDataSesiChatbotMahasiswa = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/sesichatbotmahasiswa`);
+      const response = await axios.get(
+        `${API_BASE_URL}/api/sesichatbotmahasiswa`
+      );
       setDataSesiChatbotMahasiswa(response.data);
     } catch (error) {
       console.error("Error:", error);
@@ -154,7 +157,7 @@ export default function Home() {
 
   const getDataChatbotMahasiswabySesiChatbotMahasiswaID = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/chatbotmahasiswa`);
+      const response = await axios.get(`${API_BASE_URL}/api/chatbotmahasiswa`);
 
       const dataChatbotMahasiswaFiltered = response.data.filter(
         (data: PesanChatbot) =>
@@ -169,7 +172,7 @@ export default function Home() {
 
   const getDataPesanBotBySesiChatbotMahasiswaID = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/pesanbot`);
+      const response = await axios.get(`${API_BASE_URL}/api/pesanbot`);
 
       const dataPesanBotFiltered = response.data.filter(
         (data: PesanChatbot) =>
@@ -184,7 +187,9 @@ export default function Home() {
 
   const getDataRiwayatPesanChatbotBySesiChatbotMahasiswaID = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/riwayatpesanchatbot`);
+      const response = await axios.get(
+        `${API_BASE_URL}/api/riwayatpesanchatbot`
+      );
 
       const dataRiwayatPesanChatbotFiltered = response.data.filter(
         (data: RiwayatPesanChatbot) =>
@@ -287,10 +292,10 @@ export default function Home() {
   };
 
   const addPesanBot = (newChat: ChatMessageBot) =>
-    postData(`${API_BASE_URL}/pesanbot`, newChat);
+    postData(`${API_BASE_URL}/api/pesanbot`, newChat);
 
   const addChatbotMahasiswa = (newChat: ChatMessageMahasiswa) =>
-    postData(`${API_BASE_URL}/chatbotmahasiswa`, newChat);
+    postData(`${API_BASE_URL}/api/chatbotmahasiswa`, newChat);
 
   const handleAddChatChatbotMahasiswa = async (
     newData: ChatMessageMahasiswa

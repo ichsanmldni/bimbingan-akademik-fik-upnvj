@@ -13,6 +13,7 @@ import NotificationButton from "@/components/ui/NotificationButton";
 import NavbarUser from "@/components/ui/NavbarUser";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -28,6 +29,8 @@ export default function Home() {
   const [dataKaprodi, setDataKaprodi] = useState<any[]>([]);
   const [dataDosen, setDataDosen] = useState<any[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]);
+
+  const API_BASE_URL = env.API_BASE_URL as string;
 
   const router = useRouter();
 
@@ -45,7 +48,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -61,7 +64,7 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datakaprodi");
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -77,7 +80,7 @@ export default function Home() {
 
   const getDataDosen = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosen");
+      const response = await axios.get(`${API_BASE_URL}/api/datadosen`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -93,9 +96,7 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/datamahasiswa"
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");

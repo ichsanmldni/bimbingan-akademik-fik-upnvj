@@ -2,6 +2,7 @@
 
 import FilterField from "@/components/ui/FilterField";
 import axios from "axios";
+import { env } from "process";
 import { useEffect, useState } from "react";
 
 interface TahunAjaran {
@@ -19,11 +20,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
     { value: string; label: string }[]
   >([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const getDataTahunAjaran = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/datatahunajaran"
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datatahunajaran`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");

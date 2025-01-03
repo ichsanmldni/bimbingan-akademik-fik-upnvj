@@ -12,6 +12,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -93,10 +94,12 @@ export default function Home() {
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
   const [dataDosen, setDataDosen] = useState<any[]>([]); // Adjust type as needed
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const getDataJadwalDosenPaByDosenPa = async () => {
     try {
       const dataDosenPa = await axios.get<DosenPA[]>(
-        `http://localhost:3000/api/datadosenpa`
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       const dosenPa = dataDosenPa.data.find(
@@ -110,7 +113,7 @@ export default function Home() {
       const dosenpaid = dosenPa.id;
 
       const response = await axios.get<JadwalDosenPA[]>(
-        `http://localhost:3000/api/datajadwaldosenpa/${dosenpaid}`
+        `${API_BASE_URL}/api/datajadwaldosenpa/${dosenpaid}`
       );
 
       if (response.status !== 200) {
@@ -128,7 +131,7 @@ export default function Home() {
   const getDataDosenPaByMahasiswa = async () => {
     try {
       const dataDosenPa = await axios.get<DosenPA[]>(
-        `http://localhost:3000/api/datadosenpa`
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       const dosenPa = dataDosenPa.data.find(
@@ -150,7 +153,7 @@ export default function Home() {
   const getDataMahasiswaByUser = async () => {
     try {
       const dataMahasiswa = await axios.get<Mahasiswa[]>(
-        `http://localhost:3000/api/datamahasiswa`
+        `${API_BASE_URL}/api/datamahasiswa`
       );
 
       const mahasiswa = dataMahasiswa.data.find(
@@ -171,7 +174,7 @@ export default function Home() {
   const getDataJenisBimbingan = async () => {
     try {
       const response = await axios.get<JenisBimbingan[]>(
-        "http://localhost:3000/api/datajenisbimbingan"
+        `${API_BASE_URL}/api/datajenisbimbingan`
       );
 
       if (response.status !== 200) {
@@ -190,7 +193,7 @@ export default function Home() {
   const getDataSistemBimbingan = async () => {
     try {
       const response = await axios.get<SistemBimbingan[]>(
-        "http://localhost:3000/api/datasistembimbingan"
+        `${API_BASE_URL}/api/datasistembimbingan`
       );
 
       if (response.status !== 200) {
@@ -209,7 +212,7 @@ export default function Home() {
   const addPengajuanBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/pengajuanbimbingan",
+        `${API_BASE_URL}/api/pengajuanbimbingan`,
         newData
       );
       return response.data;
@@ -269,7 +272,7 @@ export default function Home() {
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<DosenPA[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       if (response.status !== 200) {
@@ -287,7 +290,7 @@ export default function Home() {
   const getDataKaprodi = async () => {
     try {
       const response = await axios.get<any[]>(
-        "http://localhost:3000/api/datakaprodi"
+        `${API_BASE_URL}/api/datakaprodi`
       );
 
       if (response.status !== 200) {
@@ -304,9 +307,7 @@ export default function Home() {
 
   const getDataDosen = async () => {
     try {
-      const response = await axios.get<any[]>(
-        "http://localhost:3000/api/datadosen"
-      );
+      const response = await axios.get<any[]>(`${API_BASE_URL}/api/datadosen`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -323,7 +324,7 @@ export default function Home() {
   const getDataMahasiswa = async () => {
     try {
       const response = await axios.get<Mahasiswa[]>(
-        "http://localhost:3000/api/datamahasiswa"
+        `${API_BASE_URL}/api/datamahasiswa`
       );
 
       if (response.status !== 200) {

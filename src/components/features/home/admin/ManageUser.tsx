@@ -7,6 +7,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import EditButton from "@/components/ui/EditButton";
+import { env } from "process";
 
 interface TahunAjaran {
   tahun_ajaran: string;
@@ -35,10 +36,12 @@ const ManageUser: React.FC<ManageUserProps> = () => {
   const [dataTahunAjaran, setDataTahunAjaran] = useState<TahunAjaran[]>([]);
   const [dataUser, setDataUser] = useState<User[]>([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const getDataTahunAjaran = async () => {
     try {
       const response = await axios.get<TahunAjaran[]>(
-        "http://localhost:3000/api/datatahunajaran"
+        `${API_BASE_URL}/api/datatahunajaran`
       );
 
       if (response.status !== 200) {
@@ -55,9 +58,7 @@ const ManageUser: React.FC<ManageUserProps> = () => {
 
   const getDataUser = async () => {
     try {
-      const response = await axios.get<User[]>(
-        `http://localhost:3000/api/datauser`
-      );
+      const response = await axios.get<User[]>(`${API_BASE_URL}/api/datauser`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");

@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import chatbotIcon from "../assets/images/chatbot.png";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -44,10 +45,12 @@ export default function Home() {
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
   const [dataUser, setDataUser] = useState<User | null>(null);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const getDataDosen = async () => {
     try {
       const response = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosen"
+        `${API_BASE_URL}/api/datadosen`
       );
 
       if (response.status !== 200) {
@@ -64,7 +67,7 @@ export default function Home() {
   const getDataMahasiswa = async () => {
     try {
       const response = await axios.get<Mahasiswa[]>(
-        "http://localhost:3000/api/datamahasiswa"
+        `${API_BASE_URL}/api/datamahasiswa`
       );
 
       if (response.status !== 200) {
@@ -81,7 +84,7 @@ export default function Home() {
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<Dosen[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       if (response.status !== 200) {
@@ -98,7 +101,7 @@ export default function Home() {
   const getDataKaprodi = async () => {
     try {
       const response = await axios.get<Kaprodi[]>(
-        "http://localhost:3000/api/datakaprodi"
+        `${API_BASE_URL}/api/datakaprodi`
       );
 
       if (response.status !== 200) {

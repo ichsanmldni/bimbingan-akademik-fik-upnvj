@@ -6,6 +6,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import EditButton from "@/components/ui/EditButton";
+import { env } from "process";
 
 interface ManageJadwalDosenPAProps {}
 
@@ -39,11 +40,11 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
   >({});
   const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const getDataTahunAjaran = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/datatahunajaran"
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datatahunajaran`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -62,9 +63,7 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
 
   const getDataJadwalDosenPa = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/datajadwaldosenpa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datajadwaldosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -80,7 +79,7 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
 
   const getDataDosen = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/datadosen`);
+      const response = await axios.get(`${API_BASE_URL}/api/datadosen`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");

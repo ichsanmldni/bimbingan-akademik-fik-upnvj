@@ -8,6 +8,7 @@ import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
 import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
+import { env } from "process";
 
 interface DashboardMahasiswaProps {
   selectedSubMenuDashboard: string;
@@ -100,6 +101,8 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<any[]>([]); // Adjust type as needed
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   function getDate(jadwal: string) {
     if (!jadwal) return "";
     const parts = jadwal.split(" ");
@@ -149,11 +152,9 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const getDataMahasiswaById = async () => {
     try {
       const dataMahasiswa = await axios.get(
-        "http://localhost:3000/api/datamahasiswa"
+        `${API_BASE_URL}/api/datamahasiswa`
       );
-      const dataDosenPA = await axios.get(
-        "http://localhost:3000/api/datadosenpa"
-      );
+      const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       const mahasiswa = dataMahasiswa.data.find(
         (data: any) => data.id === dataUser.id
@@ -199,9 +200,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
   const getDataJadwalDosenPaByDosenPa = async () => {
     try {
-      const dataDosenPa = await axios.get(
-        `http://localhost:3000/api/datadosenpa`
-      );
+      const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       const dosenPa = dataDosenPa.data.find(
         (data: any) => data.dosen.nama_lengkap === userProfile.dosen_pa
@@ -214,7 +213,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       const dosenpaid = dosenPa.id;
 
       const response = await axios.get(
-        `http://localhost:3000/api/datajadwaldosenpa/${dosenpaid}`
+        `${API_BASE_URL}/api/datajadwaldosenpa/${dosenpaid}`
       );
 
       if (response.status !== 200) {
@@ -231,7 +230,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
   const getDataJurusan = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datajurusan");
+      const response = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -250,9 +249,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
   const getDataPeminatanByJurusan = async (selectedJurusan: string) => {
     try {
-      const dataJurusan = await axios.get(
-        "http://localhost:3000/api/datajurusan"
-      );
+      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -265,7 +262,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       const jurusanid = jurusan.id;
 
       const response = await axios.get(
-        `http://localhost:3000/api/datapeminatan/${jurusanid}`
+        `${API_BASE_URL}/api/datapeminatan/${jurusanid}`
       );
 
       if (response.status !== 200) {
@@ -285,7 +282,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datadosenpa");
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -302,7 +299,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const getDataPengajuanBimbinganByIDMahasiswa = async () => {
     try {
       const dataPengajuanBimbingan = await axios.get(
-        `http://localhost:3000/api/pengajuanbimbingan`
+        `${API_BASE_URL}/api/pengajuanbimbingan`
       );
 
       const pengajuanBimbingan = dataPengajuanBimbingan.data.filter(
@@ -319,7 +316,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const patchMahasiswa = async (updatedData: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datamahasiswa",
+        `${API_BASE_URL}/api/datamahasiswa`,
         updatedData
       );
       console.log("Mahasiswa updated successfully:", response.data);

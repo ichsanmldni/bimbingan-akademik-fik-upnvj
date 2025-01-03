@@ -11,6 +11,7 @@ import React, { useEffect, useRef, useState } from "react";
 import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
 import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
 import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
+import { env } from "process";
 
 interface User {
   id: number;
@@ -49,12 +50,14 @@ export default function ChatMahasiswa() {
   const [chatMahasiswaData, setChatMahasiswaData] = useState<ChatData[]>([]);
   const [chatDosenPAData, setChatDosenPAData] = useState<ChatData[]>([]);
 
+  const API_BASE_URL = env.API_BASE_URL as string;
+
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const addChatDosenPA = async (newChat: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/chatdosenpa",
+        `${API_BASE_URL}/api/chatdosenpa`,
         newChat
       );
       return response.data;
@@ -101,7 +104,7 @@ export default function ChatMahasiswa() {
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<DosenPA[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       if (response.status !== 200) {
@@ -119,7 +122,7 @@ export default function ChatMahasiswa() {
   const getDataKaprodi = async () => {
     try {
       const response = await axios.get<any[]>(
-        "http://localhost:3000/api/datakaprodi"
+        `${API_BASE_URL}/api/datakaprodi`
       );
 
       if (response.status !== 200) {
@@ -137,10 +140,10 @@ export default function ChatMahasiswa() {
   const getDataDosenPaByMahasiswaID = async () => {
     try {
       const dataDosenPa = await axios.get<DosenPA[]>(
-        `http://localhost:3000/api/datadosenpa`
+        `${API_BASE_URL}/api/datadosenpa`
       );
       const dataMahasiswa = await axios.get<any[]>(
-        `http://localhost:3000/api/datamahasiswa`
+        `${API_BASE_URL}/api/datamahasiswa`
       );
 
       const dataUserMahasiswa = dataMahasiswa.data.find(
@@ -164,7 +167,7 @@ export default function ChatMahasiswa() {
   const patchChatPribadi = async (updatedData: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/chatpribadi/updateisread",
+        `${API_BASE_URL}/api/chatpribadi/updateisread`,
         updatedData
       );
       console.log("Dosen PA updated successfully:", response.data);
@@ -178,7 +181,7 @@ export default function ChatMahasiswa() {
   const getDataDosenPAByDosenId = async () => {
     try {
       const dataDosenPA = await axios.get<DosenPA[]>(
-        "http://localhost:3000/api/datadosenpa"
+        `${API_BASE_URL}/api/datadosenpa`
       );
 
       const dosen = dataDosenPA.data.find(
@@ -200,7 +203,7 @@ export default function ChatMahasiswa() {
   const getDataChatPribadiByDosenPAId = async () => {
     try {
       const dataChatPribadi = await axios.get<any[]>(
-        `http://localhost:3000/api/chatpribadi`
+        `${API_BASE_URL}/api/chatpribadi`
       );
 
       const dataChat = dataChatPribadi.data.filter(
@@ -221,7 +224,7 @@ export default function ChatMahasiswa() {
   const getDataChatDosenPABySelectedChatPribadiId = async () => {
     try {
       const dataChatDosenPA = await axios.get<ChatData[]>(
-        `http://localhost:3000/api/chatdosenpa`
+        `${API_BASE_URL}/api/chatdosenpa`
       );
 
       const dataChat = dataChatDosenPA.data.filter(
@@ -241,7 +244,7 @@ export default function ChatMahasiswa() {
   const getDataChatMahasiswaBySelectedChatPribadiId = async () => {
     try {
       const dataChatMahasiswa = await axios.get<ChatData[]>(
-        `http://localhost:3000/api/chatmahasiswa`
+        `${API_BASE_URL}/api/chatmahasiswa`
       );
 
       const dataChat = dataChatMahasiswa.data.filter(

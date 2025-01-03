@@ -21,6 +21,7 @@ import {
 import Modal from "../Modal";
 import InputField from "@/components/ui/InputField";
 import { CSS } from "@dnd-kit/utilities";
+import { env } from "process";
 
 interface ManageInformasiAkademikProps {}
 
@@ -71,6 +72,8 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
   const [optionsBab, setOptionsBab] = useState<
     { value: string; label: string }[]
   >([]);
+
+  const API_BASE_URL = env.API_BASE_URL as string;
 
   const areArraysEqual = (arr1: any[], arr2: any[]) => {
     if (arr1.length !== arr2.length) return false;
@@ -309,10 +312,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const addBab = async (newData: Bab) => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/databab",
-        newData
-      );
+      const response = await axios.post(`${API_BASE_URL}/api/databab`, newData);
       return response.data;
     } catch (error) {
       throw error;
@@ -322,7 +322,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
   const patchBab = async (updatedData: Bab) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/databab",
+        `${API_BASE_URL}/api/databab`,
         updatedData
       );
       return response.data;
@@ -333,7 +333,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const deleteBab = async (deletedData: Bab) => {
     try {
-      const response = await axios.delete("http://localhost:3000/api/databab", {
+      const response = await axios.delete(`${API_BASE_URL}/api/databab`, {
         data: deletedData,
       });
       return response.data;
@@ -393,7 +393,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
   const patchBabOrder = async (updatedOrder: Bab[]) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/databab/updateorder",
+        `${API_BASE_URL}/api/databab/updateorder`,
         {
           ...updatedOrder,
         }
@@ -416,7 +416,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const getDataBab = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/databab");
+      const response = await axios.get(`${API_BASE_URL}/api/databab`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -436,9 +436,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const addSubBab = async (newData: SubBab) => {
     try {
-      const dataBabResponse = await axios.get(
-        "http://localhost:3000/api/databab"
-      );
+      const dataBabResponse = await axios.get(`${API_BASE_URL}/api/databab`);
       const bab = dataBabResponse.data.find(
         (data: Bab) => data.nama === selectedBab
       );
@@ -450,7 +448,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       const babid = bab.id;
 
       const response = await axios.post(
-        `http://localhost:3000/api/datasubbab/${babid}`,
+        `${API_BASE_URL}/api/datasubbab/${babid}`,
         newData
       );
       return response.data;
@@ -461,9 +459,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const patchSubBab = async (updatedData: SubBab) => {
     try {
-      const dataBabResponse = await axios.get(
-        "http://localhost:3000/api/databab"
-      );
+      const dataBabResponse = await axios.get(`${API_BASE_URL}/api/databab`);
       const bab = dataBabResponse.data.find(
         (data: Bab) => data.nama === selectedBab
       );
@@ -475,7 +471,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       const babid = bab.id;
 
       const response = await axios.patch(
-        `http://localhost:3000/api/datasubbab/${babid}`,
+        `${API_BASE_URL}/api/datasubbab/${babid}`,
         updatedData
       );
       return response.data;
@@ -486,9 +482,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const deleteSubBab = async (deletedData: SubBab) => {
     try {
-      const dataBabResponse = await axios.get(
-        "http://localhost:3000/api/databab"
-      );
+      const dataBabResponse = await axios.get(`${API_BASE_URL}/api/databab`);
       const bab = dataBabResponse.data.find(
         (data: Bab) => data.nama === selectedBab
       );
@@ -500,7 +494,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       const babid = bab.id;
 
       const response = await axios.delete(
-        `http://localhost:3000/api/datasubbab/${babid}`,
+        `${API_BASE_URL}/api/datasubbab/${babid}`,
         { data: deletedData }
       );
       return response.data;
@@ -561,9 +555,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const patchSubBabOrder = async (updatedOrder: SubBab[]) => {
     try {
-      const dataBabResponse = await axios.get(
-        "http://localhost:3000/api/databab"
-      );
+      const dataBabResponse = await axios.get(`${API_BASE_URL}/api/databab`);
       const bab = dataBabResponse.data.find(
         (data: Bab) => data.nama === selectedBab
       );
@@ -575,7 +567,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       const babid = bab.id;
 
       const response = await axios.patch(
-        `http://localhost:3000/api/datasubbab/${babid}/updateorder`,
+        `${API_BASE_URL}/api/datasubbab/${babid}/updateorder`,
         {
           ...updatedOrder,
         }
@@ -598,9 +590,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
 
   const getDataSubBabByBab = async (selectedBab: string) => {
     try {
-      const dataBabResponse = await axios.get(
-        "http://localhost:3000/api/databab"
-      );
+      const dataBabResponse = await axios.get(`${API_BASE_URL}/api/databab`);
       const bab = dataBabResponse.data.find(
         (data: Bab) => data.nama === selectedBab
       );
@@ -612,7 +602,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       const babid = bab.id;
 
       const response = await axios.get(
-        `http://localhost:3000/api/datasubbab/${babid}`
+        `${API_BASE_URL}/api/datasubbab/${babid}`
       );
 
       if (response.status !== 200) {

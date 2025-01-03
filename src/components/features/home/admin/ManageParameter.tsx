@@ -19,6 +19,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import Modal from "../Modal";
 import InputField from "@/components/ui/InputField";
+import { env } from "process";
 
 interface ManageParameterProps {
   activeNavbar: string;
@@ -94,6 +95,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     selectedSistemBimbinganDeleteModal,
     setSelectedSistemBimbinganDeleteModal,
   ] = useState<any>({});
+
+  const API_BASE_URL = env.API_BASE_URL as string;
 
   const openModal = (type: any, data = null) => {
     setModalType(type);
@@ -338,7 +341,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const patchJurusanOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datajurusan/updateorder",
+        `${API_BASE_URL}/api/datajurusan/updateorder`,
         {
           ...updatedOrder,
         }
@@ -356,7 +359,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const patchTahunAjaranOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datatahunajaran/updateorder",
+        `${API_BASE_URL}/api/datatahunajaran/updateorder`,
         {
           ...updatedOrder,
         }
@@ -373,9 +376,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const patchPeminatanOrder = async (updatedOrder: any) => {
     try {
-      const dataJurusan = await axios.get(
-        "http://localhost:3000/api/datajurusan"
-      );
+      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -388,7 +389,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const jurusanid = jurusan.id;
 
       const response = await axios.patch(
-        `http://localhost:3000/api/datapeminatan/${jurusanid}/updateorder`,
+        `${API_BASE_URL}/api/datapeminatan/${jurusanid}/updateorder`,
         {
           ...updatedOrder,
         }
@@ -405,7 +406,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const patchJenisBimbinganOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datajenisbimbingan/updateorder",
+        `${API_BASE_URL}/api/datajenisbimbingan/updateorder`,
         {
           ...updatedOrder,
         }
@@ -423,7 +424,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const patchSistemBimbinganOrder = async (updatedOrder: any) => {
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datasistembimbingan/updateorder",
+        `${API_BASE_URL}/api/datasistembimbingan/updateorder`,
         {
           ...updatedOrder,
         }
@@ -489,9 +490,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const getDataTahunAjaran = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/datatahunajaran"
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datatahunajaran`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -513,7 +512,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const getDataJurusan = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/datajurusan");
+      const response = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -535,9 +534,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const getDataPeminatanByJurusan = async (selectedJurusan: any) => {
     try {
-      const dataJurusan = await axios.get(
-        "http://localhost:3000/api/datajurusan"
-      );
+      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -550,7 +547,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const jurusanid = jurusan.id;
 
       const response = await axios.get(
-        `http://localhost:3000/api/datapeminatan/${jurusanid}`
+        `${API_BASE_URL}/api/datapeminatan/${jurusanid}`
       );
 
       if (response.status !== 200) {
@@ -574,7 +571,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const getDataJenisBimbingan = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/datajenisbimbingan"
+        `${API_BASE_URL}/api/datajenisbimbingan`
       );
 
       if (response.status !== 200) {
@@ -598,7 +595,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const getDataSistemBimbingan = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/datasistembimbingan"
+        `${API_BASE_URL}/api/datasistembimbingan`
       );
 
       if (response.status !== 200) {
@@ -1080,7 +1077,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const addTahunAjaran = async (newData: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/datatahunajaran",
+        `${API_BASE_URL}/api/datatahunajaran`,
         newData
       );
 
@@ -1094,7 +1091,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datatahunajaran",
+        `${API_BASE_URL}/api/datatahunajaran`,
         updatedData
       );
       console.log("Tahun Ajaran updated successfully:", response.data);
@@ -1108,7 +1105,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const deleteTahunAjaran = async (deletedData: any) => {
     try {
       const response = await axios.delete(
-        "http://localhost:3000/api/datatahunajaran",
+        `${API_BASE_URL}/api/datatahunajaran`,
         { data: deletedData }
       );
       console.log("Tahun Ajaran updated successfully:", response.data);
@@ -1175,7 +1172,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const addJurusan = async (newData: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/datajurusan",
+        `${API_BASE_URL}/api/datajurusan`,
         newData
       );
 
@@ -1189,7 +1186,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datajurusan",
+        `${API_BASE_URL}/api/datajurusan`,
         updatedData
       );
       console.log("Jurusan updated successfully:", response.data);
@@ -1202,10 +1199,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const deleteJurusan = async (deletedData: any) => {
     try {
-      const response = await axios.delete(
-        "http://localhost:3000/api/datajurusan",
-        { data: deletedData }
-      );
+      const response = await axios.delete(`${API_BASE_URL}/api/datajurusan`, {
+        data: deletedData,
+      });
       console.log("Jurusan updated successfully:", response.data);
       return response.data;
     } catch (error) {
@@ -1269,9 +1265,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const addPeminatan = async (newData: any) => {
     try {
-      const dataJurusan = await axios.get(
-        "http://localhost:3000/api/datajurusan"
-      );
+      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -1284,7 +1278,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const jurusanid = jurusan.id;
 
       const response = await axios.post(
-        `http://localhost:3000/api/datapeminatan/${jurusanid}`,
+        `${API_BASE_URL}/api/datapeminatan/${jurusanid}`,
         newData
       );
 
@@ -1297,9 +1291,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const patchPeminatan = async (updatedData: any) => {
     console.log(updatedData);
     try {
-      const dataJurusan = await axios.get(
-        "http://localhost:3000/api/datajurusan"
-      );
+      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -1312,7 +1304,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const jurusanid = jurusan.id;
 
       const response = await axios.patch(
-        `http://localhost:3000/api/datapeminatan/${jurusanid}`,
+        `${API_BASE_URL}/api/datapeminatan/${jurusanid}`,
         updatedData
       );
       console.log("Peminatan updated successfully:", response.data);
@@ -1325,9 +1317,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const deletePeminatan = async (deletedData: any) => {
     try {
-      const dataJurusan = await axios.get(
-        "http://localhost:3000/api/datajurusan"
-      );
+      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -1340,7 +1330,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const jurusanid = jurusan.id;
 
       const response = await axios.delete(
-        `http://localhost:3000/api/datapeminatan/${jurusanid}`,
+        `${API_BASE_URL}/api/datapeminatan/${jurusanid}`,
         { data: deletedData }
       );
       console.log("Peminatan updated successfully:", response.data);
@@ -1407,7 +1397,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const addJenisBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/datajenisbimbingan",
+        `${API_BASE_URL}/api/datajenisbimbingan`,
         newData
       );
 
@@ -1421,7 +1411,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datajenisbimbingan",
+        `${API_BASE_URL}/api/datajenisbimbingan`,
         updatedData
       );
       console.log("Jenis Bimbingan updated successfully:", response.data);
@@ -1435,7 +1425,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const deleteJenisBimbingan = async (deletedData: any) => {
     try {
       const response = await axios.delete(
-        "http://localhost:3000/api/datajenisbimbingan",
+        `${API_BASE_URL}/api/datajenisbimbingan`,
         { data: deletedData }
       );
       console.log("Jenis Bimbingan updated successfully:", response.data);
@@ -1502,7 +1492,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const addSistemBimbingan = async (newData: any) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/datasistembimbingan",
+        `${API_BASE_URL}/api/datasistembimbingan`,
         newData
       );
 
@@ -1516,7 +1506,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     console.log(updatedData);
     try {
       const response = await axios.patch(
-        "http://localhost:3000/api/datasistembimbingan",
+        `${API_BASE_URL}/api/datasistembimbingan`,
         updatedData
       );
       console.log("Sistem Bimbingan updated successfully:", response.data);
@@ -1530,7 +1520,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const deleteSistemBimbingan = async (deletedData: any) => {
     try {
       const response = await axios.delete(
-        "http://localhost:3000/api/datasistembimbingan",
+        `${API_BASE_URL}/api/datasistembimbingan`,
         { data: deletedData }
       );
       console.log("Sistem Bimbingan updated successfully:", response.data);
