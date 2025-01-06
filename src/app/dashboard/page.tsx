@@ -201,12 +201,18 @@ export default function Home() {
                 Jadwal Kosong Dosen PA
               </button>
               <button
-                className={`${selectedSubMenuDashboard === "Riwayat Pengajuan Konseling" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
+                className={`${selectedSubMenuDashboard === "Absensi Bimbingan" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
+                onClick={() => setSelectedSubMenuDashboard("Absensi Bimbingan")}
+              >
+                Absensi Bimbingan
+              </button>
+              <button
+                className={`${selectedSubMenuDashboard === "Riwayat Pengajuan Bimbingan" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard("Riwayat Pengajuan Konseling")
+                  setSelectedSubMenuDashboard("Riwayat Pengajuan Bimbingan")
                 }
               >
-                Riwayat Pengajuan Konseling
+                Riwayat Pengajuan Bimbingan
               </button>
             </div>
           )}
@@ -227,6 +233,14 @@ export default function Home() {
                 }
               >
                 Jadwal Kosong Dosen
+              </button>
+              <button
+                className={`${selectedSubMenuDashboard === "Pengesahan Absensi Bimbingan" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
+                onClick={() =>
+                  setSelectedSubMenuDashboard("Pengesahan Absensi Bimbingan")
+                }
+              >
+                Pengesahan Absensi Bimbingan
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Pengajuan Bimbingan Konseling Mahasiswa" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}

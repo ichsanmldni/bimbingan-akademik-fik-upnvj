@@ -34,6 +34,7 @@ interface Mahasiswa {
   nim: string;
   email: string;
   no_whatsapp: string;
+  jurusan: string;
   dosen_pa_id: number;
 }
 
@@ -50,6 +51,12 @@ interface JenisBimbingan {
   order: number;
 }
 
+interface TopikBimbinganPribadi {
+  id: number;
+  topik_bimbingan: string;
+  order: number;
+}
+
 interface SistemBimbingan {
   id: number;
   sistem_bimbingan: string;
@@ -61,6 +68,7 @@ export default function Home() {
   const [nim, setNim] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [noWa, setNoWa] = useState<string>("");
+  const [jurusan, setJurusan] = useState<string>("");
   const [roleUser, setRoleUser] = useState<string>("");
   const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
   const [dataKaprodi, setDataKaprodi] = useState<any[]>([]); // Adjust type as needed
@@ -73,12 +81,19 @@ export default function Home() {
   );
   const [selectedJenisBimbingan, setSelectedJenisBimbingan] =
     useState<string>("");
+  const [selectedTopikBimbinganPribadi, setSelectedTopikBimbinganPribadi] =
+    useState<string>("");
   const [dataJenisBimbingan, setDataJenisBimbingan] = useState<
     JenisBimbingan[]
+  >([]);
+  const [dataTopikBimbinganPribadi, setDataTopikBimbinganPribadi] = useState<
+    TopikBimbinganPribadi[]
   >([]);
   const [optionsJenisBimbingan, setOptionsJenisBimbingan] = useState<
     { value: string; label: string }[]
   >([]);
+  const [optionsTopikBimbinganPribadi, setOptionsTopikBimbinganPribadi] =
+    useState<{ value: string; label: string }[]>([]);
   const [selectedSistemBimbingan, setSelectedSistemBimbingan] =
     useState<string>("");
   const [dataSistemBimbingan, setDataSistemBimbingan] = useState<
@@ -189,6 +204,26 @@ export default function Home() {
       throw error;
     }
   };
+  const getDataTopikBimbinganPribadi = async () => {
+    try {
+      const response = await axios.get<TopikBimbinganPribadi[]>(
+        `${API_BASE_URL}/api/datatopikbimbinganpribadi`
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      const sortedDataTopikBimbinganPribadi = data.sort(
+        (a, b) => a.order - b.order
+      );
+      setDataTopikBimbinganPribadi(sortedDataTopikBimbinganPribadi);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
 
   const getDataSistemBimbingan = async () => {
     try {
@@ -236,8 +271,13 @@ export default function Home() {
         nim,
         email,
         no_whatsapp: noWa,
+        jurusan,
         jadwal_bimbingan: `${selectedHari}, ${formattedDate} ${selectedJam}`,
         jenis_bimbingan: selectedJenisBimbingan,
+        topik_bimbingan:
+          selectedTopikBimbinganPribadi === ""
+            ? null
+            : selectedTopikBimbinganPribadi,
         sistem_bimbingan: selectedSistemBimbingan,
         mahasiswa_id: dataUser.id,
         status: "Menunggu Konfirmasi",
@@ -250,6 +290,7 @@ export default function Home() {
       setNim("");
       setEmail("");
       setNoWa("");
+      setJurusan("");
       setSelectedDateTime(null);
       setSelectedHari("");
       setSelectedJam("");
@@ -262,6 +303,7 @@ export default function Home() {
           setNim(dataMahasiswaUser.nim);
           setEmail(dataMahasiswaUser.email);
           setNoWa(dataMahasiswaUser.no_whatsapp);
+          setJurusan(dataMahasiswaUser.jurusan);
         }
       }, 1000);
     } catch (error) {
@@ -340,6 +382,10 @@ export default function Home() {
   };
 
   useEffect(() => {
+    setSelectedTopikBimbinganPribadi("");
+  }, [selectedJenisBimbingan]);
+
+  useEffect(() => {
     if (dataUser.role === "Mahasiswa") {
       setRoleUser("Mahasiswa");
     } else if (dataUser.role === "Dosen") {
@@ -363,6 +409,7 @@ export default function Home() {
       setNim(dataMahasiswaUser.nim);
       setEmail(dataMahasiswaUser.email);
       setNoWa(dataMahasiswaUser.no_whatsapp);
+      setJurusan(dataMahasiswaUser.jurusan);
       getDataDosenPaByMahasiswa();
     }
   }, [dataMahasiswaUser]);
@@ -393,6 +440,19 @@ export default function Home() {
   }, [dataJenisBimbingan]);
 
   useEffect(() => {
+    if (dataTopikBimbinganPribadi.length > 0) {
+      const formattedOptions = dataTopikBimbinganPribadi.map((data) => {
+        return {
+          value: data.topik_bimbingan,
+          label: data.topik_bimbingan,
+        };
+      });
+
+      setOptionsTopikBimbinganPribadi(formattedOptions);
+    }
+  }, [dataTopikBimbinganPribadi]);
+
+  useEffect(() => {
     if (dataSistemBimbingan.length > 0) {
       const formattedOptions = dataSistemBimbingan.map((data) => {
         return {
@@ -407,6 +467,7 @@ export default function Home() {
 
   useEffect(() => {
     getDataJenisBimbingan();
+    getDataTopikBimbinganPribadi();
     getDataSistemBimbingan();
     getDataDosenPA();
     getDataKaprodi();
@@ -485,6 +546,14 @@ export default function Home() {
               value={noWa}
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
+            <InputField
+              disabled={false}
+              type="text"
+              placeholder="Jurusan"
+              onChange={(e) => setJurusan(e.target.value)}
+              value={jurusan}
+              className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
+            />
             <div className="flex flex-col">
               <DatePicker
                 selected={selectedDateTime}
@@ -550,6 +619,17 @@ export default function Home() {
               placeholder="Pilih Jenis Bimbingan"
               className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
             />
+            {selectedJenisBimbingan === "Pribadi" && (
+              <SelectField
+                options={optionsTopikBimbinganPribadi}
+                onChange={(e) =>
+                  setSelectedTopikBimbinganPribadi(e.target.value)
+                }
+                value={selectedTopikBimbinganPribadi}
+                placeholder="Pilih Topik Bimbingan"
+                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
+              />
+            )}
             <SelectField
               options={optionsSistemBimbingan}
               onChange={(e) => setSelectedSistemBimbingan(e.target.value)}

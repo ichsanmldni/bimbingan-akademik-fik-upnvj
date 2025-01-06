@@ -6,8 +6,10 @@ interface PengajuanBimbingan {
   nim: string;
   email: string;
   no_whatsapp: string;
+  jurusan: string;
   jadwal_bimbingan: string; // Adjust type according to your schema
   jenis_bimbingan: string;
+  topik_bimbingan: string;
   sistem_bimbingan: string;
   status: string;
   dosen_pa_id: number;
@@ -52,9 +54,9 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const body: PengajuanBimbingan = await req.json();
 
-    const { nama_lengkap, nim, email, no_whatsapp, jadwal_bimbingan, jenis_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id } = body;
+    const { nama_lengkap, nim, email, no_whatsapp, jurusan, jadwal_bimbingan, jenis_bimbingan, topik_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id } = body;
 
-    if (!nama_lengkap || !nim || !email || !no_whatsapp || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id) {
+    if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id) {
       return new Response(
         JSON.stringify({ message: 'All fields are required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -68,7 +70,9 @@ export async function POST(req: Request): Promise<Response> {
         email,
         no_whatsapp,
         jadwal_bimbingan,
+        jurusan,
         jenis_bimbingan,
+        topik_bimbingan,
         sistem_bimbingan,
         status,
         dosen_pa_id,

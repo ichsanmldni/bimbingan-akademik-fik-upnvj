@@ -40,8 +40,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   const isActive = (path: string) => pathname === path;
 
-  console.log(dataUser);
-
   const getDataNotifikasiByUserId = async () => {
     try {
       let response;
@@ -58,10 +56,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
                 `${API_BASE_URL}/api/datanotifikasikaprodi`
               ))
             : (response = {});
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
 
       let notifikasiUser;
 
@@ -86,8 +80,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
       throw error;
     }
   };
-
-  console.log(dataNotifikasi);
 
   useEffect(() => {
     getDataNotifikasiByUserId();

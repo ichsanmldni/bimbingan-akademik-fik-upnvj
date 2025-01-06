@@ -1,13 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import upIcon from "../../../assets/images/upIcon.png";
 import downIcon from "../../../assets/images/downIcon.png";
 import InputField from "@/components/ui/InputField";
 import SelectField from "@/components/ui/SelectField";
 import ProfileImage from "@/components/ui/ProfileImage";
+import { TrashIcon, EyeIcon } from "@heroicons/react/outline";
 import axios from "axios";
+import {
+  Dialog,
+  Transition,
+  TransitionChild,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
+import SignatureCanvas from "react-signature-canvas";
+import { Fragment } from "react";
 import { env } from "process";
 
 interface DashboardMahasiswaProps {
@@ -67,6 +77,8 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [dataJurusan, setDataJurusan] = useState<Jurusan[]>([]);
   const [dataPeminatan, setDataPeminatan] = useState<Peminatan[]>([]);
   const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [documentation, setDocumentation] = useState(null);
   const [optionsJurusan, setOptionsJurusan] = useState<
     { value: string; label: string }[]
   >([]);
@@ -79,6 +91,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState<
     PengajuanBimbingan[]
   >([]);
+  const [dataBimbingan, setDataBimbingan] = useState<any>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [dataMahasiswa, setDataMahasiswa] = useState<Record<string, any>>({});
   const [userProfile, setUserProfile] = useState<{
@@ -100,8 +113,111 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   });
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<any[]>([]); // Adjust type as needed
+  const [previewDocumentation, setPreviewDocumentation] = useState([]);
+  const [selectedBimbinganId, setSelectedBimbinganId] = useState();
+  const [inputKey, setInputKey] = useState(Date.now());
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+
+  const sigCanvas = useRef({});
+
+  const openModal = (id) => {
+    setIsOpen(true);
+    setSelectedBimbinganId(id);
+  };
+
+  const closeModal = () => {
+    setSelectedBimbinganId(null);
+    setIsOpen(false);
+    setDocumentation(null);
+    setPreviewDocumentation([]);
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const maxSize = 10 * 1024 * 1024;
+
+    const newPreviews: string[] = [];
+
+    for (const file of files) {
+      if (file.size > maxSize) {
+        alert(`File "${file.name}" melebihi ukuran maksimal 10MB`);
+        continue;
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          `Format file "${file.name}" tidak diperbolehkan. Gunakan .JPG, .JPEG, atau .PNG`
+        );
+        continue;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newPreviews.push(reader.result as string);
+        setPreviewDocumentation(newPreviews);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  const addAbsensiBimbingan = async (absensiData: any) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/bimbingan/absensi`,
+        absensiData
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const signatureData = sigCanvas.current
+      .getTrimmedCanvas()
+      .toDataURL("image/png");
+
+    try {
+      const absensiBimbinganValue = {
+        id: selectedBimbinganId,
+        dokumentasi_kehadiran: previewDocumentation[0],
+        ttd_kehadiran: signatureData,
+      };
+      const result = await addAbsensiBimbingan(absensiBimbinganValue);
+      console.log(result);
+    } catch (error) {
+      console.error("Registration error:", (error as Error).message);
+    }
+    getDataBimbinganByIDMahasiswa();
+    closeModal();
+  };
+
+  const openImageInNewTab = (base64: string) => {
+    // Membuat Blob dari base64
+    const byteString = atob(base64.split(",")[1]); // Mengambil bagian base64
+    const mimeString = base64.split(",")[0].split(":")[1].split(";")[0]; // Mengambil MIME type
+    const ab = new Uint8Array(byteString.length);
+
+    for (let i = 0; i < byteString.length; i++) {
+      ab[i] = byteString.charCodeAt(i);
+    }
+
+    const blob = new Blob([ab], { type: mimeString });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank"); // Membuka URL di tab baru
+  };
+
+  const clearSignature = () => {
+    sigCanvas.current.clear();
+  };
+
+  const resetImage = () => {
+    setPreviewDocumentation([]);
+    setDocumentation(null);
+    setInputKey(Date.now());
+  };
 
   function getDate(jadwal: string) {
     if (!jadwal) return "";
@@ -313,6 +429,21 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     }
   };
 
+  const getDataBimbinganByIDMahasiswa = async () => {
+    try {
+      const dataBimbingan = await axios.get(`${API_BASE_URL}/api/bimbingan`);
+
+      const bimbingan = dataBimbingan.data.filter(
+        (data: any) => data.pengajuan_bimbingan.mahasiswa_id === dataUser.id
+      );
+
+      setDataBimbingan(bimbingan);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   const patchMahasiswa = async (updatedData: any) => {
     try {
       const response = await axios.patch(
@@ -405,6 +536,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     if (dataUser && dataUser.id) {
       getDataMahasiswaById();
       getDataPengajuanBimbinganByIDMahasiswa();
+      getDataBimbinganByIDMahasiswa();
     }
   }, [dataUser]);
 
@@ -634,7 +766,194 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
           </div>
         </div>
       )}
-      {selectedSubMenuDashboard === "Riwayat Pengajuan Konseling" && (
+      {selectedSubMenuDashboard === "Absensi Bimbingan" && (
+        <div className="w-[75%] pl-[30px] pr-[128px] mb-[200px] py-[30px]">
+          <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
+            <h1 className="font-semibold text-[24px]">
+              Absensi Bimbingan Konseling
+            </h1>
+
+            <div className="flex flex-col gap-4">
+              {dataBimbingan
+                .slice()
+                .reverse()
+                .map((data: any) => (
+                  <div
+                    key={data.id}
+                    className="flex flex-col border rounded-lg p-6 gap-4"
+                  >
+                    <div className="flex justify-between text-neutral-600">
+                      <p>
+                        {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                      </p>
+                      <p>
+                        {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                      </p>
+                    </div>
+                    <div>
+                      <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
+                      <p>{data.pengajuan_bimbingan.topik_bimbingan}</p>
+                      <p className="font-medium">
+                        {data.pengajuan_bimbingan.sistem_bimbingan}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[14px]">
+                        {data.pengajuan_bimbingan.keterangan}
+                      </p>
+                    </div>
+                    {data.laporan_bimbingan_id === null &&
+                    data.status_kehadiran_mahasiswa === null ? (
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => openModal(data.id)}
+                          className="bg-green-400 text-[14px] hover:bg-green-500 justify-end rounded-lg p-2 text-white"
+                        >
+                          Isi Absensi
+                        </button>
+                        <Transition appear show={isOpen} as={Fragment}>
+                          <Dialog
+                            as="div"
+                            className="relative z-[1000]"
+                            onClose={closeModal}
+                          >
+                            <TransitionChild
+                              as={Fragment}
+                              enter="ease-out duration-300"
+                              enterFrom="opacity-0"
+                              enterTo="opacity-100"
+                              leave="ease-in duration-200"
+                              leaveFrom="opacity-100"
+                              leaveTo="opacity-0"
+                            >
+                              <div className="fixed inset-0 bg-black bg-opacity-25" />
+                            </TransitionChild>
+
+                            <div className="fixed inset-0 overflow-y-auto">
+                              <div className="flex min-h-full items-center justify-center p-4 text-center">
+                                <TransitionChild
+                                  as={Fragment}
+                                  enter="ease-out duration-300"
+                                  enterFrom="opacity-0 scale-95"
+                                  enterTo="opacity-100 scale-100"
+                                  leave="ease-in duration-200"
+                                  leaveFrom="opacity-100 scale-100"
+                                  leaveTo="opacity-0 scale-95"
+                                >
+                                  <DialogPanel className="w-full scrollbar scrollbar-thumb-corner-900 max-w-md max-h-[500px] overflow-y-auto transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                                    <DialogTitle
+                                      as="h3"
+                                      className="text-lg font-medium leading-6 text-gray-900"
+                                    >
+                                      Isi Absensi
+                                    </DialogTitle>
+                                    <div className="mt-2">
+                                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Tanda Tangan:
+                                      </label>
+                                      <SignatureCanvas
+                                        ref={sigCanvas}
+                                        penColor="black"
+                                        canvasProps={{
+                                          className:
+                                            "border border-gray-300 rounded w-full h-[200px]",
+                                        }}
+                                      />
+                                      <button
+                                        className="mt-2 text-sm text-blue-500 hover:underline"
+                                        onClick={clearSignature}
+                                      >
+                                        Clear
+                                      </button>
+                                    </div>
+                                    <div className="mt-4">
+                                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Dokumentasi:
+                                      </label>
+                                      {previewDocumentation.length > 0 && (
+                                        <div className="mt-4">
+                                          {previewDocumentation.map(
+                                            (preview, index) => (
+                                              <div
+                                                key={index}
+                                                className="relative mb-2"
+                                              >
+                                                <img
+                                                  src={preview}
+                                                  alt={`Preview ${index}`}
+                                                  className="w-full h-auto rounded border border-gray-300"
+                                                />
+                                                <div className="absolute top-2 right-2 flex space-x-2">
+                                                  <button
+                                                    onClick={resetImage}
+                                                    className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                                    title="Hapus Gambar"
+                                                  >
+                                                    <TrashIcon className="h-5 w-5" />
+                                                  </button>
+                                                  <button
+                                                    onClick={() =>
+                                                      openImageInNewTab(preview)
+                                                    } // Menggunakan fungsi baru
+                                                    className="p-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                                                    title="Lihat Gambar"
+                                                  >
+                                                    <EyeIcon className="h-5 w-5" />
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
+                                      <input
+                                        key={inputKey}
+                                        type="file"
+                                        onChange={handleImageUpload}
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                      />
+                                    </div>
+
+                                    <div className="mt-4 flex justify-end space-x-2">
+                                      <button
+                                        type="button"
+                                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                        onClick={(e) => handleSubmit(e)}
+                                      >
+                                        Submit
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="inline-flex justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                                        onClick={closeModal}
+                                      >
+                                        Close
+                                      </button>
+                                    </div>
+                                  </DialogPanel>
+                                </TransitionChild>
+                              </div>
+                            </div>
+                          </Dialog>
+                        </Transition>
+                      </div>
+                    ) : (
+                      <div className="flex justify-end">
+                        <div
+                          onClick={openModal}
+                          className="bg-orange-400 text-[14px] justify-end rounded-lg p-2 text-white"
+                        >
+                          Sudah Absen
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {selectedSubMenuDashboard === "Riwayat Pengajuan Bimbingan" && (
         <div className="w-[75%] pl-[30px] pr-[128px] mb-[200px] py-[30px]">
           <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">

@@ -23,11 +23,15 @@ model artikel {
 }
 
 model bimbingan {
-  id                     Int                @id @default(autoincrement())
-  pengajuan_bimbingan_id Int
-  laporan_bimbingan_id   Int?
-  laporan_bimbingan      laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "Bimbingan_laporan_bimbingan_id_fkey")
-  pengajuan_bimbingan    pengajuanbimbingan @relation(fields: [pengajuan_bimbingan_id], references: [id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
+  id                             Int                @id @default(autoincrement())
+  pengajuan_bimbingan_id         Int
+  laporan_bimbingan_id           Int?
+  status_pengesahan_kehadiran    String?
+  ttd_kehadiran                  String?
+  dokumentasi_kehadiran          String?
+  status_kehadiran_mahasiswa     String?
+  laporan_bimbingan              laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "Bimbingan_laporan_bimbingan_id_fkey")
+  pengajuan_bimbingan            pengajuanbimbingan @relation(fields: [pengajuan_bimbingan_id], references: [id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
 
   @@index([laporan_bimbingan_id], map: "Bimbingan_laporan_bimbingan_id_fkey")
   @@index([pengajuan_bimbingan_id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
@@ -150,6 +154,13 @@ model masterjenisbimbingan {
   order           Int
 }
 
+model mastertopikbimbinganpribadi {
+  id              Int    @id @default(autoincrement())
+  topik_bimbingan String
+  order           Int
+}
+
+
 model masterjurusan {
   id              Int               @id @default(autoincrement())
   jurusan         String
@@ -219,8 +230,10 @@ model pengajuanbimbingan {
   nim              String
   email            String
   no_whatsapp      String
+  jurusan          String
   jadwal_bimbingan String
   jenis_bimbingan  String
+  topik_bimbingan  String?
   sistem_bimbingan String
   status           String
   dosen_pa_id      Int

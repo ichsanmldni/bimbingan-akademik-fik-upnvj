@@ -17,6 +17,8 @@ import axios from "axios";
 import TrashButton from "@/components/ui/TrashButton";
 import { format } from "date-fns";
 import { env } from "process";
+import { Dialog, DialogPanel } from "@headlessui/react";
+import { EyeIcon } from "@heroicons/react/outline";
 
 interface UserProfile {
   nama_lengkap: string;
@@ -122,6 +124,20 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const [jamSelesai, setJamSelesai] = useState<string>("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [openDay, setOpenDay] = useState<string | null>(null);
+  const [dataPengesahanBimbingan, setDataPengesahanBimbingan] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const openImageInNewTab = (path: string) => {
+    window.open(path, "_blank"); // Membuka URL di tab baru
+  };
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -139,6 +155,25 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     if (!jadwal) return "";
     const waktu = jadwal.split(" ").slice(-1)[0];
     return waktu;
+  };
+
+  const getDataPengesahanBimbinganByIDDosenPA = async () => {
+    try {
+      const dataBimbingan = await axios.get(`${API_BASE_URL}/api/bimbingan`);
+
+      const bimbinganUser = dataBimbingan.data.filter(
+        (data: any) => data.pengajuan_bimbingan.dosen_pa_id === dataUser.id
+      );
+
+      const bimbingan = bimbinganUser.filter(
+        (data) => data.status_pengesahan_kehadiran === "Belum Sah"
+      );
+
+      setDataPengesahanBimbingan(bimbingan);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
   };
 
   const addJadwalDosen = async (newData: DataJadwalDosenPA) => {
@@ -169,6 +204,17 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/api/pengajuanbimbingan`,
+        updatedData
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+  const patchPengesahanKehadiranBimbingan = async (updatedData: any) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/bimbingan/pengesahanabsensi`,
         updatedData
       );
       return response.data;
@@ -443,9 +489,29 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
+  const handleEditPengesahanKehadiranBimbingan = async (
+    id: number,
+    status_pengesahan_kehadiran: string
+  ) => {
+    try {
+      let pengesahanKehadiranBimbinganValue = {
+        id,
+        status_pengesahan_kehadiran,
+      };
+
+      const result = await patchPengesahanKehadiranBimbingan(
+        pengesahanKehadiranBimbinganValue
+      );
+      getDataPengesahanBimbinganByIDDosenPA();
+    } catch (error) {
+      console.error("Registration error:", (error as Error).message);
+    }
+  };
+
   useEffect(() => {
     if (dataUser && dataUser.id) {
       getDataDosenById();
+      getDataPengesahanBimbinganByIDDosenPA();
       getDataDosenPAByDosenId();
     }
   }, [dataUser]);
@@ -453,6 +519,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   useEffect(() => {
     setImagePreview(null);
     getDataDosenById();
+    getDataPengesahanBimbinganByIDDosenPA();
   }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
@@ -700,6 +767,150 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
           </div>
         </div>
       )}
+      {selectedSubMenuDashboard === "Pengesahan Absensi Bimbingan" && (
+        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px] min-h-[500px]">
+          <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
+            <h1 className="font-semibold text-[24px]">
+              Pengesahan Absensi Bimbingan Konseling Mahasiswa
+            </h1>
+            <div className="flex flex-col gap-4">
+              {dataPengesahanBimbingan.length > 0 ? (
+                dataPengesahanBimbingan
+                  .slice()
+                  .reverse()
+                  .map((data) => (
+                    <div
+                      key={data.id}
+                      className="flex flex-col border rounded-lg p-6 gap-4"
+                    >
+                      <div className="flex justify-between text-neutral-600">
+                        <p>
+                          {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                        </p>
+                        <p>
+                          {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {data.pengajuan_bimbingan.nama_lengkap}
+                        </p>
+                        <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
+                        <p className="font-medium">
+                          {data.pengajuan_bimbingan.sistem_bimbingan}
+                        </p>
+                      </div>
+                      <div className="flex gap-10">
+                        <div className="flex flex-col gap-2">
+                          <p>Dokumentasi :</p>
+                          <div className="relative">
+                            <img
+                              className="w-[200px] cursor-pointer"
+                              src={data.dokumentasi_kehadiran}
+                              alt="Dokumentasi Kehadiran"
+                            />
+                            <button
+                              className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-200"
+                              onClick={() =>
+                                openImageInNewTab(data.dokumentasi_kehadiran)
+                              } // Membuka modal saat ikon diklik
+                              title="Lihat Gambar"
+                            >
+                              <EyeIcon className="h-5 w-5 text-gray-700" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <p>Tanda Tangan Kehadiran :</p>
+                          <img
+                            className="self-center p-4 w-[100px]"
+                            src={data.ttd_kehadiran}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {/* Status Menunggu */}
+                        {data.status_pengesahan_kehadiran === "Belum Sah" && (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleEditPengesahanKehadiranBimbingan(
+                                  data.id,
+                                  "Reschedule"
+                                )
+                              }
+                              className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
+                              disabled={keteranganKonfirmasi === ""}
+                            >
+                              Tidak Sah
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleEditPengesahanKehadiranBimbingan(
+                                  data.id,
+                                  "Sah"
+                                )
+                              }
+                              className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
+                              disabled={keteranganKonfirmasi === ""}
+                            >
+                              Sah
+                            </button>
+                          </>
+                        )}
+
+                        {data.status_pengesahan_kehadiran === "Sah" && (
+                          <button
+                            className="w-full bg-green-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
+                            disabled
+                          >
+                            Sah
+                          </button>
+                        )}
+
+                        {/* Status Reschedule */}
+                        {data.status_pengesahan_kehadiran === "Tidak Sah" && (
+                          <button
+                            className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
+                            disabled
+                          >
+                            Tidak Sah
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="border rounded-lg p-10 flex flex-col items-center">
+                  <svg
+                    className="h-12 w-12 text-red-500 mb-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+
+                  <p className="text-center text-red-500">
+                    Saat ini, belum ada absensi bimbingan yang diajukan oleh
+                    mahasiswa.
+                  </p>
+                  <p className="text-center text-gray-600">
+                    Silakan tunggu hingga mahasiswa mengisi absensi bimbingan.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {selectedSubMenuDashboard ===
         "Pengajuan Bimbingan Konseling Mahasiswa" && (
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
@@ -805,34 +1016,62 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       )}
       {selectedSubMenuDashboard ===
         "Riwayat Laporan Bimbingan Role Dosen PA" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
+        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px] min-h-[500px]">
           <div className=" flex flex-col gap-6 rounded-lg">
             {!isDetailLaporanDosenClicked ? (
               <div className="flex flex-col gap-4">
                 <h1 className="font-semibold text-[24px]">
                   Riwayat Laporan Bimbingan Konseling
                 </h1>
-                {dataLaporanBimbingan.map((data, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
-                    onClick={() => handleDetailLaporanDosen(data)}
-                  >
-                    <div className="text-neutral-600">
-                      <p>{data.waktu_bimbingan}</p>
-                    </div>
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">{data.nama_mahasiswa}</p>
-                        <p>{data.jenis_bimbingan}</p>
-                        <p className="font-medium">{data.sistem_bimbingan}</p>
+                {dataLaporanBimbingan.length > 0 ? (
+                  dataLaporanBimbingan.map((data, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
+                      onClick={() => handleDetailLaporanDosen(data)}
+                    >
+                      <div className="text-neutral-600">
+                        <p>{data.waktu_bimbingan}</p>
                       </div>
-                      <div className="bg-red-500 p-3 self-center rounded-lg">
-                        <p className="text-white text-center">{data.status}</p>
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="font-medium">{data.nama_mahasiswa}</p>
+                          <p>{data.jenis_bimbingan}</p>
+                          <p className="font-medium">{data.sistem_bimbingan}</p>
+                        </div>
+                        <div className="bg-red-500 p-3 self-center rounded-lg">
+                          <p className="text-white text-center">
+                            {data.status}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="border rounded-lg p-10 flex flex-col items-center">
+                    <svg
+                      className="h-12 w-12 text-red-500 mb-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+
+                    <p className="text-center text-red-500">
+                      Saat ini, belum ada laporan bimbingan yang dibuat.
+                    </p>
+                    <p className="text-center text-gray-600">
+                      Silahkan buat laporan bimbingan terlebih dahulu.
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             ) : (
               <div>

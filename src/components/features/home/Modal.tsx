@@ -18,7 +18,7 @@ interface ModalProps {
   onAdd?: any;
   onEdit?: any;
   onDelete?: any;
-  modalType: any;
+  modalType?: any;
   title: string;
   children: ReactNode;
   initialData?: any;
@@ -37,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-[1000]" onClose={onClose}>
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
