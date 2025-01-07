@@ -128,12 +128,12 @@ export default function Home() {
           setRoleUser("Mahasiswa");
         } else if (
           decodedToken.role === "Dosen" &&
-          dataDosenPA.find((data) => data.id === decodedToken.id)
+          dataDosenPA.find((data) => data.dosen_id === decodedToken.id)
         ) {
           setRoleUser("Dosen PA");
         } else if (
           decodedToken.role === "Dosen" &&
-          dataKaprodi.find((data) => data.id === decodedToken.id)
+          dataKaprodi.find((data) => data.dosen_id === decodedToken.id)
         ) {
           setRoleUser("Kaprodi");
         } else if (decodedToken.role === "Admin") {
@@ -151,6 +151,9 @@ export default function Home() {
     getDataDosen();
     getDataMahasiswa();
   }, []);
+  console.log(dataKaprodi);
+  console.log(roleUser);
+  console.log(dataUser);
 
   return (
     <div>
