@@ -15,13 +15,6 @@ model admin {
   profile_image String?
 }
 
-model artikel {
-  id      Int      @id @default(autoincrement())
-  judul   String
-  tanggal DateTime
-  isi     String
-}
-
 model bimbingan {
   id                             Int                @id @default(autoincrement())
   pengajuan_bimbingan_id         Int
@@ -105,28 +98,85 @@ model kaprodi {
 }
 
 model laporanbimbingan {
-  id                Int         @id @default(autoincrement())
-  kaprodi_id        Int?
-  kendala_mahasiswa String
-  solusi            String
-  kesimpulan        String
-  dokumentasi       String?
-  feedback_kaprodi  String?
-  status            String
-  dosen_pa_id       Int?
-  nama_dosen_pa     String
-  jenis_bimbingan   String
-  sistem_bimbingan  String
-  waktu_bimbingan   String
-  nama_mahasiswa    String
-  jumlah_mahasiswa  Int
-  bimbingan         bimbingan[]
-  dosen_pa          dosenpa?    @relation(fields: [dosen_pa_id], references: [id], map: "LaporanBimbingan_dosen_pa_id_fkey")
-  kaprodi           kaprodi?    @relation(fields: [kaprodi_id], references: [id], map: "LaporanBimbingan_kaprodi_id_fkey")
+  id                           Int         @id @default(autoincrement())
+  jumlah_beasiswa_bbm          Int?
+  jumlah_beasiswa_dll          Int?
+  jumlah_beasiswa_pegadaian    Int?
+  jumlah_beasiswa_ppa          Int?
+  jumlah_beasiswa_supersemar   Int?
+  jumlah_beasiswa_ykl          Int?
+  jumlah_ipk_a                 Int?
+  jumlah_ipk_b                 Int?
+  jumlah_ipk_c                 Int?
+  jumlah_ipk_d                 Int?
+  jumlah_ipk_e                 Int?
+  kaprodi_id                   Int?
+  nama_kaprodi                 String
+  kesimpulan                   Json?
+  dosen_pa_id                  Int?
+  nama_dosen_pa                String
+  pendahuluan                  Json?
+  semester                     String
+  status                       String
+  jenis_bimbingan              String
+  topik_bimbingan              String?
+  jumlah_mahasiswa             Int
+  tahun_ajaran                 String
+  tanda_tangan_dosen_pa        String?
+  kendala_mahasiswa            String?
+  solusi                       String?
+  dokumentasi                  String?
+  jadwal_bimbingan             String
+  feedback_kaprodi             String?
+  datastatusmahasiswa          datastatusmahasiswa      []  
+  prestasi_ilmiah_mahasiswa    prestasiilmiahmahasiswa  []
+  prestasi_porseni_mahasiswa   prestasiporsenimahasiswa []
+  bimbingan                    bimbingan                []
+  dosen_pa                     dosenpa?                 @relation(fields: [dosen_pa_id], references: [id], map: "LaporanBimbingan_dosen_pa_id_fkey")
+  kaprodi                      kaprodi?                 @relation(fields: [kaprodi_id], references: [id], map: "LaporanBimbingan_kaprodi_id_fkey")
 
   @@index([dosen_pa_id], map: "LaporanBimbingan_dosen_pa_id_fkey")
   @@index([kaprodi_id], map: "LaporanBimbingan_kaprodi_id_fkey")
 }
+
+model datastatusmahasiswa {
+  id                             Int                @id @default(autoincrement())
+  laporan_bimbingan_id           Int?
+  nama                           String?
+  nim                            String?
+  status          String?
+  laporan_bimbingan              laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "DataStatusMahasiswa_laporan_bimbingan_id_fkey")
+
+  @@index([laporan_bimbingan_id], map: "DataStatusMahasiswa_laporan_bimbingan_id_fkey")
+}
+
+model prestasiilmiahmahasiswa {
+  id                             Int                @id @default(autoincrement())
+  laporan_bimbingan_id           Int?
+  bidang_prestasi                String?
+  lampiran                       String?
+  nama                           String?
+  nim                            String?
+  tingkat_prestasi               String?
+  laporan_bimbingan              laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "PrestasiIlmiahMahasiswa_laporan_bimbingan_id_fkey")
+
+  @@index([laporan_bimbingan_id], map: "PrestasiIlmiahMahasiswa_laporan_bimbingan_id_fkey")
+}
+
+model prestasiporsenimahasiswa {
+  id                             Int                @id @default(autoincrement())
+  laporan_bimbingan_id           Int?
+  jenis_kegiatan                 String?
+  lampiran                       String?
+  nama                           String?
+  nim                            String?
+  tingkat_prestasi               String?
+  laporan_bimbingan              laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "PrestasiPorseniMahasiswa_laporan_bimbingan_id_fkey")
+
+  @@index([laporan_bimbingan_id], map: "PrestasiPorseniMahasiswa_laporan_bimbingan_id_fkey")
+}
+
+
 
 model mahasiswa {
   id                   Int                    @id @default(autoincrement())

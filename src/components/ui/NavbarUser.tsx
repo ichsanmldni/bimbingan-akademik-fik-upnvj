@@ -86,15 +86,15 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   }, [dataUser]);
 
   return (
-    <div className="fixed z-[999] w-full bg-white border flex justify-between py-5 px-[128px]">
-      <div className="flex items-center gap-5">
+    <div className="fixed z-[999] w-full bg-white border flex py-5 px-[128px]">
+      <div className="flex w-[35%] items-center gap-5">
         <Logo className="size-[40px]" />
         <a href="/" className="font-semibold">
-          Bimbingan Konseling Mahasiswa FIK
+          Bimbingan Akademik Mahasiswa FIK
         </a>
       </div>
       <div
-        className={`flex items-center ${roleUser === "Kaprodi" ? "gap-10" : "gap-6"}`}
+        className={`flex items-center pl-8 w-[45%] ${roleUser === "Kaprodi" ? "gap-10" : "gap-6"}`}
       >
         <a
           href="/"
@@ -126,16 +126,8 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
         >
           Laporan Bimbingan
         </Link>
-        <Link
-          href="/artikel"
-          className={`${
-            isActive("/artikel") ? "font-bold text-orange-500" : ""
-          }`}
-        >
-          Artikel
-        </Link>
       </div>
-      <div className="flex gap-10 items-center">
+      <div className="flex gap-10 justify-end w-[20%] items-center">
         {roleUser === "Dosen PA" && (
           <Link href="/chatpribadi">
             <MessageSquareText className="cursor-pointer" />

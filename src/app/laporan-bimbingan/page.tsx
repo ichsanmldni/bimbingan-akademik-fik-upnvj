@@ -108,7 +108,6 @@ export default function Home() {
   const [kendala, setKendala] = useState<string>("");
   const [solusi, setSolusi] = useState<string>("");
   const [kesimpulan, setKesimpulan] = useState([]);
-  const [dokumentasi, setDokumentasi] = useState<string>("");
   const [roleUser, setRoleUser] = useState<string>("");
   const [dataUser, setDataUser] = useState<User>({} as User);
   const [dataDosenPA, setDataDosenPA] = useState<Dosen[]>([]);
@@ -465,6 +464,7 @@ export default function Home() {
     ]);
     closeAddPrestasiMahasiswaMengikutiPorseniModal();
   };
+  console.log(prestasiMahasiswaMengikutiPorseniFormValue);
   const handleAddDataStatusMahasiswa = async (e: any) => {
     e.preventDefault();
     setDataStatusMahasiswaFormValue((prevValues) => [
@@ -588,9 +588,6 @@ export default function Home() {
       setPreviewUrlEditPrestasiIlmiahMahasiswaModal(
         URL.createObjectURL(selectedFile)
       );
-    } else {
-      setFileAddPrestasiIlmiahMahasiswaModal(null); // Reset file jika tidak ada file yang dipilih
-      setPreviewUrlAddPrestasiIlmiahMahasiswaModal(""); // Reset preview jika tidak ada file
     }
   };
   const handleFileChangeEditPrestasiMahasiswaMengikutiPorseniModal = (e) => {
@@ -603,9 +600,6 @@ export default function Home() {
       setPreviewUrlEditPrestasiMahasiswaMengikutiPorseniModal(
         URL.createObjectURL(selectedFile)
       );
-    } else {
-      setFileAddPrestasiMahasiswaMengikutiPorseniModal(null); // Reset file jika tidak ada file yang dipilih
-      setPreviewUrlAddPrestasiMahasiswaMengikutiPorseniModal(""); // Reset preview jika tidak ada file
     }
   };
 
@@ -792,476 +786,115 @@ export default function Home() {
   ) => {
     e.preventDefault();
 
-    const signatureData = sigCanvas.current
-      .getTrimmedCanvas()
-      .toDataURL("image/png");
+    const signatureCanvas = sigCanvas.current.getTrimmedCanvas();
+    const signatureData = signatureCanvas.toDataURL("image/png");
 
-    const laporanData = {
-      nama_dosen_pa: userProfile?.nama_lengkap,
-      tahun_ajaran: selectedTahunAjaran,
-      semester: selectedSemester,
-      kaprodi: selectedKaprodi,
-      pendahuluan,
-      jumlah_ipk_a: jumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm,
-      jumlah_ipk_b: jumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm,
-      jumlah_ipk_c: jumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm,
-      jumlah_ipk_d: jumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm,
-      jumlah_ipk_e: jumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm,
-      prestasi_ilmiah_mahasiswa: prestasiIlmiahMahasiswaFormValue,
-      jumlah_beasiswa_bbm:
-        jumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm,
-      jumlah_beasiswa_pegadaian:
-        jumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm,
-      jumlah_beasiswa_supersemar:
-        jumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm,
-      jumlah_beasiswa_ppa:
-        jumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm,
-      jumlah_beasiswa_ykl:
-        jumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm,
-      jumlah_beasiswa_dll:
-        jumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm,
-      prestasi_porseni_mahasiswa: prestasiMahasiswaMengikutiPorseniFormValue,
-      data_status_mahasiswa: dataStatusMahasiswaFormValue,
-      kesimpulan,
-      dokumentasi: imagePreviews,
-      tanda_tangan_dosen_pa: signatureData,
-    };
+    // Check if the signature data is valid (not just a blank image)
+    const isSignatureValid =
+      signatureData &&
+      signatureData !==
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAAtJREFUGFdjYAACAAAFAAGq1chRAAAAAElFTkSuQmCC"; // This is a placeholder for a blank image
 
-    console.log(laporanData);
+    try {
+      const laporanData = {
+        kaprodi_id: dataSelectedKaprodi?.id,
+        jadwal_bimbingan:
+          [
+            ...new Set(
+              selectedBimbingan.map(
+                (data) => data.pengajuan_bimbingan.jadwal_bimbingan
+              )
+            ),
+          ].length > 1
+            ? [
+                ...new Set(
+                  selectedBimbingan.map(
+                    (data) => data.pengajuan_bimbingan.jadwal_bimbingan
+                  )
+                ),
+              ].join(" | ")
+            : [
+                ...new Set(
+                  selectedBimbingan.map(
+                    (data) => data.pengajuan_bimbingan.jadwal_bimbingan
+                  )
+                ),
+              ][0],
+        nama_kaprodi: selectedKaprodi,
+        status: "Menunggu Feedback Kaprodi",
+        dosen_pa_id: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
+          ?.id,
+        nama_dosen_pa: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
+          ?.dosen.nama_lengkap,
+        jenis_bimbingan: [
+          ...new Set(
+            selectedBimbingan.map(
+              (bimbingan) => bimbingan.pengajuan_bimbingan.jenis_bimbingan
+            )
+          ),
+        ].join(", "),
+        topik_bimbingan: null,
+        kendala_mahasiswa: null,
+        solusi: null,
+        bimbingan_id: [
+          ...new Set(selectedBimbingan.map((bimbingan) => bimbingan.id)),
+        ].join(", "),
+        tahun_ajaran: selectedTahunAjaran,
+        semester: selectedSemester,
+        pendahuluan,
+        jumlah_ipk_a: jumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm,
+        jumlah_ipk_b: jumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm,
+        jumlah_ipk_c: jumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm,
+        jumlah_ipk_d: jumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm,
+        jumlah_ipk_e: jumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm,
+        prestasi_ilmiah_mahasiswa: prestasiIlmiahMahasiswaFormValue,
+        jumlah_beasiswa_bbm:
+          jumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm,
+        jumlah_beasiswa_pegadaian:
+          jumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm,
+        jumlah_beasiswa_supersemar:
+          jumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm,
+        jumlah_beasiswa_ppa:
+          jumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm,
+        jumlah_beasiswa_ykl:
+          jumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm,
+        jumlah_beasiswa_dll:
+          jumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm,
+        prestasi_porseni_mahasiswa: prestasiMahasiswaMengikutiPorseniFormValue,
+        data_status_mahasiswa: dataStatusMahasiswaFormValue,
+        kesimpulan,
+        dokumentasi:
+          imagePreviews.length > 0
+            ? [...new Set(imagePreviews.map((data) => data))].join(", ")
+            : null,
+        tanda_tangan_dosen_pa: isSignatureValid ? signatureData : null,
+      };
+      console.log(laporanData);
 
-    const doc = new jsPDF({
-      orientation: "portrait", // or "landscape"
-      unit: "mm", // units can be "pt", "mm", "cm", or "in"
-      format: "a4", // format can be "a4", "letter", etc.
-      putOnlyUsedFonts: true, // optional, to optimize font usage
-    });
-
-    doc.setFont("times new roman");
-
-    // Title
-    doc.setFontSize(11);
-    const title = "LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK";
-    const titleWidth = doc.getTextWidth(title);
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const titleX = (pageWidth - titleWidth) / 2; // Calculate x position for center alignment
-    doc.text(title, titleX, 28);
-    const subtitle = "FAKULTAS ILMU KOMPUTER  UPN “VETERAN” JAKARTA";
-    const subtitleWidth = doc.getTextWidth(subtitle);
-    const subtitleX = (pageWidth - subtitleWidth) / 2; // Calculate x position for center alignment
-    doc.text(subtitle, subtitleX, 35);
-    doc.text(`Tahun Akademik    :    ${laporanData.tahun_ajaran}`, 15, 56); // Moved up by 10y
-    doc.text(`Semester                   :    ${laporanData.semester}`, 15, 62); // Moved up by 10y
-    doc.text(`Nama Dosen PA     :    Neny Rosmawarni, M.Kom`, 15, 68); // Moved up by 10y
-
-    doc.text("A. PENDAHULUAN", 15, 91); // Adjusted x to 15 and y down by 20
-
-    let yPosition = 98;
-    const maxWidth = 175;
-
-    laporanData.pendahuluan.forEach((paragraph) => {
-      // Check if the paragraph has children and extract the text
-      if (paragraph.children && paragraph.children.length > 0) {
-        const text = paragraph.children[0].text;
-
-        // Split the text into lines based on maxWidth
-        const lines = doc.splitTextToSize(text, maxWidth);
-
-        // Set alignment based on paragraph properties
-        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
-
-        // Add each line to the document and adjust yPosition
-        lines.forEach((line, index) => {
-          // Set alignment for the line
-          if (alignment === "justify") {
-            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
-            const totalWidth = maxWidth; // Lebar area teks
-            const lineWidth = doc.getTextWidth(line);
-
-            if (index < lines.length - 1) {
-              // Hanya justify jika bukan baris terakhir
-              if (words.length > 1) {
-                const totalSpaces = words.filter(
-                  (word) => word.trim() === ""
-                ).length;
-                const totalExtraSpace = totalWidth - lineWidth;
-                const baseSpaceWidth = Math.floor(
-                  totalExtraSpace / totalSpaces
-                );
-                const extraSpaces = totalExtraSpace % totalSpaces;
-
-                let justifiedLine = "";
-
-                for (let i = 0; i < words.length; i++) {
-                  justifiedLine += words[i];
-                  if (i < words.length - 1 && words[i].trim() === "") {
-                    // Menambahkan spasi
-                    const spacesToAdd =
-                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
-                    justifiedLine += " ".repeat(spacesToAdd);
-                  }
-                }
-                doc.text(justifiedLine, 20, yPosition);
-              } else {
-                doc.text(line, 20, yPosition); // Jika hanya satu kata, tidak perlu justify
-              }
-            } else {
-              doc.text(line, 20, yPosition); // Baris terakhir tidak di-justify
-            }
-          } else if (alignment === "center") {
-            doc.text(line, 110, yPosition, { align: "center" });
-          } else if (alignment === "right") {
-            doc.text(line, 200, yPosition, { align: "right" });
-          } else {
-            doc.text(line, 20, yPosition); // Default left alignment
-          }
-          yPosition += 6; // Adjust the spacing between lines
-        });
-      }
-    });
-
-    // Section Title
-    doc.text("B. HASIL KONSULTASI PEMBIMBINGAN", 15, yPosition + 7); // Adjusted x to 15 and y down by 20
-    doc.text("Prestasi Akademik Mahasiswa", 20, yPosition + 17); // Adjusted x to 15 and y down by 20
-
-    // Table for IPK
-    const tableData = [
-      { range: "IPK > 3.5", jumlah: laporanData.jumlah_ipk_a },
-      { range: "3 > IPK >= 3.5", jumlah: laporanData.jumlah_ipk_b },
-      { range: "2.5 <= IPK < 3", jumlah: laporanData.jumlah_ipk_c },
-      { range: "2 <= IPK < 2.5", jumlah: laporanData.jumlah_ipk_d },
-      { range: "IPK < 2", jumlah: laporanData.jumlah_ipk_e },
-    ];
-
-    doc.autoTable({
-      head: [["Range IPK", "Jumlah Mahasiswa"]],
-      body: tableData.map((item) => [item.range, item.jumlah]),
-      startY: yPosition + 21, // Posisi tabel
-      theme: "plain", // Tema polos
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Prestasi Ilmiah Mahasiswa",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-    const prestasiData = laporanData.prestasi_ilmiah_mahasiswa;
-
-    doc.autoTable({
-      head: [["Bidang Prestasi", "NIM", "Nama", "Tingkat Prestasi"]],
-      theme: "plain", // Tema polos
-      body: prestasiData.map((item) => [
-        item.bidang_prestasi,
-        item.nim,
-        item.nama,
-        item.tingkat_prestasi,
-      ]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Prestasi Mahasiswa Mendapatkan Beasiswa",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-
-    // Table for Beasiswa
-    const tableBeasiswaData = [
-      { beasiswa: "BBM", jumlah: laporanData.jumlah_beasiswa_bbm },
-      { beasiswa: "Pegadaian", jumlah: laporanData.jumlah_beasiswa_pegadaian },
-      {
-        beasiswa: "Supersemar",
-        jumlah: laporanData.jumlah_beasiswa_supersemar,
-      },
-      { beasiswa: "PPA", jumlah: laporanData.jumlah_beasiswa_ppa },
-      { beasiswa: "YKL", jumlah: laporanData.jumlah_beasiswa_ykl },
-      { beasiswa: "Dan Lain-lainnya", jumlah: laporanData.jumlah_beasiswa_dll },
-    ];
-
-    doc.autoTable({
-      head: [["Jenis Beasiswa", "Jumlah Mahasiswa"]],
-      body: tableBeasiswaData.map((item) => [item.beasiswa, item.jumlah]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      theme: "plain", // Tema polos
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Prestasi Mahasiswa Mengikuti Porseni",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-    const prestasiPorseniData = laporanData.prestasi_porseni_mahasiswa;
-
-    doc.autoTable({
-      head: [["Jenis Kegiatan", "NIM", "Nama", "Tingkat Prestasi"]],
-      theme: "plain", // Tema polos
-      body: prestasiPorseniData.map((item) => [
-        item.jenis_kegiatan,
-        item.nim,
-        item.nama,
-        item.tingkat_prestasi,
-      ]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Data Status Mahasiswa",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-    const statusData = laporanData.data_status_mahasiswa;
-
-    doc.autoTable({
-      head: [["NIM", "Nama", "Status"]],
-      theme: "plain", // Tema polos
-      body: statusData.map((item) => [item.nim, item.nama, item.status]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text("C. KESIMPULAN", 15, doc.autoTable.previous.finalY + 10); // Adjusted x to 15 and y down by 20
-
-    let yPositionKesimpulan = doc.autoTable.previous.finalY + 20;
-    laporanData.kesimpulan.forEach((paragraph) => {
-      // Check if the paragraph has children and extract the text
-      if (paragraph.children && paragraph.children.length > 0) {
-        const text = paragraph.children[0].text;
-
-        // Split the text into lines based on maxWidth
-        const lines = doc.splitTextToSize(text, maxWidth);
-
-        // Set alignment based on paragraph properties
-        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
-
-        // Add each line to the document and adjust yPosition
-        lines.forEach((line, index) => {
-          // Set alignment for the line
-          if (alignment === "justify") {
-            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
-            const totalWidth = maxWidth; // Lebar area teks
-            const lineWidth = doc.getTextWidth(line);
-
-            if (index < lines.length - 1) {
-              // Hanya justify jika bukan baris terakhir
-              if (words.length > 1) {
-                const totalSpaces = words.filter(
-                  (word) => word.trim() === ""
-                ).length;
-                const totalExtraSpace = totalWidth - lineWidth;
-                const baseSpaceWidth = Math.floor(
-                  totalExtraSpace / totalSpaces
-                );
-                const extraSpaces = totalExtraSpace % totalSpaces;
-
-                let justifiedLine = "";
-
-                for (let i = 0; i < words.length; i++) {
-                  justifiedLine += words[i];
-                  if (i < words.length - 1 && words[i].trim() === "") {
-                    // Menambahkan spasi
-                    const spacesToAdd =
-                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
-                    justifiedLine += " ".repeat(spacesToAdd);
-                  }
-                }
-                doc.text(justifiedLine, 20, yPositionKesimpulan);
-              } else {
-                doc.text(line, 20, yPositionKesimpulan); // Jika hanya satu kata, tidak perlu justify
-              }
-            } else {
-              doc.text(line, 20, yPositionKesimpulan); // Baris terakhir tidak di-justify
-            }
-          } else if (alignment === "center") {
-            doc.text(line, 110, yPositionKesimpulan, { align: "center" });
-          } else if (alignment === "right") {
-            doc.text(line, 200, yPositionKesimpulan, { align: "right" });
-          } else {
-            doc.text(line, 20, yPositionKesimpulan); // Default left alignment
-          }
-          yPositionKesimpulan += 6; // Adjust the spacing between lines
-        });
-      }
-    });
-
-    // Menambahkan informasi tanggal dan jabatan
-    const now = new Date();
-
-    // Mengatur opsi untuk format tanggal
-    const options = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZone: "Asia/Jakarta",
-    };
-
-    // Mengonversi tanggal ke format yang diinginkan
-    const formattedDate = now.toLocaleDateString("id-ID", options);
-
-    const dateYPosition = yPositionKesimpulan + 7; // Posisi Y untuk tanggal
-    doc.text(`Jakarta, ${formattedDate}`, 195, dateYPosition, {
-      align: "right",
-    });
-    const jabatanYPosition = dateYPosition + 7; // Posisi Y untuk jabatan
-    doc.text("Dosen PA", 185, jabatanYPosition, { align: "right" });
-
-    // Menambahkan kolom untuk tanda tangan
-    const imgData = laporanData.tanda_tangan_dosen_pa;
-    const xImagePosition = 167; // Atur posisi X sesuai kebutuhan
-    const yImagePosition = jabatanYPosition + 4; // Atur posisi Y sesuai kebutuhan
-    const width = 21; // Lebar gambar
-    const height = 21; // Tinggi gambar
-
-    // Menambahkan gambar ke dokumen
-    doc.addImage(imgData, "PNG", xImagePosition, yImagePosition, width, height);
-    const ttdY = jabatanYPosition + 28; // Posisi Y untuk kolom TTD
-    doc.text(`( ${laporanData.nama_dosen_pa} )`, 195, ttdY, { align: "right" });
-    // Open the PDF in a new window instead of saving
-    doc.output("dataurlnewwindow");
-
-    // try {
-    //   const laporanBimbinganValue = {
-    //     nama_mahasiswa: [
-    //       ...new Set(
-    //         selectedBimbingan.map(
-    //           (bimbingan) => bimbingan.pengajuan_bimbingan.nama_lengkap
-    //         )
-    //       ),
-    //     ].join(", "),
-    //     waktu_bimbingan: [
-    //       ...new Set(
-    //         selectedBimbingan.map(
-    //           (bimbingan) => bimbingan.pengajuan_bimbingan.jadwal_bimbingan
-    //         )
-    //       ),
-    //     ].join(", "),
-    //     kaprodi_id: dataSelectedKaprodi?.id,
-    //     kendala_mahasiswa: kendala,
-    //     solusi,
-    //     kesimpulan,
-    //     dokumentasi:
-    //       imagePreviews.length > 0
-    //         ? [...new Set(imagePreviews.map((data) => data))].join(", ")
-    //         : null,
-    //     status: "Menunggu Feedback Kaprodi",
-    //     dosen_pa_id: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
-    //       ?.id,
-    //     nama_dosen_pa: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
-    //       ?.dosen.nama_lengkap,
-    //     jenis_bimbingan: [
-    //       ...new Set(
-    //         selectedBimbingan.map(
-    //           (bimbingan) => bimbingan.pengajuan_bimbingan.jenis_bimbingan
-    //         )
-    //       ),
-    //     ].join(", "),
-    //     sistem_bimbingan: [
-    //       ...new Set(
-    //         selectedBimbingan.map(
-    //           (bimbingan) => bimbingan.pengajuan_bimbingan.sistem_bimbingan
-    //         )
-    //       ),
-    //     ].join(", "),
-    //     bimbingan_id: [
-    //       ...new Set(selectedBimbingan.map((bimbingan) => bimbingan.id)),
-    //     ].join(", "),
-    //   };
-
-    //   const result = await addLaporanBimbingan(laporanBimbinganValue);
-    //   console.log(result);
-    //   setSelectedBimbingan([]);
-    //   setSolusi("");
-    //   setKesimpulan("");
-    //   setKendala("");
-    //   setSelectedKaprodi("");
-    //   setSelectedTahunAjaran("");
-    //   setDokumentasi("");
-    //   getDataBimbinganByDosenPaId();
-    // } catch (error) {
-    //   console.error("Registration error:", (error as Error).message);
-    // }
+      const result = await addLaporanBimbingan(laporanData);
+      console.log(result);
+      setJadwalFilter("");
+      setJurusanFilter("");
+      setJenisBimbinganFilter("");
+      setSelectedBimbingan([]);
+      setSolusi("");
+      setKendala("");
+      setSelectedKaprodi("");
+      setSelectedTahunAjaran("");
+      setImagePreviews([]);
+      setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(0);
+      setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(0);
+      setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(0);
+      setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(0);
+      setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(0);
+      setPrestasiIlmiahMahasiswaFormValue([]);
+      setPrestasiMahasiswaMengikutiPorseniFormValue([]);
+      setDataStatusMahasiswaFormValue([]);
+      clearSignature();
+      getDataBimbinganByDosenPaId();
+    } catch (error) {
+      console.error("Registration error:", (error as Error).message);
+    }
   };
 
   const handlePreviewPDF = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -1326,7 +959,7 @@ export default function Home() {
     doc.text(subtitle, subtitleX, 35);
     doc.text(`Tahun Akademik    :    ${laporanData.tahun_ajaran}`, 15, 56); // Moved up by 10y
     doc.text(`Semester                   :    ${laporanData.semester}`, 15, 62); // Moved up by 10y
-    doc.text(`Nama Dosen PA     :    Neny Rosmawarni, M.Kom`, 15, 68); // Moved up by 10y
+    doc.text(`Nama Dosen PA     :    ${laporanData.nama_dosen_pa}`, 15, 68); // Moved up by 10y
 
     doc.text("A. PENDAHULUAN", 15, 91); // Adjusted x to 15 and y down by 20
 
@@ -1791,6 +1424,10 @@ export default function Home() {
   }, [jenisBimbinganFilter, jadwalFilter, jurusanFilter]);
 
   useEffect(() => {
+    selectedBimbingan.map((data) => console.log(data.pengajuan_bimbingan));
+  }, [selectedBimbingan]);
+
+  useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
     getDataTahunAJaran();
@@ -2010,6 +1647,7 @@ export default function Home() {
                               <p className="pt-4">
                                 {data.pengajuan_bimbingan.nama_lengkap}
                               </p>
+                              <p>{data.pengajuan_bimbingan.jurusan}</p>
                               {(() => {
                                 const jadwal =
                                   data.pengajuan_bimbingan.jadwal_bimbingan;
@@ -2121,7 +1759,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2138,7 +1776,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2155,7 +1793,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2172,7 +1810,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2189,7 +1827,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2559,7 +2197,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2576,7 +2214,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2593,7 +2231,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2610,7 +2248,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2627,7 +2265,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -2644,7 +2282,7 @@ export default function Home() {
                               placeholder="Jumlah Mahasiswa"
                               onChange={(e) =>
                                 setJumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                  e.target.value
+                                  parseInt(e.target.value, 10)
                                 )
                               }
                               value={
@@ -3705,20 +3343,17 @@ export default function Home() {
           <div className="flex gap-5 w-2/5 items-center">
             <Logo className="size-[100px]" />
             <h1 className="text-start font-semibold text-[30px]">
-              Bimbingan Konseling Mahasiswa FIK
+              Bimbingan Akademik Mahasiswa FIK
             </h1>
           </div>
           <div className="flex items-end gap-5">
             <Link href="/informasi-akademik" className="text-[14px]">
               Informasi Akademik
             </Link>
-            <Link href="/artikel" className="text-[14px]">
-              Artikel
-            </Link>
           </div>
         </div>
         <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2024 Bimbingan Konseling Mahasiswa FIK UPNVJ
+          Hak cipta &copy; 2024 Bimbingan Akademik Mahasiswa FIK UPNVJ
         </p>
       </div>
     </div>

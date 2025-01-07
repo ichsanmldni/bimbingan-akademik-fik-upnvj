@@ -3,6 +3,8 @@ import PasswordInput from "../../ui/PasswordInput";
 import Link from "next/link";
 import SelectField from "@/components/ui/SelectField";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface LoginProps {
   isAdmin?: boolean;
@@ -63,14 +65,42 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
       // Menyimpan token jika permintaan berhasil
       if (response.status === 200) {
         localStorage.setItem("authToken", response.data.token);
+        toast.success(response?.data.message || "Login berhasil!", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
         window.location.href = "/";
       }
     } catch (error) {
       // Menangani kesalahan jika permintaan gagal
       if (axios.isAxiosError(error)) {
-        console.log("Error response:", error.response?.data);
+        toast.error(error.response?.data.message || "Login gagal!", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       } else {
-        console.log("Error:", (error as Error).message);
+        toast.error("Login gagal!", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       }
     }
   };
@@ -129,23 +159,13 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
           onChange={(e) => setPassword(e.target.value)}
           disabled={!isAdmin && selectedRole === ""}
         />
-        <p className="text-end text-[14px] cursor-pointer mt-4">
-          Forgot Password?
-        </p>
         <button
           type="submit"
-          className="p-2 rounded-lg text-[14px] bg-orange-500 text-white mt-4"
+          className="p-2 mb-4 rounded-lg text-[14px] bg-orange-500 text-white mt-4"
         >
           Masuk
         </button>
-        <div
-          className={`flex gap-2 text-[14px] justify-center mt-4 ${isAdmin && "hidden"}`}
-        >
-          <p>Belum memiliki akun?</p>
-          <Link href="/registration" className="text-orange-500">
-            Daftar
-          </Link>
-        </div>
+        <ToastContainer />
       </form>
     </div>
   );

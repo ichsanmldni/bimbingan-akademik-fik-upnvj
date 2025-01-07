@@ -59,7 +59,7 @@ export async function POST(req: Request): Promise<Response> {
 
     if (!role || !password || (role === "Mahasiswa" && !nim) || (role === "Dosen" && !nip)) {
       return new Response(
-        JSON.stringify({ message: 'Role, password, and the required identifier (nim/nip) are required' }),
+        JSON.stringify({ message: 'Role, NIM/NIP, dan Password tidak boleh kosong!' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -87,7 +87,7 @@ export async function POST(req: Request): Promise<Response> {
 
     if (!user) {
       return new Response(
-        JSON.stringify({ message: 'User not found' }),
+        JSON.stringify({ message: 'Masukkan NIM/NIP dengan benar!' }),
         { status: 404, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -95,7 +95,7 @@ export async function POST(req: Request): Promise<Response> {
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return new Response(
-        JSON.stringify({ message: 'Invalid credentials' }),
+        JSON.stringify({ message: 'Password salah!' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -117,7 +117,7 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     return new Response(
-      JSON.stringify({ message: 'Login successful', user }),
+      JSON.stringify({ message: 'Login berhasil!', user }),
       {
         status: 200,
         headers: {

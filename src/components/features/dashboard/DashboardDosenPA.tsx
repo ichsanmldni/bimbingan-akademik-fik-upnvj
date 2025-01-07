@@ -771,7 +771,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px] min-h-[500px]">
           <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
-              Pengesahan Absensi Bimbingan Konseling Mahasiswa
+              Pengesahan Absensi Bimbingan Akademik Mahasiswa
             </h1>
             <div className="flex flex-col gap-4">
               {dataPengesahanBimbingan.length > 0 ? (
@@ -912,11 +912,11 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         </div>
       )}
       {selectedSubMenuDashboard ===
-        "Pengajuan Bimbingan Konseling Mahasiswa" && (
+        "Pengajuan Bimbingan Akademik Mahasiswa" && (
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
           <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
-              Pengajuan Bimbingan Konseling Mahasiswa
+              Pengajuan Bimbingan Akademik Mahasiswa
             </h1>
             <div className="flex flex-col gap-4">
               {dataPengajuanBimbingan
@@ -1021,7 +1021,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
             {!isDetailLaporanDosenClicked ? (
               <div className="flex flex-col gap-4">
                 <h1 className="font-semibold text-[24px]">
-                  Riwayat Laporan Bimbingan Konseling
+                  Riwayat Laporan Bimbingan Akademik
                 </h1>
                 {dataLaporanBimbingan.length > 0 ? (
                   dataLaporanBimbingan.map((data, index) => (

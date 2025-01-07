@@ -243,14 +243,14 @@ export default function Home() {
                 Pengesahan Absensi Bimbingan
               </button>
               <button
-                className={`${selectedSubMenuDashboard === "Pengajuan Bimbingan Konseling Mahasiswa" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
+                className={`${selectedSubMenuDashboard === "Pengajuan Bimbingan Akademik Mahasiswa" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
                   setSelectedSubMenuDashboard(
-                    "Pengajuan Bimbingan Konseling Mahasiswa"
+                    "Pengajuan Bimbingan Akademik Mahasiswa"
                   )
                 }
               >
-                Pengajuan Bimbingan Konseling Mahasiswa
+                Pengajuan Bimbingan Akademik Mahasiswa
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Riwayat Laporan Bimbingan Role Dosen PA" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
@@ -273,12 +273,12 @@ export default function Home() {
                 Profile Kaprodi
               </button>
               <button
-                className={`${selectedSubMenuDashboard === "Statistik Bimbingan Konseling" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
+                className={`${selectedSubMenuDashboard === "Statistik Bimbingan Akademik" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard("Statistik Bimbingan Konseling")
+                  setSelectedSubMenuDashboard("Statistik Bimbingan Akademik")
                 }
               >
-                Statistik Bimbingan Konseling
+                Statistik Bimbingan Akademik
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Data Dosen PA" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
@@ -324,20 +324,17 @@ export default function Home() {
           <div className="flex gap-5 w-2/5 items-center">
             <Logo className="size-[100px]" />
             <h1 className="text-start font-semibold text-[30px]">
-              Bimbingan Konseling Mahasiswa FIK
+              Bimbingan Akademik Mahasiswa FIK
             </h1>
           </div>
           <div className="flex items-end gap-5">
             <Link href="/informasi-akademik" className="text-[14px]">
               Informasi Akademik
             </Link>
-            <Link href="/artikel" className="text-[14px]">
-              Artikel
-            </Link>
           </div>
         </div>
         <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2024 Bimbingan Konseling Mahasiswa FIK UPNVJ
+          Hak cipta &copy; 2024 Bimbingan Akademik Mahasiswa FIK UPNVJ
         </p>
       </div>
     </div>

@@ -770,7 +770,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         <div className="w-[75%] pl-[30px] pr-[128px] mb-[200px] py-[30px]">
           <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
-              Absensi Bimbingan Konseling
+              Absensi Bimbingan Akademik
             </h1>
 
             <div className="flex flex-col gap-4">
@@ -957,7 +957,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         <div className="w-[75%] pl-[30px] pr-[128px] mb-[200px] py-[30px]">
           <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
-              Riwayat Pengajuan Bimbingan Konseling
+              Riwayat Pengajuan Bimbingan Akademik
             </h1>
 
             <div className="flex flex-col gap-4">

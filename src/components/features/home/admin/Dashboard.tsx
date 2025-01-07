@@ -1,6 +1,10 @@
 "use client";
 
+import DonutChart from "@/components/ui/DonutChart";
 import FilterField from "@/components/ui/FilterField";
+import SelectField from "@/components/ui/SelectField";
+import TabelDashboardAdmin from "@/components/ui/TabelDashboardAdmin";
+import TabelStatistikLaporan from "@/components/ui/TabelStatistikLaporan";
 import axios from "axios";
 import { env } from "process";
 import { useEffect, useState } from "react";
@@ -55,40 +59,36 @@ const Dashboard: React.FC<DashboardProps> = () => {
   }, []);
 
   return (
-    <div className="m-8">
-      <div className="flex gap-6">
-        <FilterField
-          options={optionsTahunAjaran}
-          onChange={(e) => setSelectedTahunAjaran(e.target.value)}
-          value={selectedTahunAjaran}
-          placeholder="All Tahun Ajaran"
-          className={`px-3 py-2 text-[15px] border rounded-lg focus:outline-none appearance-none w-[250px]`}
-        />
-        <FilterField
-          options={[
-            {
-              value: "Ganjil",
-              label: "Ganjil",
-            },
-            {
-              value: "Genap",
-              label: "Genap",
-            },
-          ]}
-          onChange={(e) => setSelectedSemester(e.target.value)}
-          value={selectedSemester}
-          placeholder="All Semester"
-          disabled={selectedTahunAjaran === ""}
-          className={`px-3 py-2 text-[15px] border rounded-lg focus:outline-none ${selectedTahunAjaran === "" && "hidden"} appearance-none w-[150px]`}
-        />
-      </div>
-      <div className="mt-8 p-4 border rounded-lg">
-        <p className="text-[18px] font-semibold">Persentase Persebaran</p>
-      </div>
-      <div className="mt-8 p-4 border rounded-lg">
-        <p className="text-[18px] font-semibold">
-          Total Laporan Bimbingan Dosen PA
-        </p>
+    <div className="px-[30px] py-[30px]">
+      <div className="border px-[30px] py-[30px] rounded-lg">
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-5">
+            <SelectField
+              options={[{ value: "2024/2025", label: "2024/2025" }]}
+              onChange={(e) => setSelectedTahunAjaran(e.target.value)}
+              value={selectedTahunAjaran}
+              placeholder="Semua Tahun Ajaran"
+              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[240px]`}
+            />
+            <SelectField
+              options={[
+                { value: "Gasal", label: "Gasal" },
+                { value: "Genap", label: "Genap" },
+              ]}
+              onChange={(e) => setSelectedSemester(e.target.value)}
+              value={selectedSemester}
+              placeholder="Semua Semester"
+              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]`}
+            />
+          </div>
+          <div className="border py-6 rounded-lg font-semibold text-[18px]">
+            <h1 className="px-6 mb-6">Persentase Sebaran</h1>
+            <div className="w-full mt-4 mx-auto max-w-[320px]">
+              <DonutChart />
+            </div>
+          </div>
+          <TabelDashboardAdmin />
+        </div>
       </div>
     </div>
   );

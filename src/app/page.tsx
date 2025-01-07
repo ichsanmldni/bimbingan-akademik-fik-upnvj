@@ -176,8 +176,7 @@ export default function Home() {
               {roleUser === "Mahasiswa" && (
                 <div className="flex flex-col gap-5 w-2/5">
                   <h1 className="font-[800] text-[40px]">
-                    Ajukan bimbingan konseling sekarang dan raih sukses
-                    akademik!
+                    Ajukan bimbingan akademik sekarang dan raih sukses akademik!
                   </h1>
                   <Link
                     className="bg-orange-500 hover:bg-orange-600 w-1/3 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
@@ -226,7 +225,7 @@ export default function Home() {
               <Image
                 className={`${roleUser === "Dosen PA" ? "w-[46%]" : "w-1/2"}`}
                 src={landingPageImage}
-                alt="Konseling"
+                alt="Bimbingan"
               />
             </div>
           </div>
@@ -239,54 +238,22 @@ export default function Home() {
               <Image alt="chatbot-icon" className="size-8" src={chatbotIcon} />
             </Link>
           )}
-          <div className="text-center border-b">
-            <h1 className="text-[30px] font-semibold mt-16">
-              Rekomendasi artikel
-            </h1>
-            <p className="mt-4">
-              Temukan artikel populer terkait yang membantu Anda memahami topik
-              akademik lebih dalam dan mendukung pencapaian studi Anda.
-            </p>
-            <div className="mt-10 text-start grid grid-cols-3 mx-32 gap-12">
-              {cards.map((_, index) => (
-                <div key={index} className="border rounded-lg">
-                  <Image src={landingPageImage} alt="contoh" />
-                  <div className="flex flex-col gap-2 bg-slate-50 p-4">
-                    <h1 className="font-semibold text-[24px]">Judul</h1>
-                    <p className="text-[16px]">Tanggal</p>
-                    <p className="text-[16px]">Content</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="my-12">
-              <Link
-                className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg font-medium text-white"
-                href="/artikel"
-              >
-                Lihat Artikel Lainnya
-              </Link>
-            </div>
-          </div>
           <div className="">
             <div className="flex justify-between mx-32 py-8 border-black border-b">
               <div className="flex gap-5 w-2/5 items-center">
                 <Logo className="size-[100px]" />
                 <h1 className="text-start font-semibold text-[30px]">
-                  Bimbingan Konseling Mahasiswa FIK
+                  Bimbingan Akademik Mahasiswa FIK
                 </h1>
               </div>
               <div className="flex items-end gap-5">
                 <Link href="/informasi-akademik" className="text-[14px]">
                   Informasi Akademik
                 </Link>
-                <Link href="/artikel" className="text-[14px]">
-                  Artikel
-                </Link>
               </div>
             </div>
             <p className="text-center my-8 text-[16px]">
-              Hak cipta &copy; 2024 Bimbingan Konseling Mahasiswa FIK UPNVJ
+              Hak cipta &copy; 2024 Bimbingan Akademik Mahasiswa FIK UPNVJ
             </p>
           </div>
         </div>

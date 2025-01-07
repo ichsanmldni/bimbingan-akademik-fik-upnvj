@@ -32,7 +32,7 @@ export default function NavbarChatbot({ isPathChatbot }: any) {
         <a href="/chatbot" className="flex items-center">
           <Logo className="size-[40px]" />
           <p className="font-semibold text-[20px] ml-4">
-            Chatbot Bimbingan Konseling FIK
+            Chatbot Bimbingan Akademik FIK
           </p>
         </a>
       </div>

@@ -2,24 +2,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import prisma from '../../../lib/prisma';
 
-interface LaporanBimbingan {
-  id: number; // Adjust according to your schema
-  nama_mahasiswa: string;
-  waktu_bimbingan: string;
-  kaprodi_id: number;
-  status: string;
-  kendala_mahasiswa: string;
-  solusi: string;
-  kesimpulan: string;
-  dokumentasi: string | null;
-  jenis_bimbingan: string;
-  sistem_bimbingan: string;
-  dosen_pa_id: number;
-  bimbingan_id: string;
-  nama_dosen_pa: string;
-  feedback_kaprodi?: string; // Optional for PATCH
-}
-
 interface NotifikasiKaprodi {
   kaprodi_id: number;
   isi: string;
@@ -59,25 +41,43 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: LaporanBimbingan = await req.json();
-
+    const body: any = await req.json();
+    console.log(body)
     const {
-      nama_mahasiswa,
-      waktu_bimbingan,
       kaprodi_id,
       status,
+      dosen_pa_id,
+      nama_dosen_pa,
+      jenis_bimbingan,
+      topik_bimbingan,
+      bimbingan_id,
       kendala_mahasiswa,
       solusi,
+      tahun_ajaran,
+      semester,
+      pendahuluan,
+      jumlah_ipk_a,
+      jumlah_ipk_b,
+      jumlah_ipk_c,
+      jumlah_ipk_d,
+      jumlah_ipk_e,
+      jumlah_beasiswa_bbm,
+      jumlah_beasiswa_pegadaian,
+      jumlah_beasiswa_supersemar,
+      jumlah_beasiswa_ppa,
+      jumlah_beasiswa_ykl,
+      jumlah_beasiswa_dll,
+      prestasi_ilmiah_mahasiswa,
+      prestasi_porseni_mahasiswa,
+      data_status_mahasiswa,
       kesimpulan,
       dokumentasi,
-      jenis_bimbingan,
-      sistem_bimbingan,
-      dosen_pa_id,
-      bimbingan_id,
-      nama_dosen_pa,
+      tanda_tangan_dosen_pa,
+      nama_kaprodi,
+      jadwal_bimbingan
     } = body;
 
-    if (!bimbingan_id || !nama_mahasiswa || !waktu_bimbingan || !kaprodi_id || !kendala_mahasiswa || !solusi || !kesimpulan || !jenis_bimbingan || !status || !sistem_bimbingan || !dosen_pa_id || !nama_dosen_pa) {
+    if (!kaprodi_id || !nama_kaprodi || !status || !dosen_pa_id || !nama_dosen_pa || !jenis_bimbingan || !bimbingan_id || !tahun_ajaran || !semester || !jadwal_bimbingan) {
       return new Response(
         JSON.stringify({ message: 'All fields are required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -85,10 +85,13 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     // Buat direktori jika belum ada
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'dokumentasi_laporan');
-    await fs.mkdir(uploadDir, { recursive: true }); // Membuat folder secara rekursif
+    const uploadDokumentasiDir = path.join(process.cwd(), 'public', 'uploads', 'dokumentasi_laporan');
+    await fs.mkdir(uploadDokumentasiDir, { recursive: true }); // Membuat folder secara rekursif
 
-    let savedImagePaths: string[] = [];
+    const uploadTtdDir = path.join(process.cwd(), 'public', 'uploads', 'ttd_dosen_pa_laporan');
+    await fs.mkdir(uploadTtdDir, { recursive: true }); // Membuat folder secara rekursif
+
+    let savedDokumentasiImagePaths: string[] = [];
     if (dokumentasi) {
       const base64Strings = dokumentasi.split(", ").map((str) => str.trim());
       for (const base64Data of base64Strings) {
@@ -107,13 +110,40 @@ export async function POST(req: Request): Promise<Response> {
           await fs.writeFile(path.join(process.cwd(), 'public', relativePath), imageBuffer);
 
           // Tambahkan path ke array hasil
-          savedImagePaths.push(relativePath);
+          savedDokumentasiImagePaths.push(relativePath);
         } catch (error) {
           console.error("Error menyimpan gambar: ", error instanceof Error ? error.message : 'Unknown error');
         }
       }
     }
-    const savedImagePathsString = savedImagePaths.join(", ");
+    const savedDokumentasiImagePathsString = savedDokumentasiImagePaths.join(", ");
+
+    let savedTtdImagePaths: string[] = [];
+    if (tanda_tangan_dosen_pa) {
+      const base64Strings = tanda_tangan_dosen_pa.split(", ").map((str) => str.trim());
+      for (const base64Data of base64Strings) {
+        try {
+          const match = base64Data.match(/^data:image\/(\w+);base64,/);
+          if (!match) throw new Error("Format base64 gambar tidak valid");
+
+          const extension = match[1]; // Ekstensi gambar (png, jpeg, dll)
+          const imageBuffer = Buffer.from(base64Data.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+
+          // Buat nama file unik
+          const filename = `ttd_dosen_pa_${Date.now()}_${Math.random().toString(36).substring(2, 5)}.${extension}`;
+          const relativePath = path.join('uploads', 'ttd_dosen_pa_laporan', filename);
+
+          // Simpan file ke folder public
+          await fs.writeFile(path.join(process.cwd(), 'public', relativePath), imageBuffer);
+
+          // Tambahkan path ke array hasil
+          savedTtdImagePaths.push(relativePath);
+        } catch (error) {
+          console.error("Error menyimpan gambar: ", error instanceof Error ? error.message : 'Unknown error');
+        }
+      }
+    }
+    const savedTtdImagePathsString = savedTtdImagePaths.join(", ");
 
     const notifikasiKaprodi: NotifikasiKaprodi = {
       kaprodi_id,
@@ -135,21 +165,75 @@ export async function POST(req: Request): Promise<Response> {
 
     const laporanBimbingan = await prisma.laporanbimbingan.create({
       data: {
-        nama_mahasiswa,
-        jumlah_mahasiswa: bimbingan_id.split(",").map(id => id.trim()).length,
-        waktu_bimbingan,
+        jumlah_mahasiswa: parseInt(bimbingan_id.split(",").map(id => id.trim()).length),
         status,
+        nama_kaprodi,
         kaprodi_id,
-        kendala_mahasiswa,
-        solusi,
-        kesimpulan,
-        dokumentasi: savedImagePathsString || null,
-        jenis_bimbingan,
-        sistem_bimbingan,
         dosen_pa_id,
         nama_dosen_pa,
+        jenis_bimbingan,
+        topik_bimbingan: topik_bimbingan || null,
+        kendala_mahasiswa: kendala_mahasiswa || null,
+        solusi: solusi || null,
+        tahun_ajaran,
+        semester,
+        pendahuluan: pendahuluan || null,
+        jumlah_ipk_a: jumlah_ipk_a ?? null,
+        jumlah_ipk_b: jumlah_ipk_b ?? null,
+        jumlah_ipk_c: jumlah_ipk_c ?? null,
+        jumlah_ipk_d: jumlah_ipk_d ?? null,
+        jumlah_ipk_e: jumlah_ipk_e ?? null,
+        jumlah_beasiswa_bbm: jumlah_beasiswa_bbm ?? null,
+        jumlah_beasiswa_pegadaian: jumlah_beasiswa_pegadaian ?? null,
+        jumlah_beasiswa_supersemar: jumlah_beasiswa_supersemar ?? null,
+        jumlah_beasiswa_ppa: jumlah_beasiswa_ppa ?? null,
+        jumlah_beasiswa_ykl: jumlah_beasiswa_ykl ?? null,
+        jumlah_beasiswa_dll: jumlah_beasiswa_dll ?? null,
+        kesimpulan: kesimpulan || null,
+        dokumentasi: savedDokumentasiImagePathsString,
+        tanda_tangan_dosen_pa: savedTtdImagePathsString,
+        jadwal_bimbingan
       },
     });
+
+    prestasi_ilmiah_mahasiswa?.map(async (data) =>
+      await prisma.prestasiilmiahmahasiswa.create({
+        data: {
+          laporan_bimbingan_id: laporanBimbingan.id,
+          bidang_prestasi: data.bidang_prestasi,
+          lampiran: data.file.name,
+          nama: data.nama,
+          nim: data.nim,
+          tingkat_prestasi: data.tingkat_prestasi
+        }
+      })
+    )
+
+    prestasi_porseni_mahasiswa?.map(async (data) =>
+      await prisma.prestasiporsenimahasiswa.create({
+        data: {
+          laporan_bimbingan_id: laporanBimbingan.id,
+          jenis_kegiatan: data.jenis_kegiatan,
+          lampiran: data.file.name,
+          nama: data.nama,
+          nim: data.nim,
+          tingkat_prestasi: data.tingkat_prestasi
+        }
+      })
+    )
+
+    data_status_mahasiswa?.map(async (data) =>
+      await prisma.datastatusmahasiswa.create({
+        data: {
+          laporan_bimbingan_id: laporanBimbingan.id,
+          nama: data.nama,
+          nim: data.nim,
+          status: data.status
+        }
+      })
+    )
+
+
 
     const bimbinganIds = bimbingan_id.split(",").map(id => id.trim()); // Mengubah string menjadi array dan membersihkan spasi
 

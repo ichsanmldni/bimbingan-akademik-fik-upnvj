@@ -10,6 +10,14 @@ import SelectField from "@/components/ui/SelectField";
 import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
 import { env } from "process";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import "./fonts/times new roman bold-normal";
+import "./fonts/times new roman-normal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import DonutChart from "@/components/ui/DonutChart";
+import TabelStatistikLaporan from "@/components/ui/TabelStatistikLaporan";
 
 interface DashboardKaprodiProps {
   selectedSubMenuDashboard: string;
@@ -82,6 +90,16 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const [dataKaprodi, setDataKaprodi] = useState<any>({});
   const [dataKaprodiUser, setDataKaprodiUser] = useState<any>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [
+    selectedDataPrestasiIlmiahMahasiswa,
+    setSelectedDataPrestasiIlmiahMahasiswa,
+  ] = useState([]);
+  const [
+    selectedDataPrestasiPorseniMahasiswa,
+    setSelectedDataPrestasiPorseniMahasiswa,
+  ] = useState([]);
+  const [selectedDataStatusMahasiswa, setSelectedDataStatusMahasiswa] =
+    useState([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -244,6 +262,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const laporanBimbingan = dataLaporanBimbingan.data.filter(
         (data: any) => data.kaprodi_id === kaprodiid
       );
+      console.log(laporanBimbingan);
 
       setDataLaporanBimbingan(laporanBimbingan);
     } catch (error) {
@@ -316,6 +335,454 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       console.error("Error:", error);
       throw error;
     }
+  };
+
+  const getDataPrestasiIlmiahMahasiswaByIdLaporan = async () => {
+    try {
+      const dataPrestasiIlmiahMahasiswa = await axios.get<any>(
+        `${API_BASE_URL}/api/prestasiilmiahmahasiswa`
+      );
+      console.log(dataPrestasiIlmiahMahasiswa);
+      const idLaporan = selectedDataLaporanBimbingan?.id;
+
+      const selectedDataPrestasiIlmiahMahasiswa =
+        dataPrestasiIlmiahMahasiswa.data.filter(
+          (data) => data.laporan_bimbingan_id === idLaporan
+        );
+
+      setSelectedDataPrestasiIlmiahMahasiswa(
+        selectedDataPrestasiIlmiahMahasiswa
+      );
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataPrestasiPorseniMahasiswaByIdLaporan = async () => {
+    try {
+      const dataPrestasiPorseniMahasiswa = await axios.get<any>(
+        `${API_BASE_URL}/api/prestasiporsenimahasiswa`
+      );
+      const idLaporan = selectedDataLaporanBimbingan?.id;
+
+      const dataSelectedPrestasiPorseniMahasiswa =
+        dataPrestasiPorseniMahasiswa.data.filter(
+          (data) => data.laporan_bimbingan_id === idLaporan
+        );
+
+      setSelectedDataPrestasiPorseniMahasiswa(
+        dataSelectedPrestasiPorseniMahasiswa
+      );
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataStatusMahasiswaByIdLaporan = async () => {
+    try {
+      const dataStatusMahasiswa = await axios.get<any>(
+        `${API_BASE_URL}/api/datastatusmahasiswa`
+      );
+      const idLaporan = selectedDataLaporanBimbingan?.id;
+
+      const selectedDataStatusMahasiswa = dataStatusMahasiswa.data.filter(
+        (data) => data.laporan_bimbingan_id === idLaporan
+      );
+
+      setSelectedDataStatusMahasiswa(selectedDataStatusMahasiswa);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    getDataPrestasiIlmiahMahasiswaByIdLaporan();
+    getDataPrestasiPorseniMahasiswaByIdLaporan();
+    getDataStatusMahasiswaByIdLaporan();
+  }, [selectedDataLaporanBimbingan]);
+
+  const handlePreviewPDF = async (
+    e: React.FormEvent<HTMLFormElement>,
+    data
+  ) => {
+    e.preventDefault();
+
+    const doc = new jsPDF({
+      orientation: "portrait", // or "landscape"
+      unit: "mm", // units can be "pt", "mm", "cm", or "in"
+      format: "a4", // format can be "a4", "letter", etc.
+      putOnlyUsedFonts: true, // optional, to optimize font usage
+    });
+
+    doc.setFont("times new roman");
+
+    // Title
+    doc.setFontSize(11);
+    const title = "LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK";
+    const titleWidth = doc.getTextWidth(title);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const titleX = (pageWidth - titleWidth) / 2; // Calculate x position for center alignment
+    doc.text(title, titleX, 28);
+    const subtitle = "FAKULTAS ILMU KOMPUTER  UPN “VETERAN” JAKARTA";
+    const subtitleWidth = doc.getTextWidth(subtitle);
+    const subtitleX = (pageWidth - subtitleWidth) / 2; // Calculate x position for center alignment
+    doc.text(subtitle, subtitleX, 35);
+    doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 56); // Moved up by 10y
+    doc.text(`Semester                   :    ${data.semester}`, 15, 62); // Moved up by 10y
+    doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 68); // Moved up by 10y
+
+    doc.text("A. PENDAHULUAN", 15, 91); // Adjusted x to 15 and y down by 20
+
+    let yPosition = 98;
+    const maxWidth = 175;
+
+    data.pendahuluan.forEach((paragraph) => {
+      // Check if the paragraph has children and extract the text
+      if (paragraph.children && paragraph.children.length > 0) {
+        const text = paragraph.children[0].text;
+
+        // Split the text into lines based on maxWidth
+        const lines = doc.splitTextToSize(text, maxWidth);
+
+        // Set alignment based on paragraph properties
+        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
+
+        // Add each line to the document and adjust yPosition
+        lines.forEach((line, index) => {
+          // Set alignment for the line
+          if (alignment === "justify") {
+            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
+            const totalWidth = maxWidth; // Lebar area teks
+            const lineWidth = doc.getTextWidth(line);
+
+            if (index < lines.length - 1) {
+              // Hanya justify jika bukan baris terakhir
+              if (words.length > 1) {
+                const totalSpaces = words.filter(
+                  (word) => word.trim() === ""
+                ).length;
+                const totalExtraSpace = totalWidth - lineWidth;
+                const baseSpaceWidth = Math.floor(
+                  totalExtraSpace / totalSpaces
+                );
+                const extraSpaces = totalExtraSpace % totalSpaces;
+
+                let justifiedLine = "";
+
+                for (let i = 0; i < words.length; i++) {
+                  justifiedLine += words[i];
+                  if (i < words.length - 1 && words[i].trim() === "") {
+                    // Menambahkan spasi
+                    const spacesToAdd =
+                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
+                    justifiedLine += " ".repeat(spacesToAdd);
+                  }
+                }
+                doc.text(justifiedLine, 20, yPosition);
+              } else {
+                doc.text(line, 20, yPosition); // Jika hanya satu kata, tidak perlu justify
+              }
+            } else {
+              doc.text(line, 20, yPosition); // Baris terakhir tidak di-justify
+            }
+          } else if (alignment === "center") {
+            doc.text(line, 110, yPosition, { align: "center" });
+          } else if (alignment === "right") {
+            doc.text(line, 200, yPosition, { align: "right" });
+          } else {
+            doc.text(line, 20, yPosition); // Default left alignment
+          }
+          yPosition += 6; // Adjust the spacing between lines
+        });
+      }
+    });
+
+    // Section Title
+    doc.text("B. HASIL KONSULTASI PEMBIMBINGAN", 15, yPosition + 7); // Adjusted x to 15 and y down by 20
+    doc.text("Prestasi Akademik Mahasiswa", 20, yPosition + 17); // Adjusted x to 15 and y down by 20
+
+    // Table for IPK
+    const tableData = [
+      { range: "IPK > 3.5", jumlah: data.jumlah_ipk_a },
+      { range: "3 > IPK >= 3.5", jumlah: data.jumlah_ipk_b },
+      { range: "2.5 <= IPK < 3", jumlah: data.jumlah_ipk_c },
+      { range: "2 <= IPK < 2.5", jumlah: data.jumlah_ipk_d },
+      { range: "IPK < 2", jumlah: data.jumlah_ipk_e },
+    ];
+
+    doc.autoTable({
+      head: [["Range IPK", "Jumlah Mahasiswa"]],
+      body: tableData.map((item) => [item.range, item.jumlah]),
+      startY: yPosition + 21, // Posisi tabel
+      theme: "plain", // Tema polos
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Prestasi Ilmiah Mahasiswa",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+    const prestasiData = selectedDataPrestasiIlmiahMahasiswa;
+
+    doc.autoTable({
+      head: [["Bidang Prestasi", "NIM", "Nama", "Tingkat Prestasi"]],
+      theme: "plain", // Tema polos
+      body: prestasiData.map((item) => [
+        item.bidang_prestasi,
+        item.nim,
+        item.nama,
+        item.tingkat_prestasi,
+      ]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Prestasi Mahasiswa Mendapatkan Beasiswa",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+
+    // Table for Beasiswa
+    const tableBeasiswaData = [
+      { beasiswa: "BBM", jumlah: data.jumlah_beasiswa_bbm },
+      { beasiswa: "Pegadaian", jumlah: data.jumlah_beasiswa_pegadaian },
+      {
+        beasiswa: "Supersemar",
+        jumlah: data.jumlah_beasiswa_supersemar,
+      },
+      { beasiswa: "PPA", jumlah: data.jumlah_beasiswa_ppa },
+      { beasiswa: "YKL", jumlah: data.jumlah_beasiswa_ykl },
+      { beasiswa: "Dan Lain-lainnya", jumlah: data.jumlah_beasiswa_dll },
+    ];
+
+    doc.autoTable({
+      head: [["Jenis Beasiswa", "Jumlah Mahasiswa"]],
+      body: tableBeasiswaData.map((item) => [item.beasiswa, item.jumlah]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      theme: "plain", // Tema polos
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Prestasi Mahasiswa Mengikuti Porseni",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+    const prestasiPorseniData = selectedDataPrestasiPorseniMahasiswa;
+
+    doc.autoTable({
+      head: [["Jenis Kegiatan", "NIM", "Nama", "Tingkat Prestasi"]],
+      theme: "plain", // Tema polos
+      body: prestasiPorseniData.map((item) => [
+        item.jenis_kegiatan,
+        item.nim,
+        item.nama,
+        item.tingkat_prestasi,
+      ]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Data Status Mahasiswa",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+    const statusData = selectedDataStatusMahasiswa;
+
+    doc.autoTable({
+      head: [["NIM", "Nama", "Status"]],
+      theme: "plain", // Tema polos
+      body: statusData.map((item) => [item.nim, item.nama, item.status]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text("C. KESIMPULAN", 15, doc.autoTable.previous.finalY + 10); // Adjusted x to 15 and y down by 20
+
+    let yPositionKesimpulan = doc.autoTable.previous.finalY + 20;
+    data.kesimpulan.forEach((paragraph) => {
+      // Check if the paragraph has children and extract the text
+      if (paragraph.children && paragraph.children.length > 0) {
+        const text = paragraph.children[0].text;
+
+        // Split the text into lines based on maxWidth
+        const lines = doc.splitTextToSize(text, maxWidth);
+
+        // Set alignment based on paragraph properties
+        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
+
+        // Add each line to the document and adjust yPosition
+        lines.forEach((line, index) => {
+          // Set alignment for the line
+          if (alignment === "justify") {
+            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
+            const totalWidth = maxWidth; // Lebar area teks
+            const lineWidth = doc.getTextWidth(line);
+
+            if (index < lines.length - 1) {
+              // Hanya justify jika bukan baris terakhir
+              if (words.length > 1) {
+                const totalSpaces = words.filter(
+                  (word) => word.trim() === ""
+                ).length;
+                const totalExtraSpace = totalWidth - lineWidth;
+                const baseSpaceWidth = Math.floor(
+                  totalExtraSpace / totalSpaces
+                );
+                const extraSpaces = totalExtraSpace % totalSpaces;
+
+                let justifiedLine = "";
+
+                for (let i = 0; i < words.length; i++) {
+                  justifiedLine += words[i];
+                  if (i < words.length - 1 && words[i].trim() === "") {
+                    // Menambahkan spasi
+                    const spacesToAdd =
+                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
+                    justifiedLine += " ".repeat(spacesToAdd);
+                  }
+                }
+                doc.text(justifiedLine, 20, yPositionKesimpulan);
+              } else {
+                doc.text(line, 20, yPositionKesimpulan); // Jika hanya satu kata, tidak perlu justify
+              }
+            } else {
+              doc.text(line, 20, yPositionKesimpulan); // Baris terakhir tidak di-justify
+            }
+          } else if (alignment === "center") {
+            doc.text(line, 110, yPositionKesimpulan, { align: "center" });
+          } else if (alignment === "right") {
+            doc.text(line, 200, yPositionKesimpulan, { align: "right" });
+          } else {
+            doc.text(line, 20, yPositionKesimpulan); // Default left alignment
+          }
+          yPositionKesimpulan += 6; // Adjust the spacing between lines
+        });
+      }
+    });
+
+    // Menambahkan informasi tanggal dan jabatan
+    const now = new Date();
+
+    // Mengatur opsi untuk format tanggal
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "Asia/Jakarta",
+    };
+
+    // Mengonversi tanggal ke format yang diinginkan
+    const formattedDate = now.toLocaleDateString("id-ID", options);
+
+    const dateYPosition = yPositionKesimpulan + 7; // Posisi Y untuk tanggal
+    doc.text(`Jakarta, ${formattedDate}`, 195, dateYPosition, {
+      align: "right",
+    });
+    const jabatanYPosition = dateYPosition + 7; // Posisi Y untuk jabatan
+    doc.text("Dosen PA", 185, jabatanYPosition, { align: "right" });
+
+    // Menambahkan kolom untuk tanda tangan
+    const imgData = data.tanda_tangan_dosen_pa;
+    const xImagePosition = 167; // Atur posisi X sesuai kebutuhan
+    const yImagePosition = jabatanYPosition + 4; // Atur posisi Y sesuai kebutuhan
+    const width = 21; // Lebar gambar
+    const height = 21; // Tinggi gambar
+
+    // Menambahkan gambar ke dokumen
+    doc.addImage(imgData, "PNG", xImagePosition, yImagePosition, width, height);
+    const ttdY = jabatanYPosition + 28; // Posisi Y untuk kolom TTD
+    doc.text(`( ${data.nama_dosen_pa} )`, 195, ttdY, { align: "right" });
+    // Open the PDF in a new window instead of saving
+    const pdfOutput = doc.output("blob");
+    const url = URL.createObjectURL(pdfOutput);
+
+    // Membuka PDF di tab baru
+    window.open(url, "_blank");
   };
 
   useEffect(() => {
@@ -465,7 +932,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
           </div>
         </div>
       )}
-      {selectedSubMenuDashboard === "Statistik Bimbingan Konseling" && (
+      {selectedSubMenuDashboard === "Statistik Bimbingan Akademik" && (
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
           <div className="border px-[30px] py-[30px] rounded-lg">
             <div className="flex flex-col gap-4">
@@ -474,7 +941,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                   options={[{ value: "2024/2025", label: "2024/2025" }]}
                   onChange={(e) => setSelectedTahunAjaran(e.target.value)}
                   value={selectedTahunAjaran}
-                  placeholder="Pilih Tahun Ajaran"
+                  placeholder="Semua Tahun Ajaran"
                   className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[240px]`}
                 />
                 <SelectField
@@ -484,16 +951,17 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                   ]}
                   onChange={(e) => setSelectedSemester(e.target.value)}
                   value={selectedSemester}
-                  placeholder="Pilih Semester"
+                  placeholder="Semua Semester"
                   className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]`}
                 />
               </div>
               <div className="border rounded-lg font-semibold text-[18px]">
-                <h1 className="p-4">Persentase Sebaran</h1>
+                <h1 className="p-6">Persentase Sebaran</h1>
+                <div className="w-full mt-4 mx-auto max-w-[320px]">
+                  <DonutChart />
+                </div>
               </div>
-              <div className="border rounded-lg font-semibold text-[18px]">
-                <h1 className="p-4">Total Laporan Bimbingan Dosen PA</h1>
-              </div>
+              <TabelStatistikLaporan />
             </div>
           </div>
         </div>
@@ -636,7 +1104,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                         onClick={() => handleDetailLaporanKaprodi(data)}
                       >
                         <div className="flex justify-between text-neutral-600">
-                          <p>{data.waktu_bimbingan}</p>
+                          <p>{data.jadwal_bimbingan}</p>
                         </div>
                         <div className="flex justify-between">
                           <div>
@@ -679,29 +1147,53 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                   <div className="mt-4">
                     <div className="flex flex-col border rounded-lg p-6 gap-4">
                       <div className="flex justify-between text-neutral-600">
-                        <p>{selectedDataLaporanBimbingan?.waktu_bimbingan}</p>
+                        <p>{selectedDataLaporanBimbingan?.jadwal_bimbingan}</p>
                       </div>
                       <div className="flex justify-between">
                         <div className="flex flex-col gap-4 w-[55%]">
                           <div className="flex flex-col gap-2">
-                            <p className="font-medium">{`Peserta Bimbingan (${selectedDataLaporanBimbingan?.jumlah_mahasiswa} mahasiswa) :`}</p>
-                            <p>
-                              {selectedDataLaporanBimbingan?.nama_mahasiswa}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <p className="font-medium">Jenis Bimbingan :</p>
-                            <p>
-                              <p>
+                            <div className="flex items-center">
+                              <p className="font-medium w-1/3">
+                                Tahun Akademik
+                              </p>
+                              <span className="font-medium">:</span>
+                              <p className="flex-1 ml-4">
+                                {selectedDataLaporanBimbingan.tahun_ajaran}
+                              </p>
+                            </div>
+                            <div className="flex items-center">
+                              <p className="font-medium w-1/3">Semester</p>
+                              <span className="font-medium">:</span>
+                              <p className="flex-1 ml-4">
+                                {selectedDataLaporanBimbingan.semester}
+                              </p>
+                            </div>
+                            <div className="flex items-center">
+                              <p className="font-medium w-1/3">Nama Dosen PA</p>
+                              <span className="font-medium">:</span>
+                              <p className="flex-1 ml-4">
+                                {selectedDataLaporanBimbingan.nama_dosen_pa}
+                              </p>
+                            </div>
+                            <div className="flex items-center">
+                              <p className="font-medium w-1/3">
+                                Jenis Bimbingan
+                              </p>
+                              <span className="font-medium">:</span>
+                              <p className="flex-1 ml-4">
                                 {selectedDataLaporanBimbingan?.jenis_bimbingan}
                               </p>
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <p className="font-medium">Sistem Bimbingan :</p>
-                            <p>
-                              {selectedDataLaporanBimbingan?.sistem_bimbingan}
-                            </p>
+                            </div>
+                            <div className="flex items-center">
+                              <p className="font-medium w-1/3">
+                                Jumlah Peserta
+                              </p>
+                              <span className="font-medium">:</span>
+                              <p className="flex-1 ml-4">
+                                {selectedDataLaporanBimbingan?.jumlah_mahasiswa}{" "}
+                                Mahasiswa
+                              </p>
+                            </div>
                           </div>
                         </div>
                         <div
@@ -714,7 +1206,88 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                       </div>
                       <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">Kendala Mahasiswa</h3>
+                          <h3 className="font-medium">PDF Laporan Bimbingan</h3>
+                          <a
+                            onClick={(e) => {
+                              handlePreviewPDF(e, selectedDataLaporanBimbingan);
+                            }}
+                            className="flex underline hover:cursor-pointer items-center text-blue-600 hover:text-blue-800 font-semibold"
+                          >
+                            <FontAwesomeIcon
+                              icon={faFilePdf}
+                              className="mr-2"
+                            />{" "}
+                            {/* Ikon PDF */}
+                            Buka PDF
+                          </a>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Dokumentasi</h3>
+                          <img
+                            className="w-1/2"
+                            src={selectedDataLaporanBimbingan?.dokumentasi}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-3 rounded-lg">
+                          <h3 className="font-medium">Feedback Kaprodi</h3>
+                          {selectedDataLaporanBimbingan?.feedback_kaprodi !==
+                          null ? (
+                            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                              <p className="text-gray-700">
+                                {selectedDataLaporanBimbingan?.feedback_kaprodi}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-3">
+                              <textarea
+                                placeholder={
+                                  feedbackKaprodi === ""
+                                    ? "Input Feedback"
+                                    : feedbackKaprodi
+                                }
+                                onChange={(e) => {
+                                  setFeedbackKaprodi(e.target.value);
+                                }}
+                                value={feedbackKaprodi}
+                                className="px-3 pt-2 h-[200px] text-[15px] border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              ></textarea>
+                              <button
+                                onClick={() => {
+                                  handleEditLaporanBimbingan(
+                                    selectedDataLaporanBimbingan?.id,
+                                    selectedDataLaporanBimbingan?.dosen_pa_id,
+                                    "Sudah Diberikan Feedback"
+                                  );
+                                  setIsDetailLaporanKaprodiClicked(
+                                    !isDetailLaporanKaprodiClicked
+                                  );
+                                  setSelectedDataLaporanBimbingan(null);
+                                  setTimeout(() => {
+                                    setIsDetailLaporanKaprodiClicked(
+                                      isDetailLaporanKaprodiClicked
+                                    );
+                                    setSelectedDataLaporanBimbingan({
+                                      ...selectedDataLaporanBimbingan,
+                                      status: "Sudah Diberikan Feedback",
+                                      feedback_kaprodi: feedbackKaprodi,
+                                    });
+                                  }, 1);
+                                }}
+                                className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg ml-auto w-1/5 hover:bg-orange-600 transition duration-200"
+                              >
+                                Submit
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {/* <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Dokumentasi</h3>
+                          <img
+                            src={selectedDataLaporanBimbingan?.dokumentasi}
+                          />
                           <p>
                             {selectedDataLaporanBimbingan?.kendala_mahasiswa}
                           </p>
@@ -792,7 +1365,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                             </div>
                           )}
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

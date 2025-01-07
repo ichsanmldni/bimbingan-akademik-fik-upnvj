@@ -17,7 +17,7 @@ const NavbarAdmin: React.FC<NavbarAdminProps> = ({
       <div className="flex gap-2 items-center ">
         <Logo className="size-[56px]" />
         <a href="/" className="font-bold">
-          Bimbingan Konseling Mahasiswa FIK
+          Bimbingan Akademik Mahasiswa FIK
         </a>
       </div>
       <div className="flex flex-col py-6 gap-1">
