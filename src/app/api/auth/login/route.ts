@@ -59,8 +59,6 @@ export async function POST(req: Request): Promise<Response> {
 
     const { nim, nip, email, password, role } = body;
 
-    console.log(body)
-
     if (!role || !password || (role === "Mahasiswa" && !nim) || (role === "Dosen PA" && !nip) || (role === "Kaprodi" && !nip)) {
       return new Response(
         JSON.stringify({ message: 'Role, NIM/NIP, dan Password tidak boleh kosong!' }),
@@ -107,7 +105,7 @@ export async function POST(req: Request): Promise<Response> {
 
       try {
         const response = await axios.post(url, formData, { headers: combinedHeaders });
-        if (response.status === 200) {
+        if (response.data.data.nim) {
           user = response.data.data;
           const mahasiswa = await prisma.mahasiswa.findUnique({
             where: { nim: user.nim },
@@ -127,7 +125,6 @@ export async function POST(req: Request): Promise<Response> {
                   dosen_pa_id: null,
                 },
               });
-              console.log('Mahasiswa created:', newMahasiswa);
             } catch (prismaError) {
               console.error('Prisma error:', prismaError);
               // Simpan pesan kesalahan Prisma ke dalam variabel  
@@ -170,6 +167,8 @@ export async function POST(req: Request): Promise<Response> {
               },
             }
           );
+        } else {
+          throw new Error(response.data.message);
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -179,7 +178,7 @@ export async function POST(req: Request): Promise<Response> {
           });
         } else {
           console.error('General error:', error);
-          return new Response(JSON.stringify({ message: 'Login gagal!' }), {
+          return new Response(JSON.stringify({ message: error.message }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
           });
@@ -281,7 +280,6 @@ export async function POST(req: Request): Promise<Response> {
         const filteredJurusan = response.data.data.filter(data => data.nama_fakultas === 'Fakultas Ilmu Komputer');
         const matchingJurusan = filteredJurusan.find(data => data.nidn_dosen_ketua_prodi === user.nip);
         const namaJurusan = matchingJurusan.nama_program_studi;
-        console.log(namaJurusan)
 
         await prisma.kaprodi.update({
           where: { nip: user.nip },

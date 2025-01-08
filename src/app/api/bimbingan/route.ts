@@ -74,6 +74,9 @@ export async function PATCH(req: Request): Promise<Response> {
 
     const existingRecord = await prisma.bimbingan.findUnique({
       where: { id },
+      include: {
+        pengajuan_bimbingan: true
+      }
     });
 
     if (!existingRecord) {

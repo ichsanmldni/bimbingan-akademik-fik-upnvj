@@ -7,6 +7,7 @@ export async function PATCH(req: Request): Promise<Response> {
     try {
         const body: any = await req.json();
         const { id, status_pengesahan_kehadiran } = body;
+        console.log(body)
 
 
         if (!id || !status_pengesahan_kehadiran) {
@@ -18,6 +19,9 @@ export async function PATCH(req: Request): Promise<Response> {
 
         const existingRecord = await prisma.bimbingan.findUnique({
             where: { id },
+            include: {
+                pengajuan_bimbingan: true
+            }
         });
 
         if (!existingRecord) {
@@ -31,6 +35,27 @@ export async function PATCH(req: Request): Promise<Response> {
             where: { id },
             data: { status_pengesahan_kehadiran },
         });
+
+        if (status_pengesahan_kehadiran === "Sah") {
+            const notifikasiMahasiswa = {
+                mahasiswa_id: existingRecord.pengajuan_bimbingan.mahasiswa_id,
+                isi: "Absensi bimbinganmu telah dinyatakan sah!",
+                read: false,
+                waktu: new Date(),
+            };
+
+            await prisma.notifikasimahasiswa.create({ data: notifikasiMahasiswa });
+        } else if (status_pengesahan_kehadiran === "Tidak Sah") {
+            const notifikasiMahasiswa = {
+                mahasiswa_id: existingRecord.pengajuan_bimbingan.mahasiswa_id,
+                isi: "Absensi bimbinganmu dinyatakan tidak sah!",
+                read: false,
+                waktu: new Date(),
+            };
+
+            await prisma.notifikasimahasiswa.create({ data: notifikasiMahasiswa });
+        }
+
 
         return new Response(JSON.stringify(bimbingan), {
             status: 200,

@@ -69,6 +69,7 @@
     "slate-dom": "^0.111.0",
     "slate-history": "^0.110.3",
     "slate-react": "^0.112.0",
+    "styled-components": "^6.1.14",
     "tailwind-scrollbar": "^4.0.0-beta.0",
     "translate": "^3.0.1",
     "uuid": "^11.0.3"

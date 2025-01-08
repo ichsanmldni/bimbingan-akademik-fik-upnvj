@@ -9,15 +9,39 @@ export async function PATCH(req: Request): Promise<Response> {
         const { id, dokumentasi_kehadiran, ttd_kehadiran } = body;
 
 
-        if (!id || !dokumentasi_kehadiran || !ttd_kehadiran) {
+        if (!id) {
             return new Response(
                 JSON.stringify({ message: 'Invalid data' }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
         }
 
+        if (!dokumentasi_kehadiran && !ttd_kehadiran) {
+            return new Response(
+                JSON.stringify({ message: 'Wajib input tanda tangan dan dokumentasi kehadiran!' }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
+        if (!dokumentasi_kehadiran) {
+            return new Response(
+                JSON.stringify({ message: 'Wajib input dokumentasi kehadiran!' }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
+        if (!ttd_kehadiran) {
+            return new Response(
+                JSON.stringify({ message: 'Wajib input tanda tangan kehadiran!' }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
         const existingRecord = await prisma.bimbingan.findUnique({
             where: { id },
+            include: {
+                pengajuan_bimbingan: true,
+            }
         });
 
         if (!existingRecord) {
@@ -54,7 +78,7 @@ export async function PATCH(req: Request): Promise<Response> {
                     // Tambahkan path ke array hasil
                     savedImageTtdPaths = relativePath;
                 } catch (error) {
-                    console.error("Error menyimpan gambar: ", error instanceof Error ? error.message : 'Unknown error');
+                    console.error("Error menyimpan dokumentasi kehadiran: ", error instanceof Error ? error.message : 'Unknown error');
                 }
             }
         }
@@ -80,7 +104,7 @@ export async function PATCH(req: Request): Promise<Response> {
                     // Tambahkan path ke array hasil
                     savedImageDokumentasiPaths = relativePath;
                 } catch (error) {
-                    console.error("Error menyimpan gambar: ", error instanceof Error ? error.message : 'Unknown error');
+                    console.error("Error menyimpan tanda tangan kehadiran: ", error instanceof Error ? error.message : 'Unknown error');
                 }
             }
         }
@@ -90,7 +114,22 @@ export async function PATCH(req: Request): Promise<Response> {
             data: { dokumentasi_kehadiran: savedImageDokumentasiPaths, status_pengesahan_kehadiran: "Belum Sah", status_kehadiran_mahasiswa: "Hadir", ttd_kehadiran: savedImageTtdPaths },
         });
 
-        return new Response(JSON.stringify(bimbingan), {
+        const notifikasiDosenPA = {
+            dosen_pa_id: existingRecord.pengajuan_bimbingan.dosen_pa_id,
+            isi: `Ada absensi bimbingan baru dari ${existingRecord.pengajuan_bimbingan.nama_lengkap}. Klik untuk mengonfirmasi pengesahan absensi bimbingan.`,
+            read: false,
+            waktu: new Date(),
+        };
+
+        await prisma.notifikasidosenpa.create({ data: notifikasiDosenPA });
+
+        const responsePayload = {
+            status: "success",
+            message: "Absensi bimbingan berhasil dicatat!",
+            data: bimbingan,
+        };
+
+        return new Response(JSON.stringify(responsePayload), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });

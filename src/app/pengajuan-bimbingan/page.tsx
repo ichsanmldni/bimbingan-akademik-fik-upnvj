@@ -12,7 +12,11 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { env } from "process";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import WarningIcon from "@mui/icons-material/Warning";
 
 interface User {
   id: number;
@@ -170,8 +174,6 @@ export default function Home() {
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
-      console.log(dataMahasiswa, dataUser);
-
       const mahasiswa = dataMahasiswa.data.find(
         (data) => data.nim === dataUser.nim
       );
@@ -186,8 +188,6 @@ export default function Home() {
       throw error;
     }
   };
-
-  console.log(dataMahasiswaUser);
 
   const getDataJenisBimbingan = async () => {
     try {
@@ -253,9 +253,17 @@ export default function Home() {
         `${API_BASE_URL}/api/pengajuanbimbingan`,
         newData
       );
-      return response.data;
+      console.log(response);
+      return {
+        success: true,
+        message: response.data.message || "Pengajuan berhasil!",
+        data: response.data,
+      };
     } catch (error) {
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
 
@@ -288,7 +296,21 @@ export default function Home() {
       };
 
       const result = await addPengajuanBimbingan(pengajuanBimbinganValue);
-      console.log(result);
+      toast.success(
+        <div className="flex items-center">
+          <span>{result.message || "Pengajuan bimbingan berhasil!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
       setNamaLengkap("");
       setNim("");
       setEmail("");
@@ -310,7 +332,21 @@ export default function Home() {
         }
       }, 1000);
     } catch (error) {
-      console.error("Registration error:", (error as Error).message);
+      toast.error(
+        <div className="flex items-center">
+          <span>{error.message || "Pengajuan gagal. Silahkan coba lagi!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
   };
 
@@ -468,7 +504,6 @@ export default function Home() {
   const getDayName = (date: Date) => {
     return format(date, "EEEE", { locale: id });
   };
-  console.log(dataUser);
   return (
     <div>
       <NavbarUser
@@ -622,6 +657,7 @@ export default function Home() {
               Ajukan
             </button>
           </form>
+          <ToastContainer />
         </div>
       </div>
 

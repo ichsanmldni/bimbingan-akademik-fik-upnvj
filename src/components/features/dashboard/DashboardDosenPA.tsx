@@ -19,6 +19,8 @@ import { format } from "date-fns";
 import { env } from "process";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { EyeIcon } from "@heroicons/react/outline";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface UserProfile {
   nama_lengkap: string;
@@ -212,9 +214,17 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         `${API_BASE_URL}/api/pengajuanbimbingan`,
         updatedData
       );
-      return response.data;
+      return {
+        success: true,
+        message:
+          response.data.message || "Konfirmasi pengajuan bimbingan berhasil!",
+        data: response.data,
+      };
     } catch (error) {
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
   const patchPengesahanKehadiranBimbingan = async (updatedData: any) => {
@@ -485,12 +495,46 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       };
 
       const result = await patchPengajuanBimbingan(pengajuanBimbinganValue);
-      await addBimbingan(id);
       console.log(result);
+      toast.success(
+        <div className="flex items-center">
+          <span>
+            {result.message || "Pengajuan bimbingan berhasil dikonfirmasi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+      await addBimbingan(id);
       setKeteranganKonfirmasi((prev) => ({ ...prev, [id]: "" }));
       getDataPengajuanBimbinganByDosenPaId();
     } catch (error) {
-      console.error("Registration error:", (error as Error).message);
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message ||
+              "Konfirmasi pengajuan bimbingan gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
   };
 
@@ -503,6 +547,8 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         id,
         status_pengesahan_kehadiran,
       };
+
+      console.log(pengesahanKehadiranBimbinganValue);
 
       const result = await patchPengesahanKehadiranBimbingan(
         pengesahanKehadiranBimbinganValue
@@ -597,7 +643,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
             </div>
             <form className="flex flex-col mt-8 gap-4">
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={
                   namaLengkapDosen === "" ? "Nama Lengkap" : namaLengkapDosen
@@ -609,7 +655,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={emailDosen === "" ? "Email" : emailDosen}
                 onChange={(e) => {
@@ -619,7 +665,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={nip === "" ? "NIP" : nip}
                 onChange={(e) => {
@@ -629,7 +675,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={noTelpDosen === "" ? "No Telp" : noTelpDosen}
                 onChange={(e) => {
@@ -842,7 +888,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                               onClick={() =>
                                 handleEditPengesahanKehadiranBimbingan(
                                   data.id,
-                                  "Reschedule"
+                                  "Tidak Sah"
                                 )
                               }
                               className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
@@ -972,7 +1018,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                                 "Reschedule"
                               )
                             }
-                            className="w-1/2 bg-red-500 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
+                            className="w-1/2 bg-red-500 text-white cursor-pointer hover:bg-red-600 rounded-md py-2 font-medium text-[14px]"
                             disabled={keteranganKonfirmasi === ""}
                           >
                             Reschedule
@@ -985,7 +1031,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                                 "Diterima"
                               )
                             }
-                            className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
+                            className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 hover:bg-green-600 font-medium text-[14px]"
                             disabled={keteranganKonfirmasi === ""}
                           >
                             Diterima
@@ -1017,6 +1063,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 ))}
             </div>
           </div>
+          <ToastContainer />
         </div>
       )}
       {selectedSubMenuDashboard ===

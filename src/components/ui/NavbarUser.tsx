@@ -20,11 +20,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   const pathname = usePathname();
 
-  const handleNotificationClick = () => {
-    setIsModalProfileOpen(false);
-    setIsModalNotificationOpen(true);
-  };
-
   const closeNotificationModal = () => {
     setIsModalNotificationOpen(false);
   };
@@ -134,18 +129,21 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           </Link>
         )}
         <NotificationButton
-          onClick={handleNotificationClick}
+          onClick={() => setIsModalNotificationOpen((prev) => !prev)}
           className="w-6 h-6 cursor-pointer"
         />
         {dataUser?.profile_image ? (
           <img
             src={`../${dataUser.profile_image}`}
             alt="Profile"
-            className="rounded-full size-8"
+            className="rounded-full size-8 cursor-pointer"
             onClick={handleProfileClick}
           />
         ) : (
-          <ProfileImage className="size-8" onClick={handleProfileClick} />
+          <ProfileImage
+            className="size-8 cursor-pointer"
+            onClick={handleProfileClick}
+          />
         )}
       </div>
       {isModalNotificationOpen && (

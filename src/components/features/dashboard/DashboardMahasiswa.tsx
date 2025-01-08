@@ -19,6 +19,8 @@ import {
 import SignatureCanvas from "react-signature-canvas";
 import { Fragment } from "react";
 import { env } from "process";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface DashboardMahasiswaProps {
   selectedSubMenuDashboard: string;
@@ -159,9 +161,16 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         `${API_BASE_URL}/api/bimbingan/absensi`,
         absensiData
       );
-      return response.data;
+      return {
+        success: true,
+        message: response.data.message || "Absensi bimbingan berhasil!!",
+        data: response.data,
+      };
     } catch (error) {
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
 
@@ -175,14 +184,49 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       const absensiBimbinganValue = {
         id: selectedBimbinganId,
         dokumentasi_kehadiran: previewDocumentation[0],
-        ttd_kehadiran: signatureData,
+        ttd_kehadiran:
+          signatureData ===
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAAtJREFUGFdjYAACAAAFAAGq1chRAAAAAElFTkSuQmCC"
+            ? undefined
+            : signatureData,
       };
       const result = await addAbsensiBimbingan(absensiBimbinganValue);
+      toast.success(
+        <div className="flex items-center">
+          <span>{result.message || "Absensi bimbingan berhasil!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+      getDataBimbinganByIDMahasiswa();
+      closeModal();
     } catch (error) {
-      console.error("Registration error:", (error as Error).message);
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message || "Absensi bimbingan gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
-    getDataBimbinganByIDMahasiswa();
-    closeModal();
   };
 
   const openImageInNewTab = (base64: string) => {
@@ -467,9 +511,11 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         (data) => (data.nim = dataUser.nim)
       );
 
-      const bimbingan = dataBimbingan.data.filter(
-        (data: any) => data.pengajuan_bimbingan.mahasiswa_id === mahasiswa.id
-      );
+      const bimbingan = dataBimbingan.data
+        .filter(
+          (data: any) => data.pengajuan_bimbingan.mahasiswa_id === mahasiswa.id
+        )
+        .filter((data) => data.pengajuan_bimbingan.status === "Diterima");
 
       setDataBimbingan(bimbingan);
     } catch (error) {
@@ -840,7 +886,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                       <div className="flex justify-end">
                         <button
                           onClick={() => openModal(data.id)}
-                          className="bg-green-400 text-[14px] hover:bg-green-500 justify-end rounded-lg p-2 text-white"
+                          className="bg-orange-400 text-[14px] hover:bg-orange-500 justify-end rounded-lg p-2 text-white"
                         >
                           Isi Absensi
                         </button>
@@ -859,7 +905,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                               leaveFrom="opacity-100"
                               leaveTo="opacity-0"
                             >
-                              <div className="fixed inset-0 bg-black bg-opacity-25" />
+                              <div className="fixed inset-0 bg-black bg-opacity-5" />
                             </TransitionChild>
 
                             <div className="fixed inset-0 overflow-y-auto">
@@ -873,7 +919,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                                   leaveFrom="opacity-100 scale-100"
                                   leaveTo="opacity-0 scale-95"
                                 >
-                                  <DialogPanel className="w-full scrollbar scrollbar-thumb-corner-900 max-w-md max-h-[500px] overflow-y-auto transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                                  <DialogPanel className="w-full scrollbar scrollbar-thumb-corner-900 max-w-md max-h-[500px] overflow-y-auto transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle transition-all">
                                     <DialogTitle
                                       as="h3"
                                       className="text-lg font-medium leading-6 text-gray-900"
@@ -889,7 +935,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                                         penColor="black"
                                         canvasProps={{
                                           className:
-                                            "border border-gray-300 rounded w-full h-[200px]",
+                                            "border border-gray-300 rounded w-full h-[200px] hover:cursor-pointer",
                                         }}
                                       />
                                       <button
@@ -943,7 +989,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                                         key={inputKey}
                                         type="file"
                                         onChange={handleImageUpload}
-                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:cursor-pointer hover:file:bg-blue-100"
                                       />
                                     </div>
 
@@ -972,7 +1018,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                       </div>
                     ) : (
                       <div className="flex justify-end">
-                        <div className="bg-orange-400 text-[14px] justify-end rounded-lg p-2 text-white">
+                        <div className="bg-green-400 text-[14px] justify-end rounded-lg p-2 text-white">
                           Sudah Absen
                         </div>
                       </div>
@@ -981,6 +1027,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                 ))}
             </div>
           </div>
+          <ToastContainer />
         </div>
       )}
       {selectedSubMenuDashboard === "Riwayat Pengajuan Bimbingan" && (
