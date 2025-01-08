@@ -47,30 +47,33 @@ model chatpribadi {
   @@index([mahasiswa_id], map: "ChatPribadi_mahasiswa_id_fkey")
 }
 
-model dosen {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique(map: "Dosen_email_key")
-  nip           String
-  password      String
-  nama_lengkap  String
-  profile_image String?
-  no_whatsapp   String
-  dosenpa       dosenpa[]
-  kaprodi       kaprodi[]
+model dosenpa {
+  id                   Int                      @id @default(autoincrement())
+  email                String                   @unique(map: "Dosen_email_key")
+  nip                  String                   @unique(map: "Dosen_nip_key")
+  password             String
+  nama                 String
+  profile_image        String?
+  hp                   String
+  chatpribadi          chatpribadi[]
+  jadwaldosenpa        jadwaldosenpa[]
+  laporanbimbingan     laporanbimbingan[]
+  mahasiswa            mahasiswa[]
+  notifikasidosenpa    notifikasidosenpa[]
+  pengajuanbimbingan   pengajuanbimbingan[]
 }
 
-model dosenpa {
-  id                 Int                  @id @default(autoincrement())
-  dosen_id           Int?
-  chatpribadi        chatpribadi[]
-  dosen              dosen?               @relation(fields: [dosen_id], references: [id], map: "DosenPA_dosen_id_fkey")
-  jadwaldosenpa      jadwaldosenpa[]
+model kaprodi {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique(map: "Dosen_email_key")
+  nip             String    @unique(map: "Dosen_nip_key")
+  password        String
+  nama            String
+  profile_image   String?
+  kaprodi_jurusan String?
+  hp              String
   laporanbimbingan   laporanbimbingan[]
-  mahasiswa          mahasiswa[]
-  notifikasidosenpa  notifikasidosenpa[]
-  pengajuanbimbingan pengajuanbimbingan[]
-
-  @@index([dosen_id], map: "DosenPA_dosen_id_fkey")
+  notifikasikaprodi  notifikasikaprodi[]
 }
 
 model jadwaldosenpa {
@@ -82,19 +85,6 @@ model jadwaldosenpa {
   dosen_pa    dosenpa @relation(fields: [dosen_pa_id], references: [id], map: "JadwalDosenPA_dosen_pa_id_fkey")
 
   @@index([dosen_pa_id], map: "JadwalDosenPA_dosen_pa_id_fkey")
-}
-
-model kaprodi {
-  id                 Int                 @id @default(autoincrement())
-  dosen_id           Int?
-  kaprodi_jurusan_id Int
-  dosen              dosen?              @relation(fields: [dosen_id], references: [id], map: "Kaprodi_dosen_id_fkey")
-  kaprodi_jurusan    masterjurusan       @relation(fields: [kaprodi_jurusan_id], references: [id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
-  laporanbimbingan   laporanbimbingan[]
-  notifikasikaprodi  notifikasikaprodi[]
-
-  @@index([dosen_id], map: "Kaprodi_dosen_id_fkey")
-  @@index([kaprodi_jurusan_id], map: "Kaprodi_kaprodi_jurusan_id_fkey")
 }
 
 model laporanbimbingan {
@@ -180,17 +170,16 @@ model prestasiporsenimahasiswa {
 
 model mahasiswa {
   id                   Int                    @id @default(autoincrement())
+  nim                  String                 @unique(map: "Mahasiswa_nim_key")  
   email                String                 @unique(map: "Mahasiswa_email_key")
-  nim                  String
-  password             String
-  no_whatsapp          String
-  peminatan            String
+  hp                   String
+  peminatan            String?
   jurusan              String
-  nama_lengkap         String
+  nama                 String
   profile_image        String?
   dosen_pa_id          Int?
-  chatpribadi          chatpribadi[]
   dosen_pa             dosenpa?               @relation(fields: [dosen_pa_id], references: [id], map: "Mahasiswa_dosen_pa_id_fkey")
+  chatpribadi          chatpribadi[]
   notifikasimahasiswa  notifikasimahasiswa[]
   pengajuanbimbingan   pengajuanbimbingan[]
   sesichatbotmahasiswa sesichatbotmahasiswa[]
@@ -210,23 +199,11 @@ model mastertopikbimbinganpribadi {
   order           Int
 }
 
-
-model masterjurusan {
-  id              Int               @id @default(autoincrement())
-  jurusan         String
-  order           Int
-  kaprodi         kaprodi[]
-  masterpeminatan masterpeminatan[]
-}
-
 model masterpeminatan {
   id         Int           @id @default(autoincrement())
   peminatan  String
   jurusan_id Int
   order      Int
-  jurusan    masterjurusan @relation(fields: [jurusan_id], references: [id], map: "MasterPeminatan_jurusan_id_fkey")
-
-  @@index([jurusan_id], map: "MasterPeminatan_jurusan_id_fkey")
 }
 
 model mastersistembimbingan {

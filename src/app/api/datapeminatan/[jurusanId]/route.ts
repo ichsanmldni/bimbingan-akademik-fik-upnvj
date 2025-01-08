@@ -23,10 +23,7 @@ export async function GET(req: Request): Promise<Response> {
     const peminatan = await prisma.masterpeminatan.findMany({
       where: {
         jurusan_id: parseInt(jurusanid),
-      },
-      include: {
-        jurusan: true,
-      },
+      }
     });
 
     return new Response(JSON.stringify(peminatan), {

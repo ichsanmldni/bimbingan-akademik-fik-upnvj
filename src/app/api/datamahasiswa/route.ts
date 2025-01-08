@@ -38,12 +38,13 @@ export async function PATCH(req: Request): Promise<Response> {
   try {
     const body: MahasiswaRequestBody = await req.json();
 
+    console.log(body)
+
     const {
-      id,
-      nama_lengkap,
+      nama,
       email,
       nim,
-      no_whatsapp,
+      hp,
       jurusan,
       peminatan,
       dosen_pa_id,
@@ -51,7 +52,7 @@ export async function PATCH(req: Request): Promise<Response> {
     } = body;
 
     // Validate input
-    if (!id || !nama_lengkap || !email || !nim || !no_whatsapp || !jurusan || !peminatan || !dosen_pa_id) {
+    if (!nama || !email || !nim || !hp || !jurusan) {
       return new Response(
         JSON.stringify({ message: 'Invalid data' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -60,8 +61,9 @@ export async function PATCH(req: Request): Promise<Response> {
 
     // Check if record exists in the database
     const existingRecord = await prisma.mahasiswa.findUnique({
-      where: { id },
+      where: { nim },
     });
+
 
     if (!existingRecord) {
       return new Response(
@@ -76,12 +78,12 @@ export async function PATCH(req: Request): Promise<Response> {
 
     // Save image if provided
     let savedImagePath = existingRecord.profile_image; // Use old image if not updated
-    if (profile_image) {
+    if (profile_image && profile_image !== null) {
       const base64Data = profile_image.replace(/^data:image\/\w+;base64,/, '');
       const imageBuffer = Buffer.from(base64Data, 'base64');
 
-      const filename = `profile_${id}_${Date.now()}.jpg`;
-      savedImagePath = path.join('uploads', 'profile_pictures', filename); // Relative path
+      const filename = `profile_${nim}_${Date.now()}.jpg`;
+      savedImagePath = path.join('uploads', 'profile_pictures', filename); // Relative path)
 
       if (existingRecord.profile_image) {
         const oldImagePath = path.join(process.cwd(), 'public', existingRecord.profile_image);
@@ -97,16 +99,16 @@ export async function PATCH(req: Request): Promise<Response> {
 
     // Update data in the database
     const mahasiswa = await prisma.mahasiswa.update({
-      where: { id },
+      where: { nim },
       data: {
-        nama_lengkap,
+        nama,
         email,
         nim,
-        no_whatsapp,
+        hp,
         jurusan,
         peminatan,
         dosen_pa_id,
-        profile_image: savedImagePath, // Save relative path in DB
+        profile_image: savedImagePath,
       },
     });
 

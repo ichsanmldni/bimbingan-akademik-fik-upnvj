@@ -9,7 +9,10 @@ import DashboardDosenPA from "@/components/features/dashboard/DashboardDosenPA";
 import DashboardMahasiswa from "@/components/features/dashboard/DashboardMahasiswa";
 import DashboardKaprodi from "@/components/features/dashboard/DashboardKaprodi";
 import axios from "axios";
-import { env } from "process";
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedSubMenu } from "@/components/store/selectedSubMenuSlice";
+import { RootState } from "@/components/store/store";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface User {
   id: number;
@@ -38,34 +41,19 @@ interface Mahasiswa {
 
 export default function Home() {
   const [dataUser, setDataUser] = useState<any>(null);
-  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
   const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
   const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
-  const [selectedSubMenuDashboard, setSelectedSubMenuDashboard] =
-    useState<string>("");
   const [roleUser, setRoleUser] = useState<string>("");
-
-  const getDataDosen = async () => {
-    try {
-      const response = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosen`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = response.data;
-      setDataDosen(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
+  const dispatch = useDispatch();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const selectedSubMenuDashboard = useSelector(
+    (state: RootState) => state.selectedSubMenu.value
+  );
 
   const getDataDosenPA = async () => {
     try {
@@ -122,7 +110,19 @@ export default function Home() {
   };
 
   useEffect(() => {
-    getDataDosen();
+    const submenu = searchParams.get("submenu");
+    if (submenu) {
+      setTimeout(() => {
+        dispatch(setSelectedSubMenu(submenu));
+      }, 500);
+      const timer = setTimeout(() => {
+        router.replace("/dashboard"); // Ganti '/your-page' dengan path halaman Anda tanpa query params
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [dispatch, searchParams, dataUser, dataDosenPA, dataKaprodi]);
+
+  useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
     getDataMahasiswa();
@@ -144,23 +144,15 @@ export default function Home() {
     if (dataUser) {
       if (dataUser.role === "Mahasiswa") {
         setRoleUser("Mahasiswa");
-        setSelectedSubMenuDashboard("Profile Mahasiswa");
-      } else if (dataUser.role === "Dosen") {
-        const isDosenPA = dataDosenPA.find(
-          (data) => data.dosen_id === dataUser.id
-        );
-        const isKaprodi = dataKaprodi.find(
-          (data) => data.dosen_id === dataUser.id
-        );
-        if (isDosenPA) {
-          setRoleUser("Dosen PA");
-          setSelectedSubMenuDashboard("Profile Dosen PA");
-        } else if (isKaprodi) {
-          setRoleUser("Kaprodi");
-          setSelectedSubMenuDashboard("Profile Kaprodi");
-        }
+        dispatch(setSelectedSubMenu("Profile Mahasiswa"));
+      } else if (dataUser.role === "Dosen PA") {
+        setRoleUser("Dosen PA");
+        dispatch(setSelectedSubMenu("Profile Dosen PA"));
+      } else if (dataUser.role === "Kaprodi") {
+        setRoleUser("Kaprodi");
+        dispatch(setSelectedSubMenu("Profile Kaprodi"));
       } else {
-        setSelectedSubMenuDashboard("");
+        dispatch(setSelectedSubMenu(""));
       }
     }
   }, [dataUser, dataDosenPA, dataKaprodi]);
@@ -171,11 +163,11 @@ export default function Home() {
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.id === dataUser?.id) || {}
+            ? dataMahasiswa.find((data) => data.nim === dataUser?.nim) || {}
             : roleUser === "Dosen PA"
-              ? dataDosen.find((data) => data.id === dataUser?.id) || {}
+              ? dataDosenPA.find((data) => data.nip === dataUser?.nip) || {}
               : roleUser === "Kaprodi"
-                ? dataDosen.find((data) => data.id === dataUser?.id) || {}
+                ? dataKaprodi.find((data) => data.nip === dataUser?.nip) || {}
                 : {}
         }
       />
@@ -186,15 +178,17 @@ export default function Home() {
             <div className="flex flex-col gap-1">
               <button
                 className={`${selectedSubMenuDashboard === "Profile Mahasiswa" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
-                onClick={() => setSelectedSubMenuDashboard("Profile Mahasiswa")}
+                onClick={() =>
+                  dispatch(setSelectedSubMenu("Profile Mahasiswa"))
+                }
               >
                 Profile Mahasiswa
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Jadwal Kosong Dosen PA Role Mahasiswa" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard(
-                    "Jadwal Kosong Dosen PA Role Mahasiswa"
+                  dispatch(
+                    setSelectedSubMenu("Jadwal Kosong Dosen PA Role Mahasiswa")
                   )
                 }
               >
@@ -202,14 +196,16 @@ export default function Home() {
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Absensi Bimbingan" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
-                onClick={() => setSelectedSubMenuDashboard("Absensi Bimbingan")}
+                onClick={() =>
+                  dispatch(setSelectedSubMenu("Absensi Bimbingan"))
+                }
               >
                 Absensi Bimbingan
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Riwayat Pengajuan Bimbingan" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard("Riwayat Pengajuan Bimbingan")
+                  dispatch(setSelectedSubMenu("Riwayat Pengajuan Bimbingan"))
                 }
               >
                 Riwayat Pengajuan Bimbingan
@@ -220,15 +216,15 @@ export default function Home() {
             <div className="flex flex-col gap-1">
               <button
                 className={`${selectedSubMenuDashboard === "Profile Dosen PA" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
-                onClick={() => setSelectedSubMenuDashboard("Profile Dosen PA")}
+                onClick={() => dispatch(setSelectedSubMenu("Profile Dosen PA"))}
               >
                 Profile Dosen PA
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Jadwal Kosong Dosen Role Dosen PA" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard(
-                    "Jadwal Kosong Dosen Role Dosen PA"
+                  dispatch(
+                    setSelectedSubMenu("Jadwal Kosong Dosen Role Dosen PA")
                   )
                 }
               >
@@ -237,7 +233,7 @@ export default function Home() {
               <button
                 className={`${selectedSubMenuDashboard === "Pengesahan Absensi Bimbingan" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard("Pengesahan Absensi Bimbingan")
+                  dispatch(setSelectedSubMenu("Pengesahan Absensi Bimbingan"))
                 }
               >
                 Pengesahan Absensi Bimbingan
@@ -245,8 +241,8 @@ export default function Home() {
               <button
                 className={`${selectedSubMenuDashboard === "Pengajuan Bimbingan Akademik Mahasiswa" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard(
-                    "Pengajuan Bimbingan Akademik Mahasiswa"
+                  dispatch(
+                    setSelectedSubMenu("Pengajuan Bimbingan Akademik Mahasiswa")
                   )
                 }
               >
@@ -255,8 +251,10 @@ export default function Home() {
               <button
                 className={`${selectedSubMenuDashboard === "Riwayat Laporan Bimbingan Role Dosen PA" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard(
-                    "Riwayat Laporan Bimbingan Role Dosen PA"
+                  dispatch(
+                    setSelectedSubMenu(
+                      "Riwayat Laporan Bimbingan Role Dosen PA"
+                    )
                   )
                 }
               >
@@ -268,29 +266,29 @@ export default function Home() {
             <div className="flex flex-col gap-1">
               <button
                 className={`${selectedSubMenuDashboard === "Profile Kaprodi" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
-                onClick={() => setSelectedSubMenuDashboard("Profile Kaprodi")}
+                onClick={() => dispatch(setSelectedSubMenu("Profile Kaprodi"))}
               >
                 Profile Kaprodi
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Statistik Bimbingan Akademik" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard("Statistik Bimbingan Akademik")
+                  dispatch(setSelectedSubMenu("Statistik Bimbingan Akademik"))
                 }
               >
                 Statistik Bimbingan Akademik
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Data Dosen PA" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
-                onClick={() => setSelectedSubMenuDashboard("Data Dosen PA")}
+                onClick={() => dispatch(setSelectedSubMenu("Data Dosen PA"))}
               >
                 Data Dosen PA
               </button>
               <button
                 className={`${selectedSubMenuDashboard === "Riwayat Laporan Bimbingan Role Kaprodi" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
-                  setSelectedSubMenuDashboard(
-                    "Riwayat Laporan Bimbingan Role Kaprodi"
+                  dispatch(
+                    setSelectedSubMenu("Riwayat Laporan Bimbingan Role Kaprodi")
                   )
                 }
               >

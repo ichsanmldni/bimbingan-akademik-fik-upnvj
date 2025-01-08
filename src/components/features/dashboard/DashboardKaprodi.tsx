@@ -18,6 +18,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import DonutChart from "@/components/ui/DonutChart";
 import TabelStatistikLaporan from "@/components/ui/TabelStatistikLaporan";
+import { Provider } from "react-redux";
+import store from "@/components/store/store";
 
 interface DashboardKaprodiProps {
   selectedSubMenuDashboard: string;
@@ -160,10 +162,9 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const patchKaprodi = async (updatedData: any) => {
     try {
       const response = await axios.patch(
-        `${API_BASE_URL}/api/datadosen`,
+        `${API_BASE_URL}/api/datakaprodi`,
         updatedData
       );
-      console.log("Kaprodi updated successfully:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error updating order:", error);
@@ -171,62 +172,62 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
-  const handleEditKaprodi = async (id: number) => {
+  const handleEditKaprodi = async () => {
     try {
       let jurusanValue = {
-        id,
-        nama_lengkap: namaLengkapKaprodi,
+        nama: namaLengkapKaprodi,
         email: emailKaprodi,
         nip,
-        no_whatsapp: noTelpKaprodi,
+        hp: noTelpKaprodi,
         profile_image: !imagePreview ? null : imagePreview,
       };
 
-      const result = await patchKaprodi(jurusanValue);
-      getDataDosenById();
+      await patchKaprodi(jurusanValue);
+      getDataKaprodiByNip();
       setImagePreview(null);
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  const getDataDosenById = async () => {
+  const getDataKaprodiByNip = async () => {
     try {
-      const dataDosen = await axios.get(`${API_BASE_URL}/api/datadosen`);
+      const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
-      const dosen = dataDosen.data.find((data: any) => data.id === dataUser.id);
+      const kaprodi = dataKaprodi.data.find(
+        (data: any) => data.nip === dataUser.nip
+      );
 
-      if (!dosen) {
-        console.error("Dosen tidak ditemukan");
+      if (!kaprodi) {
+        console.error("Kaprodi tidak ditemukan");
         return;
       }
 
       setUserProfile({
-        nama_lengkap: dosen.nama_lengkap,
-        email: dosen.email,
-        nip: dosen.nip,
-        no_whatsapp: dosen.no_whatsapp,
+        nama: kaprodi.nama,
+        email: kaprodi.email,
+        nip: kaprodi.nip,
+        hp: kaprodi.hp,
       });
 
-      setDataKaprodi(dosen);
+      setDataKaprodi(kaprodi);
 
-      setNamaLengkapKaprodi(dosen.nama_lengkap);
-      setEmailKaprodi(dosen.email);
-      setNip(dosen.nip);
-      setNoTelpKaprodi(dosen.no_whatsapp);
+      setNamaLengkapKaprodi(kaprodi.nama);
+      setEmailKaprodi(kaprodi.email);
+      setNip(kaprodi.nip);
+      setNoTelpKaprodi(kaprodi.hp);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
 
-  const getDataKaprodiByDosenId = async () => {
+  const getDataKaprodiByKaprodiNip = async () => {
     try {
       const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       const kaprodi = dataKaprodi.data.find(
-        (data: any) => data.dosen_id == dataUser.id
+        (data: any) => data.nip == dataUser.nip
       );
 
       if (!kaprodi) {
@@ -246,7 +247,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       const kaprodi = dataKaprodi.data.find(
-        (data: any) => data.dosen.nama_lengkap === userProfile?.nama_lengkap
+        (data: any) => data.nip === dataUser.nip
       );
 
       if (!kaprodi) {
@@ -262,7 +263,6 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const laporanBimbingan = dataLaporanBimbingan.data.filter(
         (data: any) => data.kaprodi_id === kaprodiid
       );
-      console.log(laporanBimbingan);
 
       setDataLaporanBimbingan(laporanBimbingan);
     } catch (error) {
@@ -299,7 +299,6 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       };
 
       const result = await patchLaporanBimbingan(laporanBimbinganValue);
-      console.log(result);
 
       setFeedbackKaprodi("");
       getDataLaporanBimbinganByKaprodiId();
@@ -342,7 +341,6 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const dataPrestasiIlmiahMahasiswa = await axios.get<any>(
         `${API_BASE_URL}/api/prestasiilmiahmahasiswa`
       );
-      console.log(dataPrestasiIlmiahMahasiswa);
       const idLaporan = selectedDataLaporanBimbingan?.id;
 
       const selectedDataPrestasiIlmiahMahasiswa =
@@ -787,13 +785,13 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   useEffect(() => {
     setImagePreview(null);
-    getDataDosenById();
+    getDataKaprodiByNip();
   }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
-    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.id) {
-      getDataDosenById();
-      getDataKaprodiByDosenId();
+    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.nip) {
+      getDataKaprodiByNip();
+      getDataKaprodiByKaprodiNip();
     }
   }, [dataUser]);
 
@@ -805,19 +803,19 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     if (
       userProfile &&
       Object.keys(userProfile).length > 0 &&
-      userProfile.nama_lengkap
+      userProfile.nama
     ) {
       getDataLaporanBimbinganByKaprodiId();
     }
   }, [userProfile]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap !== "") {
+    if (userProfile && userProfile.nama !== "") {
       const isDataChanged =
-        userProfile.nama_lengkap !== namaLengkapKaprodi ||
+        userProfile.nama !== namaLengkapKaprodi ||
         userProfile.email !== emailKaprodi ||
         userProfile.nip !== nip ||
-        userProfile.no_whatsapp !== noTelpKaprodi;
+        userProfile.hp !== noTelpKaprodi;
       setIsDataChanged(isDataChanged);
     }
   }, [userProfile, namaLengkapKaprodi, emailKaprodi, nip, noTelpKaprodi]);
@@ -828,7 +826,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   }, []);
 
   return (
-    <>
+    <Provider store={store}>
       {selectedSubMenuDashboard === "Profile Kaprodi" && (
         <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
           <div className="border px-[70px] py-[30px] rounded-lg">
@@ -874,7 +872,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
             </div>
             <form className="flex flex-col mt-8 gap-4">
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={
                   namaLengkapKaprodi === ""
@@ -888,7 +886,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={emailKaprodi === "" ? "Email" : emailKaprodi}
                 onChange={(e) => {
@@ -898,7 +896,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={nip === "" ? "NIP" : nip}
                 onChange={(e) => {
@@ -908,7 +906,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={noTelpKaprodi === "" ? "No Telp" : noTelpKaprodi}
                 onChange={(e) => {
@@ -920,7 +918,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  handleEditKaprodi(dataUser.id);
+                  handleEditKaprodi();
                 }}
                 className={`text-white bg-orange-500 hover:bg-orange-600 text-[14px] py-2 font-medium rounded-lg ${
                   !isDataChanged && !imagePreview ? "hidden" : ""
@@ -987,23 +985,17 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 <div className="flex flex-col gap-4 mt-4 border rounded-xl p-8">
                   <div className="flex gap-6">
                     <img
-                      src={selectedDataDosenPA?.dosen.profile_image}
+                      src={selectedDataDosenPA?.profile_image}
                       alt="Profile Image"
                       className="size-[120px] rounded-full cursor-pointer"
                     />
                     <div className="font-medium mt-2">
+                      <p className="self-center">{selectedDataDosenPA?.nama}</p>
+                      <p className="self-center">{selectedDataDosenPA?.nip}</p>
                       <p className="self-center">
-                        {selectedDataDosenPA?.dosen.nama_lengkap}
+                        {selectedDataDosenPA?.email}
                       </p>
-                      <p className="self-center">
-                        {selectedDataDosenPA?.dosen.nip}
-                      </p>
-                      <p className="self-center">
-                        {selectedDataDosenPA?.dosen.email}
-                      </p>
-                      <p className="self-center">
-                        {selectedDataDosenPA?.dosen.no_whatsapp}
-                      </p>
+                      <p className="self-center">{selectedDataDosenPA?.hp}</p>
                     </div>
                   </div>
                   <div className="flex flex-col gap-4">
@@ -1056,13 +1048,11 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                     >
                       <div className="flex items-center gap-4">
                         <img
-                          src={data.dosen.profile_image}
+                          src={data.profile_image}
                           alt="Profile Image"
                           className="w-8 h-8 rounded-full cursor-pointer"
                         />
-                        <p className="self-center font-medium">
-                          {data.dosen.nama_lengkap}
-                        </p>
+                        <p className="self-center font-medium">{data.nama}</p>
                       </div>
                       <div className="flex items-center">
                         <p className="font-semibold text-orange-500">
@@ -1378,7 +1368,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
           </div>
         </div>
       )}
-    </>
+    </Provider>
   );
 };
 

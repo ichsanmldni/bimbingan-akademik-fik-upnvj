@@ -10,7 +10,6 @@ interface DecodedToken {
 
 const protectedRoutes = [
   '/',
-  '/artikel',
   '/laporan-bimbingan',
   '/pengajuan-bimbingan',
   '/dashboard',
@@ -65,7 +64,6 @@ export const config = {
     "/admin",
     '/dashboard/:path*',
     '/informasi-akademik/:path*',
-    '/artikel/:path*',
     '/laporan-bimbingan/:path*',
     '/pengajuan-bimbingan/:path*',
   ],

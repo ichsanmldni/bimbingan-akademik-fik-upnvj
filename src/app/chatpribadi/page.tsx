@@ -80,18 +80,10 @@ export default function ChatPribadi() {
     if (dataUser) {
       if (dataUser.role === "Mahasiswa") {
         setRoleUser("Mahasiswa");
-      } else if (dataUser.role === "Dosen") {
-        const isDosenPA = dataDosenPA.find(
-          (data) => data.dosen_id === dataUser.id
-        );
-        const isKaprodi = dataKaprodi.find(
-          (data) => data.dosen_id === dataUser.id
-        );
-        if (isDosenPA) {
-          setRoleUser("Dosen PA");
-        } else if (isKaprodi) {
-          setRoleUser("Kaprodi");
-        }
+      } else if (dataUser.role === "Dosen PA") {
+        setRoleUser("Dosen PA");
+      } else if (dataUser.role === "Kaprodi") {
+        setRoleUser("Kaprodi");
       }
     }
   }, [dataUser, dataDosenPA, dataKaprodi]);

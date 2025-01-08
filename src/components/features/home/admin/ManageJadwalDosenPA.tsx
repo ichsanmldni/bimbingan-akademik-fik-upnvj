@@ -38,7 +38,7 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
   const [groupedSchedules, setGroupedSchedules] = useState<
     Record<string, Record<string, string[]>>
   >({});
-  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
+  const [dataDosenPA, setDataDosenPA] = useState<Dosen[]>([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -77,16 +77,16 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
     }
   };
 
-  const getDataDosen = async () => {
+  const getDataDosenPA = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/datadosen`);
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
       const data = await response.data;
-      setDataDosen(data);
+      setDataDosenPA(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -98,7 +98,7 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
 
     schedules.forEach(
       ({ dosen_pa_id, dosen_pa, hari, jam_mulai, jam_selesai }) => {
-        const dosen = dataDosen.find((data) => data.id === dosen_pa.dosen_id);
+        const dosen = dataDosenPA.find((data) => data.id === dosen_pa.dosen_id);
         const dosenName = dosen ? dosen.nama_lengkap : `Dosen ${dosen_pa_id}`; // Default jika nama tidak ditemukan
         if (!grouped[dosenName]) {
           grouped[dosenName] = {
@@ -119,13 +119,13 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
   useEffect(() => {
     getDataTahunAjaran();
     getDataJadwalDosenPa();
-    getDataDosen();
+    getDataDosenPA();
   }, []);
 
   useEffect(() => {
     const grouped = groupSchedules(dataJadwalDosenPA);
     setGroupedSchedules(grouped);
-  }, [dataDosen, dataJadwalDosenPA]);
+  }, [dataDosenPA, dataJadwalDosenPA]);
 
   return (
     <div className="m-8">

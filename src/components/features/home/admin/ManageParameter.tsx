@@ -616,20 +616,14 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const getDataJurusan = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const response = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
       const data = await response.data;
-      const sortedDataJurusan = data.sort(
-        (a: any, b: any) => a.order - b.order
-      );
-      setDataJurusan(sortedDataJurusan);
-      if (data.length === 0) {
-        setAfterOrderEditDataJurusan([]);
-      }
+      setDataJurusan(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -638,17 +632,17 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const getDataPeminatanByJurusan = async (selectedJurusan: any) => {
     try {
-      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const dataJurusan = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
-        (data: any) => data.jurusan === selectedJurusan
+        (data: any) => data.nama_program_studi === selectedJurusan
       );
 
       if (!jurusan) {
         throw new Error("Jurusan tidak ditemukan");
       }
 
-      const jurusanid = jurusan.id;
+      const jurusanid = jurusan.id_program_studi;
 
       const response = await axios.get(
         `${API_BASE_URL}/api/datapeminatan/${jurusanid}`
@@ -1484,17 +1478,17 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const addPeminatan = async (newData: any) => {
     try {
-      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const dataJurusan = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
-        (data: any) => data.jurusan === selectedJurusan
+        (data: any) => data.nama_program_studi === selectedJurusan
       );
 
       if (!jurusan) {
         throw new Error("Jurusan tidak ditemukan");
       }
 
-      const jurusanid = jurusan.id;
+      const jurusanid = jurusan.id_program_studi;
 
       const response = await axios.post(
         `${API_BASE_URL}/api/datapeminatan/${jurusanid}`,
@@ -1906,8 +1900,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     if (dataJurusan.length > 0) {
       const formattedOptions = dataJurusan.map((data: any) => {
         return {
-          value: data.jurusan,
-          label: data.jurusan,
+          value: data.nama_program_studi,
+          label: data.nama_program_studi,
         };
       });
 

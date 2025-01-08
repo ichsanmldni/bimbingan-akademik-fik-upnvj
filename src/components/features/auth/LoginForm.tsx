@@ -44,25 +44,21 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
 
     if (requestBody.role === "Mahasiswa") {
       requestBody.nim = nim;
-    }
-
-    if (requestBody.role === "Dosen") {
+    } else if (requestBody.role === "Dosen PA") {
       requestBody.nip = nip;
-    }
-
-    if (requestBody.role === "Admin") {
+    } else if (requestBody.role === "Kaprodi") {
+      requestBody.nip = nip;
+    } else if (requestBody.role === "Admin") {
       requestBody.email = email;
     }
 
     try {
-      // Menggunakan axios untuk melakukan permintaan POST
       const response = await axios.post("/api/auth/login", requestBody, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      // Menyimpan token jika permintaan berhasil
       if (response.status === 200) {
         localStorage.setItem("authToken", response.data.token);
         toast.success(response?.data.message || "Login berhasil!", {
@@ -78,7 +74,6 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         window.location.href = "/";
       }
     } catch (error) {
-      // Menangani kesalahan jika permintaan gagal
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message || "Login gagal!", {
           position: "bottom-right",
@@ -114,7 +109,8 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         <SelectField
           options={[
             { value: "Mahasiswa", label: "Mahasiswa" },
-            { value: "Dosen", label: "Dosen" },
+            { value: "Dosen PA", label: "Dosen PA" },
+            { value: "Kaprodi", label: "Kaprodi" },
           ]}
           onChange={(e) => setSelectedRole(e.target.value)}
           value={selectedRole}
@@ -147,7 +143,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         />
         <input
           type="text"
-          className={`px-3 py-2 text-[15px] mt-4 border rounded-lg ${selectedRole !== "Dosen" && "hidden"}`}
+          className={`px-3 py-2 text-[15px] mt-4 border rounded-lg ${selectedRole !== "Dosen PA" && selectedRole !== "Kaprodi" && "hidden"}`}
           placeholder="NIP"
           value={nip}
           disabled={!isAdmin && selectedRole === ""}

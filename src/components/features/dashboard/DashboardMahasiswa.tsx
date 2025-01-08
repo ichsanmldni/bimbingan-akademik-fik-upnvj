@@ -94,19 +94,11 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [dataBimbingan, setDataBimbingan] = useState<any>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [dataMahasiswa, setDataMahasiswa] = useState<Record<string, any>>({});
-  const [userProfile, setUserProfile] = useState<{
-    nama_lengkap: string;
-    email: string;
-    nim: string;
-    no_whatsapp: string;
-    jurusan: string;
-    peminatan: string;
-    dosen_pa: string;
-  }>({
-    nama_lengkap: "",
+  const [userProfile, setUserProfile] = useState({
+    nama: "",
     email: "",
     nim: "",
-    no_whatsapp: "",
+    hp: "",
     jurusan: "",
     peminatan: "",
     dosen_pa: "",
@@ -186,7 +178,6 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         ttd_kehadiran: signatureData,
       };
       const result = await addAbsensiBimbingan(absensiBimbinganValue);
-      console.log(result);
     } catch (error) {
       console.error("Registration error:", (error as Error).message);
     }
@@ -273,41 +264,70 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
       const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       const mahasiswa = dataMahasiswa.data.find(
-        (data: any) => data.id === dataUser.id
+        (data: any) => data.nim === dataUser.nim
       );
-      const dosenpa = dataDosenPA.data.find(
-        (data: any) => data.id === mahasiswa.dosen_pa_id
-      );
-
-      if (!dosenpa) {
-        console.error("Dosen PA tidak ditemukan");
-        return;
-      }
 
       if (!mahasiswa) {
         console.error("Mahasiswa tidak ditemukan");
         return;
       }
 
-      setUserProfile({
-        nama_lengkap: mahasiswa.nama_lengkap,
-        email: mahasiswa.email,
-        nim: mahasiswa.nim,
-        no_whatsapp: mahasiswa.no_whatsapp,
-        jurusan: mahasiswa.jurusan,
-        peminatan: mahasiswa.peminatan,
-        dosen_pa: dosenpa.dosen.nama_lengkap,
-      });
-
       setDataMahasiswa(mahasiswa);
 
-      setNamaLengkapMahasiswa(mahasiswa.nama_lengkap);
+      if (mahasiswa.dosen_pa_id !== null) {
+        const dosenpa = dataDosenPA.data.find(
+          (data: any) => data.id === mahasiswa.dosen_pa_id
+        );
+
+        if (!dosenpa) {
+          console.error("Dosen PA tidak ditemukan");
+          return;
+        }
+
+        setUserProfile({
+          nama: mahasiswa.nama,
+          email: mahasiswa.email,
+          nim: mahasiswa.nim,
+          hp: mahasiswa.hp,
+          jurusan: mahasiswa.jurusan,
+          peminatan: mahasiswa.peminatan,
+          dosen_pa: dosenpa.nama,
+        });
+
+        setNamaLengkapMahasiswa(mahasiswa.nama);
+        setEmailMahasiswa(mahasiswa.email);
+        setNim(mahasiswa.nim);
+        setNoTelpMahasiswa(mahasiswa.hp);
+        setSelectedJurusan(mahasiswa.jurusan);
+        setSelectedPeminatan(
+          mahasiswa.peminatan === null ? "" : mahasiswa.peminatan
+        );
+
+        setSelectedDosenPA(dosenpa.nama);
+        return;
+      }
+
+      setUserProfile({
+        nama: mahasiswa.nama,
+        email: mahasiswa.email,
+        nim: mahasiswa.nim,
+        hp: mahasiswa.hp,
+        jurusan: mahasiswa.jurusan,
+        peminatan: mahasiswa.peminatan,
+        dosen_pa: null,
+      });
+
+      setNamaLengkapMahasiswa(mahasiswa.nama);
       setEmailMahasiswa(mahasiswa.email);
       setNim(mahasiswa.nim);
-      setNoTelpMahasiswa(mahasiswa.no_whatsapp);
+      setNoTelpMahasiswa(mahasiswa.hp);
       setSelectedJurusan(mahasiswa.jurusan);
-      setSelectedPeminatan(mahasiswa.peminatan);
-      setSelectedDosenPA(dosenpa.dosen.nama_lengkap);
+      setSelectedPeminatan(
+        mahasiswa.peminatan === null ? "" : mahasiswa.peminatan
+      );
+      setSelectedDosenPA(
+        mahasiswa.dosen_pa_id === null ? "" : mahasiswa.dosen_pa_id
+      );
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -318,26 +338,28 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     try {
       const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
-      const dosenPa = dataDosenPa.data.find(
-        (data: any) => data.dosen.nama_lengkap === userProfile.dosen_pa
-      );
+      if (userProfile.dosen_pa !== null) {
+        const dosenPa = dataDosenPa.data.find(
+          (data: any) => data.nama === userProfile.dosen_pa
+        );
 
-      if (!dosenPa) {
-        throw new Error("Dosen PA tidak ditemukan");
+        const dosenpaid = dosenPa.id;
+
+        if (!dosenPa) {
+          throw new Error("Dosen PA tidak ditemukan");
+        }
+
+        const response = await axios.get(
+          `${API_BASE_URL}/api/datajadwaldosenpa/${dosenpaid}`
+        );
+
+        if (response.status !== 200) {
+          throw new Error("Gagal mengambil data");
+        }
+
+        const data = await response.data;
+        setDataJadwalDosenPA(data);
       }
-
-      const dosenpaid = dosenPa.id;
-
-      const response = await axios.get(
-        `${API_BASE_URL}/api/datajadwaldosenpa/${dosenpaid}`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataJadwalDosenPA(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -346,36 +368,32 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
   const getDataJurusan = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const response = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
       const data = await response.data;
-      const sortedDataJurusan = data.sort(
-        (a: any, b: any) => a.order - b.order
-      );
-      setDataJurusan(sortedDataJurusan);
+      setDataJurusan(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
     }
   };
-
   const getDataPeminatanByJurusan = async (selectedJurusan: string) => {
     try {
-      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const dataJurusan = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
-        (data: any) => data.jurusan === selectedJurusan
+        (data: any) => data.nama_program_studi === selectedJurusan
       );
 
       if (!jurusan) {
         throw new Error("Jurusan tidak ditemukan");
       }
 
-      const jurusanid = jurusan.id;
+      const jurusanid = jurusan.id_program_studi;
 
       const response = await axios.get(
         `${API_BASE_URL}/api/datapeminatan/${jurusanid}`
@@ -418,8 +436,16 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         `${API_BASE_URL}/api/pengajuanbimbingan`
       );
 
+      const dataMahasiswa = await axios.get(
+        `${API_BASE_URL}/api/datamahasiswa`
+      );
+
+      const mahasiswa = dataMahasiswa.data.find(
+        (data) => data.nim === dataUser.nim
+      );
+
       const pengajuanBimbingan = dataPengajuanBimbingan.data.filter(
-        (data: any) => data.mahasiswa_id === dataUser.id
+        (data: any) => data.mahasiswa_id === mahasiswa.id
       );
 
       setDataPengajuanBimbingan(pengajuanBimbingan);
@@ -433,8 +459,16 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     try {
       const dataBimbingan = await axios.get(`${API_BASE_URL}/api/bimbingan`);
 
+      const dataMahasiswa = await axios.get(
+        `${API_BASE_URL}/api/datamahasiswa`
+      );
+
+      const mahasiswa = dataMahasiswa.data.find(
+        (data) => (data.nim = dataUser.nim)
+      );
+
       const bimbingan = dataBimbingan.data.filter(
-        (data: any) => data.pengajuan_bimbingan.mahasiswa_id === dataUser.id
+        (data: any) => data.pengajuan_bimbingan.mahasiswa_id === mahasiswa.id
       );
 
       setDataBimbingan(bimbingan);
@@ -450,7 +484,6 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         `${API_BASE_URL}/api/datamahasiswa`,
         updatedData
       );
-      console.log("Mahasiswa updated successfully:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error updating order:", error);
@@ -461,23 +494,20 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const handleEditMahasiswa = async (id: string) => {
     try {
       let mahasiswaValue = {
-        id,
-        nama_lengkap: namaLengkapMahasiswa,
+        nama: namaLengkapMahasiswa,
         email: emailMahasiswa,
         nim: nim,
-        no_whatsapp: noTelpMahasiswa,
+        hp: noTelpMahasiswa,
         jurusan: selectedJurusan,
         peminatan: selectedPeminatan,
-        dosen_pa_id: dataDosenPA.find(
-          (data) => data.dosen.nama_lengkap === selectedDosenPA
-        )?.id,
+        dosen_pa_id:
+          dataDosenPA.find((data) => data.nama === selectedDosenPA)?.id || null,
         profile_image: !imagePreview ? null : imagePreview,
       };
 
       const result = await patchMahasiswa(mahasiswaValue);
       getDataMahasiswaById();
       setImagePreview(null);
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
@@ -487,8 +517,8 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     if (dataJurusan.length > 0) {
       const formattedOptions = dataJurusan.map((data) => {
         return {
-          value: data.jurusan,
-          label: data.jurusan,
+          value: data.nama_program_studi,
+          label: data.nama_program_studi,
         };
       });
 
@@ -511,8 +541,8 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     if (dataDosenPA.length > 0) {
       const formattedOptions = dataDosenPA.map((data) => {
         return {
-          value: data.dosen.nama_lengkap,
-          label: data.dosen.nama_lengkap,
+          value: data.nama,
+          label: data.nama,
         };
       });
 
@@ -523,7 +553,9 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   useEffect(() => {
     if (selectedJurusan !== "") {
       if (selectedJurusan === userProfile.jurusan) {
-        setSelectedPeminatan(userProfile.peminatan);
+        setSelectedPeminatan(
+          userProfile.peminatan === null ? "" : userProfile.peminatan
+        );
       }
       if (selectedJurusan !== userProfile.jurusan) {
         setSelectedPeminatan("");
@@ -533,7 +565,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   }, [selectedJurusan]);
 
   useEffect(() => {
-    if (dataUser && dataUser.id) {
+    if (dataUser && dataUser.nim) {
       getDataMahasiswaById();
       getDataPengajuanBimbinganByIDMahasiswa();
       getDataBimbinganByIDMahasiswa();
@@ -541,18 +573,18 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   }, [dataUser]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap !== "") {
+    if (userProfile && userProfile.nama !== "") {
       getDataJadwalDosenPaByDosenPa();
     }
   }, [userProfile]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap !== "") {
+    if (userProfile && userProfile.nama !== "") {
       const isDataChanged =
-        userProfile.nama_lengkap !== namaLengkapMahasiswa ||
+        userProfile.nama !== namaLengkapMahasiswa ||
         userProfile.email !== emailMahasiswa ||
         userProfile.nim !== nim ||
-        userProfile.no_whatsapp !== noTelpMahasiswa ||
+        userProfile.hp !== noTelpMahasiswa ||
         userProfile.dosen_pa !== selectedDosenPA ||
         userProfile.jurusan !== selectedJurusan ||
         userProfile.peminatan !== selectedPeminatan;
@@ -627,7 +659,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
             <form className="flex flex-col mt-8 gap-4">
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={
                   namaLengkapMahasiswa === ""
@@ -641,7 +673,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={emailMahasiswa === "" ? "Email" : emailMahasiswa}
                 onChange={(e) => {
@@ -651,7 +683,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={nim === "" ? "NIM" : nim}
                 onChange={(e) => {
@@ -661,7 +693,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
-                disabled={false}
+                disabled
                 type="text"
                 placeholder={
                   noTelpMahasiswa === "" ? "No Telp" : noTelpMahasiswa
@@ -674,6 +706,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
               />
               <SelectField
                 options={optionsJurusan}
+                disabled
                 onChange={(e) => setSelectedJurusan(e.target.value)}
                 value={selectedJurusan}
                 placeholder="Pilih Jurusan"
@@ -696,7 +729,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  handleEditMahasiswa(dataUser.id);
+                  handleEditMahasiswa(dataUser.nim);
                 }}
                 className={`text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg  ${
                   !isDataChanged && !imagePreview ? "hidden" : ""
@@ -917,17 +950,17 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                                     <div className="mt-4 flex justify-end space-x-2">
                                       <button
                                         type="button"
-                                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                        onClick={(e) => handleSubmit(e)}
-                                      >
-                                        Submit
-                                      </button>
-                                      <button
-                                        type="button"
                                         className="inline-flex justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
                                         onClick={closeModal}
                                       >
                                         Close
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                        onClick={(e) => handleSubmit(e)}
+                                      >
+                                        Submit
                                       </button>
                                     </div>
                                   </DialogPanel>
@@ -939,10 +972,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                       </div>
                     ) : (
                       <div className="flex justify-end">
-                        <div
-                          onClick={openModal}
-                          className="bg-orange-400 text-[14px] justify-end rounded-lg p-2 text-white"
-                        >
+                        <div className="bg-orange-400 text-[14px] justify-end rounded-lg p-2 text-white">
                           Sudah Absen
                         </div>
                       </div>

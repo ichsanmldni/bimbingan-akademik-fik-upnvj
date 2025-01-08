@@ -135,7 +135,6 @@ export default function Home() {
     no_whatsapp: string;
   } | null>(null);
   const [selectedBimbingan, setSelectedBimbingan] = useState<Bimbingan[]>([]);
-  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]); // Adjust type as needed
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
@@ -464,7 +463,6 @@ export default function Home() {
     ]);
     closeAddPrestasiMahasiswaMengikutiPorseniModal();
   };
-  console.log(prestasiMahasiswaMengikutiPorseniFormValue);
   const handleAddDataStatusMahasiswa = async (e: any) => {
     e.preventDefault();
     setDataStatusMahasiswaFormValue((prevValues) => [
@@ -691,21 +689,6 @@ export default function Home() {
     });
   };
 
-  const getDataDosen = async () => {
-    try {
-      const response = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosen`
-      );
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-      setDataDosen(response.data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
   const getDataMahasiswa = async () => {
     try {
       const response = await axios.get<any[]>(
@@ -754,15 +737,24 @@ export default function Home() {
 
   const getDataTahunAJaran = async () => {
     try {
-      const response = await axios.get<any>(
+      const response = await axios.post<any>(
         `${API_BASE_URL}/api/datatahunajaran`
       );
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
-      const data = await response.data;
-      const sortedDataTahunAjaran = data.sort((a, b) => a.order - b.order);
-      setDataTahunAjaran(sortedDataTahunAjaran);
+      const data = await response.data.data;
+
+      // Memfilter dan memformat data tahun ajaran
+      const tahunAjaran = data.map((item) => {
+        return `${item.tahun_periode}/${item.tahun_periode + 1}`;
+      });
+
+      // Menghilangkan duplikat dengan menggunakan Set
+      const uniqueTahunAjaran = [...new Set(tahunAjaran)];
+
+      // Menyimpan data tahun ajaran yang sudah difilter
+      setDataTahunAjaran(uniqueTahunAjaran);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -822,10 +814,8 @@ export default function Home() {
               ][0],
         nama_kaprodi: selectedKaprodi,
         status: "Menunggu Feedback Kaprodi",
-        dosen_pa_id: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
-          ?.id,
-        nama_dosen_pa: dataDosenPA.find((data) => data.dosen.id === dataUser.id)
-          ?.dosen.nama_lengkap,
+        dosen_pa_id: dataDosenPA.find((data) => data.nip === dataUser.nip)?.id,
+        nama_dosen_pa: dataUser.nama,
         jenis_bimbingan: [
           ...new Set(
             selectedBimbingan.map(
@@ -869,10 +859,8 @@ export default function Home() {
             : null,
         tanda_tangan_dosen_pa: isSignatureValid ? signatureData : null,
       };
-      console.log(laporanData);
 
       const result = await addLaporanBimbingan(laporanData);
-      console.log(result);
       setJadwalFilter("");
       setJurusanFilter("");
       setJenisBimbinganFilter("");
@@ -905,7 +893,7 @@ export default function Home() {
       .toDataURL("image/png");
 
     const laporanData = {
-      nama_dosen_pa: userProfile?.nama_lengkap,
+      nama_dosen_pa: userProfile?.nama,
       tahun_ajaran: selectedTahunAjaran,
       semester: selectedSemester,
       kaprodi: selectedKaprodi,
@@ -934,8 +922,6 @@ export default function Home() {
       dokumentasi: imagePreviews,
       tanda_tangan_dosen_pa: signatureData,
     };
-
-    console.log(laporanData);
 
     const doc = new jsPDF({
       orientation: "portrait", // or "landscape"
@@ -1321,12 +1307,12 @@ export default function Home() {
     URL.revokeObjectURL(pdfUrl); // Clean up the Blob URL
   };
 
-  const getDataDosenById = async () => {
+  const getDataDosenPAById = async () => {
     try {
-      const dataDosen = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosen`
+      const dataDosenPA = await axios.get<Dosen[]>(
+        `${API_BASE_URL}/api/datadosenpa`
       );
-      const dosen = dataDosen.data.find((data) => data.id === dataUser.id);
+      const dosen = dataDosenPA.data.find((data) => data.nip === dataUser.nip);
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -1334,10 +1320,10 @@ export default function Home() {
       }
 
       setUserProfile({
-        nama_lengkap: dosen.nama_lengkap,
+        nama: dosen.nama,
         email: dosen.email,
         nip: dosen.nip,
-        no_whatsapp: dosen.no_whatsapp,
+        hp: dosen.hp,
       });
     } catch (error) {
       console.error("Error:", error);
@@ -1351,7 +1337,7 @@ export default function Home() {
         `${API_BASE_URL}/api/datadosenpa`
       );
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userProfile?.nama_lengkap
+        (data) => data.nim === dataUser.nim
       );
 
       if (!dosenPa) {
@@ -1424,14 +1410,9 @@ export default function Home() {
   }, [jenisBimbinganFilter, jadwalFilter, jurusanFilter]);
 
   useEffect(() => {
-    selectedBimbingan.map((data) => console.log(data.pengajuan_bimbingan));
-  }, [selectedBimbingan]);
-
-  useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
     getDataTahunAJaran();
-    getDataDosen();
     getDataMahasiswa();
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
@@ -1451,8 +1432,8 @@ export default function Home() {
     if (dataKaprodi.length > 0) {
       const formattedOptions = dataKaprodi.map((data) => {
         return {
-          value: data.dosen.nama_lengkap,
-          label: `${data.dosen.nama_lengkap} (Kaprodi ${data.kaprodi_jurusan.jurusan})`,
+          value: data.nama,
+          label: `${data.nama} (Kaprodi ${data.kaprodi_jurusan})`,
         };
       });
 
@@ -1464,8 +1445,8 @@ export default function Home() {
     if (dataTahunAjaran.length > 0) {
       const formattedOptions = dataTahunAjaran.map((data) => {
         return {
-          value: data.tahun_ajaran,
-          label: `${data.tahun_ajaran}`,
+          value: data,
+          label: `${data}`,
         };
       });
 
@@ -1474,16 +1455,14 @@ export default function Home() {
   }, [dataTahunAjaran]);
 
   useEffect(() => {
-    if (dataUser && dataUser.id) {
-      getDataDosenById();
+    if (dataUser && dataUser.nip) {
+      getDataDosenPAById();
     }
   }, [dataUser]);
 
   useEffect(() => {
     if (dataKaprodi.length > 0) {
-      const data = dataKaprodi.find(
-        (data) => data.dosen.nama_lengkap === selectedKaprodi
-      );
+      const data = dataKaprodi.find((data) => data.nama === selectedKaprodi);
       setDataSelectedKaprodi(data || null);
     }
   }, [selectedKaprodi]);
@@ -1495,23 +1474,15 @@ export default function Home() {
   useEffect(() => {
     if (dataUser.role === "Mahasiswa") {
       setRoleUser("Mahasiswa");
-    } else if (dataUser.role === "Dosen") {
-      const isDosenPA = dataDosenPA.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      const isKaprodi = dataKaprodi.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      if (isDosenPA) {
-        setRoleUser("Dosen PA");
-      } else if (isKaprodi) {
-        setRoleUser("Kaprodi");
-      }
+    } else if (dataUser.role === "Dosen PA") {
+      setRoleUser("Dosen PA");
+    } else if (dataUser.role === "Kaprodi") {
+      setRoleUser("Kaprodi");
     }
   }, [dataUser, dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap) {
+    if (userProfile && userProfile.nama) {
       getDataBimbinganByDosenPaId();
     }
   }, [userProfile]);
@@ -1522,11 +1493,11 @@ export default function Home() {
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.id === dataUser.id)
+            ? dataMahasiswa.find((data) => data.nim === dataUser.nim)
             : roleUser === "Dosen PA"
-              ? dataDosen.find((data) => data.id === dataUser.id)
+              ? dataDosenPA.find((data) => data.nip === dataUser.nip)
               : roleUser === "Kaprodi"
-                ? dataDosen.find((data) => data.id === dataUser.id)
+                ? dataKaprodi.find((data) => data.nip === dataUser.nip)
                 : undefined
         }
       />

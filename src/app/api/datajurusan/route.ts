@@ -1,5 +1,7 @@
 // /app/api/datadosen/route.ts
+import axios from 'axios';
 import prisma from '../../../lib/prisma';
+import FormData from 'form-data';
 
 interface JurusanRequestBody {
   id?: number; // Optional for POST, required for PATCH and DELETE
@@ -7,130 +9,34 @@ interface JurusanRequestBody {
   order?: number; // Optional for POST
 }
 
-export async function GET(req: Request): Promise<Response> {
-  try {
-    // Fetching data from the database
-    const jurusan = await prisma.masterjurusan.findMany();
-
-    // Returning data as JSON
-    return new Response(JSON.stringify(jurusan), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    // Handling errors
-    return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
-
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: JurusanRequestBody = await req.json();
-    const { jurusan, order } = body;
+    const username = process.env.BASIC_AUTH_USERNAME;
+    const password = process.env.BASIC_AUTH_PASSWORD;
+    const basicAuth = Buffer.from(`${username}:${password}`).toString('base64');
 
-    // Validate required fields
-    if (!jurusan || order === undefined) {
-      return new Response(
-        JSON.stringify({ message: 'All fields are required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    // API Key from environment variables  
+    const apiKeyName = process.env.API_KEY_NAME;
+    const apiKeySecret = process.env.API_KEY_SECRET;
 
-    const newJurusan = await prisma.masterjurusan.create({
-      data: {
-        jurusan,
-        order,
-      },
+    const formData = new FormData
+
+    // Fetch data from external API  
+    const response = await axios.post('https://api.upnvj.ac.id/data/ref_program_studi', formData, {
+      headers: {
+        'Authorization': `Basic ${basicAuth}`,
+        'API_KEY_NAME': apiKeyName,
+        'API_KEY_SECRET': apiKeySecret,
+      }
     });
 
-    return new Response(JSON.stringify(newJurusan), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
+    const dataJurusan = response.data;
+    const dataJurusanFIK = dataJurusan.data.filter(data => data.nama_fakultas === "Fakultas Ilmu Komputer")
 
-export async function PATCH(req: Request): Promise<Response> {
-  try {
-    const body: JurusanRequestBody = await req.json();
-    const { id, jurusan } = body;
-
-    // Validate required fields
-    if (!id || !jurusan) {
-      return new Response(
-        JSON.stringify({ message: 'Invalid data' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const existingRecord = await prisma.masterjurusan.findUnique({
-      where: { id },
-    });
-
-    if (!existingRecord) {
-      return new Response(
-        JSON.stringify({ message: 'Record not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const updatedJurusan = await prisma.masterjurusan.update({
-      where: { id },
-      data: { jurusan },
-    });
-
-    return new Response(JSON.stringify(updatedJurusan), {
+    return new Response(JSON.stringify(dataJurusanFIK), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
-
-export async function DELETE(req: Request): Promise<Response> {
-  try {
-    const body: JurusanRequestBody = await req.json();
-    const { id } = body;
-
-    // Validate required fields
-    if (!id) {
-      return new Response(
-        JSON.stringify({ message: 'Invalid ID' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const existingRecord = await prisma.masterjurusan.findUnique({
-      where: { id },
-    });
-
-    if (!existingRecord) {
-      return new Response(
-        JSON.stringify({ message: 'Record not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    await prisma.masterjurusan.delete({
-      where: { id },
-    });
-
-    return new Response(
-      JSON.stringify({ message: 'Record deleted successfully' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     return new Response(
       JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),

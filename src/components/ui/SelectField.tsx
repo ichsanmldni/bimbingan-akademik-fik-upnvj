@@ -19,7 +19,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 }) => (
   <div className="relative">
     <select
-      className={`${className} ${value === "" ? "text-gray-400" : "text-black"}`}
+      className={`${className} ${value === "" ? "text-gray-400" : "text-black"} ${disabled ? "bg-gray-100" : ""}`}
       value={value}
       onChange={onChange}
       disabled={disabled}

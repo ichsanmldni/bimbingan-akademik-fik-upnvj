@@ -107,7 +107,6 @@ export default function Home() {
     null
   );
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
-  const [dataDosen, setDataDosen] = useState<any[]>([]); // Adjust type as needed
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -118,7 +117,7 @@ export default function Home() {
       );
 
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.dosen.nama_lengkap === userDosenPa?.dosen.nama_lengkap
+        (data) => data.nama === userDosenPa?.nama
       );
 
       if (!dosenPa) {
@@ -171,8 +170,10 @@ export default function Home() {
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
+      console.log(dataMahasiswa, dataUser);
+
       const mahasiswa = dataMahasiswa.data.find(
-        (data) => data.id === dataUser.id
+        (data) => data.nim === dataUser.nim
       );
 
       if (!mahasiswa) {
@@ -185,6 +186,8 @@ export default function Home() {
       throw error;
     }
   };
+
+  console.log(dataMahasiswaUser);
 
   const getDataJenisBimbingan = async () => {
     try {
@@ -279,7 +282,7 @@ export default function Home() {
             ? null
             : selectedTopikBimbinganPribadi,
         sistem_bimbingan: selectedSistemBimbingan,
-        mahasiswa_id: dataUser.id,
+        mahasiswa_id: dataUser.nim,
         status: "Menunggu Konfirmasi",
         dosen_pa_id: userDosenPa?.id,
       };
@@ -299,10 +302,10 @@ export default function Home() {
 
       setTimeout(() => {
         if (dataMahasiswaUser) {
-          setNamaLengkap(dataMahasiswaUser.nama_lengkap);
+          setNamaLengkap(dataMahasiswaUser.nama);
           setNim(dataMahasiswaUser.nim);
           setEmail(dataMahasiswaUser.email);
-          setNoWa(dataMahasiswaUser.no_whatsapp);
+          setNoWa(dataMahasiswaUser.hp);
           setJurusan(dataMahasiswaUser.jurusan);
         }
       }, 1000);
@@ -347,22 +350,6 @@ export default function Home() {
     }
   };
 
-  const getDataDosen = async () => {
-    try {
-      const response = await axios.get<any[]>(`${API_BASE_URL}/api/datadosen`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataDosen(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
   const getDataMahasiswa = async () => {
     try {
       const response = await axios.get<Mahasiswa[]>(
@@ -388,40 +375,32 @@ export default function Home() {
   useEffect(() => {
     if (dataUser.role === "Mahasiswa") {
       setRoleUser("Mahasiswa");
-    } else if (dataUser.role === "Dosen") {
-      const isDosenPA = dataDosenPA.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      const isKaprodi = dataKaprodi.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      if (isDosenPA) {
-        setRoleUser("Dosen PA");
-      } else if (isKaprodi) {
-        setRoleUser("Kaprodi");
-      }
+    } else if (dataUser.role === "Dosen PA") {
+      setRoleUser("Dosen PA");
+    } else if (dataUser.role === "Kaprodi") {
+      setRoleUser("Kaprodi");
     }
   }, [dataUser, dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
     if (dataMahasiswaUser && dataMahasiswaUser.id) {
-      setNamaLengkap(dataMahasiswaUser.nama_lengkap);
+      setNamaLengkap(dataMahasiswaUser.nama);
       setNim(dataMahasiswaUser.nim);
       setEmail(dataMahasiswaUser.email);
-      setNoWa(dataMahasiswaUser.no_whatsapp);
+      setNoWa(dataMahasiswaUser.hp);
       setJurusan(dataMahasiswaUser.jurusan);
       getDataDosenPaByMahasiswa();
     }
   }, [dataMahasiswaUser]);
 
   useEffect(() => {
-    if (dataUser && dataUser.id) {
+    if (dataUser && dataUser.nim) {
       getDataMahasiswaByUser();
     }
   }, [dataUser]);
 
   useEffect(() => {
-    if (userDosenPa && userDosenPa.dosen && userDosenPa.dosen.nama_lengkap) {
+    if (userDosenPa && userDosenPa.nama) {
       getDataJadwalDosenPaByDosenPa();
     }
   }, [userDosenPa]);
@@ -471,7 +450,6 @@ export default function Home() {
     getDataSistemBimbingan();
     getDataDosenPA();
     getDataKaprodi();
-    getDataDosen();
     getDataMahasiswa();
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
@@ -490,18 +468,18 @@ export default function Home() {
   const getDayName = (date: Date) => {
     return format(date, "EEEE", { locale: id });
   };
-
+  console.log(dataUser);
   return (
     <div>
       <NavbarUser
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.id === dataUser.id)
+            ? dataMahasiswa.find((data) => data.nim === dataUser.nim)
             : roleUser === "Dosen PA"
-              ? dataDosen.find((data) => data.id === dataUser.id)
+              ? dataDosenPA.find((data) => data.nip === dataUser.nip)
               : roleUser === "Kaprodi"
-                ? dataDosen.find((data) => data.id === dataUser.id)
+                ? dataKaprodi.find((data) => data.nip === dataUser.nip)
                 : undefined
         }
       />

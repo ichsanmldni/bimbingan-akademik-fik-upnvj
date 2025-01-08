@@ -90,10 +90,10 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   dataUser,
 }) => {
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    nama_lengkap: "",
+    nama: "",
     email: "",
     nip: "",
-    no_whatsapp: "",
+    hp: "",
   });
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<
     DataJadwalDosenPA[]
@@ -161,8 +161,14 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     try {
       const dataBimbingan = await axios.get(`${API_BASE_URL}/api/bimbingan`);
 
+      const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
+
+      const dosenPA = dataDosenPA.data.find(
+        (data) => data.nip === dataUser.nip
+      );
+
       const bimbinganUser = dataBimbingan.data.filter(
-        (data: any) => data.pengajuan_bimbingan.dosen_pa_id === dataUser.id
+        (data: any) => data.pengajuan_bimbingan.dosen_pa_id === dosenPA.id
       );
 
       const bimbingan = bimbinganUser.filter(
@@ -223,11 +229,11 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
-  const getDataDosenPAByDosenId = async () => {
+  const getDataDosenPAByDosenNip = async () => {
     try {
       const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosen = dataDosenPA.data.find(
-        (data: DataDosenPA) => data.dosen_id === dataUser.id
+        (data: DataDosenPA) => data.nip === dataUser.nip
       );
 
       if (!dosen) {
@@ -244,9 +250,9 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
 
   const getDataDosenById = async () => {
     try {
-      const dataDosen = await axios.get(`${API_BASE_URL}/api/datadosen`);
+      const dataDosen = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosen = dataDosen.data.find(
-        (data: DataDosenPA) => data.id === dataUser.id
+        (data: DataDosenPA) => data.nip === dataUser.nip
       );
 
       if (!dosen) {
@@ -255,17 +261,17 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       }
 
       setUserProfile({
-        nama_lengkap: dosen.nama_lengkap,
+        nama: dosen.nama,
         email: dosen.email,
         nip: dosen.nip,
-        no_whatsapp: dosen.no_whatsapp,
+        hp: dosen.hp,
       });
 
       setDataDosen(dosen);
-      setNamaLengkapDosen(dosen.nama_lengkap);
+      setNamaLengkapDosen(dosen.nama);
       setEmailDosen(dosen.email);
       setNip(dosen.nip);
-      setNoTelpDosen(dosen.no_whatsapp);
+      setNoTelpDosen(dosen.hp);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -276,7 +282,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     try {
       const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosenPa = dataDosenPa.data.find(
-        (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data: any) => data.nama === userProfile.nama
       );
 
       if (!dosenPa) {
@@ -304,7 +310,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     try {
       const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosenPa = dataDosenPa.data.find(
-        (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data: any) => data.nama === userProfile.nama
       );
 
       if (!dosenPa) {
@@ -330,7 +336,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     try {
       const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosenPa = dataDosenPa.data.find(
-        (data: any) => data.dosen.nama_lengkap === userProfile.nama_lengkap
+        (data: any) => data.nama === userProfile.nama
       );
 
       if (!dosenPa) {
@@ -355,7 +361,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const patchDosenPA = async (updatedData: DataDosenPA) => {
     try {
       const response = await axios.patch(
-        `${API_BASE_URL}/api/datadosen`,
+        `${API_BASE_URL}/api/datadosenpa`,
         updatedData
       );
       console.log("Dosen PA updated successfully:", response.data);
@@ -405,14 +411,13 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
-  const handleEditDosenPA = async (id: number) => {
+  const handleEditDosenPA = async () => {
     try {
       let dosenPAValue: any = {
-        id,
-        nama_lengkap: namaLengkapDosen,
+        nama: namaLengkapDosen,
         email: emailDosen,
         nip,
-        no_whatsapp: noTelpDosen,
+        hp: noTelpDosen,
         profile_image: imagePreview ? imagePreview : undefined,
       };
 
@@ -509,10 +514,10 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   };
 
   useEffect(() => {
-    if (dataUser && dataUser.id) {
+    if (dataUser && dataUser.nip) {
       getDataDosenById();
       getDataPengesahanBimbinganByIDDosenPA();
-      getDataDosenPAByDosenId();
+      getDataDosenPAByDosenNip();
     }
   }, [dataUser]);
 
@@ -526,21 +531,21 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     if (
       userProfile &&
       Object.keys(userProfile).length > 0 &&
-      userProfile.nama_lengkap
+      userProfile.nama
     ) {
       getDataJadwalDosenPaByDosenPa();
     }
   }, [userProfile]);
 
   useEffect(() => {
-    if (userProfile && userProfile.nama_lengkap !== "") {
+    if (userProfile && userProfile.nama !== "") {
       getDataPengajuanBimbinganByDosenPaId();
       getDataLaporanBimbinganByDosenPaId();
       const isDataChanged =
-        userProfile.nama_lengkap !== namaLengkapDosen ||
+        userProfile.nama !== namaLengkapDosen ||
         userProfile.email !== emailDosen ||
         userProfile.nip !== nip ||
-        userProfile.no_whatsapp !== noTelpDosen;
+        userProfile.hp !== noTelpDosen;
       setIsDataChanged(isDataChanged);
     }
   }, [userProfile, namaLengkapDosen, emailDosen, nip, noTelpDosen]);
@@ -636,7 +641,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  handleEditDosenPA(dataUser.id);
+                  handleEditDosenPA();
                 }}
                 className={`text-white bg-orange-500 hover:bg-orange-600 text-[14px] py-2 font-medium rounded-lg ${
                   !isDataChanged && !imagePreview ? "hidden" : ""

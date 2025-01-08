@@ -1,136 +1,41 @@
 // /app/api/datadosen/route.ts
+import axios from 'axios';
 import prisma from '../../../lib/prisma';
+import FormData from 'form-data';
 
-interface TahunAjaranRequestBody {
+interface JurusanRequestBody {
   id?: number; // Optional for POST, required for PATCH and DELETE
-  tahun_ajaran?: string; // Optional for PATCH
+  jurusan?: string; // Optional for PATCH
   order?: number; // Optional for POST
-}
-
-export async function GET(req: Request): Promise<Response> {
-  try {
-    // Fetching data from the database
-    const tahunAjaran = await prisma.mastertahunajaran.findMany();
-
-    // Returning data as JSON
-    return new Response(JSON.stringify(tahunAjaran), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    // Handling errors
-    return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
 }
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: TahunAjaranRequestBody = await req.json();
-    const { tahun_ajaran, order } = body;
+    const username = process.env.BASIC_AUTH_USERNAME;
+    const password = process.env.BASIC_AUTH_PASSWORD;
+    const basicAuth = Buffer.from(`${username}:${password}`).toString('base64');
 
-    // Validate required fields
-    if (!tahun_ajaran || order === undefined) {
-      return new Response(
-        JSON.stringify({ message: 'All fields are required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    // API Key from environment variables  
+    const apiKeyName = process.env.API_KEY_NAME;
+    const apiKeySecret = process.env.API_KEY_SECRET;
 
-    const newTahunAjaran = await prisma.mastertahunajaran.create({
-      data: {
-        tahun_ajaran,
-        order,
-      },
+    const formData = new FormData
+
+    // Fetch data from external API  
+    const response = await axios.post('https://api.upnvj.ac.id/data/ref_periode', formData, {
+      headers: {
+        'Authorization': `Basic ${basicAuth}`,
+        'API_KEY_NAME': apiKeyName,
+        'API_KEY_SECRET': apiKeySecret,
+      }
     });
 
-    return new Response(JSON.stringify(newTahunAjaran), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
+    const dataTahunAjaran = response.data;
 
-export async function PATCH(req: Request): Promise<Response> {
-  try {
-    const body: TahunAjaranRequestBody = await req.json();
-    const { id, tahun_ajaran } = body;
-
-    // Validate required fields
-    if (!id || !tahun_ajaran) {
-      return new Response(
-        JSON.stringify({ message: 'Invalid data' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const existingRecord = await prisma.mastertahunajaran.findUnique({
-      where: { id },
-    });
-
-    if (!existingRecord) {
-      return new Response(
-        JSON.stringify({ message: 'Record not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const updatedTahunAjaran = await prisma.mastertahunajaran.update({
-      where: { id },
-      data: { tahun_ajaran },
-    });
-
-    return new Response(JSON.stringify(updatedTahunAjaran), {
+    return new Response(JSON.stringify(dataTahunAjaran), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
-
-export async function DELETE(req: Request): Promise<Response> {
-  try {
-    const body: TahunAjaranRequestBody = await req.json();
-    const { id } = body;
-
-    // Validate required fields
-    if (!id) {
-      return new Response(
-        JSON.stringify({ message: 'Invalid ID' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const existingRecord = await prisma.mastertahunajaran.findUnique({
-      where: { id },
-    });
-
-    if (!existingRecord) {
-      return new Response(
-        JSON.stringify({ message: 'Record not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    await prisma.mastertahunajaran.delete({
-      where: { id },
-    });
-
-    return new Response(
-      JSON.stringify({ message: 'Record deleted successfully' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     return new Response(
       JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),

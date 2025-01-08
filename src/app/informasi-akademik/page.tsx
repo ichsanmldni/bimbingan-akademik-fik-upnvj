@@ -64,7 +64,6 @@ export default function Home() {
   const [dataSubBab, setDataSubBab] = useState<SubBab[]>([]);
   const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
   const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
-  const [dataDosen, setDataDosen] = useState<Dosen[]>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
   const [selectedSubBabData, setSelectedSubBabData] =
     useState<SubBabData | null>(null);
@@ -150,24 +149,6 @@ export default function Home() {
     }
   };
 
-  const getDataDosen = async () => {
-    try {
-      const response = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosen`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = response.data;
-      setDataDosen(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
   const getDataDosenPA = async () => {
     try {
       const response = await axios.get<DosenPA[]>(
@@ -223,7 +204,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    getDataDosen();
     getDataDosenPA();
     getDataKaprodi();
     getDataMahasiswa();
@@ -245,18 +225,10 @@ export default function Home() {
   useEffect(() => {
     if (dataUser?.role === "Mahasiswa") {
       setRoleUser("Mahasiswa");
-    } else if (dataUser?.role === "Dosen") {
-      const isDosenPA = dataDosenPA.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      const isKaprodi = dataKaprodi.find(
-        (data) => data.dosen_id === dataUser.id
-      );
-      if (isDosenPA) {
-        setRoleUser("Dosen PA");
-      } else if (isKaprodi) {
-        setRoleUser("Kaprodi");
-      }
+    } else if (dataUser?.role === "Dosen PA") {
+      setRoleUser("Dosen PA");
+    } else if (dataUser?.role === "Kaprodi") {
+      setRoleUser("Kaprodi");
     }
   }, [dataUser, dataDosenPA, dataKaprodi]);
 
@@ -268,9 +240,9 @@ export default function Home() {
           roleUser === "Mahasiswa"
             ? dataMahasiswa.find((data) => data.id === dataUser?.id) || {}
             : roleUser === "Dosen PA"
-              ? dataDosen.find((data) => data.id === dataUser?.id) || {}
+              ? dataDosenPA.find((data) => data.id === dataUser?.id) || {}
               : roleUser === "Kaprodi"
-                ? dataDosen.find((data) => data.id === dataUser?.id) || {}
+                ? dataKaprodi.find((data) => data.id === dataUser?.id) || {}
                 : {}
         }
       />

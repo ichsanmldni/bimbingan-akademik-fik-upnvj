@@ -54,6 +54,8 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const body: PengajuanBimbingan = await req.json();
 
+    console.log(body)
+
     const { nama_lengkap, nim, email, no_whatsapp, jurusan, jadwal_bimbingan, jenis_bimbingan, topik_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id } = body;
 
     if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id) {
@@ -62,6 +64,10 @@ export async function POST(req: Request): Promise<Response> {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    const mahasiswa = await prisma.mahasiswa.findUnique({
+      where: { nim },
+    });
 
     const pengajuanBimbingan = await prisma.pengajuanbimbingan.create({
       data: {
@@ -76,12 +82,14 @@ export async function POST(req: Request): Promise<Response> {
         sistem_bimbingan,
         status,
         dosen_pa_id,
-        mahasiswa_id,
+        mahasiswa_id: mahasiswa.id,
       },
     });
 
+
+
     const notifikasiMahasiswa: NotifikasiMahasiswa = {
-      mahasiswa_id,
+      mahasiswa_id: mahasiswa.id,
       isi: "Pengajuan bimbinganmu berhasil!",
       read: false,
       waktu: new Date(),
@@ -114,6 +122,7 @@ export async function POST(req: Request): Promise<Response> {
 export async function PATCH(req: Request): Promise<Response> {
   try {
     const body = await req.json();
+    console.log(body)
 
     const { id, status, keterangan, mahasiswa_id, dosen_pa_id } = body;
 
