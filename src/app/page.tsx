@@ -111,7 +111,6 @@ export default function Home() {
       throw error;
     }
   };
-  console.log(dataUser);
 
   useEffect(() => {
     const cookies = document.cookie.split("; ");

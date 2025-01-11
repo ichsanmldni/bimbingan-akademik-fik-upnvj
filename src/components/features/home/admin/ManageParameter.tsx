@@ -30,9 +30,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const [isLoading, setIsLoading] = useState<any>(false);
   const [modalType, setModalType] = useState<any>("");
   const [selectedParameter, setSelectedParameter] = useState<any>("");
-  const [dataTahunAjaran, setDataTahunAjaran] = useState<any>([]);
-  const [afterOrderEditDataTahunAjaran, setAfterOrderEditDataTahunAjaran] =
-    useState<any>([]);
   const [dataJurusan, setDataJurusan] = useState<any>([]);
   const [afterOrderEditDataJurusan, setAfterOrderEditDataJurusan] =
     useState<any>([]);
@@ -57,21 +54,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   ] = useState<any>([]);
   const [selectedJurusan, setSelectedJurusan] = useState<any>("");
   const [optionsJurusan, setOptionsJurusan] = useState<any>([]);
-  const [valueTahunAjaranAddModal, setValueTahunAjaranAddModal] =
-    useState<any>("");
-  const [valueTahunAjaranEditModal, setValueTahunAjaranEditModal] =
-    useState<any>("");
-  const [selectedTahunAjaranEditModal, setSelectedTahunAjaranEditModal] =
-    useState<any>({});
-  const [selectedTahunAjaranDeleteModal, setSelectedTahunAjaranDeleteModal] =
-    useState<any>({});
   const [valueJurusanAddModal, setValueJurusanAddModal] = useState<any>("");
   const [valueJurusanEditModal, setValueJurusanEditModal] = useState<any>("");
-  const [selectedJurusanEditModal, setSelectedJurusanEditModal] = useState<any>(
-    {}
-  );
-  const [selectedJurusanDeleteModal, setSelectedJurusanDeleteModal] =
-    useState<any>({});
   const [valuePeminatanAddModal, setValuePeminatanAddModal] = useState<any>("");
   const [valuePeminatanEditModal, setValuePeminatanEditModal] =
     useState<any>("");
@@ -118,8 +102,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     setSelectedSistemBimbinganDeleteModal,
   ] = useState<any>({});
 
-  console.log(afterOrderEditDataTopikBimbinganPribadi);
-
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const openModal = (type: any, data = null) => {
@@ -129,10 +111,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setValueTahunAjaranAddModal("");
-    setValueTahunAjaranEditModal("");
-    setValueJurusanAddModal("");
-    setValueJurusanEditModal("");
     setValuePeminatanAddModal("");
     setValuePeminatanEditModal("");
     setValueJenisBimbinganAddModal("");
@@ -141,90 +119,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     setValueTopikBimbinganPribadiEditModal("");
     setValueSistemBimbinganAddModal("");
     setValueSistemBimbinganEditModal("");
-  };
-
-  const handleDragEndJurusan = (event: any) => {
-    const { active, over } = event;
-
-    if (!over) {
-      setAfterOrderEditDataJurusan([...dataJurusan]);
-      return;
-    }
-
-    if (!over) {
-      setAfterOrderEditDataJurusan([...dataJurusan]);
-      return;
-    }
-
-    if (over !== null) {
-      const oldIndex = afterOrderEditDataJurusan.findIndex(
-        (item: any) => item.id === +active.id
-      );
-      const newIndex = afterOrderEditDataJurusan.findIndex(
-        (item: any) => item.id === +over.id
-      );
-      if (oldIndex !== -1 && newIndex !== -1) {
-        // Salin array dataJurusan
-        const newDataJurusan = [...afterOrderEditDataJurusan];
-
-        // Perbarui properti order di dalam dataJurusan
-        const updatedData = newDataJurusan.map((item, index) => {
-          if (index === oldIndex) {
-            return { ...item, order: newIndex + 1 }; // Set order ke posisi baru
-          }
-          if (index === newIndex) {
-            return { ...item, order: oldIndex + 1 }; // Set order ke posisi lama
-          }
-          return item; // Tidak ubah item lainnya
-        });
-        const sortedDataJurusan = updatedData.sort((a, b) => a.order - b.order);
-        setAfterOrderEditDataJurusan(sortedDataJurusan);
-        setIsEditOrder(true);
-      }
-    }
-  };
-
-  const handleDragEndTahunAjaran = (event: any) => {
-    const { active, over } = event;
-
-    if (!over) {
-      setAfterOrderEditDataTahunAjaran([...dataTahunAjaran]);
-      return;
-    }
-
-    if (!over) {
-      setAfterOrderEditDataTahunAjaran([...dataTahunAjaran]);
-      return;
-    }
-
-    if (over !== null) {
-      const oldIndex = afterOrderEditDataTahunAjaran.findIndex(
-        (item: any) => item.id === +active.id
-      );
-      const newIndex = afterOrderEditDataTahunAjaran.findIndex(
-        (item: any) => item.id === +over.id
-      );
-      if (oldIndex !== -1 && newIndex !== -1) {
-        // Salin array dataTahunAjaran
-        const newDataTahunAjaran = [...afterOrderEditDataTahunAjaran];
-
-        // Perbarui properti order di dalam dataTahunAjaran
-        const updatedData = newDataTahunAjaran.map((item, index) => {
-          if (index === oldIndex) {
-            return { ...item, order: newIndex + 1 }; // Set order ke posisi baru
-          }
-          if (index === newIndex) {
-            return { ...item, order: oldIndex + 1 }; // Set order ke posisi lama
-          }
-          return item; // Tidak ubah item lainnya
-        });
-        const sortedDataTahunAjaran = updatedData.sort(
-          (a, b) => a.order - b.order
-        );
-        setAfterOrderEditDataTahunAjaran(sortedDataTahunAjaran);
-        setIsEditOrder(true);
-      }
-    }
   };
 
   const handleDragEndPeminatan = (event: any) => {
@@ -414,48 +308,12 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     );
   };
 
-  const patchJurusanOrder = async (updatedOrder: any) => {
-    try {
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/datajurusan/updateorder`,
-        {
-          ...updatedOrder,
-        }
-      );
-      console.log("Order updated successfully:", response.data);
-      getDataJurusan();
-      setIsEditOrder(false);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
-    }
-  };
-
-  const patchTahunAjaranOrder = async (updatedOrder: any) => {
-    try {
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/datatahunajaran/updateorder`,
-        {
-          ...updatedOrder,
-        }
-      );
-      console.log("Order updated successfully:", response.data);
-      getDataTahunAjaran();
-      setIsEditOrder(false);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
-    }
-  };
-
   const patchPeminatanOrder = async (updatedOrder: any) => {
     try {
-      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const dataJurusan = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
-        (data: any) => data.jurusan === selectedJurusan
+        (data: any) => data.nama_program_studi === selectedJurusan
       );
 
       if (!jurusan) {
@@ -532,24 +390,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   };
 
-  const handleSaveJurusanOrder = async () => {
-    try {
-      const result = await patchJurusanOrder(afterOrderEditDataJurusan);
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
-  };
-
-  const handleSaveTahunAjaranOrder = async () => {
-    try {
-      const result = await patchTahunAjaranOrder(afterOrderEditDataTahunAjaran);
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
-  };
-
   const handleSavePeminatanOrder = async () => {
     try {
       const result = await patchPeminatanOrder(afterOrderEditDataPeminatan);
@@ -589,28 +429,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
-    }
-  };
-
-  const getDataTahunAjaran = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/datatahunajaran`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      const sortedDataTahunAjaran = data.sort(
-        (a: any, b: any) => a.order - b.order
-      );
-      setDataTahunAjaran(sortedDataTahunAjaran);
-      if (data.length === 0) {
-        setAfterOrderEditDataTahunAjaran([]);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
     }
   };
 
@@ -750,183 +568,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       transition: isDragging ? "none" : "transform 200ms",
       cursor: isDragging ? "grabbing" : "grab",
     };
-    console.log(parameter);
 
-    if (parameter === "Jurusan") {
-      return (
-        <tr
-          ref={setNodeRef}
-          className={`text-center ${isDragging ? "cursor-grabbing" : ""}`}
-        >
-          <td className="border-b border-gray-200 px-4 py-2">
-            <div className="flex items-center">
-              <div
-                {...attributes}
-                {...listeners}
-                className={`size-4 mr-2 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-              >
-                <Image src={dragIcon} alt="Drag Icon" />
-              </div>
-              <p className="text-center flex-1">{index + 1}</p>
-            </div>
-          </td>
-          <td className="border-b border-gray-200 px-4 py-2">{data.jurusan}</td>
-          <td className="border-b border-gray-200 px-4 py-4">
-            <div className="flex gap-2 items-center justify-center">
-              <EditButton
-                onClick={() => {
-                  setValueJurusanEditModal(data.jurusan);
-                  setSelectedJurusanEditModal(data);
-                  openModal("Edit");
-                }}
-                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-              />
-              <TrashButton
-                onClick={() => {
-                  setSelectedJurusanDeleteModal(data);
-                  openModal("Delete");
-                }}
-                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-              />
-            </div>
-          </td>
-          <DragOverlay>
-            {isDragging ? (
-              <>
-                <table className="min-w-full text-[16px] border-collapse table-fixed bg-white bg-opacity-10 backdrop-blur-sm rounded-lg">
-                  <thead className="hidden">
-                    <tr className="bg-gray-100 text-center">
-                      <th className="pr-4 py-2 pl-12 rounded-tl-lg rounded-bl-lg">
-                        No
-                      </th>
-                      <th className="px-4 py-2">Jurusan</th>
-                      <th className="px-4 py-2 rounded-tr-lg rounded-br-lg">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="text-center">
-                      <td className="px-4 py-2">
-                        <div className="flex items-center">
-                          <Image
-                            className="size-4 mr-2"
-                            src={dragIcon}
-                            alt="Drag Icon"
-                          />
-                          <p className="text-center flex-1">{index + 1}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 w-1/2">{data.jurusan}</td>
-                      <td className="px-4 py-4 w-1/4">
-                        <div className="flex gap-2 items-center justify-center">
-                          <EditButton
-                            onClick={() => {}}
-                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                          />
-                          <TrashButton
-                            onClick={() => {}}
-                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </>
-            ) : null}
-          </DragOverlay>
-        </tr>
-      );
-    } else if (parameter === "Tahun Ajaran") {
-      return (
-        <tr
-          ref={setNodeRef}
-          className={`text-center ${isDragging ? "cursor-grabbing" : ""}`}
-        >
-          <td className="border-b border-gray-200 px-4 py-2">
-            <div className="flex items-center">
-              <div
-                {...attributes}
-                {...listeners}
-                className={`size-4 mr-2 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-              >
-                <Image src={dragIcon} alt="Drag Icon" />
-              </div>
-              <p className="text-center flex-1">{index + 1}</p>
-            </div>
-          </td>
-          <td className="border-b border-gray-200 px-4 py-2">
-            {data.tahun_ajaran}
-          </td>
-          <td className="border-b border-gray-200 px-4 py-4">
-            <div className="flex gap-2 items-center justify-center">
-              <EditButton
-                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                onClick={() => {
-                  setValueTahunAjaranEditModal(data.tahun_ajaran);
-                  setSelectedTahunAjaranEditModal(data);
-                  openModal("Edit");
-                }}
-              />
-              <TrashButton
-                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                onClick={() => {
-                  setSelectedTahunAjaranDeleteModal(data);
-                  openModal("Delete");
-                }}
-              />
-            </div>
-          </td>
-          <DragOverlay>
-            {isDragging ? (
-              <>
-                <table className="min-w-full text-[16px] border-collapse table-fixed bg-white bg-opacity-10 backdrop-blur-sm rounded-lg">
-                  <thead className="hidden">
-                    <tr className="bg-gray-100 text-center">
-                      <th className="pr-4 py-2 pl-12 rounded-tl-lg rounded-bl-lg">
-                        No
-                      </th>
-                      <th className="px-4 py-2">Tahun Ajaran</th>
-                      <th className="px-4 py-2 rounded-tr-lg rounded-br-lg">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="text-center">
-                      <td className="px-4 py-2 w-1/4">
-                        <div className="flex items-center">
-                          <Image
-                            className="size-4 mr-2"
-                            src={dragIcon}
-                            alt="Drag Icon"
-                          />
-                          <p className="text-center flex-1">{index + 1}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-2 w-1/2">{data.tahun_ajaran}</td>
-                      <td className="px-4 py-4 w-1/4">
-                        <div className="flex gap-2 items-center justify-center">
-                          <EditButton
-                            onClick={() => {}}
-                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                          />
-                          <TrashButton
-                            onClick={() => {}}
-                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </>
-            ) : null}
-          </DragOverlay>
-        </tr>
-      );
-    } else if (parameter === "Peminatan") {
+    if (parameter === "Peminatan") {
       return (
         <tr
           ref={setNodeRef}
@@ -1287,195 +930,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   }
 
-  const addTahunAjaran = async (newData: any) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/datatahunajaran`,
-        newData
-      );
-
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const patchTahunAjaran = async (updatedData: any) => {
-    console.log(updatedData);
-    try {
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/datatahunajaran`,
-        updatedData
-      );
-      console.log("Tahun Ajaran updated successfully:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
-    }
-  };
-
-  const deleteTahunAjaran = async (deletedData: any) => {
-    try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/api/datatahunajaran`,
-        { data: deletedData }
-      );
-      console.log("Tahun Ajaran updated successfully:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
-    }
-  };
-
-  const handleAddTahunAjaran = async (e: any) => {
-    e.preventDefault();
-
-    try {
-      let tahunAjaranValue = {
-        tahun_ajaran: valueTahunAjaranAddModal,
-        order: dataTahunAjaran.length + 1,
-      };
-
-      const result = await addTahunAjaran(tahunAjaranValue);
-
-      console.log(result);
-
-      getDataTahunAjaran();
-      setIsEditOrder(false);
-      closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
-  };
-
-  const handleEditTahunAjaran = async (id: any) => {
-    try {
-      let tahunAjaranValue = {
-        id,
-        tahun_ajaran: valueTahunAjaranEditModal,
-      };
-
-      const result = await patchTahunAjaran(tahunAjaranValue);
-      getDataTahunAjaran();
-      setIsEditOrder(false);
-      closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
-  };
-
-  const handleDeleteTahunAjaran = async (id: any) => {
-    try {
-      let tahunAjaranValue = {
-        id,
-      };
-
-      const result = await deleteTahunAjaran(tahunAjaranValue);
-      getDataTahunAjaran();
-      closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
-  };
-
-  const addJurusan = async (newData: any) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/datajurusan`,
-        newData
-      );
-
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const patchJurusan = async (updatedData: any) => {
-    console.log(updatedData);
-    try {
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/datajurusan`,
-        updatedData
-      );
-      console.log("Jurusan updated successfully:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
-    }
-  };
-
-  const deleteJurusan = async (deletedData: any) => {
-    try {
-      const response = await axios.delete(`${API_BASE_URL}/api/datajurusan`, {
-        data: deletedData,
-      });
-      console.log("Jurusan updated successfully:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
-    }
-  };
-
-  const handleAddJurusan = async (e: any) => {
-    e.preventDefault();
-
-    try {
-      let jurusanValue = {
-        jurusan: valueJurusanAddModal,
-        order: dataJurusan.length + 1,
-      };
-
-      const result = await addJurusan(jurusanValue);
-
-      console.log(result);
-
-      getDataJurusan();
-      setIsEditOrder(false);
-      closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
-  };
-
-  const handleEditJurusan = async (id: any) => {
-    try {
-      let jurusanValue = {
-        id,
-        jurusan: valueJurusanEditModal,
-      };
-
-      const result = await patchJurusan(jurusanValue);
-      getDataJurusan();
-      setIsEditOrder(false);
-      closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
-  };
-
-  const handleDeleteJurusan = async (id: any) => {
-    try {
-      let jurusanValue = {
-        id,
-      };
-
-      const result = await deleteJurusan(jurusanValue);
-      closeModal();
-      getDataJurusan();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
-  };
-
   const addPeminatan = async (newData: any) => {
     try {
       const dataJurusan = await axios.post(`${API_BASE_URL}/api/datajurusan`);
@@ -1502,9 +956,8 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   };
 
   const patchPeminatan = async (updatedData: any) => {
-    console.log(updatedData);
     try {
-      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const dataJurusan = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -1530,7 +983,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
   const deletePeminatan = async (deletedData: any) => {
     try {
-      const dataJurusan = await axios.get(`${API_BASE_URL}/api/datajurusan`);
+      const dataJurusan = await axios.post(`${API_BASE_URL}/api/datajurusan`);
 
       const jurusan = dataJurusan.data.find(
         (data: any) => data.jurusan === selectedJurusan
@@ -1564,8 +1017,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       };
 
       const result = await addPeminatan(peminatanValue);
-
-      console.log(result);
 
       getDataPeminatanByJurusan(selectedJurusan);
       setIsEditOrder(false);
@@ -1634,7 +1085,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   };
 
   const patchJenisBimbingan = async (updatedData: any) => {
-    console.log(updatedData);
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/api/datajenisbimbingan`,
@@ -1649,7 +1099,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   };
 
   const patchTopikBimbinganPribadi = async (updatedData: any) => {
-    console.log(updatedData);
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/api/datatopikbimbinganpribadi`,
@@ -1702,8 +1151,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
 
       const result = await addJenisBimbingan(jenisBimbinganValue);
 
-      console.log(result);
-
       getDataJenisBimbingan();
       setIsEditOrder(false);
       closeModal();
@@ -1754,8 +1201,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       };
 
       const result = await addTopikBimbinganPribadi(topikBimbinganPribadiValue);
-
-      console.log(result);
 
       getDataTopikBimbinganPribadi();
       setIsEditOrder(false);
@@ -1815,7 +1260,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   };
 
   const patchSistemBimbingan = async (updatedData: any) => {
-    console.log(updatedData);
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/api/datasistembimbingan`,
@@ -1853,8 +1297,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       };
 
       const result = await addSistemBimbingan(sistemBimbinganValue);
-
-      console.log(result);
 
       getDataSistemBimbingan();
       setIsEditOrder(false);
@@ -1915,17 +1357,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       setAfterOrderEditDataJurusan(afterOrder);
     }
   }, [dataJurusan]);
-
-  useEffect(() => {
-    if (dataTahunAjaran.length > 0) {
-      const afterOrder = dataTahunAjaran.map((data: any) => {
-        return {
-          ...data,
-        };
-      });
-      setAfterOrderEditDataTahunAjaran(afterOrder);
-    }
-  }, [dataTahunAjaran]);
 
   useEffect(() => {
     if (dataPeminatan.length > 0) {
@@ -1996,22 +1427,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         }, 1000);
         return () => clearTimeout(timeout);
       }
-    } else if (selectedParameter === "Tahun Ajaran") {
-      if (afterOrderEditDataTahunAjaran.length === 0) {
-        setIsLoading(true);
-        const timeout = setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
-        return () => clearTimeout(timeout);
-      }
-    } else if (selectedParameter === "Jurusan") {
-      if (afterOrderEditDataJurusan.length === 0) {
-        setIsLoading(true);
-        const timeout = setTimeout(() => {
-          setIsLoading(false);
-        }, 1000);
-        return () => clearTimeout(timeout);
-      }
     } else if (selectedParameter === "Jenis Bimbingan") {
       if (afterOrderEditDataJenisBimbingan.length === 0) {
         setIsLoading(true);
@@ -2039,8 +1454,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
     }
   }, [
     afterOrderEditDataPeminatan,
-    afterOrderEditDataJurusan,
-    afterOrderEditDataTahunAjaran,
     afterOrderEditDataJenisBimbingan,
     afterOrderEditDataTopikBimbinganPribadi,
     afterOrderEditDataSistemBimbingan,
@@ -2049,7 +1462,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   ]);
 
   useEffect(() => {
-    getDataTahunAjaran();
     getDataJurusan();
     getDataJenisBimbingan();
     getDataTopikBimbinganPribadi();
@@ -2061,8 +1473,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       <div className="flex">
         <SelectField
           options={[
-            { value: "Tahun Ajaran", label: "Tahun Ajaran" },
-            { value: "Jurusan", label: "Jurusan" },
             { value: "Peminatan", label: "Peminatan" },
             { value: "Jenis Bimbingan", label: "Jenis Bimbingan" },
             {
@@ -2094,365 +1504,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         <p className="text-[18px] font-semibold">
           {selectedParameter !== "Peminatan" ? `List ${selectedParameter}` : ""}
         </p>
-        {selectedParameter === "Tahun Ajaran" && (
-          <div className="mt-6">
-            {afterOrderEditDataTahunAjaran.length === 0 ? (
-              <>
-                <button
-                  className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                  onClick={() => {
-                    openModal("Tambah");
-                  }}
-                >
-                  <Image src={plusIcon} alt="Plus Icon" />
-                  <p className="text-white text-[14px]">Tambah Tahun Ajaran</p>
-                </button>
-                <div className="overflow-x-auto mt-6 mb-6">
-                  <DndContext onDragEnd={handleDragEndTahunAjaran}>
-                    <SortableContext
-                      items={afterOrderEditDataTahunAjaran.map(
-                        (item: any) => item.id
-                      )}
-                    >
-                      <table className="min-w-full text-[16px] border-collapse table-fixed">
-                        <thead>
-                          <tr className="bg-gray-100 text-center">
-                            <th className="px-4 py-2 pl-10 rounded-tl-lg rounded-bl-lg ">
-                              No
-                            </th>
-                            <th className="px-4 py-2 w-1/2">Tahun Ajaran</th>
-                            <th className="px-4 py-2 w-1/4 rounded-tr-lg rounded-br-lg ">
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <td colSpan={3}>
-                            {isLoading ? (
-                              <div className="flex justify-center items-center h-20">
-                                <div className="loader" />
-                              </div>
-                            ) : (
-                              <p className="py-8 text-center">
-                                No Data, Please add data!
-                              </p>
-                            )}
-                          </td>
-                        </tbody>
-                      </table>
-                    </SortableContext>
-                  </DndContext>
-                </div>
-              </>
-            ) : (
-              <>
-                <button
-                  className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                  onClick={() => {
-                    openModal("Tambah");
-                  }}
-                >
-                  <Image src={plusIcon} alt="Plus Icon" />
-                  <p className="text-white text-[14px]">Tambah Tahun Ajaran</p>
-                </button>
-                <div className="overflow-x-auto mt-6 mb-6">
-                  <DndContext onDragEnd={handleDragEndTahunAjaran}>
-                    <SortableContext
-                      items={afterOrderEditDataTahunAjaran.map(
-                        (item: any) => item.id
-                      )}
-                    >
-                      <table className="min-w-full text-[16px] border-collapse table-fixed">
-                        <thead>
-                          <tr className="bg-gray-100 text-center">
-                            <th className="px-4 py-2 pl-10 w-1/4 rounded-tl-lg rounded-bl-lg">
-                              No
-                            </th>
-                            <th className="px-4 py-2 w-1/2">Tahun Ajaran</th>
-                            <th className="px-4 py-2 w-1/4 rounded-tr-lg rounded-br-lg">
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {afterOrderEditDataTahunAjaran.map(
-                            (data: any, index: any) => (
-                              <DraggableRow
-                                key={data.id}
-                                id={data.id.toString()}
-                                index={index}
-                                data={data}
-                                parameter="Tahun Ajaran"
-                              />
-                            )
-                          )}
-                        </tbody>
-                      </table>
-                    </SortableContext>
-                  </DndContext>
-                </div>
-                <div className="flex ml-auto mt-6 justify-end gap-4">
-                  <button
-                    className={`flex px-2 py-2 w-[88px] justify-center bg-green-500 items-center gap-2 rounded-lg hover:bg-green-600 ${areArraysEqual(dataTahunAjaran, afterOrderEditDataTahunAjaran) || !isEditOrder ? "hidden" : ""}`}
-                    onClick={() => handleSaveTahunAjaranOrder()}
-                  >
-                    <Image src={saveIcon} className="size-4" alt="Save Icon" />
-                    <p className="text-white text-[14px]">Save</p>
-                  </button>
-                  <button
-                    className={`flex  py-2 bg-red-500 w-[88px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataTahunAjaran, afterOrderEditDataTahunAjaran) || !isEditOrder ? "hidden" : ""}`}
-                    onClick={() => {
-                      const afterOrder = dataTahunAjaran.map((data: any) => {
-                        return {
-                          ...data,
-                        };
-                      });
-                      setAfterOrderEditDataTahunAjaran(afterOrder);
-                    }}
-                  >
-                    <Image
-                      src={cancelIcon}
-                      className="size-2.5"
-                      alt="Cancel Icon"
-                    />
-                    <p className="text-white text-[14px]">Cancel</p>
-                  </button>
-                </div>
-              </>
-            )}
-            <Modal
-              isOpen={isModalOpen}
-              onClose={closeModal}
-              onAdd={handleAddTahunAjaran}
-              onEdit={handleEditTahunAjaran}
-              onDelete={handleDeleteTahunAjaran}
-              title={`${modalType === "Delete" ? "Konfirmasi Penghapusan Tahun Ajaran" : `${modalType} Tahun Ajaran`}`}
-              modalType={modalType}
-              initialData={
-                modalType === "Delete"
-                  ? selectedTahunAjaranDeleteModal
-                  : modalType === "Edit"
-                    ? selectedTahunAjaranEditModal
-                    : null
-              }
-            >
-              {modalType === "Tambah" && (
-                <form>
-                  <InputField
-                    type="text"
-                    placeholder="Masukkan tahun ajaran"
-                    onChange={(e) => {
-                      setValueTahunAjaranAddModal(e.target.value);
-                    }}
-                    disabled={false}
-                    value={valueTahunAjaranAddModal}
-                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
-                  />
-                </form>
-              )}
-              {modalType === "Edit" && (
-                <form>
-                  <InputField
-                    type="text"
-                    placeholder="Masukkan tahun ajaran"
-                    onChange={(e) => {
-                      setValueTahunAjaranEditModal(e.target.value);
-                    }}
-                    disabled={false}
-                    value={valueTahunAjaranEditModal}
-                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
-                  />
-                </form>
-              )}
-              {modalType === "Delete" && (
-                <p>
-                  Apakah Anda yakin ingin menghapus tahun ajaran [
-                  {selectedTahunAjaranDeleteModal.tahun_ajaran}] ?
-                </p>
-              )}
-            </Modal>
-          </div>
-        )}
-        {selectedParameter === "Jurusan" && (
-          <div className="mt-6">
-            {afterOrderEditDataJurusan.length === 0 ? (
-              <>
-                <button
-                  onClick={() => {
-                    openModal("Tambah");
-                  }}
-                  className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                >
-                  <Image src={plusIcon} alt="Plus Icon" />
-                  <p className="text-white text-[14px]">Tambah Jurusan</p>
-                </button>
-                <div className="overflow-x-auto mt-6 mb-6">
-                  <DndContext onDragEnd={handleDragEndJurusan}>
-                    <SortableContext
-                      items={afterOrderEditDataJurusan.map(
-                        (item: any) => item.id
-                      )}
-                    >
-                      <table className="min-w-full text-[16px] border-collapse table-fixed">
-                        <thead>
-                          <tr className="bg-gray-100 text-center">
-                            <th className="px-4 py-2 pl-10 rounded-tl-lg rounded-bl-lg ">
-                              No
-                            </th>
-                            <th className="px-4 py-2 w-1/2">Jurusan</th>
-                            <th className="px-4 py-2 w-1/4 rounded-tr-lg rounded-br-lg ">
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <td colSpan={3}>
-                            {isLoading ? (
-                              <div className="flex justify-center items-center h-20">
-                                <div className="loader" />{" "}
-                                {/* Tambahkan animasi di CSS */}
-                              </div>
-                            ) : (
-                              <p className="py-8 text-center">
-                                No Data, Please add data!
-                              </p>
-                            )}
-                          </td>
-                        </tbody>
-                      </table>
-                    </SortableContext>
-                  </DndContext>
-                </div>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => {
-                    openModal("Tambah");
-                  }}
-                  className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                >
-                  <Image src={plusIcon} alt="Plus Icon" />
-                  <p className="text-white text-[14px]">Tambah Jurusan</p>
-                </button>
-                <div className="overflow-x-auto mt-6 mb-6">
-                  <DndContext onDragEnd={handleDragEndJurusan}>
-                    <SortableContext
-                      items={afterOrderEditDataJurusan.map(
-                        (item: any) => item.id
-                      )}
-                    >
-                      <table className="min-w-full text-[16px] border-collapse table-fixed">
-                        <thead>
-                          <tr className="bg-gray-100 text-center">
-                            <th className="px-4 py-2 pl-10 w-1/4 rounded-tl-lg rounded-bl-lg">
-                              No
-                            </th>
-                            <th className="px-4 py-2 w-1/2">Jurusan</th>
-                            <th className="px-4 py-2 w-1/4 rounded-tr-lg rounded-br-lg">
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {afterOrderEditDataJurusan.map(
-                            (data: any, index: any) => (
-                              <DraggableRow
-                                key={data.id}
-                                id={data.id.toString()}
-                                index={index}
-                                data={data}
-                                parameter="Jurusan"
-                              />
-                            )
-                          )}
-                        </tbody>
-                      </table>
-                    </SortableContext>
-                  </DndContext>
-                </div>
-                <div className="flex ml-auto my-8 justify-end gap-4">
-                  <button
-                    className={`flex px-3 py-2 w-[90px] justify-center bg-green-500 items-center gap-2 rounded-lg hover:bg-green-600 ${areArraysEqual(dataJurusan, afterOrderEditDataJurusan) || !isEditOrder ? "hidden" : ""}`}
-                    onClick={() => handleSaveJurusanOrder()}
-                  >
-                    <p className="text-white text-[14px]">Save</p>
-                    <Image src={saveIcon} className="size-4" alt="Save Icon" />
-                  </button>
-                  <button
-                    className={`flex px-3 py-2 bg-red-500 w-[90px] justify-center items-center gap-2 rounded-lg hover:bg-red-600 ${areArraysEqual(dataJurusan, afterOrderEditDataJurusan) || !isEditOrder ? "hidden" : ""}`}
-                    onClick={() => {
-                      const afterOrder = dataJurusan.map((data: any) => {
-                        return {
-                          ...data,
-                        };
-                      });
-                      setAfterOrderEditDataJurusan(afterOrder);
-                    }}
-                  >
-                    <p className="text-white text-[14px]">Cancel</p>
-                    <Image
-                      src={cancelIcon}
-                      className="size-2.5"
-                      alt="Cancel Icon"
-                    />
-                  </button>
-                </div>
-              </>
-            )}
-            <Modal
-              isOpen={isModalOpen}
-              onClose={closeModal}
-              onAdd={handleAddJurusan}
-              onEdit={handleEditJurusan}
-              onDelete={handleDeleteJurusan}
-              title={`${modalType === "Delete" ? "Konfirmasi Penghapusan Jurusan" : `${modalType} Jurusan`}`}
-              modalType={modalType}
-              initialData={
-                modalType === "Delete"
-                  ? selectedJurusanDeleteModal
-                  : modalType === "Edit"
-                    ? selectedJurusanEditModal
-                    : null
-              }
-            >
-              {modalType === "Tambah" && (
-                <form>
-                  <InputField
-                    type="text"
-                    placeholder="Masukkan jurusan"
-                    onChange={(e) => {
-                      setValueJurusanAddModal(e.target.value);
-                    }}
-                    disabled={false}
-                    value={valueJurusanAddModal}
-                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
-                  />
-                </form>
-              )}
-              {modalType === "Edit" && (
-                <form>
-                  <InputField
-                    type="text"
-                    placeholder="Masukkan jurusan"
-                    onChange={(e) => {
-                      setValueJurusanEditModal(e.target.value);
-                    }}
-                    disabled={false}
-                    value={valueJurusanEditModal}
-                    className="px-3 py-2 text-[15px] w-1/2 focus:outline-none border rounded-lg"
-                  />
-                </form>
-              )}
-              {modalType === "Delete" && (
-                <p>
-                  Apakah Anda yakin ingin menghapus jurusan [
-                  {selectedJurusanDeleteModal.jurusan}] ?
-                </p>
-              )}
-            </Modal>
-          </div>
-        )}
         {selectedParameter === "Peminatan" && selectedJurusan !== "" && (
           <p className="text-[18px] mt-4 ml-4 font-semibold">
             {`List ${selectedParameter}`}
@@ -2491,18 +1542,20 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          <td colSpan={3}>
-                            {isLoading ? (
-                              <div className="flex justify-center items-center h-20">
-                                <div className="loader" />{" "}
-                                {/* Tambahkan animasi di CSS */}
-                              </div>
-                            ) : (
-                              <p className="py-8 text-center">
-                                No Data, Please add data!
-                              </p>
-                            )}
-                          </td>
+                          <tr>
+                            <td colSpan={3}>
+                              {isLoading ? (
+                                <div className="flex justify-center items-center h-20">
+                                  <div className="loader" />{" "}
+                                  {/* Tambahkan animasi di CSS */}
+                                </div>
+                              ) : (
+                                <p className="py-8 text-center">
+                                  No Data, Please add data!
+                                </p>
+                              )}
+                            </td>
+                          </tr>
                         </tbody>
                       </table>
                     </SortableContext>
@@ -2674,18 +1727,20 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          <td colSpan={3}>
-                            {isLoading ? (
-                              <div className="flex justify-center items-center h-20">
-                                <div className="loader" />{" "}
-                                {/* Tambahkan animasi di CSS */}
-                              </div>
-                            ) : (
-                              <p className="py-8 text-center">
-                                No Data, Please add data!
-                              </p>
-                            )}
-                          </td>
+                          <tr>
+                            <td colSpan={3}>
+                              {isLoading ? (
+                                <div className="flex justify-center items-center h-20">
+                                  <div className="loader" />{" "}
+                                  {/* Tambahkan animasi di CSS */}
+                                </div>
+                              ) : (
+                                <p className="py-8 text-center">
+                                  No Data, Please add data!
+                                </p>
+                              )}
+                            </td>
+                          </tr>
                         </tbody>
                       </table>
                     </SortableContext>
@@ -2858,18 +1913,20 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          <td colSpan={3}>
-                            {isLoading ? (
-                              <div className="flex justify-center items-center h-20">
-                                <div className="loader" />{" "}
-                                {/* Tambahkan animasi di CSS */}
-                              </div>
-                            ) : (
-                              <p className="py-8 text-center">
-                                No Data, Please add data!
-                              </p>
-                            )}
-                          </td>
+                          <tr>
+                            <td colSpan={3}>
+                              {isLoading ? (
+                                <div className="flex justify-center items-center h-20">
+                                  <div className="loader" />{" "}
+                                  {/* Tambahkan animasi di CSS */}
+                                </div>
+                              ) : (
+                                <p className="py-8 text-center">
+                                  No Data, Please add data!
+                                </p>
+                              )}
+                            </td>
+                          </tr>
                         </tbody>
                       </table>
                     </SortableContext>
@@ -3046,18 +2103,20 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          <td colSpan={3}>
-                            {isLoading ? (
-                              <div className="flex justify-center items-center h-20">
-                                <div className="loader" />{" "}
-                                {/* Tambahkan animasi di CSS */}
-                              </div>
-                            ) : (
-                              <p className="py-8 text-center">
-                                No Data, Please add data!
-                              </p>
-                            )}
-                          </td>
+                          <tr>
+                            <td colSpan={3}>
+                              {isLoading ? (
+                                <div className="flex justify-center items-center h-20">
+                                  <div className="loader" />{" "}
+                                  {/* Tambahkan animasi di CSS */}
+                                </div>
+                              ) : (
+                                <p className="py-8 text-center">
+                                  No Data, Please add data!
+                                </p>
+                              )}
+                            </td>
+                          </tr>
                         </tbody>
                       </table>
                     </SortableContext>

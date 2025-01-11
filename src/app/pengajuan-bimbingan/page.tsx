@@ -14,9 +14,6 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorIcon from "@mui/icons-material/Error";
-import WarningIcon from "@mui/icons-material/Warning";
 
 interface User {
   id: number;
@@ -111,6 +108,8 @@ export default function Home() {
     null
   );
   const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
+  const [permasalahan, setPermasalahan] = useState("");
+  const [selectedIsPermasalahan, setSelectedIsPermasalahan] = useState("");
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -290,6 +289,8 @@ export default function Home() {
             ? null
             : selectedTopikBimbinganPribadi,
         sistem_bimbingan: selectedSistemBimbingan,
+        permasalahan: permasalahan ? permasalahan : null,
+        is_selected_permasalahan: selectedIsPermasalahan ? true : false,
         mahasiswa_id: dataUser.nim,
         status: "Menunggu Konfirmasi",
         dosen_pa_id: userDosenPa?.id,
@@ -501,6 +502,21 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    setSelectedTopikBimbinganPribadi("");
+    setSelectedSistemBimbingan("");
+    setSelectedIsPermasalahan("");
+    setPermasalahan("");
+  }, [selectedJenisBimbingan]);
+
+  useEffect(() => {
+    setPermasalahan("");
+  }, [selectedIsPermasalahan]);
+
+  useEffect(() => {
+    setPermasalahan("");
+  }, [selectedTopikBimbinganPribadi]);
+
   const getDayName = (date: Date) => {
     return format(date, "EEEE", { locale: id });
   };
@@ -528,7 +544,7 @@ export default function Home() {
             onSubmit={handleAddPengajuanBimbingan}
           >
             <InputField
-              disabled={false}
+              disabled
               type="text"
               placeholder="Nama Lengkap"
               onChange={(e) => setNamaLengkap(e.target.value)}
@@ -536,7 +552,7 @@ export default function Home() {
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
             <InputField
-              disabled={false}
+              disabled
               type="text"
               placeholder="NIM"
               onChange={(e) => setNim(e.target.value)}
@@ -544,7 +560,7 @@ export default function Home() {
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
             <InputField
-              disabled={false}
+              disabled
               type="text"
               placeholder="E-mail"
               onChange={(e) => setEmail(e.target.value)}
@@ -552,7 +568,7 @@ export default function Home() {
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
             <InputField
-              disabled={false}
+              disabled
               type="text"
               placeholder="No Whatsapp"
               onChange={(e) => setNoWa(e.target.value)}
@@ -560,7 +576,7 @@ export default function Home() {
               className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
             />
             <InputField
-              disabled={false}
+              disabled
               type="text"
               placeholder="Jurusan"
               onChange={(e) => setJurusan(e.target.value)}
@@ -632,6 +648,13 @@ export default function Home() {
               placeholder="Pilih Jenis Bimbingan"
               className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
             />
+            <SelectField
+              options={optionsSistemBimbingan}
+              onChange={(e) => setSelectedSistemBimbingan(e.target.value)}
+              value={selectedSistemBimbingan}
+              placeholder="Pilih Sistem Bimbingan"
+              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
+            />
             {selectedJenisBimbingan === "Pribadi" && (
               <SelectField
                 options={optionsTopikBimbinganPribadi}
@@ -643,13 +666,49 @@ export default function Home() {
                 className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
               />
             )}
-            <SelectField
-              options={optionsSistemBimbingan}
-              onChange={(e) => setSelectedSistemBimbingan(e.target.value)}
-              value={selectedSistemBimbingan}
-              placeholder="Pilih Sistem Bimbingan"
-              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
-            />
+            {selectedJenisBimbingan === "Perwalian" && (
+              <SelectField
+                options={[
+                  {
+                    value: "Iya",
+                    label: "Iya, saya memiliki permasalahan",
+                  },
+                  {
+                    value: "Tidak",
+                    label: "Tidak",
+                  },
+                ]}
+                onChange={(e) => setSelectedIsPermasalahan(e.target.value)}
+                value={selectedIsPermasalahan}
+                placeholder="Apakah Anda memiliki permasalahan spesifik untuk perwalian kali ini?"
+                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
+              />
+            )}
+            {selectedJenisBimbingan === "Perwalian" &&
+              selectedIsPermasalahan === "Iya" && (
+                <textarea
+                  placeholder={
+                    permasalahan === "" ? "Permasalahan" : permasalahan
+                  }
+                  onChange={(e) => {
+                    setPermasalahan(e.target.value);
+                  }}
+                  value={permasalahan}
+                  className="border text-[15px] focus:outline-none rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                />
+              )}
+            {selectedJenisBimbingan === "Pribadi" && (
+              <textarea
+                placeholder={
+                  permasalahan === "" ? "Permasalahan" : permasalahan
+                }
+                onChange={(e) => {
+                  setPermasalahan(e.target.value);
+                }}
+                value={permasalahan}
+                className="border focus:outline-none rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+              />
+            )}
             <button
               type="submit"
               className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-[6px] font-medium"

@@ -23,6 +23,8 @@ model bimbingan {
   ttd_kehadiran                  String?
   dokumentasi_kehadiran          String?
   status_kehadiran_mahasiswa     String?
+  permasalahan                   String?            @db.Text
+  solusi                         String?            @db.Text
   laporan_bimbingan              laporanbimbingan?  @relation(fields: [laporan_bimbingan_id], references: [id], map: "Bimbingan_laporan_bimbingan_id_fkey")
   pengajuan_bimbingan            pengajuanbimbingan @relation(fields: [pengajuan_bimbingan_id], references: [id], map: "Bimbingan_pengajuan_bimbingan_id_fkey")
 
@@ -109,13 +111,10 @@ model laporanbimbingan {
   semester                     String
   status                       String
   jenis_bimbingan              String
-  topik_bimbingan              String?
   jumlah_mahasiswa             Int
   tahun_ajaran                 String
   tanda_tangan_dosen_pa        String?
-  kendala_mahasiswa            String?
-  solusi                       String?
-  dokumentasi                  String?
+  dokumentasi                  String?                  @db.Text         
   jadwal_bimbingan             String
   feedback_kaprodi             String?
   datastatusmahasiswa          datastatusmahasiswa      []  
@@ -266,6 +265,7 @@ model pengajuanbimbingan {
   dosen_pa_id      Int
   keterangan       String?
   mahasiswa_id     Int
+  permasalahan     String?     @db.Text
   bimbingan        bimbingan[]
   dosen_pa         dosenpa     @relation(fields: [dosen_pa_id], references: [id], map: "PengajuanBimbingan_dosen_pa_id_fkey")
   mahasiswa        mahasiswa   @relation(fields: [mahasiswa_id], references: [id], map: "PengajuanBimbingan_mahasiswa_id_fkey")

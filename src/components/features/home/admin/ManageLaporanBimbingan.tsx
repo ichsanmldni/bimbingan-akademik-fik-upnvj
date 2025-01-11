@@ -33,17 +33,14 @@ const ManageLaporanBimbingan: React.FC<ManageLaporanBimbinganProps> = () => {
 
   const getDataTahunAjaran = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/datatahunajaran`);
+      const response = await axios.post(`${API_BASE_URL}/api/datatahunajaran`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      const sortedDataJurusan = data.sort(
-        (a: TahunAjaran, b: TahunAjaran) => a.order - b.order
-      );
-      setDataTahunAjaran(sortedDataJurusan);
+      const data = await response.data.data;
+      setDataTahunAjaran(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;

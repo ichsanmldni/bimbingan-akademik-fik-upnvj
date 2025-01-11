@@ -53,7 +53,7 @@ export async function POST(req: Request): Promise<Response> {
 
     if (!dosen_pa_id || !hari || !jam_mulai || !jam_selesai) {
       return new Response(
-        JSON.stringify({ message: 'All fields are required' }),
+        JSON.stringify({ message: 'Semua kolom wajib diisi!' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -67,7 +67,13 @@ export async function POST(req: Request): Promise<Response> {
       },
     });
 
-    return new Response(JSON.stringify(jadwalDosenPA), {
+    const responsePayload = {
+      status: "success",
+      message: "Berhasil menambah jadwal kosong!",
+      data: jadwalDosenPA,
+    };
+
+    return new Response(JSON.stringify(responsePayload), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -106,8 +112,12 @@ export async function DELETE(req: Request): Promise<Response> {
       where: { id },
     });
 
+    const responsePayload = {
+      status: "success",
+      message: "Jadwal kosong berhasil dihapus!",
+    };
     return new Response(
-      JSON.stringify({ message: 'Record deleted successfully' }),
+      JSON.stringify(responsePayload),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {

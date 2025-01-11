@@ -55,15 +55,31 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const body: PengajuanBimbingan = await req.json();
 
-    console.log(body)
-
-    const { nama_lengkap, nim, email, no_whatsapp, jurusan, jadwal_bimbingan, jenis_bimbingan, topik_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id } = body;
+    const { nama_lengkap, nim, email, no_whatsapp, jurusan, jadwal_bimbingan, jenis_bimbingan, topik_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id, permasalahan, is_selected_permasalahan } = body;
 
     if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id) {
       return new Response(
         JSON.stringify({ message: 'Semua kolom harus diisi!' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
+    }
+
+    if (jenis_bimbingan === "Pribadi") {
+      if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id || !permasalahan || !topik_bimbingan) {
+        return new Response(
+          JSON.stringify({ message: 'Semua kolom harus diisi!' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    if (jenis_bimbingan === "Perwalian") {
+      if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id || !is_selected_permasalahan) {
+        return new Response(
+          JSON.stringify({ message: 'Semua kolom harus diisi!' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     const mahasiswa = await prisma.mahasiswa.findUnique({
@@ -84,6 +100,7 @@ export async function POST(req: Request): Promise<Response> {
         status,
         dosen_pa_id,
         mahasiswa_id: mahasiswa.id,
+        permasalahan
       },
     });
 
@@ -118,7 +135,6 @@ export async function POST(req: Request): Promise<Response> {
 export async function PATCH(req: Request): Promise<Response> {
   try {
     const body = await req.json();
-    console.log(body)
 
     const { id, status, keterangan, mahasiswa_id, dosen_pa_id } = body;
 

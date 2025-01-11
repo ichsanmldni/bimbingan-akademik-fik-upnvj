@@ -20,6 +20,8 @@ import DonutChart from "@/components/ui/DonutChart";
 import TabelStatistikLaporan from "@/components/ui/TabelStatistikLaporan";
 import { Provider } from "react-redux";
 import store from "@/components/store/store";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface DashboardKaprodiProps {
   selectedSubMenuDashboard: string;
@@ -53,8 +55,6 @@ interface LaporanBimbingan {
   jenis_bimbingan: string;
   sistem_bimbingan: string;
   status: string;
-  kendala_mahasiswa: string;
-  solusi: string;
   kesimpulan: string;
   dokumentasi: string | null;
   feedback_kaprodi: string | null;
@@ -88,6 +88,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataBimbinganBySelectedDosenPA, setDataBimbinganBySelectedDosenPA] =
     useState<any[]>([]);
+  const [dataBimbingan, setDataBimbingan] = useState([]);
   const [dataAllMahasiswa, setDataAllMahasiswa] = useState<any[]>([]);
   const [dataKaprodi, setDataKaprodi] = useState<any>({});
   const [dataKaprodiUser, setDataKaprodiUser] = useState<any>({});
@@ -131,6 +132,21 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     }
   };
 
+  const getDataBimbingan = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/bimbingan`);
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataBimbingan(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
@@ -278,9 +294,19 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         updatedData
       );
 
-      return response.data;
+      return {
+        success: true,
+        message:
+          response.data.message ||
+          "Feedback laporan bimbingan telah berhasil diberikan!",
+
+        data: response.data,
+      };
     } catch (error) {
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
 
@@ -299,11 +325,55 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       };
 
       const result = await patchLaporanBimbingan(laporanBimbinganValue);
-
+      toast.success(
+        <div className="flex items-center">
+          <span>
+            {result.message ||
+              "Feedback laporan bimbingan telah berhasil diberikan!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
       setFeedbackKaprodi("");
       getDataLaporanBimbinganByKaprodiId();
+      setIsDetailLaporanKaprodiClicked(!isDetailLaporanKaprodiClicked);
+      setSelectedDataLaporanBimbingan(null);
+      setTimeout(() => {
+        setIsDetailLaporanKaprodiClicked(isDetailLaporanKaprodiClicked);
+        setSelectedDataLaporanBimbingan({
+          ...selectedDataLaporanBimbingan,
+          status: "Sudah Diberikan Feedback",
+          feedback_kaprodi: feedbackKaprodi,
+        });
+      }, 1);
     } catch (error) {
-      console.error("Registration error:", (error as Error).message);
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message ||
+              "Feedback laporan bimbingan gagal diberikan. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
   };
 
@@ -406,381 +476,913 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   ) => {
     e.preventDefault();
 
-    const doc = new jsPDF({
-      orientation: "portrait", // or "landscape"
-      unit: "mm", // units can be "pt", "mm", "cm", or "in"
-      format: "a4", // format can be "a4", "letter", etc.
-      putOnlyUsedFonts: true, // optional, to optimize font usage
-    });
+    const formatTanggal = (jadwal) => {
+      // Memisahkan string berdasarkan spasi
+      const parts = jadwal.split(" ");
 
-    doc.setFont("times new roman");
+      // Mengambil bagian tanggal (indeks 1 dan 2)
+      const tanggal = `${parts[1]} ${parts[2]}`; // "20 Januari"
+      const tahun = parts[3]; // "2025"
 
-    // Title
-    doc.setFontSize(11);
-    const title = "LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK";
-    const titleWidth = doc.getTextWidth(title);
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const titleX = (pageWidth - titleWidth) / 2; // Calculate x position for center alignment
-    doc.text(title, titleX, 28);
-    const subtitle = "FAKULTAS ILMU KOMPUTER  UPN “VETERAN” JAKARTA";
-    const subtitleWidth = doc.getTextWidth(subtitle);
-    const subtitleX = (pageWidth - subtitleWidth) / 2; // Calculate x position for center alignment
-    doc.text(subtitle, subtitleX, 35);
-    doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 56); // Moved up by 10y
-    doc.text(`Semester                   :    ${data.semester}`, 15, 62); // Moved up by 10y
-    doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 68); // Moved up by 10y
-
-    doc.text("A. PENDAHULUAN", 15, 91); // Adjusted x to 15 and y down by 20
-
-    let yPosition = 98;
-    const maxWidth = 175;
-
-    data.pendahuluan.forEach((paragraph) => {
-      // Check if the paragraph has children and extract the text
-      if (paragraph.children && paragraph.children.length > 0) {
-        const text = paragraph.children[0].text;
-
-        // Split the text into lines based on maxWidth
-        const lines = doc.splitTextToSize(text, maxWidth);
-
-        // Set alignment based on paragraph properties
-        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
-
-        // Add each line to the document and adjust yPosition
-        lines.forEach((line, index) => {
-          // Set alignment for the line
-          if (alignment === "justify") {
-            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
-            const totalWidth = maxWidth; // Lebar area teks
-            const lineWidth = doc.getTextWidth(line);
-
-            if (index < lines.length - 1) {
-              // Hanya justify jika bukan baris terakhir
-              if (words.length > 1) {
-                const totalSpaces = words.filter(
-                  (word) => word.trim() === ""
-                ).length;
-                const totalExtraSpace = totalWidth - lineWidth;
-                const baseSpaceWidth = Math.floor(
-                  totalExtraSpace / totalSpaces
-                );
-                const extraSpaces = totalExtraSpace % totalSpaces;
-
-                let justifiedLine = "";
-
-                for (let i = 0; i < words.length; i++) {
-                  justifiedLine += words[i];
-                  if (i < words.length - 1 && words[i].trim() === "") {
-                    // Menambahkan spasi
-                    const spacesToAdd =
-                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
-                    justifiedLine += " ".repeat(spacesToAdd);
-                  }
-                }
-                doc.text(justifiedLine, 20, yPosition);
-              } else {
-                doc.text(line, 20, yPosition); // Jika hanya satu kata, tidak perlu justify
-              }
-            } else {
-              doc.text(line, 20, yPosition); // Baris terakhir tidak di-justify
-            }
-          } else if (alignment === "center") {
-            doc.text(line, 110, yPosition, { align: "center" });
-          } else if (alignment === "right") {
-            doc.text(line, 200, yPosition, { align: "right" });
-          } else {
-            doc.text(line, 20, yPosition); // Default left alignment
-          }
-          yPosition += 6; // Adjust the spacing between lines
-        });
-      }
-    });
-
-    // Section Title
-    doc.text("B. HASIL KONSULTASI PEMBIMBINGAN", 15, yPosition + 7); // Adjusted x to 15 and y down by 20
-    doc.text("Prestasi Akademik Mahasiswa", 20, yPosition + 17); // Adjusted x to 15 and y down by 20
-
-    // Table for IPK
-    const tableData = [
-      { range: "IPK > 3.5", jumlah: data.jumlah_ipk_a },
-      { range: "3 > IPK >= 3.5", jumlah: data.jumlah_ipk_b },
-      { range: "2.5 <= IPK < 3", jumlah: data.jumlah_ipk_c },
-      { range: "2 <= IPK < 2.5", jumlah: data.jumlah_ipk_d },
-      { range: "IPK < 2", jumlah: data.jumlah_ipk_e },
-    ];
-
-    doc.autoTable({
-      head: [["Range IPK", "Jumlah Mahasiswa"]],
-      body: tableData.map((item) => [item.range, item.jumlah]),
-      startY: yPosition + 21, // Posisi tabel
-      theme: "plain", // Tema polos
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Prestasi Ilmiah Mahasiswa",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-    const prestasiData = selectedDataPrestasiIlmiahMahasiswa;
-
-    doc.autoTable({
-      head: [["Bidang Prestasi", "NIM", "Nama", "Tingkat Prestasi"]],
-      theme: "plain", // Tema polos
-      body: prestasiData.map((item) => [
-        item.bidang_prestasi,
-        item.nim,
-        item.nama,
-        item.tingkat_prestasi,
-      ]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Prestasi Mahasiswa Mendapatkan Beasiswa",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-
-    // Table for Beasiswa
-    const tableBeasiswaData = [
-      { beasiswa: "BBM", jumlah: data.jumlah_beasiswa_bbm },
-      { beasiswa: "Pegadaian", jumlah: data.jumlah_beasiswa_pegadaian },
-      {
-        beasiswa: "Supersemar",
-        jumlah: data.jumlah_beasiswa_supersemar,
-      },
-      { beasiswa: "PPA", jumlah: data.jumlah_beasiswa_ppa },
-      { beasiswa: "YKL", jumlah: data.jumlah_beasiswa_ykl },
-      { beasiswa: "Dan Lain-lainnya", jumlah: data.jumlah_beasiswa_dll },
-    ];
-
-    doc.autoTable({
-      head: [["Jenis Beasiswa", "Jumlah Mahasiswa"]],
-      body: tableBeasiswaData.map((item) => [item.beasiswa, item.jumlah]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      theme: "plain", // Tema polos
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Prestasi Mahasiswa Mengikuti Porseni",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-    const prestasiPorseniData = selectedDataPrestasiPorseniMahasiswa;
-
-    doc.autoTable({
-      head: [["Jenis Kegiatan", "NIM", "Nama", "Tingkat Prestasi"]],
-      theme: "plain", // Tema polos
-      body: prestasiPorseniData.map((item) => [
-        item.jenis_kegiatan,
-        item.nim,
-        item.nama,
-        item.tingkat_prestasi,
-      ]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text(
-      "Data Status Mahasiswa",
-      20,
-      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
-    );
-    const statusData = selectedDataStatusMahasiswa;
-
-    doc.autoTable({
-      head: [["NIM", "Nama", "Status"]],
-      theme: "plain", // Tema polos
-      body: statusData.map((item) => [item.nim, item.nama, item.status]),
-      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
-      headStyles: {
-        fontSize: 11, // Ukuran font header
-        halign: "center", // Rata tengah
-        font: "times new roman", // Font header
-      },
-      bodyStyles: {
-        fontSize: 11, // Ukuran font untuk isi
-        halign: "left", // Rata kiri
-        font: "times new roman", // Font header
-      },
-      styles: {
-        cellPadding: 3, // Padding sel
-        lineWidth: 0.1, // Ketebalan garis
-        lineColor: [0, 0, 0], // Warna garis hitam
-      },
-      tableWidth: "auto", // Lebar tabel otomatis
-      margin: { left: 20 },
-    });
-
-    doc.text("C. KESIMPULAN", 15, doc.autoTable.previous.finalY + 10); // Adjusted x to 15 and y down by 20
-
-    let yPositionKesimpulan = doc.autoTable.previous.finalY + 20;
-    data.kesimpulan.forEach((paragraph) => {
-      // Check if the paragraph has children and extract the text
-      if (paragraph.children && paragraph.children.length > 0) {
-        const text = paragraph.children[0].text;
-
-        // Split the text into lines based on maxWidth
-        const lines = doc.splitTextToSize(text, maxWidth);
-
-        // Set alignment based on paragraph properties
-        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
-
-        // Add each line to the document and adjust yPosition
-        lines.forEach((line, index) => {
-          // Set alignment for the line
-          if (alignment === "justify") {
-            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
-            const totalWidth = maxWidth; // Lebar area teks
-            const lineWidth = doc.getTextWidth(line);
-
-            if (index < lines.length - 1) {
-              // Hanya justify jika bukan baris terakhir
-              if (words.length > 1) {
-                const totalSpaces = words.filter(
-                  (word) => word.trim() === ""
-                ).length;
-                const totalExtraSpace = totalWidth - lineWidth;
-                const baseSpaceWidth = Math.floor(
-                  totalExtraSpace / totalSpaces
-                );
-                const extraSpaces = totalExtraSpace % totalSpaces;
-
-                let justifiedLine = "";
-
-                for (let i = 0; i < words.length; i++) {
-                  justifiedLine += words[i];
-                  if (i < words.length - 1 && words[i].trim() === "") {
-                    // Menambahkan spasi
-                    const spacesToAdd =
-                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
-                    justifiedLine += " ".repeat(spacesToAdd);
-                  }
-                }
-                doc.text(justifiedLine, 20, yPositionKesimpulan);
-              } else {
-                doc.text(line, 20, yPositionKesimpulan); // Jika hanya satu kata, tidak perlu justify
-              }
-            } else {
-              doc.text(line, 20, yPositionKesimpulan); // Baris terakhir tidak di-justify
-            }
-          } else if (alignment === "center") {
-            doc.text(line, 110, yPositionKesimpulan, { align: "center" });
-          } else if (alignment === "right") {
-            doc.text(line, 200, yPositionKesimpulan, { align: "right" });
-          } else {
-            doc.text(line, 20, yPositionKesimpulan); // Default left alignment
-          }
-          yPositionKesimpulan += 6; // Adjust the spacing between lines
-        });
-      }
-    });
-
-    // Menambahkan informasi tanggal dan jabatan
-    const now = new Date();
-
-    // Mengatur opsi untuk format tanggal
-    const options = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZone: "Asia/Jakarta",
+      // Menggabungkan kembali menjadi format yang diinginkan
+      return `${tanggal} ${tahun}`; // "20 Januari 2025"
     };
 
-    // Mengonversi tanggal ke format yang diinginkan
-    const formattedDate = now.toLocaleDateString("id-ID", options);
+    if (data.jenis_bimbingan === "Pribadi") {
+      const doc = new jsPDF({
+        orientation: "landscape", // or "landscape"
+        unit: "mm", // units can be "pt", "mm", "cm", or "in"
+        format: "a4", // format can be "a4", "letter", etc.
+        putOnlyUsedFonts: true, // optional, to optimize font usage
+      });
 
-    const dateYPosition = yPositionKesimpulan + 7; // Posisi Y untuk tanggal
-    doc.text(`Jakarta, ${formattedDate}`, 195, dateYPosition, {
-      align: "right",
-    });
-    const jabatanYPosition = dateYPosition + 7; // Posisi Y untuk jabatan
-    doc.text("Dosen PA", 185, jabatanYPosition, { align: "right" });
+      doc.setFontSize(11);
+      const judulLembarKonsultasi = "LEMBAR KONSULTASI MAHASISWA";
+      const lebarJudulLembarKonsultasi = doc.getTextWidth(
+        judulLembarKonsultasi
+      );
+      const lebarPageLembarKonsultasi = doc.internal.pageSize.getWidth();
+      const judulLembarKonsultasiXPosition =
+        (lebarPageLembarKonsultasi - lebarJudulLembarKonsultasi) / 2; // Calculate x position for center alignment
+      doc.setFont("times new roman bold");
+      doc.text(judulLembarKonsultasi, judulLembarKonsultasiXPosition, 20);
+      doc.setFont("times new roman");
+      doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 32); // Moved up by 10y
+      doc.text(`Semester                   :    ${data.semester}`, 15, 38); // Moved up by 10y
+      doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 44); // Moved up by 10y
 
-    // Menambahkan kolom untuk tanda tangan
-    const imgData = data.tanda_tangan_dosen_pa;
-    const xImagePosition = 167; // Atur posisi X sesuai kebutuhan
-    const yImagePosition = jabatanYPosition + 4; // Atur posisi Y sesuai kebutuhan
-    const width = 21; // Lebar gambar
-    const height = 21; // Tinggi gambar
+      const selectedBimbingan = dataBimbingan.filter(
+        (bimbingan) => bimbingan.laporan_bimbingan_id === data.id
+      );
 
-    // Menambahkan gambar ke dokumen
-    doc.addImage(imgData, "PNG", xImagePosition, yImagePosition, width, height);
-    const ttdY = jabatanYPosition + 28; // Posisi Y untuk kolom TTD
-    doc.text(`( ${data.nama_dosen_pa} )`, 195, ttdY, { align: "right" });
-    // Open the PDF in a new window instead of saving
-    const pdfOutput = doc.output("blob");
-    const url = URL.createObjectURL(pdfOutput);
+      const bodyBimbinganLembarKonsultasi =
+        selectedBimbingan.length === 0
+          ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
+          : selectedBimbingan.map((item, index) => [
+              index + 1,
+              formatTanggal(item.pengajuan_bimbingan.jadwal_bimbingan),
+              item.pengajuan_bimbingan.nim,
+              item.pengajuan_bimbingan.nama_lengkap,
+              item.permasalahan,
+              item.solusi,
+              data.tanda_tangan_dosen_pa,
+              item.ttd_kehadiran,
+            ]);
+      doc.autoTable({
+        head: [
+          [
+            "No",
+            "Tanggal",
+            "NIM",
+            "Nama",
+            "Permasalahan",
+            "Solusi",
+            "TTD Dosen PA",
+            "TTD MHS",
+          ],
+        ],
+        showHead: "firstPage", // Tampilkan header hanya di halaman pertama
+        pageBreak: "auto", // Atur pemecahan halaman otomatis
+        theme: "plain", // Tema polos
+        body: bodyBimbinganLembarKonsultasi,
+        startY: 54,
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: "center",
+          valign: "top",
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { bottom: 30 },
+        didDrawCell: (data) => {
+          if (
+            data.row.index >= 0 &&
+            data.column.index === 7 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
+            if (imgSrc) {
+              const imgWidth = 8;
+              const imgHeight = 8;
+              const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
+              const y = data.cell.y + 2;
+              doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
+            }
+          } else if (
+            data.row.index >= 0 &&
+            data.column.index === 6 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
+            if (imgSrc) {
+              const imgWidth = 8;
+              const imgHeight = 8;
+              const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
+              const y = data.cell.y + 2;
+              doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
+            }
+          }
+        },
+        didParseCell: (data) => {
+          if (
+            data.row.index >= 0 &&
+            data.column.index === 7 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.row.raw[7];
+            if (imgSrc) {
+              data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
+              data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
+            }
+          } else if (
+            data.row.index >= 0 &&
+            data.column.index === 6 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.row.raw[6];
+            if (imgSrc) {
+              data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
+              data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
+            }
+          }
+          if (data.row.index >= 0 && data.section === "body") {
+            if (data.column.index === 4 || data.column.index === 5) {
+              data.cell.styles.halign = "justify"; // Justify alignment
+            }
+          }
+        },
+      });
 
-    // Membuka PDF di tab baru
-    window.open(url, "_blank");
+      const pdfOutput = doc.output("blob");
+      const url = URL.createObjectURL(pdfOutput);
+
+      // Membuka PDF di tab baru
+      window.open(url, "_blank");
+    } else if (data.jenis_bimbingan === "Perwalian") {
+      const doc = new jsPDF({
+        orientation: "portrait", // or "landscape"
+        unit: "mm", // units can be "pt", "mm", "cm", or "in"
+        format: "a4",
+        putOnlyUsedFonts: true, // optional, to optimize font usage
+      });
+
+      doc.setFont("times new roman bold");
+
+      // Title
+      doc.setFontSize(11);
+      const title = "LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK";
+      const titleWidth = doc.getTextWidth(title);
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const titleX = (pageWidth - titleWidth) / 2; // Calculate x position for center alignment
+      doc.text(title, titleX, 28);
+      const subtitle = "FAKULTAS ILMU KOMPUTER  UPN “VETERAN” JAKARTA";
+      const subtitleWidth = doc.getTextWidth(subtitle);
+      const subtitleX = (pageWidth - subtitleWidth) / 2; // Calculate x position for center alignment
+      doc.text(subtitle, subtitleX, 35);
+      doc.setFont("times new roman");
+      doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 56); // Moved up by 10y
+      doc.text(`Semester                   :    ${data.semester}`, 15, 62); // Moved up by 10y
+      doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 68); // Moved up by 10y
+
+      doc.setFont("times new roman bold");
+
+      doc.text("A. PENDAHULUAN", 15, 91); // Adjusted x to 15 and y down by 20
+
+      doc.setFont("times new roman");
+
+      let yPosition = 98;
+      const maxWidth = 175;
+
+      const maxHeight = 276;
+
+      data.pendahuluan.forEach((paragraph) => {
+        if (paragraph.children && paragraph.children.length > 0) {
+          const text = paragraph.children[0].text;
+          const lines = doc.splitTextToSize(text, maxWidth);
+          const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
+
+          lines.forEach((line, index) => {
+            // Check if yPosition exceeds maxHeight
+            if (yPosition > maxHeight) {
+              doc.addPage(); // Add a new page
+              yPosition = 20; // Reset yPosition for the new page
+            }
+
+            // Set alignment for the line
+            if (alignment === "justify") {
+              const words = line.split(/(\s+)/);
+              const totalWidth = maxWidth;
+              const lineWidth = doc.getTextWidth(line);
+
+              if (index < lines.length - 1) {
+                if (words.length > 1) {
+                  const totalSpaces = words.filter(
+                    (word) => word.trim() === ""
+                  ).length;
+                  const totalExtraSpace = totalWidth - lineWidth;
+                  const baseSpaceWidth = Math.floor(
+                    totalExtraSpace / totalSpaces
+                  );
+                  const extraSpaces = totalExtraSpace % totalSpaces;
+
+                  let justifiedLine = "";
+
+                  for (let i = 0; i < words.length; i++) {
+                    justifiedLine += words[i];
+                    if (i < words.length - 1 && words[i].trim() === "") {
+                      const spacesToAdd =
+                        baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
+                      justifiedLine += " ".repeat(spacesToAdd);
+                    }
+                  }
+                  doc.text(justifiedLine, 20, yPosition);
+                } else {
+                  doc.text(line, 20, yPosition);
+                }
+              } else {
+                doc.text(line, 20, yPosition);
+              }
+            } else if (alignment === "center") {
+              doc.text(line, 110, yPosition, { align: "center" });
+            } else if (alignment === "right") {
+              doc.text(line, 200, yPosition, { align: "right" });
+            } else {
+              doc.text(line, 20, yPosition); // Default left alignment
+            }
+            yPosition += 6; // Adjust the spacing between lines
+          });
+        }
+      });
+
+      doc.setFont("times new roman bold");
+      let hasilKonsultasiPembimbinganYPosition = yPosition + 7;
+      if (hasilKonsultasiPembimbinganYPosition > maxHeight) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      doc.text("B. HASIL KONSULTASI PEMBIMBINGAN", 15, yPosition + 7); // Adjusted x to 15 and y down by 20
+      doc.setFont("times new roman");
+
+      let textPrestasiAkademikYPosition = yPosition + 17;
+      // Table for IPK
+      const tableData = [
+        { range: "IPK > 3.5", jumlah: data.jumlah_ipk_a },
+        { range: "3 > IPK >= 3.5", jumlah: data.jumlah_ipk_b },
+        { range: "2.5 <= IPK < 3", jumlah: data.jumlah_ipk_c },
+        { range: "2 <= IPK < 2.5", jumlah: data.jumlah_ipk_d },
+        { range: "IPK < 2", jumlah: data.jumlah_ipk_e },
+      ];
+
+      let tablePrestasiAkademikHeight = 1 * 15;
+
+      if (
+        textPrestasiAkademikYPosition + tablePrestasiAkademikHeight >
+        maxHeight
+      ) {
+        doc.addPage();
+        textPrestasiAkademikYPosition = 20;
+      }
+
+      doc.text(
+        "Prestasi Akademik Mahasiswa",
+        20,
+        textPrestasiAkademikYPosition
+      );
+
+      let tablePrestasiAkademikYPosition = textPrestasiAkademikYPosition + 4;
+
+      doc.autoTable({
+        head: [["Range IPK", "Jumlah Mahasiswa"]],
+        body: tableData.map((item) => [item.range, item.jumlah]),
+        startY: tablePrestasiAkademikYPosition,
+        theme: "plain", // Tema polos
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: "left", // Rata kiri
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { left: 20 },
+      });
+
+      let textPrestasiIlmiahYPosition = doc.autoTable.previous.finalY + 10;
+
+      const prestasiData = selectedDataPrestasiIlmiahMahasiswa;
+      const bodyDataIlmiah =
+        prestasiData.length === 0
+          ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
+          : prestasiData.map((item) => [
+              item.bidang_prestasi,
+              item.nim,
+              item.nama,
+              item.tingkat_prestasi,
+            ]);
+
+      const tablePrestasiIlmiahHeight = 1 * 15;
+
+      if (textPrestasiIlmiahYPosition + tablePrestasiIlmiahHeight > maxHeight) {
+        doc.addPage(); // Add a new page
+        textPrestasiIlmiahYPosition = 20; // Reset Y position for the new page
+      }
+
+      doc.text("Prestasi Ilmiah Mahasiswa", 20, textPrestasiIlmiahYPosition);
+
+      let tablePrestasiIlmiahYPosition = textPrestasiIlmiahYPosition + 4;
+
+      doc.autoTable({
+        head: [["Bidang Prestasi", "NIM", "Nama", "Tingkat Prestasi"]],
+        theme: "plain", // Tema polos
+        body: bodyDataIlmiah,
+        startY: tablePrestasiIlmiahYPosition, // Tambahkan margin 14
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: prestasiData.length === 0 ? "center" : "left", // Rata kiri
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { left: 20 },
+      });
+
+      let textPrestasiBeasiswaYPosition = doc.autoTable.previous.finalY + 10;
+
+      // Table for Beasiswa
+      const tableBeasiswaData = [
+        { beasiswa: "BBM", jumlah: data.jumlah_beasiswa_bbm },
+        { beasiswa: "Pegadaian", jumlah: data.jumlah_beasiswa_pegadaian },
+        {
+          beasiswa: "Supersemar",
+          jumlah: data.jumlah_beasiswa_supersemar,
+        },
+        { beasiswa: "PPA", jumlah: data.jumlah_beasiswa_ppa },
+        { beasiswa: "YKL", jumlah: data.jumlah_beasiswa_ykl },
+        { beasiswa: "Dan Lain-lainnya", jumlah: data.jumlah_beasiswa_dll },
+      ];
+
+      let tablePrestasiBeasiswaHeight = 1 * 15;
+
+      if (
+        textPrestasiBeasiswaYPosition + tablePrestasiBeasiswaHeight >
+        maxHeight
+      ) {
+        doc.addPage();
+        textPrestasiBeasiswaYPosition = 20;
+      }
+
+      doc.text(
+        "Prestasi Mahasiswa Mendapatkan Beasiswa",
+        20,
+        textPrestasiBeasiswaYPosition
+      );
+
+      let tablePrestasiBeasiswaYPosition = textPrestasiBeasiswaYPosition + 4;
+
+      doc.autoTable({
+        head: [["Jenis Beasiswa", "Jumlah Mahasiswa"]],
+        body: tableBeasiswaData.map((item) => [item.beasiswa, item.jumlah]),
+        startY: tablePrestasiBeasiswaYPosition,
+        theme: "plain", // Tema polos
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: "left", // Rata kiri
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { left: 20 },
+      });
+
+      let textPrestasiPorseniYPosition = doc.autoTable.previous.finalY + 10;
+
+      const prestasiPorseniData = selectedDataPrestasiPorseniMahasiswa;
+
+      const bodyDataPorseni =
+        prestasiPorseniData.length === 0
+          ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
+          : prestasiPorseniData.map((item) => [
+              item.jenis_kegiatan,
+              item.nim,
+              item.nama,
+              item.tingkat_prestasi,
+            ]);
+
+      const tablePrestasiPorseniHeight = 1 * 15;
+
+      if (
+        textPrestasiPorseniYPosition + tablePrestasiPorseniHeight >
+        maxHeight
+      ) {
+        doc.addPage(); // Add a new page
+        textPrestasiPorseniYPosition = 20; // Reset Y position for the new page
+      }
+
+      doc.text(
+        "Prestasi Mahasiswa Mengikuti Porseni",
+        20,
+        textPrestasiPorseniYPosition
+      );
+
+      let tablePrestasiPorseniYPosition = textPrestasiPorseniYPosition + 4;
+
+      doc.autoTable({
+        head: [["Jenis Kegiatan", "NIM", "Nama", "Tingkat Prestasi"]],
+        theme: "plain", // Tema polos
+        body: bodyDataPorseni,
+        startY: tablePrestasiPorseniYPosition, // Tambahkan margin 14
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: prestasiPorseniData.length > 0 ? "left" : "center", // Rata kiri
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { left: 20 },
+      });
+
+      let textStatusDataYPosition = doc.autoTable.previous.finalY + 10;
+
+      const statusData = selectedDataStatusMahasiswa;
+
+      const bodyDataStatus =
+        statusData.length === 0
+          ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
+          : statusData.map((item) => [item.nim, item.nama, item.status]);
+
+      const tableStatusDataHeight = 1 * 15;
+
+      if (textStatusDataYPosition + tableStatusDataHeight > maxHeight) {
+        doc.addPage(); // Add a new page
+        textStatusDataYPosition = 20; // Reset Y position for the new page
+      }
+
+      doc.text("Data Status Mahasiswa", 20, textStatusDataYPosition);
+
+      let tableStatusDataYPosition = textStatusDataYPosition + 4;
+
+      doc.autoTable({
+        head: [["NIM", "Nama", "Status"]],
+        theme: "plain", // Tema polos
+        body: bodyDataStatus,
+        startY: tableStatusDataYPosition,
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: statusData.length > 0 ? "left" : "center",
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { left: 20 },
+      });
+
+      doc.setFont("times new roman bold");
+
+      const selectedBimbingan = dataBimbingan.filter(
+        (bimbingan) => bimbingan.laporan_bimbingan_id === data.id
+      );
+      const bimbinganData = selectedBimbingan;
+
+      const bodyBimbingan =
+        bimbinganData.length === 0
+          ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
+          : bimbinganData.map((item, index) => [
+              index + 1,
+              item.pengajuan_bimbingan.nim,
+              item.pengajuan_bimbingan.nama_lengkap,
+              item.ttd_kehadiran,
+            ]);
+
+      function calculateTableHeight(doc, options) {
+        const cloneOptions = { ...options, startY: 0, margin: { bottom: 0 } };
+        doc.addPage();
+        doc.autoTable(cloneOptions);
+        const tableHeight = doc.autoTable.previous.finalY - 62;
+        doc.deletePage(doc.internal.getNumberOfPages()); // Hapus halaman sementara
+        return tableHeight;
+      }
+
+      const tableOptions = {
+        head: [["No", "NIM", "Nama", "TTD"]],
+        theme: "plain", // Tema polos
+        body: bodyBimbingan,
+        startY: 62,
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: "center",
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { bottom: 70 },
+        didDrawCell: (data) => {
+          if (
+            data.row.index >= 0 &&
+            data.column.index === 3 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.cell.raw;
+            if (imgSrc) {
+              const imgWidth = 8;
+              const imgHeight = 8;
+              const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
+              const y = data.cell.y + data.cell.height / 2 - imgHeight / 2;
+              doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
+            }
+          }
+        },
+        didParseCell: (data) => {
+          if (
+            data.row.index >= 0 &&
+            data.column.index === 3 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.row.raw[3];
+            if (imgSrc) {
+              data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
+              data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
+            }
+          }
+        },
+        didDrawPage: (a) => {
+          // Menambahkan TTD di setiap halaman setelah kolom tabel terakhir
+          const ttdY = a.cursor.y + 22; // Jarak dari baris tabel
+
+          const now = new Date();
+
+          // Mengatur opsi untuk format tanggal
+          const options = {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            timeZone: "Asia/Jakarta",
+          };
+
+          // Mengonversi tanggal ke format yang diinginkan
+          const formattedDate = now.toLocaleDateString("id-ID", options);
+
+          // Menambahkan tanggal (posisi pertama)
+          doc.text(`Jakarta, ${formattedDate}`, 170, ttdY, {
+            align: "center",
+          });
+
+          // Menambahkan jabatan (di bawah tanggal)
+          const jabatanDaftarHadirYPosition = ttdY + 7; // Jarak antar elemen
+          doc.text("Dosen PA", 170, jabatanDaftarHadirYPosition, {
+            align: "center",
+          });
+
+          // Menambahkan gambar TTD
+          doc.addImage(
+            data.tanda_tangan_dosen_pa,
+            "PNG",
+            160,
+            jabatanDaftarHadirYPosition + 4,
+            21,
+            21
+          );
+
+          // Menambahkan nama dosen di bawah TTD
+          doc.text(`( ${data.nama_dosen_pa} )`, 170, ttdY + 4 + 7 + 21 + 4, {
+            align: "center",
+          });
+        },
+      };
+
+      const tableHeight = calculateTableHeight(doc, tableOptions);
+
+      // Atur margin bottom
+
+      doc.addPage();
+
+      const judulDaftarHadir = "DAFTAR HADIR PERWALIAN";
+      const lebarJudulDaftarHadir = doc.getTextWidth(judulDaftarHadir);
+      const lebarPage = doc.internal.pageSize.getWidth();
+      const judulDaftarHadirXPosition = (lebarPage - lebarJudulDaftarHadir) / 2; // Calculate x position for center alignment
+      doc.setFont("times new roman bold");
+      doc.text(judulDaftarHadir, judulDaftarHadirXPosition, 28);
+      doc.setFont("times new roman");
+      doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 42); // Moved up by 10y
+      doc.text(`Semester                   :    ${data.semester}`, 15, 48); // Moved up by 10y
+      doc.autoTable(tableOptions);
+
+      doc.addPage("a4", "landscape");
+      const judulLembarKonsultasi = "LEMBAR KONSULTASI MAHASISWA";
+      const lebarJudulLembarKonsultasi = doc.getTextWidth(
+        judulLembarKonsultasi
+      );
+      const lebarPageLembarKonsultasi = doc.internal.pageSize.getWidth();
+      const judulLembarKonsultasiXPosition =
+        (lebarPageLembarKonsultasi - lebarJudulLembarKonsultasi) / 2; // Calculate x position for center alignment
+      doc.setFont("times new roman bold");
+      doc.text(judulLembarKonsultasi, judulLembarKonsultasiXPosition, 20);
+      doc.setFont("times new roman");
+      doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 32); // Moved up by 10y
+      doc.text(`Semester                   :    ${data.semester}`, 15, 38); // Moved up by 10y
+
+      const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
+        (data) => data.permasalahan !== null
+      );
+
+      console.log(data);
+      const bodyBimbinganLembarKonsultasi =
+        bimbinganDataLembarKonsultasi.length === 0
+          ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
+          : bimbinganDataLembarKonsultasi.map((item, index) => [
+              index + 1,
+              formatTanggal(item.pengajuan_bimbingan.jadwal_bimbingan),
+              item.pengajuan_bimbingan.nim,
+              item.pengajuan_bimbingan.nama_lengkap,
+              item.permasalahan,
+              item.solusi,
+              data.tanda_tangan_dosen_pa,
+              item.ttd_kehadiran,
+            ]);
+
+      doc.autoTable({
+        head: [
+          [
+            "No",
+            "Tanggal",
+            "NIM",
+            "Nama",
+            "Permasalahan",
+            "Solusi",
+            "TTD Dosen PA",
+            "TTD MHS",
+          ],
+        ],
+        showHead: "firstPage", // Tampilkan header hanya di halaman pertama
+        pageBreak: "auto", // Atur pemecahan halaman otomatis
+        theme: "plain", // Tema polos
+        body: bodyBimbinganLembarKonsultasi,
+        startY: 48,
+        headStyles: {
+          fontSize: 11, // Ukuran font header
+          halign: "center", // Rata tengah
+          font: "times new roman", // Font header
+        },
+        bodyStyles: {
+          fontSize: 11, // Ukuran font untuk isi
+          halign: "center",
+          valign: "top",
+          font: "times new roman", // Font header
+        },
+        styles: {
+          cellPadding: 3, // Padding sel
+          lineWidth: 0.1, // Ketebalan garis
+          lineColor: [0, 0, 0], // Warna garis hitam
+        },
+        tableWidth: "auto", // Lebar tabel otomatis
+        margin: { bottom: 30 },
+        didDrawCell: (data) => {
+          if (
+            data.row.index >= 0 &&
+            data.column.index === 7 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
+            if (imgSrc) {
+              const imgWidth = 8;
+              const imgHeight = 8;
+              const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
+              const y = data.cell.y + 2;
+              doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
+            }
+          } else if (
+            data.row.index >= 0 &&
+            data.column.index === 6 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
+            if (imgSrc) {
+              const imgWidth = 8;
+              const imgHeight = 8;
+              const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
+              const y = data.cell.y + 2;
+              doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
+            }
+          }
+        },
+        didParseCell: (data) => {
+          if (
+            data.row.index >= 0 &&
+            data.column.index === 7 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.row.raw[7];
+            if (imgSrc) {
+              data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
+              data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
+            }
+          } else if (
+            data.row.index >= 0 &&
+            data.column.index === 6 &&
+            data.section === "body"
+          ) {
+            const imgSrc = data.row.raw[6];
+            if (imgSrc) {
+              data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
+              data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
+            }
+          }
+          if (data.row.index >= 0 && data.section === "body") {
+            if (data.column.index === 4 || data.column.index === 5) {
+              data.cell.styles.halign = "justify"; // Justify alignment
+            }
+          }
+        },
+      });
+
+      doc.addPage("a4", "portrait");
+      doc.text("C. KESIMPULAN", 15, 20); // Adjusted x to 15 and y down by 20
+      doc.setFont("times new roman");
+
+      let yPositionKesimpulan = 30;
+      data.kesimpulan.forEach((paragraph) => {
+        // Check if the paragraph has children and extract the text
+        if (paragraph.children && paragraph.children.length > 0) {
+          const text = paragraph.children[0].text;
+
+          // Split the text into lines based on maxWidth
+          const lines = doc.splitTextToSize(text, maxWidth);
+
+          // Set alignment based on paragraph properties
+          const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
+
+          // Add each line to the document and adjust yPosition
+          lines.forEach((line, index) => {
+            if (yPositionKesimpulan > maxHeight) {
+              doc.addPage(); // Add a new page
+              yPositionKesimpulan = 20; // Reset yPosition for the new page
+            }
+            // Set alignment for the line
+            if (alignment === "justify") {
+              const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
+              const totalWidth = maxWidth; // Lebar area teks
+              const lineWidth = doc.getTextWidth(line);
+
+              if (index < lines.length - 1) {
+                // Hanya justify jika bukan baris terakhir
+                if (words.length > 1) {
+                  const totalSpaces = words.filter(
+                    (word) => word.trim() === ""
+                  ).length;
+                  const totalExtraSpace = totalWidth - lineWidth;
+                  const baseSpaceWidth = Math.floor(
+                    totalExtraSpace / totalSpaces
+                  );
+                  const extraSpaces = totalExtraSpace % totalSpaces;
+
+                  let justifiedLine = "";
+
+                  for (let i = 0; i < words.length; i++) {
+                    justifiedLine += words[i];
+                    if (i < words.length - 1 && words[i].trim() === "") {
+                      // Menambahkan spasi
+                      const spacesToAdd =
+                        baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
+                      justifiedLine += " ".repeat(spacesToAdd);
+                    }
+                  }
+                  doc.text(justifiedLine, 20, yPositionKesimpulan);
+                } else {
+                  doc.text(line, 20, yPositionKesimpulan); // Jika hanya satu kata, tidak perlu justify
+                }
+              } else {
+                doc.text(line, 20, yPositionKesimpulan); // Baris terakhir tidak di-justify
+              }
+            } else if (alignment === "center") {
+              doc.text(line, 110, yPositionKesimpulan, { align: "center" });
+            } else if (alignment === "right") {
+              doc.text(line, 200, yPositionKesimpulan, { align: "right" });
+            } else {
+              doc.text(line, 20, yPositionKesimpulan); // Default left alignment
+            }
+            yPositionKesimpulan += 6; // Adjust the spacing between lines
+          });
+        }
+      });
+
+      const now = new Date();
+
+      // Mengatur opsi untuk format tanggal
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Asia/Jakarta",
+      };
+
+      // Mengonversi tanggal ke format yang diinginkan
+      const formattedDate = now.toLocaleDateString("id-ID", options);
+
+      // Mengatur posisi awal untuk elemen vertikal
+      let verticalStart = yPositionKesimpulan + 14; // Posisi awal untuk elemen pertama
+      if (verticalStart > maxHeight) {
+        doc.addPage(); // Tambahkan halaman baru jika melebihi batas
+        verticalStart = 20; // Reset posisi Y untuk halaman baru
+      }
+
+      // Menambahkan tanggal (posisi pertama)
+      doc.text(`Jakarta, ${formattedDate}`, 170, verticalStart, {
+        align: "center",
+      });
+
+      // Menambahkan jabatan (di bawah tanggal)
+      const jabatanYPosition = verticalStart + 7; // Jarak antar elemen
+      doc.text("Dosen PA", 170, jabatanYPosition, { align: "center" });
+
+      const width = 21;
+      const height = 21;
+      // Menambahkan gambar tanda tangan (di bawah jabatan)
+      const yImagePosition = jabatanYPosition + 4; // Jarak antar elemen
+      const xImagePosition = 160; // Posisi X sesuai kebutuhan
+      console.log(data);
+      doc.addImage(
+        data.tanda_tangan_dosen_pa,
+        "PNG",
+        xImagePosition,
+        yImagePosition,
+        width,
+        height
+      );
+
+      // Menambahkan nama dosen (di bawah gambar)
+      const ttdY = yImagePosition + height + 4; // Jarak di bawah gambar
+      doc.text(`( ${data.nama_dosen_pa} )`, 170, ttdY, {
+        align: "center",
+      });
+
+      const pdfOutput = doc.output("blob");
+      const url = URL.createObjectURL(pdfOutput);
+
+      // Membuka PDF di tab baru
+      window.open(url, "_blank");
+    }
   };
 
   useEffect(() => {
@@ -823,6 +1425,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   useEffect(() => {
     getDataDosenPA();
     getDataMahasiswa();
+    getDataBimbingan();
   }, []);
 
   return (
@@ -1037,38 +1640,64 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
               </div>
             ) : (
               <div className="flex flex-col gap-4">
-                {dataDosenPA.map((data) => {
-                  return (
-                    <div
-                      key={data.id}
-                      className="flex justify-between border rounded-xl p-4 cursor-pointer"
-                      onClick={() => {
-                        handleDetailDosenPA(data);
-                      }}
+                {dataDosenPA.length > 0 ? (
+                  dataDosenPA.map((data) => {
+                    return (
+                      <div
+                        key={data.id}
+                        className="flex justify-between border rounded-xl p-4 cursor-pointer"
+                        onClick={() => {
+                          handleDetailDosenPA(data);
+                        }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={data.profile_image}
+                            alt="Profile Image"
+                            className="w-8 h-8 rounded-full cursor-pointer"
+                          />
+                          <p className="self-center font-medium">{data.nama}</p>
+                        </div>
+                        <div className="flex items-center">
+                          <p className="font-semibold text-orange-500">
+                            {`
+                        ${
+                          dataAllMahasiswa.filter(
+                            (dataMahasiswa) =>
+                              dataMahasiswa.dosen_pa_id === data.id
+                          ).length
+                        } mahasiswa bimbingan
+                      `}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="flex flex-col items-center p-10 border rounded-lg">
+                    <svg
+                      className="h-12 w-12 text-red-500 mb-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={data.profile_image}
-                          alt="Profile Image"
-                          className="w-8 h-8 rounded-full cursor-pointer"
-                        />
-                        <p className="self-center font-medium">{data.nama}</p>
-                      </div>
-                      <div className="flex items-center">
-                        <p className="font-semibold text-orange-500">
-                          {`
-                          ${
-                            dataAllMahasiswa.filter(
-                              (dataMahasiswa) =>
-                                dataMahasiswa.dosen_pa_id === data.id
-                            ).length
-                          } mahasiswa bimbingan
-                        `}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+
+                    <p className="text-center text-red-500">
+                      Data dosen tidak ditemukan.
+                    </p>
+                    <p className="text-center text-gray-600">
+                      Tunggu hingga data dosen ditambahkan.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1214,10 +1843,13 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">Dokumentasi</h3>
-                          <img
-                            className="w-1/2"
-                            src={selectedDataLaporanBimbingan?.dokumentasi}
-                          />
+                          <div className="flex overflow-x-auto gap-8 border p-8 rounded-xl mt-2 h-[300px]">
+                            {selectedDataLaporanBimbingan?.dokumentasi
+                              ?.split(", ")
+                              .map((data) => (
+                                <img className="ronded rounded-xl" src={data} />
+                              ))}
+                          </div>
                         </div>
                         <div className="flex flex-col gap-3 rounded-lg">
                           <h3 className="font-medium">Feedback Kaprodi</h3>
@@ -1249,22 +1881,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                                     selectedDataLaporanBimbingan?.dosen_pa_id,
                                     "Sudah Diberikan Feedback"
                                   );
-                                  setIsDetailLaporanKaprodiClicked(
-                                    !isDetailLaporanKaprodiClicked
-                                  );
-                                  setSelectedDataLaporanBimbingan(null);
-                                  setTimeout(() => {
-                                    setIsDetailLaporanKaprodiClicked(
-                                      isDetailLaporanKaprodiClicked
-                                    );
-                                    setSelectedDataLaporanBimbingan({
-                                      ...selectedDataLaporanBimbingan,
-                                      status: "Sudah Diberikan Feedback",
-                                      feedback_kaprodi: feedbackKaprodi,
-                                    });
-                                  }, 1);
                                 }}
-                                className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg ml-auto w-1/5 hover:bg-orange-600 transition duration-200"
+                                className="text-white bg-green-500 text-[14px] py-2 font-medium rounded-lg ml-auto w-1/5 hover:bg--600 transition duration-200"
                               >
                                 Submit
                               </button>
@@ -1361,11 +1979,32 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                 </div>
               )
             ) : (
-              <div className="text-center border rounded-lg py-12 text-gray-500 mb-[400px]">
-                <p>Belum ada laporan bimbingan</p>
+              <div className="flex flex-col items-center p-10 border rounded-lg">
+                <svg
+                  className="h-12 w-12 text-red-500 mb-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+
+                <p className="text-center text-red-500">
+                  Saat ini belum ada data riwayat laporan bimbingan.
+                </p>
+                <p className="text-center text-gray-600">
+                  Silakan tunggu dosen pembimbing akademik melaporkan bimbingan.
+                </p>
               </div>
             )}
           </div>
+          <ToastContainer />
         </div>
       )}
     </Provider>

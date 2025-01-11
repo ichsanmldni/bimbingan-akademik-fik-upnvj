@@ -44,17 +44,14 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
 
   const getDataTahunAjaran = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/datatahunajaran`);
+      const response = await axios.post(`${API_BASE_URL}/api/datatahunajaran`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
-      const sortedDataJurusan = data.sort(
-        (a: TahunAjaran, b: TahunAjaran) => a.order - b.order
-      );
-      setDataTahunAjaran(sortedDataJurusan);
+      const data = await response.data.data;
+      setDataTahunAjaran(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -157,10 +154,10 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
               {Object.entries(groupedSchedules).map(
                 ([dosenName, schedule], index) => (
                   <tr key={index} className="text-center">
-                    <td className="border-b border-gray-200 px-4 py-6">
+                    <td className="border-b align-top  border-gray-200 px-4 py-6">
                       {index + 1}
                     </td>
-                    <td className="border-b border-gray-200 px-4 py-6">
+                    <td className="border-b align-top  border-gray-200 px-4 py-6">
                       {dosenName}
                     </td>
                     {["Senin", "Selasa", "Rabu", "Kamis", "Jumat"].map(
@@ -181,7 +178,7 @@ const ManageJadwalDosenPA: React.FC<ManageJadwalDosenPAProps> = () => {
                         </td>
                       )
                     )}
-                    <td className="border-b border-gray-200 px-4 py-6">
+                    <td className="border-b align-top  border-gray-200 px-4 py-6">
                       <div className="flex gap-2 items-center justify-center">
                         <EditButton
                           onClick={() => {}}

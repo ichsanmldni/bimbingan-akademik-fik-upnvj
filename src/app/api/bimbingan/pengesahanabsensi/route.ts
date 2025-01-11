@@ -7,7 +7,6 @@ export async function PATCH(req: Request): Promise<Response> {
     try {
         const body: any = await req.json();
         const { id, status_pengesahan_kehadiran } = body;
-        console.log(body)
 
 
         if (!id || !status_pengesahan_kehadiran) {
@@ -56,8 +55,13 @@ export async function PATCH(req: Request): Promise<Response> {
             await prisma.notifikasimahasiswa.create({ data: notifikasiMahasiswa });
         }
 
+        const responsePayload = {
+            status: "success",
+            message: "Konfirmasi pengesahan absensi bimbingan telah berhasil!",
+            data: bimbingan,
+        };
 
-        return new Response(JSON.stringify(bimbingan), {
+        return new Response(JSON.stringify(responsePayload), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });

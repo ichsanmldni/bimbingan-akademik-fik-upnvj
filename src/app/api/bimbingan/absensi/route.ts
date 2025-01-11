@@ -6,33 +6,11 @@ import prisma from '../../../../lib/prisma';
 export async function PATCH(req: Request): Promise<Response> {
     try {
         const body: any = await req.json();
-        const { id, dokumentasi_kehadiran, ttd_kehadiran } = body;
-
+        const { id, dokumentasi_kehadiran, ttd_kehadiran, solusi } = body;
 
         if (!id) {
             return new Response(
                 JSON.stringify({ message: 'Invalid data' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
-            );
-        }
-
-        if (!dokumentasi_kehadiran && !ttd_kehadiran) {
-            return new Response(
-                JSON.stringify({ message: 'Wajib input tanda tangan dan dokumentasi kehadiran!' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
-            );
-        }
-
-        if (!dokumentasi_kehadiran) {
-            return new Response(
-                JSON.stringify({ message: 'Wajib input dokumentasi kehadiran!' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
-            );
-        }
-
-        if (!ttd_kehadiran) {
-            return new Response(
-                JSON.stringify({ message: 'Wajib input tanda tangan kehadiran!' }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
         }
@@ -42,13 +20,77 @@ export async function PATCH(req: Request): Promise<Response> {
             include: {
                 pengajuan_bimbingan: true,
             }
-        });
+        }
+        );
 
         if (!existingRecord) {
             return new Response(
-                JSON.stringify({ message: 'Record not found' }),
+                JSON.stringify({ message: 'Tidak ada data bimbingan yang ditemukan!' }),
                 { status: 404, headers: { 'Content-Type': 'application/json' } }
             );
+        }
+
+        if (existingRecord?.pengajuan_bimbingan.jenis_bimbingan === "Pribadi") {
+            if (!dokumentasi_kehadiran && !ttd_kehadiran && !solusi) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input semua kolom!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+            if (!solusi) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input solusi yang diberikan selama bimbingan!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+            if (!dokumentasi_kehadiran && !ttd_kehadiran) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input tanda tangan dan dokumentasi kehadiran!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+            if (!dokumentasi_kehadiran) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input dokumentasi kehadiran!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+
+            if (!ttd_kehadiran) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input tanda tangan kehadiran!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+        } else if (existingRecord?.pengajuan_bimbingan.jenis_bimbingan === "Perwalian") {
+            if (existingRecord.permasalahan) {
+                if (!solusi) {
+                    return new Response(
+                        JSON.stringify({ message: 'Wajib input solusi yang diberikan selama bimbingan!' }),
+                        { status: 400, headers: { 'Content-Type': 'application/json' } }
+                    );
+                }
+            }
+            if (!dokumentasi_kehadiran && !ttd_kehadiran) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input tanda tangan dan dokumentasi kehadiran!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+
+            if (!dokumentasi_kehadiran) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input dokumentasi kehadiran!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
+
+            if (!ttd_kehadiran) {
+                return new Response(
+                    JSON.stringify({ message: 'Wajib input tanda tangan kehadiran!' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
+            }
         }
 
         const ttdUploadDir = path.join(process.cwd(), 'public', 'uploads', 'ttd_mahasiswa');
@@ -108,11 +150,18 @@ export async function PATCH(req: Request): Promise<Response> {
                 }
             }
         }
-
-        const bimbingan = await prisma.bimbingan.update({
-            where: { id },
-            data: { dokumentasi_kehadiran: savedImageDokumentasiPaths, status_pengesahan_kehadiran: "Belum Sah", status_kehadiran_mahasiswa: "Hadir", ttd_kehadiran: savedImageTtdPaths },
-        });
+        let bimbingan;
+        if (existingRecord.permasalahan) {
+            bimbingan = await prisma.bimbingan.update({
+                where: { id },
+                data: { dokumentasi_kehadiran: savedImageDokumentasiPaths, status_pengesahan_kehadiran: "Belum Sah", status_kehadiran_mahasiswa: "Hadir", ttd_kehadiran: savedImageTtdPaths, solusi },
+            });
+        } else {
+            bimbingan = await prisma.bimbingan.update({
+                where: { id },
+                data: { dokumentasi_kehadiran: savedImageDokumentasiPaths, status_pengesahan_kehadiran: "Belum Sah", status_kehadiran_mahasiswa: "Hadir", ttd_kehadiran: savedImageTtdPaths, },
+            });
+        }
 
         const notifikasiDosenPA = {
             dosen_pa_id: existingRecord.pengajuan_bimbingan.dosen_pa_id,

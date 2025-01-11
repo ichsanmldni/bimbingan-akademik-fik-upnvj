@@ -28,15 +28,14 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   const getDataTahunAjaran = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/datatahunajaran`);
+      const response = await axios.post(`${API_BASE_URL}/api/datatahunajaran`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const data: TahunAjaran[] = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
-      setDataTahunAjaran(sortedDataJurusan);
+      const data: TahunAjaran[] = await response.data.data;
+      setDataTahunAjaran(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -45,11 +44,16 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   useEffect(() => {
     if (dataTahunAjaran.length > 0) {
-      const formattedOptions = dataTahunAjaran.map((data) => ({
-        value: data.tahun_ajaran,
-        label: data.tahun_ajaran,
-      }));
+      const uniqueYears = new Set();
+      dataTahunAjaran.forEach((data) => {
+        const year = data.nama_periode.split(" ")[0];
+        uniqueYears.add(year); // Menambahkan tahun ke Set
+      });
 
+      const formattedOptions = Array.from(uniqueYears).map((year) => ({
+        value: year,
+        label: year,
+      }));
       setOptionsTahunAjaran(formattedOptions);
     }
   }, [dataTahunAjaran]);
@@ -64,7 +68,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
         <div className="flex flex-col gap-4">
           <div className="flex gap-5">
             <SelectField
-              options={[{ value: "2024/2025", label: "2024/2025" }]}
+              options={optionsTahunAjaran}
               onChange={(e) => setSelectedTahunAjaran(e.target.value)}
               value={selectedTahunAjaran}
               placeholder="Semua Tahun Ajaran"
@@ -72,7 +76,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
             />
             <SelectField
               options={[
-                { value: "Gasal", label: "Gasal" },
+                { value: "Ganjil", label: "Genap" },
                 { value: "Genap", label: "Genap" },
               ]}
               onChange={(e) => setSelectedSemester(e.target.value)}

@@ -26,7 +26,13 @@ const NotificationModal: React.FC<ModalProps> = ({
     } else if (data.isi.startsWith("Ada absensi bimbingan baru dari")) {
       submenu = "Pengesahan%20Absensi%20Bimbingan";
     } else if (data.isi.startsWith("Absensi bimbinganmu")) {
-      submenu = "Absensi Bimbingan";
+      submenu = "Absensi%20Bimbingan";
+    } else if (data.isi.startsWith("Laporan bimbingan baru dari Dosen")) {
+      submenu = "Riwayat%20Laporan%20Bimbingan%20Role%20Kaprodi";
+    } else if (
+      data.isi.startsWith("Laporan bimbingan Anda yang dilaksanakan pada")
+    ) {
+      submenu = "Riwayat%20Laporan%20Bimbingan%20Role%20Dosen%20PA";
     }
     const targetUrl = `/dashboard?submenu=${submenu}`;
     router.push(targetUrl);

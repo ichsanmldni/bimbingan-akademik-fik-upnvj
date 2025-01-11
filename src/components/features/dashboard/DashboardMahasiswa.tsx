@@ -21,6 +21,7 @@ import { Fragment } from "react";
 import { env } from "process";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Span } from "slate";
 
 interface DashboardMahasiswaProps {
   selectedSubMenuDashboard: string;
@@ -109,6 +110,9 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<any[]>([]); // Adjust type as needed
   const [previewDocumentation, setPreviewDocumentation] = useState([]);
   const [selectedBimbinganId, setSelectedBimbinganId] = useState();
+  const [permasalahan, setPermasalahan] = useState("");
+  const [solusi, setSolusi] = useState("");
+  const [selectedTopikBimbingan, setSelectedTopikBimbingan] = useState();
   const [inputKey, setInputKey] = useState(Date.now());
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
@@ -120,10 +124,27 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
     setSelectedBimbinganId(id);
   };
 
+  useEffect(() => {
+    if (selectedBimbinganId) {
+      const selectedDataBimbingan = dataBimbingan.filter(
+        (data) => data.id === selectedBimbinganId
+      );
+
+      console.log(selectedDataBimbingan[0]);
+
+      setSelectedTopikBimbingan(
+        selectedDataBimbingan[0].pengajuan_bimbingan.topik_bimbingan
+      );
+    }
+  }, [selectedBimbinganId]);
+
   const closeModal = () => {
     setSelectedBimbinganId(null);
     setIsOpen(false);
+    setSelectedTopikBimbingan(null);
     setDocumentation(null);
+    setSolusi("");
+    setPermasalahan("");
     setPreviewDocumentation([]);
   };
 
@@ -189,6 +210,8 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
           "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAAtJREFUGFdjYAACAAAFAAGq1chRAAAAAElFTkSuQmCC"
             ? undefined
             : signatureData,
+        solusi: solusi ? solusi : null,
+        permasalahan: permasalahan ? permasalahan : null,
       };
       const result = await addAbsensiBimbingan(absensiBimbinganValue);
       toast.success(
@@ -853,178 +876,438 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
             </h1>
 
             <div className="flex flex-col gap-4">
-              {dataBimbingan
-                .slice()
-                .reverse()
-                .map((data: any) => (
-                  <div
-                    key={data.id}
-                    className="flex flex-col border rounded-lg p-6 gap-4"
-                  >
-                    <div className="flex justify-between text-neutral-600">
-                      <p>
-                        {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
-                      </p>
-                      <p>
-                        {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
-                      </p>
-                    </div>
-                    <div>
-                      <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
-                      <p>{data.pengajuan_bimbingan.topik_bimbingan}</p>
-                      <p className="font-medium">
-                        {data.pengajuan_bimbingan.sistem_bimbingan}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[14px]">
-                        {data.pengajuan_bimbingan.keterangan}
-                      </p>
-                    </div>
-                    {data.laporan_bimbingan_id === null &&
-                    data.status_kehadiran_mahasiswa === null ? (
-                      <div className="flex justify-end">
-                        <button
-                          onClick={() => openModal(data.id)}
-                          className="bg-orange-400 text-[14px] hover:bg-orange-500 justify-end rounded-lg p-2 text-white"
-                        >
-                          Isi Absensi
-                        </button>
-                        <Transition appear show={isOpen} as={Fragment}>
-                          <Dialog
-                            as="div"
-                            className="relative z-[1000]"
-                            onClose={closeModal}
-                          >
-                            <TransitionChild
-                              as={Fragment}
-                              enter="ease-out duration-300"
-                              enterFrom="opacity-0"
-                              enterTo="opacity-100"
-                              leave="ease-in duration-200"
-                              leaveFrom="opacity-100"
-                              leaveTo="opacity-0"
-                            >
-                              <div className="fixed inset-0 bg-black bg-opacity-5" />
-                            </TransitionChild>
+              {dataBimbingan.length > 0 ? (
+                dataBimbingan
+                  .slice()
+                  .reverse()
+                  .map((data: any) => (
+                    <div
+                      key={data.id}
+                      className="flex flex-col border rounded-lg p-6 gap-4"
+                    >
+                      <div className="flex justify-between text-neutral-600">
+                        <p>
+                          {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                        </p>
+                        <p>
+                          {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                        </p>
+                      </div>
+                      <div>
+                        <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
+                        <p>{data.pengajuan_bimbingan.topik_bimbingan}</p>
+                        <p className="font-medium">
+                          {data.pengajuan_bimbingan.sistem_bimbingan}
+                        </p>
+                      </div>
+                      {data.permasalahan && (
+                        <div className="flex flex-col gap-2">
+                          <p className="text-[14px] font-medium">
+                            Permasalahan{" "}
+                            {data.pengajuan_bimbingan.jenis_bimbingan ===
+                            "Pribadi" ? (
+                              <span>
+                                {" "}
+                                (Topik bimbingan :{" "}
+                                {data.pengajuan_bimbingan.topik_bimbingan} )
+                              </span>
+                            ) : (
+                              ""
+                            )}
+                          </p>
+                          <textarea
+                            value={data.permasalahan}
+                            disabled
+                            className="border rounded-lg text-sm p-2"
+                          ></textarea>
+                        </div>
+                      )}
 
-                            <div className="fixed inset-0 overflow-y-auto">
-                              <div className="flex min-h-full items-center justify-center p-4 text-center">
+                      {data.laporan_bimbingan_id === null &&
+                      data.status_kehadiran_mahasiswa === null ? (
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => openModal(data.id)}
+                            className="bg-orange-400 text-[14px] hover:bg-orange-500 justify-end rounded-lg p-2 text-white"
+                          >
+                            Isi Absensi
+                          </button>
+                          {data.id === selectedBimbinganId &&
+                          data.pengajuan_bimbingan.jenis_bimbingan ===
+                            "Perwalian" ? (
+                            <Transition appear show={isOpen} as={Fragment}>
+                              <Dialog
+                                as="div"
+                                className="relative z-[1000]"
+                                onClose={closeModal}
+                              >
                                 <TransitionChild
                                   as={Fragment}
                                   enter="ease-out duration-300"
-                                  enterFrom="opacity-0 scale-95"
-                                  enterTo="opacity-100 scale-100"
+                                  enterFrom="opacity-0"
+                                  enterTo="opacity-100"
                                   leave="ease-in duration-200"
-                                  leaveFrom="opacity-100 scale-100"
-                                  leaveTo="opacity-0 scale-95"
+                                  leaveFrom="opacity-100"
+                                  leaveTo="opacity-0"
                                 >
-                                  <DialogPanel className="w-full scrollbar scrollbar-thumb-corner-900 max-w-md max-h-[500px] overflow-y-auto transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle transition-all">
-                                    <DialogTitle
-                                      as="h3"
-                                      className="text-lg font-medium leading-6 text-gray-900"
-                                    >
-                                      Isi Absensi
-                                    </DialogTitle>
-                                    <div className="mt-2">
-                                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Tanda Tangan:
-                                      </label>
-                                      <SignatureCanvas
-                                        ref={sigCanvas}
-                                        penColor="black"
-                                        canvasProps={{
-                                          className:
-                                            "border border-gray-300 rounded w-full h-[200px] hover:cursor-pointer",
-                                        }}
-                                      />
-                                      <button
-                                        className="mt-2 text-sm text-blue-500 hover:underline"
-                                        onClick={clearSignature}
-                                      >
-                                        Clear
-                                      </button>
-                                    </div>
-                                    <div className="mt-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Dokumentasi:
-                                      </label>
-                                      {previewDocumentation.length > 0 && (
-                                        <div className="mt-4">
-                                          {previewDocumentation.map(
-                                            (preview, index) => (
-                                              <div
-                                                key={index}
-                                                className="relative mb-2"
-                                              >
-                                                <img
-                                                  src={preview}
-                                                  alt={`Preview ${index}`}
-                                                  className="w-full h-auto rounded border border-gray-300"
-                                                />
-                                                <div className="absolute top-2 right-2 flex space-x-2">
-                                                  <button
-                                                    onClick={resetImage}
-                                                    className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                                    title="Hapus Gambar"
-                                                  >
-                                                    <TrashIcon className="h-5 w-5" />
-                                                  </button>
-                                                  <button
-                                                    onClick={() =>
-                                                      openImageInNewTab(preview)
-                                                    } // Menggunakan fungsi baru
-                                                    className="p-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-                                                    title="Lihat Gambar"
-                                                  >
-                                                    <EyeIcon className="h-5 w-5" />
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            )
-                                          )}
-                                        </div>
-                                      )}
-                                      <input
-                                        key={inputKey}
-                                        type="file"
-                                        onChange={handleImageUpload}
-                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:cursor-pointer hover:file:bg-blue-100"
-                                      />
-                                    </div>
-
-                                    <div className="mt-4 flex justify-end space-x-2">
-                                      <button
-                                        type="button"
-                                        className="inline-flex justify-center rounded-md border border-transparent bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                                        onClick={closeModal}
-                                      >
-                                        Close
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                        onClick={(e) => handleSubmit(e)}
-                                      >
-                                        Submit
-                                      </button>
-                                    </div>
-                                  </DialogPanel>
+                                  <div className="fixed inset-0 bg-black bg-opacity-5" />
                                 </TransitionChild>
-                              </div>
-                            </div>
-                          </Dialog>
-                        </Transition>
-                      </div>
-                    ) : (
-                      <div className="flex justify-end">
-                        <div className="bg-green-400 text-[14px] justify-end rounded-lg p-2 text-white">
-                          Sudah Absen
+
+                                <div className="fixed inset-0 overflow-clip">
+                                  <div className="flex min-h-full items-center justify-center p-4 text-center">
+                                    <TransitionChild
+                                      as={Fragment}
+                                      enter="ease-out duration-300"
+                                      enterFrom="opacity-0 scale-95"
+                                      enterTo="opacity-100 scale-100"
+                                      leave="ease-in duration-200"
+                                      leaveFrom="opacity-100 scale-100"
+                                      leaveTo="opacity-0 scale-95"
+                                    >
+                                      <DialogPanel className="w-full max-w-md max-h-[500px] overflow-hidden rounded-2xl bg-white text-left align-middle transition-all">
+                                        <DialogTitle
+                                          as="h3"
+                                          className="text-lg font-medium leading-6 text-gray-900 px-6 pt-6"
+                                        >
+                                          Isi Absensi
+                                        </DialogTitle>
+                                        <div className=" pl-6 px-3">
+                                          <div className="max-h-[346px] overflow-y-auto pr-3">
+                                            {data.permasalahan && (
+                                              <div>
+                                                <p className="text-sm font-medium text-gray-700 mt-2">
+                                                  Permasalahan
+                                                </p>
+                                                <textarea
+                                                  placeholder={
+                                                    data.permasalahan === ""
+                                                      ? "Permasalahan"
+                                                      : data.permasalahan
+                                                  }
+                                                  value={data.permasalahan}
+                                                  disabled
+                                                  className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                                                />
+                                                <p className="text-sm font-medium text-gray-700 mt-2">
+                                                  Solusi
+                                                </p>
+                                                <textarea
+                                                  placeholder={
+                                                    solusi === ""
+                                                      ? "Masukkan solusi yang diberikan selama bimbingan"
+                                                      : solusi
+                                                  }
+                                                  onChange={(e) => {
+                                                    setSolusi(e.target.value);
+                                                  }}
+                                                  value={solusi}
+                                                  className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                                                />
+                                              </div>
+                                            )}
+                                            <div className="mt-2">
+                                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Tanda Tangan:
+                                              </label>
+                                              <SignatureCanvas
+                                                ref={sigCanvas}
+                                                penWidth={7}
+                                                penColor="black"
+                                                canvasProps={{
+                                                  className:
+                                                    "border border-gray-300 rounded w-full h-[200px] hover:cursor-pointer",
+                                                }}
+                                              />
+                                              <button
+                                                className="mt-2 text-sm text-blue-500 hover:underline"
+                                                onClick={clearSignature}
+                                              >
+                                                Clear
+                                              </button>
+                                            </div>
+                                            <div className="mt-4">
+                                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Dokumentasi:
+                                              </label>
+                                              {previewDocumentation.length >
+                                                0 && (
+                                                <div className="mt-4">
+                                                  {previewDocumentation.map(
+                                                    (preview, index) => (
+                                                      <div
+                                                        key={index}
+                                                        className="relative mb-2"
+                                                      >
+                                                        <img
+                                                          src={preview}
+                                                          alt={`Preview ${index}`}
+                                                          className="w-full h-auto rounded border border-gray-300"
+                                                        />
+                                                        <div className="absolute top-2 right-2 flex space-x-2">
+                                                          <button
+                                                            onClick={resetImage}
+                                                            className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                                            title="Hapus Gambar"
+                                                          >
+                                                            <TrashIcon className="h-5 w-5" />
+                                                          </button>
+                                                          <button
+                                                            onClick={() =>
+                                                              openImageInNewTab(
+                                                                preview
+                                                              )
+                                                            } // Menggunakan fungsi baru
+                                                            className="p-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                                                            title="Lihat Gambar"
+                                                          >
+                                                            <EyeIcon className="h-5 w-5" />
+                                                          </button>
+                                                        </div>
+                                                      </div>
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                              <input
+                                                key={inputKey}
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:cursor-pointer hover:file:bg-blue-100"
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-4 flex justify-end space-x-2 pb-6 px-6">
+                                          <button
+                                            type="button"
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                                            onClick={closeModal}
+                                          >
+                                            Close
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                            onClick={(e) => handleSubmit(e)}
+                                          >
+                                            Submit
+                                          </button>
+                                        </div>
+                                      </DialogPanel>
+                                    </TransitionChild>
+                                  </div>
+                                </div>
+                              </Dialog>
+                            </Transition>
+                          ) : data.id === selectedBimbinganId &&
+                            data.pengajuan_bimbingan.jenis_bimbingan ===
+                              "Pribadi" ? (
+                            <Transition appear show={isOpen} as={Fragment}>
+                              <Dialog
+                                as="div"
+                                className="relative z-[1000]"
+                                onClose={closeModal}
+                              >
+                                <TransitionChild
+                                  as={Fragment}
+                                  enter="ease-out duration-300"
+                                  enterFrom="opacity-0"
+                                  enterTo="opacity-100"
+                                  leave="ease-in duration-200"
+                                  leaveFrom="opacity-100"
+                                  leaveTo="opacity-0"
+                                >
+                                  <div className="fixed inset-0 bg-black bg-opacity-5" />
+                                </TransitionChild>
+
+                                <div className="fixed inset-0 overflow-clip">
+                                  <div className="flex min-h-full items-center justify-center p-4 text-center">
+                                    <TransitionChild
+                                      as={Fragment}
+                                      enter="ease-out duration-300"
+                                      enterFrom="opacity-0 scale-95"
+                                      enterTo="opacity-100 scale-100"
+                                      leave="ease-in duration-200"
+                                      leaveFrom="opacity-100 scale-100"
+                                      leaveTo="opacity-0 scale-95"
+                                    >
+                                      <DialogPanel className="w-full max-w-md max-h-[500px] overflow-hidden rounded-2xl bg-white text-left align-middle transition-all">
+                                        <DialogTitle
+                                          as="h3"
+                                          className="text-lg font-medium leading-6 text-gray-900 px-6 py-6"
+                                        >
+                                          Isi Absensi
+                                        </DialogTitle>
+                                        <div className=" pl-6 px-3">
+                                          <div className="max-h-[346px] overflow-y-auto pr-3">
+                                            <div className="flex flex-col gap-2">
+                                              <p className="text-sm font-medium text-gray-700">
+                                                Permasalahan (Topik bimbingan :{" "}
+                                                {selectedTopikBimbingan})
+                                              </p>
+                                              <textarea
+                                                placeholder={
+                                                  data.permasalahan === ""
+                                                    ? "Permasalahan"
+                                                    : data.permasalahan
+                                                }
+                                                value={data.permasalahan}
+                                                disabled
+                                                className="border focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                                              />
+                                              <p className="text-sm font-medium text-gray-700">
+                                                Solusi
+                                              </p>
+                                              <textarea
+                                                placeholder={
+                                                  solusi === ""
+                                                    ? "Masukkan solusi yang diberikan selama bimbingan"
+                                                    : solusi
+                                                }
+                                                onChange={(e) => {
+                                                  setSolusi(e.target.value);
+                                                }}
+                                                value={solusi}
+                                                className="border focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                                              />
+                                            </div>
+                                            <div className="mt-2">
+                                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Tanda Tangan:
+                                              </label>
+                                              <SignatureCanvas
+                                                ref={sigCanvas}
+                                                penColor="black"
+                                                penWidth={7}
+                                                canvasProps={{
+                                                  className:
+                                                    "border border-gray-300 rounded w-full h-[200px] hover:cursor-pointer",
+                                                }}
+                                              />
+                                              <button
+                                                className="mt-2 text-sm text-blue-500 hover:underline"
+                                                onClick={clearSignature}
+                                              >
+                                                Clear
+                                              </button>
+                                            </div>
+                                            <div className="mt-4">
+                                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Dokumentasi:
+                                              </label>
+                                              {previewDocumentation.length >
+                                                0 && (
+                                                <div className="mt-4">
+                                                  {previewDocumentation.map(
+                                                    (preview, index) => (
+                                                      <div
+                                                        key={index}
+                                                        className="relative mb-2"
+                                                      >
+                                                        <img
+                                                          src={preview}
+                                                          alt={`Preview ${index}`}
+                                                          className="w-full h-auto rounded border border-gray-300"
+                                                        />
+                                                        <div className="absolute top-2 right-2 flex space-x-2">
+                                                          <button
+                                                            onClick={resetImage}
+                                                            className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                                            title="Hapus Gambar"
+                                                          >
+                                                            <TrashIcon className="h-5 w-5" />
+                                                          </button>
+                                                          <button
+                                                            onClick={() =>
+                                                              openImageInNewTab(
+                                                                preview
+                                                              )
+                                                            } // Menggunakan fungsi baru
+                                                            className="p-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                                                            title="Lihat Gambar"
+                                                          >
+                                                            <EyeIcon className="h-5 w-5" />
+                                                          </button>
+                                                        </div>
+                                                      </div>
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                              <input
+                                                key={inputKey}
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:cursor-pointer hover:file:bg-blue-100"
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-4 flex justify-end space-x-2 pb-6 px-6">
+                                          <button
+                                            type="button"
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                                            onClick={closeModal}
+                                          >
+                                            Close
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                            onClick={(e) => handleSubmit(e)}
+                                          >
+                                            Submit
+                                          </button>
+                                        </div>
+                                      </DialogPanel>
+                                    </TransitionChild>
+                                  </div>
+                                </div>
+                              </Dialog>
+                            </Transition>
+                          ) : (
+                            ""
+                          )}
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      ) : (
+                        <div className="flex justify-end">
+                          <div className="bg-green-400 text-[14px] justify-end rounded-lg p-2 text-white">
+                            Sudah Absen
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+              ) : (
+                <div className="flex flex-col items-center p-10 border rounded-lg">
+                  <svg
+                    className="h-12 w-12 text-red-500 mb-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+
+                  <p className="text-center text-red-500">
+                    Saat ini tidak ada data absensi bimbingan.
+                  </p>
+                  <p className="text-center text-gray-600">
+                    Belum ada bimbingan yang perlu diabsen. Silakan periksa
+                    kembali setelah bimbingan dilaksanakan.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <ToastContainer />
@@ -1038,35 +1321,95 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
             </h1>
 
             <div className="flex flex-col gap-4">
-              {dataPengajuanBimbingan
-                .slice()
-                .reverse()
-                .map((data) => (
-                  <div
-                    key={data.id}
-                    className="flex flex-col border rounded-lg p-6 gap-4"
+              {dataPengajuanBimbingan.length > 0 ? (
+                dataPengajuanBimbingan
+                  .slice()
+                  .reverse()
+                  .map((data) => (
+                    <div
+                      key={data.id}
+                      className="flex flex-col border rounded-lg p-6 gap-4"
+                    >
+                      <div className="flex justify-between text-neutral-600">
+                        <p>{getDate(data.jadwal_bimbingan)}</p>
+                        <p>{getTime(data.jadwal_bimbingan)}</p>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="max-w-[500px]">
+                          <p className="font-medium">{data.nama_lengkap}</p>
+                          <p>{data.jenis_bimbingan}</p>
+                          <p className="font-medium">{data.sistem_bimbingan}</p>
+                        </div>
+                        <div
+                          className={`${data.status === "Diterima" ? "bg-green-500" : data.status === "Reschedule" ? "bg-red-500" : data.status === "Menunggu Konfirmasi" ? "bg-gray-400" : ""} p-3 align-top max-h-[48px] rounded-lg`}
+                        >
+                          <p className="text-white text-center">
+                            {data.status}
+                          </p>
+                        </div>
+                      </div>
+                      {data.permasalahan && (
+                        <div className="flex flex-col gap-2">
+                          <p className="text-[14px] font-medium">
+                            Permasalahan{" "}
+                            {data.jenis_bimbingan === "Pribadi" ? (
+                              <span>
+                                {" "}
+                                (Topik bimbingan : {data.topik_bimbingan} )
+                              </span>
+                            ) : (
+                              ""
+                            )}
+                          </p>
+                          <textarea
+                            value={data.permasalahan}
+                            disabled
+                            className="border rounded-lg text-sm p-2"
+                          ></textarea>
+                        </div>
+                      )}
+                      {data.status === "Diterima" ||
+                      data.status === "Reschedule" ? (
+                        <div className="flex flex-col gap-2">
+                          <p className="text-[14px] font-medium">
+                            Keterangan dari Dosen PA
+                          </p>
+                          <textarea
+                            value={data.keterangan}
+                            disabled
+                            className="border rounded-lg text-sm p-2"
+                          ></textarea>
+                        </div>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  ))
+              ) : (
+                <div className="flex flex-col items-center p-10 border rounded-lg">
+                  <svg
+                    className="h-12 w-12 text-red-500 mb-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    <div className="flex justify-between text-neutral-600">
-                      <p>{getDate(data.jadwal_bimbingan)}</p>
-                      <p>{getTime(data.jadwal_bimbingan)}</p>
-                    </div>
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">{data.nama_lengkap}</p>
-                        <p>{data.jenis_bimbingan}</p>
-                        <p className="font-medium">{data.sistem_bimbingan}</p>
-                      </div>
-                      <div
-                        className={`${data.status === "Diterima" ? "bg-green-500" : data.status === "Reschedule" ? "bg-red-500" : data.status === "Menunggu Konfirmasi" ? "bg-gray-400" : ""} p-3 self-center rounded-lg`}
-                      >
-                        <p className="text-white text-center">{data.status}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[14px]">{data.keterangan}</p>
-                    </div>
-                  </div>
-                ))}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+
+                  <p className="text-center text-red-500">
+                    Saat ini tidak ada data riwayat pengajuan bimbingan.
+                  </p>
+                  <p className="text-center text-gray-600">
+                    Silakan ajukan bimbingan terlebih dahulu.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

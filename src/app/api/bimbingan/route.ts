@@ -13,6 +13,7 @@ export async function GET(req: Request): Promise<Response> {
     const bimbingan = await prisma.bimbingan.findMany({
       include: {
         pengajuan_bimbingan: true,
+        laporan_bimbingan: true
       },
     });
 
@@ -33,7 +34,7 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
   try {
     const body: BimbinganRequestBody = await req.json();
-    const { pengajuan_bimbingan_id } = body;
+    const { pengajuan_bimbingan_id, permasalahan } = body;
 
     if (!pengajuan_bimbingan_id) {
       return new Response(
@@ -45,6 +46,7 @@ export async function POST(req: Request): Promise<Response> {
     const bimbingan = await prisma.bimbingan.create({
       data: {
         pengajuan_bimbingan_id,
+        permasalahan
       },
     });
 

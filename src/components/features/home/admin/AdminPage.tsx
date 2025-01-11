@@ -10,7 +10,6 @@ import ManageParameter from "./ManageParameter";
 import Dashboard from "./Dashboard";
 import ManageLaporanBimbingan from "./ManageLaporanBimbingan";
 import ManageJadwalDosenPA from "./ManageJadwalDosenPA";
-import ManageUser from "./ManageUser";
 import ManageInformasiAkademik from "./ManageInformasiAkademik";
 
 interface AdminPageProps {
@@ -29,7 +28,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ activeNavbar }) => {
         <ManageLaporanBimbingan />
       )}
       {activeNavbar === "Manage Jadwal Dosen PA" && <ManageJadwalDosenPA />}
-      {activeNavbar === "Manage User" && <ManageUser />}
       {activeNavbar === "Manage Informasi Akademik" && (
         <ManageInformasiAkademik />
       )}

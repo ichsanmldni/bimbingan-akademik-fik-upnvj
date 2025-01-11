@@ -56,7 +56,7 @@ const RegistrationForm = () => {
 
   const getDataJurusan = async () => {
     try {
-      const response = await axios.get<Jurusan[]>(
+      const response = await axios.post<Jurusan[]>(
         `${API_BASE_URL}/api/datajurusan`
       );
 
@@ -75,7 +75,7 @@ const RegistrationForm = () => {
 
   const getDataPeminatanByJurusan = async (selectedJurusan: string) => {
     try {
-      const dataJurusan = await axios.get<Jurusan[]>(
+      const dataJurusan = await axios.post<Jurusan[]>(
         `${API_BASE_URL}/api/datajurusan`
       );
 

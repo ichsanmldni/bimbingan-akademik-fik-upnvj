@@ -8,6 +8,7 @@ import upnvjLogo from "../../../assets/images/LOGO-UPNVJ.png";
 import backIconOrange from "../../../assets/images/back-icon-orange.png";
 import downIcon from "../../../assets/images/downIcon.png";
 import addIcon from "../../../assets/images/add-button.png";
+import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import plusIcon from "../../../assets/images/plus.png";
 import deleteIcon from "../../../assets/images/trash-icon.png";
 import line from "../../../assets/images/line.png";
@@ -17,10 +18,22 @@ import axios from "axios";
 import TrashButton from "@/components/ui/TrashButton";
 import { format } from "date-fns";
 import { env } from "process";
-import { Dialog, DialogPanel } from "@headlessui/react";
 import { EyeIcon } from "@heroicons/react/outline";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import "./fonts/times new roman bold-normal";
+import "./fonts/times new roman-normal";
+import { Fragment } from "react";
+import {
+  Dialog,
+  Transition,
+  TransitionChild,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
 
 interface UserProfile {
   nama_lengkap: string;
@@ -128,6 +141,19 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [dataPengesahanBimbingan, setDataPengesahanBimbingan] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [
+    selectedDataPrestasiIlmiahMahasiswa,
+    setSelectedDataPrestasiIlmiahMahasiswa,
+  ] = useState([]);
+  const [
+    selectedDataPrestasiPorseniMahasiswa,
+    setSelectedDataPrestasiPorseniMahasiswa,
+  ] = useState([]);
+  const [selectedDataStatusMahasiswa, setSelectedDataStatusMahasiswa] =
+    useState([]);
+
+  const [isDeleteJadwalDosenModalOpen, setIsDeleteJadwalDosenModalOpen] =
+    useState(false);
 
   const openModal = () => {
     setIsOpen(true);
@@ -190,9 +216,16 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         `${API_BASE_URL}/api/datajadwaldosenpa/${dataDosenPA?.id}`,
         newData
       );
-      return response.data;
+      return {
+        success: true,
+        message: response.data.message || "Jadwal kosong berhasil ditambahkan!",
+        data: response.data,
+      };
     } catch (error) {
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
 
@@ -202,9 +235,16 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         `${API_BASE_URL}/api/datajadwaldosenpa/${deletedData.id}`,
         { data: deletedData }
       );
-      return response.data;
+      return {
+        success: true,
+        message: response.data.message || "Jadwal kosong berhasil dihapus!",
+        data: response.data,
+      };
     } catch (error) {
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
 
@@ -233,9 +273,17 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         `${API_BASE_URL}/api/bimbingan/pengesahanabsensi`,
         updatedData
       );
-      return response.data;
+      return {
+        success: true,
+        message:
+          response.data.message || "Konfirmasi pengajuan bimbingan berhasil!",
+        data: response.data,
+      };
     } catch (error) {
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
 
@@ -382,10 +430,11 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
     }
   };
 
-  const addBimbingan = async (idPengajuan: number) => {
+  const addBimbingan = async (idPengajuan: number, permasalahan) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/bimbingan`, {
         pengajuan_bimbingan_id: idPengajuan,
+        permasalahan,
       });
       return response.data;
     } catch (error) {
@@ -457,13 +506,44 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
       };
 
       const result = await addJadwalDosen(jadwalDosenValue);
+      toast.success(
+        <div className="flex items-center">
+          <span>{result.message || "Jadwal kosong berhasil ditambahkan!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
       getDataJadwalDosenPaByDosenPa();
       setJamMulai("");
       setJamSelesai("");
       setIsAddJadwal(false);
-      console.log(result);
     } catch (error) {
-      console.error("Registration error:", (error as Error).message);
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message ||
+              "Penambahan jadwal kosong gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
   };
 
@@ -473,17 +553,50 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         id,
       };
       const result = await deleteJadwalDosen(jadwalDosenValue);
+      toast.success(
+        <div className="flex items-center">
+          <span>{result.message || "Jadwal kosong berhasil dihapus!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
       getDataJadwalDosenPaByDosenPa();
-      console.log(result);
+      setIsDeleteJadwalDosenModalOpen(false);
     } catch (error) {
-      console.error("Registration error:", (error as Error).message);
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message ||
+              "Penghapusan jadwal kosong gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
   };
 
   const handleEditPengajuanBimbingan = async (
     id: number,
     mahasiswa_id: number,
-    statusPengajuan: string
+    statusPengajuan: string,
+    permasalahan
   ) => {
     try {
       let pengajuanBimbinganValue = {
@@ -513,7 +626,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
           theme: "colored",
         }
       );
-      await addBimbingan(id);
+      await addBimbingan(id, permasalahan);
       setKeteranganKonfirmasi((prev) => ({ ...prev, [id]: "" }));
       getDataPengajuanBimbinganByDosenPaId();
     } catch (error) {
@@ -548,16 +661,497 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
         status_pengesahan_kehadiran,
       };
 
-      console.log(pengesahanKehadiranBimbinganValue);
-
       const result = await patchPengesahanKehadiranBimbingan(
         pengesahanKehadiranBimbinganValue
       );
+      toast.success(
+        <div className="flex items-center">
+          <span>
+            {result.message ||
+              "Pengesahan absensi bimbingan berhasil dikonfirmasi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+
       getDataPengesahanBimbinganByIDDosenPA();
     } catch (error) {
-      console.error("Registration error:", (error as Error).message);
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message ||
+              "Konfirmasi pengesahan absensi bimbingan gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
   };
+
+  const handlePreviewPDF = async (
+    e: React.FormEvent<HTMLFormElement>,
+    data
+  ) => {
+    e.preventDefault();
+
+    const doc = new jsPDF({
+      orientation: "portrait", // or "landscape"
+      unit: "mm", // units can be "pt", "mm", "cm", or "in"
+      format: "a4", // format can be "a4", "letter", etc.
+      putOnlyUsedFonts: true, // optional, to optimize font usage
+    });
+
+    doc.setFont("times new roman");
+
+    // Title
+    doc.setFontSize(11);
+    const title = "LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK";
+    const titleWidth = doc.getTextWidth(title);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const titleX = (pageWidth - titleWidth) / 2; // Calculate x position for center alignment
+    doc.text(title, titleX, 28);
+    const subtitle = "FAKULTAS ILMU KOMPUTER  UPN “VETERAN” JAKARTA";
+    const subtitleWidth = doc.getTextWidth(subtitle);
+    const subtitleX = (pageWidth - subtitleWidth) / 2; // Calculate x position for center alignment
+    doc.text(subtitle, subtitleX, 35);
+    doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 56); // Moved up by 10y
+    doc.text(`Semester                   :    ${data.semester}`, 15, 62); // Moved up by 10y
+    doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 68); // Moved up by 10y
+
+    doc.text("A. PENDAHULUAN", 15, 91); // Adjusted x to 15 and y down by 20
+
+    let yPosition = 98;
+    const maxWidth = 175;
+
+    data.pendahuluan.forEach((paragraph) => {
+      // Check if the paragraph has children and extract the text
+      if (paragraph.children && paragraph.children.length > 0) {
+        const text = paragraph.children[0].text;
+
+        // Split the text into lines based on maxWidth
+        const lines = doc.splitTextToSize(text, maxWidth);
+
+        // Set alignment based on paragraph properties
+        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
+
+        // Add each line to the document and adjust yPosition
+        lines.forEach((line, index) => {
+          // Set alignment for the line
+          if (alignment === "justify") {
+            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
+            const totalWidth = maxWidth; // Lebar area teks
+            const lineWidth = doc.getTextWidth(line);
+
+            if (index < lines.length - 1) {
+              // Hanya justify jika bukan baris terakhir
+              if (words.length > 1) {
+                const totalSpaces = words.filter(
+                  (word) => word.trim() === ""
+                ).length;
+                const totalExtraSpace = totalWidth - lineWidth;
+                const baseSpaceWidth = Math.floor(
+                  totalExtraSpace / totalSpaces
+                );
+                const extraSpaces = totalExtraSpace % totalSpaces;
+
+                let justifiedLine = "";
+
+                for (let i = 0; i < words.length; i++) {
+                  justifiedLine += words[i];
+                  if (i < words.length - 1 && words[i].trim() === "") {
+                    // Menambahkan spasi
+                    const spacesToAdd =
+                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
+                    justifiedLine += " ".repeat(spacesToAdd);
+                  }
+                }
+                doc.text(justifiedLine, 20, yPosition);
+              } else {
+                doc.text(line, 20, yPosition); // Jika hanya satu kata, tidak perlu justify
+              }
+            } else {
+              doc.text(line, 20, yPosition); // Baris terakhir tidak di-justify
+            }
+          } else if (alignment === "center") {
+            doc.text(line, 110, yPosition, { align: "center" });
+          } else if (alignment === "right") {
+            doc.text(line, 200, yPosition, { align: "right" });
+          } else {
+            doc.text(line, 20, yPosition); // Default left alignment
+          }
+          yPosition += 6; // Adjust the spacing between lines
+        });
+      }
+    });
+
+    // Section Title
+    doc.text("B. HASIL KONSULTASI PEMBIMBINGAN", 15, yPosition + 7); // Adjusted x to 15 and y down by 20
+    doc.text("Prestasi Akademik Mahasiswa", 20, yPosition + 17); // Adjusted x to 15 and y down by 20
+
+    // Table for IPK
+    const tableData = [
+      { range: "IPK > 3.5", jumlah: data.jumlah_ipk_a },
+      { range: "3 > IPK >= 3.5", jumlah: data.jumlah_ipk_b },
+      { range: "2.5 <= IPK < 3", jumlah: data.jumlah_ipk_c },
+      { range: "2 <= IPK < 2.5", jumlah: data.jumlah_ipk_d },
+      { range: "IPK < 2", jumlah: data.jumlah_ipk_e },
+    ];
+
+    doc.autoTable({
+      head: [["Range IPK", "Jumlah Mahasiswa"]],
+      body: tableData.map((item) => [item.range, item.jumlah]),
+      startY: yPosition + 21, // Posisi tabel
+      theme: "plain", // Tema polos
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Prestasi Ilmiah Mahasiswa",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+    const prestasiData = selectedDataPrestasiIlmiahMahasiswa;
+
+    doc.autoTable({
+      head: [["Bidang Prestasi", "NIM", "Nama", "Tingkat Prestasi"]],
+      theme: "plain", // Tema polos
+      body: prestasiData.map((item) => [
+        item.bidang_prestasi,
+        item.nim,
+        item.nama,
+        item.tingkat_prestasi,
+      ]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Prestasi Mahasiswa Mendapatkan Beasiswa",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+
+    // Table for Beasiswa
+    const tableBeasiswaData = [
+      { beasiswa: "BBM", jumlah: data.jumlah_beasiswa_bbm },
+      { beasiswa: "Pegadaian", jumlah: data.jumlah_beasiswa_pegadaian },
+      {
+        beasiswa: "Supersemar",
+        jumlah: data.jumlah_beasiswa_supersemar,
+      },
+      { beasiswa: "PPA", jumlah: data.jumlah_beasiswa_ppa },
+      { beasiswa: "YKL", jumlah: data.jumlah_beasiswa_ykl },
+      { beasiswa: "Dan Lain-lainnya", jumlah: data.jumlah_beasiswa_dll },
+    ];
+
+    doc.autoTable({
+      head: [["Jenis Beasiswa", "Jumlah Mahasiswa"]],
+      body: tableBeasiswaData.map((item) => [item.beasiswa, item.jumlah]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      theme: "plain", // Tema polos
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Prestasi Mahasiswa Mengikuti Porseni",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+    const prestasiPorseniData = selectedDataPrestasiPorseniMahasiswa;
+
+    doc.autoTable({
+      head: [["Jenis Kegiatan", "NIM", "Nama", "Tingkat Prestasi"]],
+      theme: "plain", // Tema polos
+      body: prestasiPorseniData.map((item) => [
+        item.jenis_kegiatan,
+        item.nim,
+        item.nama,
+        item.tingkat_prestasi,
+      ]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text(
+      "Data Status Mahasiswa",
+      20,
+      doc.autoTable.previous.finalY + 10 // Tambahkan margin 10
+    );
+    const statusData = selectedDataStatusMahasiswa;
+
+    doc.autoTable({
+      head: [["NIM", "Nama", "Status"]],
+      theme: "plain", // Tema polos
+      body: statusData.map((item) => [item.nim, item.nama, item.status]),
+      startY: doc.autoTable.previous.finalY + 14, // Tambahkan margin 14
+      headStyles: {
+        fontSize: 11, // Ukuran font header
+        halign: "center", // Rata tengah
+        font: "times new roman", // Font header
+      },
+      bodyStyles: {
+        fontSize: 11, // Ukuran font untuk isi
+        halign: "left", // Rata kiri
+        font: "times new roman", // Font header
+      },
+      styles: {
+        cellPadding: 3, // Padding sel
+        lineWidth: 0.1, // Ketebalan garis
+        lineColor: [0, 0, 0], // Warna garis hitam
+      },
+      tableWidth: "auto", // Lebar tabel otomatis
+      margin: { left: 20 },
+    });
+
+    doc.text("C. KESIMPULAN", 15, doc.autoTable.previous.finalY + 10); // Adjusted x to 15 and y down by 20
+
+    let yPositionKesimpulan = doc.autoTable.previous.finalY + 20;
+    data.kesimpulan.forEach((paragraph) => {
+      // Check if the paragraph has children and extract the text
+      if (paragraph.children && paragraph.children.length > 0) {
+        const text = paragraph.children[0].text;
+
+        // Split the text into lines based on maxWidth
+        const lines = doc.splitTextToSize(text, maxWidth);
+
+        // Set alignment based on paragraph properties
+        const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
+
+        // Add each line to the document and adjust yPosition
+        lines.forEach((line, index) => {
+          // Set alignment for the line
+          if (alignment === "justify") {
+            const words = line.split(/(\s+)/); // Memecah teks berdasarkan spasi dan mempertahankan spasi asli
+            const totalWidth = maxWidth; // Lebar area teks
+            const lineWidth = doc.getTextWidth(line);
+
+            if (index < lines.length - 1) {
+              // Hanya justify jika bukan baris terakhir
+              if (words.length > 1) {
+                const totalSpaces = words.filter(
+                  (word) => word.trim() === ""
+                ).length;
+                const totalExtraSpace = totalWidth - lineWidth;
+                const baseSpaceWidth = Math.floor(
+                  totalExtraSpace / totalSpaces
+                );
+                const extraSpaces = totalExtraSpace % totalSpaces;
+
+                let justifiedLine = "";
+
+                for (let i = 0; i < words.length; i++) {
+                  justifiedLine += words[i];
+                  if (i < words.length - 1 && words[i].trim() === "") {
+                    // Menambahkan spasi
+                    const spacesToAdd =
+                      baseSpaceWidth + (i / 2 < extraSpaces ? 1 : 0);
+                    justifiedLine += " ".repeat(spacesToAdd);
+                  }
+                }
+                doc.text(justifiedLine, 20, yPositionKesimpulan);
+              } else {
+                doc.text(line, 20, yPositionKesimpulan); // Jika hanya satu kata, tidak perlu justify
+              }
+            } else {
+              doc.text(line, 20, yPositionKesimpulan); // Baris terakhir tidak di-justify
+            }
+          } else if (alignment === "center") {
+            doc.text(line, 110, yPositionKesimpulan, { align: "center" });
+          } else if (alignment === "right") {
+            doc.text(line, 200, yPositionKesimpulan, { align: "right" });
+          } else {
+            doc.text(line, 20, yPositionKesimpulan); // Default left alignment
+          }
+          yPositionKesimpulan += 6; // Adjust the spacing between lines
+        });
+      }
+    });
+
+    // Menambahkan informasi tanggal dan jabatan
+    const now = new Date();
+
+    // Mengatur opsi untuk format tanggal
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "Asia/Jakarta",
+    };
+
+    // Mengonversi tanggal ke format yang diinginkan
+    const formattedDate = now.toLocaleDateString("id-ID", options);
+
+    const dateYPosition = yPositionKesimpulan + 7; // Posisi Y untuk tanggal
+    doc.text(`Jakarta, ${formattedDate}`, 195, dateYPosition, {
+      align: "right",
+    });
+    const jabatanYPosition = dateYPosition + 7; // Posisi Y untuk jabatan
+    doc.text("Dosen PA", 185, jabatanYPosition, { align: "right" });
+
+    // Menambahkan kolom untuk tanda tangan
+    const imgData = data.tanda_tangan_dosen_pa;
+    const xImagePosition = 167; // Atur posisi X sesuai kebutuhan
+    const yImagePosition = jabatanYPosition + 4; // Atur posisi Y sesuai kebutuhan
+    const width = 21; // Lebar gambar
+    const height = 21; // Tinggi gambar
+
+    // Menambahkan gambar ke dokumen
+    doc.addImage(imgData, "PNG", xImagePosition, yImagePosition, width, height);
+    const ttdY = jabatanYPosition + 28; // Posisi Y untuk kolom TTD
+    doc.text(`( ${data.nama_dosen_pa} )`, 195, ttdY, { align: "right" });
+    // Open the PDF in a new window instead of saving
+    const pdfOutput = doc.output("blob");
+    const url = URL.createObjectURL(pdfOutput);
+
+    // Membuka PDF di tab baru
+    window.open(url, "_blank");
+  };
+
+  const getDataPrestasiIlmiahMahasiswaByIdLaporan = async () => {
+    try {
+      const dataPrestasiIlmiahMahasiswa = await axios.get<any>(
+        `${API_BASE_URL}/api/prestasiilmiahmahasiswa`
+      );
+      const idLaporan = dataClickedLaporanBimbingan?.id;
+
+      const selectedDataPrestasiIlmiahMahasiswa =
+        dataPrestasiIlmiahMahasiswa.data.filter(
+          (data) => data.laporan_bimbingan_id === idLaporan
+        );
+
+      setSelectedDataPrestasiIlmiahMahasiswa(
+        selectedDataPrestasiIlmiahMahasiswa
+      );
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataPrestasiPorseniMahasiswaByIdLaporan = async () => {
+    try {
+      const dataPrestasiPorseniMahasiswa = await axios.get<any>(
+        `${API_BASE_URL}/api/prestasiporsenimahasiswa`
+      );
+      const idLaporan = dataClickedLaporanBimbingan?.id;
+
+      const dataSelectedPrestasiPorseniMahasiswa =
+        dataPrestasiPorseniMahasiswa.data.filter(
+          (data) => data.laporan_bimbingan_id === idLaporan
+        );
+
+      setSelectedDataPrestasiPorseniMahasiswa(
+        dataSelectedPrestasiPorseniMahasiswa
+      );
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataStatusMahasiswaByIdLaporan = async () => {
+    try {
+      const dataStatusMahasiswa = await axios.get<any>(
+        `${API_BASE_URL}/api/datastatusmahasiswa`
+      );
+      const idLaporan = dataClickedLaporanBimbingan?.id;
+
+      const selectedDataStatusMahasiswa = dataStatusMahasiswa.data.filter(
+        (data) => data.laporan_bimbingan_id === idLaporan
+      );
+
+      setSelectedDataStatusMahasiswa(selectedDataStatusMahasiswa);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    getDataPrestasiIlmiahMahasiswaByIdLaporan();
+    getDataPrestasiPorseniMahasiswaByIdLaporan();
+    getDataStatusMahasiswaByIdLaporan();
+  }, [dataClickedLaporanBimbingan]);
 
   useEffect(() => {
     if (dataUser && dataUser.nip) {
@@ -737,9 +1331,82 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                               className="flex justify-between items-center"
                             >
                               <TrashButton
-                                onClick={() => handleDeleteJadwalDosen(data.id)}
+                                onClick={() =>
+                                  setIsDeleteJadwalDosenModalOpen(true)
+                                }
                                 className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
                               />
+                              <Transition
+                                appear
+                                show={isDeleteJadwalDosenModalOpen}
+                                as={Fragment}
+                              >
+                                <Dialog
+                                  as="div"
+                                  className="relative z-[1000]"
+                                  onClose={() =>
+                                    setIsDeleteJadwalDosenModalOpen(false)
+                                  }
+                                >
+                                  <TransitionChild
+                                    as={Fragment}
+                                    enter="ease-out duration-300"
+                                    enterFrom="opacity-0"
+                                    enterTo="opacity-100"
+                                    leave="ease-in duration-200"
+                                    leaveFrom="opacity-100"
+                                    leaveTo="opacity-0"
+                                  >
+                                    <div className="fixed inset-0 bg-black bg-opacity-5" />
+                                  </TransitionChild>
+
+                                  <div className="fixed inset-0 overflow-clip">
+                                    <div className="flex min-h-full items-center justify-center p-4 text-center">
+                                      <TransitionChild
+                                        as={Fragment}
+                                        enter="ease-out duration-300"
+                                        enterFrom="opacity-0 scale-95"
+                                        enterTo="opacity-100 scale-100"
+                                        leave="ease-in duration-200"
+                                        leaveFrom="opacity-100 scale-100"
+                                        leaveTo="opacity-0 scale-95"
+                                      >
+                                        <DialogPanel className="w-full max-w-md max-h-[500px] overflow-hidden rounded-2xl bg-white text-left align-middle transition-all">
+                                          <DialogTitle
+                                            as="h3"
+                                            className="text-lg font-medium leading-6 text-gray-900 px-6 pt-6"
+                                          >
+                                            Apakah anda yakin ingin menghapus
+                                            jadwal kosong ini?
+                                          </DialogTitle>
+                                          <div className="mt-4 flex justify-end space-x-2 pb-6 px-6">
+                                            <button
+                                              type="button"
+                                              className="inline-flex justify-center rounded-md border border-transparent bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                                              onClick={() =>
+                                                setIsDeleteJadwalDosenModalOpen(
+                                                  false
+                                                )
+                                              }
+                                            >
+                                              Batal
+                                            </button>
+                                            <button
+                                              type="button"
+                                              className="inline-flex justify-center rounded-md border border-transparent bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                              onClick={(e) =>
+                                                handleDeleteJadwalDosen(data.id)
+                                              }
+                                            >
+                                              Konfirmasi
+                                            </button>
+                                          </div>
+                                        </DialogPanel>
+                                      </TransitionChild>
+                                    </div>
+                                  </div>
+                                </Dialog>
+                              </Transition>
                               <div className="text-[14px] w-[100px] mx-3">{`${data.jam_mulai}-${data.jam_selesai}`}</div>
                               {index <
                                 dataJadwalDosenPA.filter(
@@ -815,6 +1482,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 </div>
               ))}
             </div>
+            <ToastContainer />
           </div>
         </div>
       )}
@@ -851,6 +1519,41 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                           {data.pengajuan_bimbingan.sistem_bimbingan}
                         </p>
                       </div>
+                      {data.permasalahan && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mt-2">
+                            Permasalahan{" "}
+                            {data.pengajuan_bimbingan.jenis_bimbingan ===
+                              "Pribadi" && (
+                              <span>
+                                (Topik bimbingan :{" "}
+                                {data.pengajuan_bimbingan.topik_bimbingan})
+                              </span>
+                            )}
+                          </p>
+                          <textarea
+                            placeholder={
+                              data.permasalahan === ""
+                                ? "Permasalahan"
+                                : data.permasalahan
+                            }
+                            value={data.permasalahan}
+                            disabled
+                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                          />
+                          <p className="text-sm font-medium text-gray-700 mt-2">
+                            Solusi
+                          </p>
+                          <textarea
+                            placeholder={
+                              data.solusi === "" ? "Solusi" : data.solusi
+                            }
+                            disabled
+                            value={data.solusi}
+                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                          />
+                        </div>
+                      )}
                       <div className="flex gap-10">
                         <div className="flex flex-col gap-2">
                           <p>Dokumentasi :</p>
@@ -960,6 +1663,7 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
               )}
             </div>
           </div>
+          <ToastContainer />
         </div>
       )}
       {selectedSubMenuDashboard ===
@@ -970,97 +1674,135 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
               Pengajuan Bimbingan Akademik Mahasiswa
             </h1>
             <div className="flex flex-col gap-4">
-              {dataPengajuanBimbingan
-                .slice()
-                .reverse()
-                .map((data) => (
-                  <div
-                    key={data.id}
-                    className="flex flex-col border rounded-lg p-6 gap-4"
-                  >
-                    <div className="flex justify-between text-neutral-600">
-                      <p>{getDate(data.jadwal_bimbingan)}</p>
-                      <p>{getTime(data.jadwal_bimbingan)}</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">{data.nama_lengkap}</p>
-                      <p>{data.jenis_bimbingan}</p>
-                      <p className="font-medium">{data.sistem_bimbingan}</p>
-                    </div>
-                    <InputField
-                      type="text"
-                      placeholder={
-                        data.keterangan === null ? "Input Keterangan" : ""
-                      }
-                      onChange={(e) => {
-                        setKeteranganKonfirmasi((prev) => ({
-                          ...prev,
-                          [data.id]: e.target.value, // Update keterangan untuk pengajuan ini
-                        }));
-                      }}
-                      value={
-                        data.keterangan === null
-                          ? keteranganKonfirmasi[data.id] || ""
-                          : data.keterangan
-                      }
-                      disabled={data.keterangan !== null}
-                      className="px-3 pt-2 pb-10 text-[15px] border rounded-lg"
-                    />
-                    <div className="flex gap-2">
-                      {/* Status Menunggu */}
-                      {data.status === "Menunggu Konfirmasi" && (
-                        <>
+              {dataPengajuanBimbingan.length > 0 ? (
+                dataPengajuanBimbingan
+                  .slice()
+                  .reverse()
+                  .map((data) => (
+                    <div
+                      key={data.id}
+                      className="flex flex-col border rounded-lg p-6 gap-4"
+                    >
+                      <div className="flex justify-between text-neutral-600">
+                        <p>{getDate(data.jadwal_bimbingan)}</p>
+                        <p>{getTime(data.jadwal_bimbingan)}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">{data.nama_lengkap}</p>
+                        <p>{data.jenis_bimbingan}</p>
+                        <p className="font-medium">{data.sistem_bimbingan}</p>
+                        {data.permasalahan && (
+                          <p>
+                            <span className="font-medium">Permasalahan :</span>{" "}
+                            {data.permasalahan}
+                          </p>
+                        )}
+                      </div>
+                      <textarea
+                        placeholder={
+                          data.keterangan === null
+                            ? "Input Keterangan (Misal: Ruang FIK 204 , https://meet.link, atau keterangan lainnya)"
+                            : ""
+                        }
+                        onChange={(e) => {
+                          setKeteranganKonfirmasi((prev) => ({
+                            ...prev,
+                            [data.id]: e.target.value, // Update keterangan untuk pengajuan ini
+                          }));
+                        }}
+                        value={
+                          data.keterangan === null
+                            ? keteranganKonfirmasi[data.id] || ""
+                            : data.keterangan
+                        }
+                        disabled={data.keterangan !== null}
+                        className="px-3 py-2 text-[15px] border rounded-lg resize-none" // Tambahkan 'resize-none' untuk mencegah perubahan ukuran
+                        rows={4} // Menentukan jumlah baris yang ditampilkan
+                      />
+                      <div className="flex gap-2">
+                        {/* Status Menunggu */}
+                        {data.status === "Menunggu Konfirmasi" && (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleEditPengajuanBimbingan(
+                                  data.id,
+                                  data.mahasiswa_id,
+                                  "Reschedule",
+                                  data.permasalahan
+                                )
+                              }
+                              className="w-1/2 bg-red-500 text-white cursor-pointer hover:bg-red-600 rounded-md py-2 font-medium text-[14px]"
+                              disabled={keteranganKonfirmasi === ""}
+                            >
+                              Reschedule
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleEditPengajuanBimbingan(
+                                  data.id,
+                                  data.mahasiswa_id,
+                                  "Diterima",
+                                  data.permasalahan
+                                )
+                              }
+                              className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 hover:bg-green-600 font-medium text-[14px]"
+                              disabled={keteranganKonfirmasi === ""}
+                            >
+                              Diterima
+                            </button>
+                          </>
+                        )}
+
+                        {/* Status Diterima */}
+                        {data.status === "Diterima" && (
                           <button
-                            onClick={() =>
-                              handleEditPengajuanBimbingan(
-                                data.id,
-                                data.mahasiswa_id,
-                                "Reschedule"
-                              )
-                            }
-                            className="w-1/2 bg-red-500 text-white cursor-pointer hover:bg-red-600 rounded-md py-2 font-medium text-[14px]"
-                            disabled={keteranganKonfirmasi === ""}
-                          >
-                            Reschedule
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleEditPengajuanBimbingan(
-                                data.id,
-                                data.mahasiswa_id,
-                                "Diterima"
-                              )
-                            }
-                            className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 hover:bg-green-600 font-medium text-[14px]"
-                            disabled={keteranganKonfirmasi === ""}
+                            className="w-full bg-green-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
+                            disabled
                           >
                             Diterima
                           </button>
-                        </>
-                      )}
+                        )}
 
-                      {/* Status Diterima */}
-                      {data.status === "Diterima" && (
-                        <button
-                          className="w-full bg-green-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
-                          disabled
-                        >
-                          Diterima
-                        </button>
-                      )}
-
-                      {/* Status Reschedule */}
-                      {data.status === "Reschedule" && (
-                        <button
-                          className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
-                          disabled
-                        >
-                          Reschedule
-                        </button>
-                      )}
+                        {/* Status Reschedule */}
+                        {data.status === "Reschedule" && (
+                          <button
+                            className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
+                            disabled
+                          >
+                            Reschedule
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+              ) : (
+                <div className="flex flex-col items-center p-10 border rounded-lg">
+                  <svg
+                    className="h-12 w-12 text-red-500 mb-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+
+                  <p className="text-center text-red-500">
+                    Saat ini tidak ada pengajuan bimbingan yang perlu
+                    dikonfirmasi.
+                  </p>
+                  <p className="text-center text-gray-600">
+                    Belum ada mahasiswa yang mengajukan bimbingan. Silakan
+                    tunggu.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <ToastContainer />
@@ -1078,20 +1820,23 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 {dataLaporanBimbingan.length > 0 ? (
                   dataLaporanBimbingan.map((data, index) => (
                     <div
-                      key={index}
+                      key={data.id}
                       className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
                       onClick={() => handleDetailLaporanDosen(data)}
                     >
-                      <div className="text-neutral-600">
-                        <p>{data.waktu_bimbingan}</p>
+                      <div className="flex justify-between text-neutral-600">
+                        <p>{data.jadwal_bimbingan}</p>
                       </div>
                       <div className="flex justify-between">
                         <div>
-                          <p className="font-medium">{data.nama_mahasiswa}</p>
-                          <p>{data.jenis_bimbingan}</p>
+                          <p className="font-medium">{data.nama_dosen_pa}</p>
+                          <p>{data.jumlah_mahasiswa} Mahasiswa</p>
+                          <p className="font-medium">{data.jenis_bimbingan}</p>
                           <p className="font-medium">{data.sistem_bimbingan}</p>
                         </div>
-                        <div className="bg-red-500 p-3 self-center rounded-lg">
+                        <div
+                          className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-3 self-center rounded-lg`}
+                        >
                           <p className="text-white text-center">
                             {data.status}
                           </p>
@@ -1144,25 +1889,51 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                 <div className="mt-4">
                   <div className="flex flex-col border rounded-lg p-6 gap-4">
                     <div className="flex justify-between text-neutral-600">
-                      {dataClickedLaporanBimbingan?.waktu_bimbingan}
+                      <p>{dataClickedLaporanBimbingan?.jadwal_bimbingan}</p>
                     </div>
                     <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">
-                          {dataClickedLaporanBimbingan?.nama_mahasiswa}
-                        </p>
-                        <p>{dataClickedLaporanBimbingan?.jenis_bimbingan}</p>
-                        <p className="font-medium">
-                          {dataClickedLaporanBimbingan?.sistem_bimbingan}
-                        </p>
+                      <div className="flex flex-col gap-4 w-[55%]">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center">
+                            <p className="font-medium w-1/3">Tahun Akademik</p>
+                            <span className="font-medium">:</span>
+                            <p className="flex-1 ml-4">
+                              {dataClickedLaporanBimbingan.tahun_ajaran}
+                            </p>
+                          </div>
+                          <div className="flex items-center">
+                            <p className="font-medium w-1/3">Semester</p>
+                            <span className="font-medium">:</span>
+                            <p className="flex-1 ml-4">
+                              {dataClickedLaporanBimbingan.semester}
+                            </p>
+                          </div>
+                          <div className="flex items-center">
+                            <p className="font-medium w-1/3">Nama Dosen PA</p>
+                            <span className="font-medium">:</span>
+                            <p className="flex-1 ml-4">
+                              {dataClickedLaporanBimbingan.nama_dosen_pa}
+                            </p>
+                          </div>
+                          <div className="flex items-center">
+                            <p className="font-medium w-1/3">Jenis Bimbingan</p>
+                            <span className="font-medium">:</span>
+                            <p className="flex-1 ml-4">
+                              {dataClickedLaporanBimbingan?.jenis_bimbingan}
+                            </p>
+                          </div>
+                          <div className="flex items-center">
+                            <p className="font-medium w-1/3">Jumlah Peserta</p>
+                            <span className="font-medium">:</span>
+                            <p className="flex-1 ml-4">
+                              {dataClickedLaporanBimbingan?.jumlah_mahasiswa}{" "}
+                              Mahasiswa
+                            </p>
+                          </div>
+                        </div>
                       </div>
                       <div
-                        className={`${
-                          dataClickedLaporanBimbingan?.status ===
-                          "Menunggu Feedback Kaprodi"
-                            ? "bg-red-500"
-                            : "bg-green-500"
-                        } p-3 self-center rounded-lg`}
+                        className={`self-start ${dataClickedLaporanBimbingan?.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} p-3 rounded-lg`}
                       >
                         <p className="text-white text-center">
                           {dataClickedLaporanBimbingan?.status}
@@ -1170,36 +1941,150 @@ const DashboardDosenPA: React.FC<DashboardDosenPAProps> = ({
                       </div>
                     </div>
                     <div className="flex flex-col gap-4">
-                      <div>
-                        <h3 className="font-medium">Kendala Mahasiswa</h3>
-                        <p>{dataClickedLaporanBimbingan?.kendala_mahasiswa}</p>
+                      <div className="flex flex-col gap-2">
+                        <h3 className="font-medium">PDF Laporan Bimbingan</h3>
+                        <a
+                          onClick={(e) => {
+                            handlePreviewPDF(e, dataClickedLaporanBimbingan);
+                          }}
+                          className="flex underline hover:cursor-pointer items-center text-blue-600 hover:text-blue-800 font-semibold"
+                        >
+                          <FontAwesomeIcon icon={faFilePdf} className="mr-2" />{" "}
+                          {/* Ikon PDF */}
+                          Buka PDF
+                        </a>
                       </div>
-                      <div>
-                        <h3 className="font-medium">Solusi yang ditawarkan</h3>
-                        <p>{dataClickedLaporanBimbingan?.solusi}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Kesimpulan</h3>
-                        <p>{dataClickedLaporanBimbingan?.kesimpulan}</p>
-                      </div>
-                      <div>
+
+                      <div className="flex flex-col gap-2">
                         <h3 className="font-medium">Dokumentasi</h3>
-                        {dataClickedLaporanBimbingan?.dokumentasi === null ? (
-                          "-"
-                        ) : (
-                          <p>{dataClickedLaporanBimbingan?.dokumentasi}</p>
-                        )}
+                        <img
+                          className="w-1/2"
+                          src={dataClickedLaporanBimbingan?.dokumentasi}
+                        />
                       </div>
-                      <div>
+                      <div className="flex flex-col gap-3 rounded-lg">
                         <h3 className="font-medium">Feedback Kaprodi</h3>
-                        {dataClickedLaporanBimbingan?.feedback_kaprodi ===
+                        {dataClickedLaporanBimbingan?.feedback_kaprodi !==
                         null ? (
-                          "-"
+                          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                            <p className="text-gray-700">
+                              {dataClickedLaporanBimbingan?.feedback_kaprodi}
+                            </p>
+                          </div>
                         ) : (
-                          <p>{dataClickedLaporanBimbingan?.feedback_kaprodi}</p>
+                          <div className="flex flex-col gap-3">
+                            <textarea
+                              placeholder={
+                                feedbackKaprodi === ""
+                                  ? "Input Feedback"
+                                  : feedbackKaprodi
+                              }
+                              onChange={(e) => {
+                                setFeedbackKaprodi(e.target.value);
+                              }}
+                              value={feedbackKaprodi}
+                              className="px-3 pt-2 h-[200px] text-[15px] border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            ></textarea>
+                            <button
+                              onClick={() => {
+                                handleEditLaporanBimbingan(
+                                  dataClickedLaporanBimbingan?.id,
+                                  dataClickedLaporanBimbingan?.dosen_pa_id,
+                                  "Sudah Diberikan Feedback"
+                                );
+                              }}
+                              className="text-white bg-green-500 text-[14px] py-2 font-medium rounded-lg ml-auto w-1/5 hover:bg-green-600 transition duration-200"
+                            >
+                              Submit
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
+                    {/* <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Dokumentasi</h3>
+                          <img
+                            src={dataClickedLaporanBimbingan?.dokumentasi}
+                          />
+                          <p>
+                            {dataClickedLaporanBimbingan?.kendala_mahasiswa}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">
+                            Solusi yang ditawarkan
+                          </h3>
+                          <p>{dataClickedLaporanBimbingan?.solusi}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Kesimpulan</h3>
+                          <p>{dataClickedLaporanBimbingan?.kesimpulan}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <h3 className="font-medium">Dokumentasi</h3>
+                          <div className="grid grid-cols-2 gap-4 items-center">
+                            {dataClickedLaporanBimbingan?.dokumentasi ? (
+                              dataClickedLaporanBimbingan.dokumentasi
+                                .split(", ")
+                                .map((data, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex justify-center border rounded-lg"
+                                  >
+                                    <img
+                                      src={data}
+                                      alt="dokumentasi"
+                                      className="min-h-[100px] p-4 max-h-[200px]"
+                                    />
+                                  </div>
+                                ))
+                            ) : (
+                              <p>-</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                          <h3 className="font-medium">Feedback Kaprodi</h3>
+                          {dataClickedLaporanBimbingan?.feedback_kaprodi !==
+                          null ? (
+                            <p>
+                              {dataClickedLaporanBimbingan?.feedback_kaprodi}
+                            </p>
+                          ) : (
+                            <div className="flex flex-col gap-3">
+                              <textarea
+                                placeholder={
+                                  feedbackKaprodi === ""
+                                    ? "Input Feedback"
+                                    : feedbackKaprodi
+                                }
+                                onChange={(e) => {
+                                  setFeedbackKaprodi(e.target.value);
+                                }}
+                                value={feedbackKaprodi}
+                                className="px-3 pt-2 h-[200px] text-[15px] border rounded-lg"
+                              ></textarea>
+                              <button
+                                onClick={() => {
+                                  handleEditLaporanBimbingan(
+                                    dataClickedLaporanBimbingan?.id,
+                                    dataClickedLaporanBimbingan?.dosen_pa_id,
+                                    "Sudah Diberikan Feedback"
+                                  );
+                                  setIsDetailLaporanKaprodiClicked(
+                                    !isDetailLaporanKaprodiClicked
+                                  );
+                                  setSelectedDataLaporanBimbingan(null);
+                                }}
+                                className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg w-1/5"
+                              >
+                                Submit
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div> */}
                   </div>
                 </div>
               </div>
