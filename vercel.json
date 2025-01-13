@@ -1,0 +1,9 @@
+{
+    "build": {
+      "env": {
+        "NODE_ENV": "production",
+        "NEXT_SHARP_PATH": "/vercel/path0/node_modules/sharp"
+      }
+    }
+  }
+  
