@@ -213,8 +213,6 @@ export default function ChatDosenPA() {
       const dataChatMahasiswa = await axios.get<any>(
         `${API_BASE_URL}/api/chatmahasiswa`
       );
-
-      console.log(selectedDataChatPribadi);
       const dataChat = dataChatMahasiswa.data.filter(
         (data) => data.chat_pribadi_id === selectedDataChatPribadi.id
       );
@@ -342,7 +340,6 @@ export default function ChatDosenPA() {
   let previousDate: string | null = null;
 
   const handleClickDetailChatPribadi = (data: any) => {
-    console.log(data);
     setSelectedDataChatPribadi(data);
     setIsDetailChatPribadiClicked(true);
     if (!data.is_mahasiswa_pesan_terakhir_read) {
@@ -477,7 +474,7 @@ export default function ChatDosenPA() {
                           <Image
                             src={broadcastIcon}
                             className="size-10"
-                            alt=""
+                            alt="broadcast"
                           />
                         </div>
                         <div className="flex flex-col gap-2">
@@ -551,7 +548,7 @@ export default function ChatDosenPA() {
                     <div className="flex gap-4">
                       <div className="rounded-full size-12 bg-orange-200">
                         {selectedDataChatPribadi.dosen_pa?.profile_image ? (
-                          <img
+                          <Image
                             src={`../${selectedDataChatPribadi.dosen_pa.profile_image}`}
                             alt="Profile"
                             className="rounded-full size-12 cursor-pointer"
@@ -597,7 +594,7 @@ export default function ChatDosenPA() {
                   >
                     <div className="flex gap-4">
                       <div className="rounded-full flex size-12 justify-center items-center bg-orange-200">
-                        <Image src={chatIcon} className="size-6" alt="" />
+                        <Image src={chatIcon} className="size-6" alt="chat" />
                       </div>
                       <div className="flex flex-col gap-2">
                         <p className={`text-[18px] font-medium`}>

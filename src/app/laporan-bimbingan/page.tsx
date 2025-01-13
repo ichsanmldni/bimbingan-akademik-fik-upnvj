@@ -487,7 +487,11 @@ export default function Home() {
           )}
         </td>
         <td className="border-b text-center align-top border-gray-200 px-2 py-2">
-          <img src={data.ttd_mhs} className="size-[48px] mx-auto p-1" />
+          <Image
+            alt="ttd mhs"
+            src={data.ttd_mhs}
+            className="size-[48px] mx-auto p-1"
+          />
         </td>
       </tr>
     );
@@ -509,7 +513,11 @@ export default function Home() {
           {data.pengajuan_bimbingan.nama_lengkap}
         </td>
         <td className="border-b text-center align-top border-gray-200 px-2 py-2">
-          <img src={data.ttd_kehadiran} className="size-[48px] mx-auto p-1" />
+          <Image
+            alt="ttd absen"
+            src={data.ttd_kehadiran}
+            className="size-[48px] mx-auto p-1"
+          />
         </td>
       </tr>
     );
@@ -4077,339 +4085,6 @@ export default function Home() {
                                     </div>
                                   )}
                                 </div>
-                                {/* <div className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium">
-                          Data Mahasiswa berprestasi Akademik
-                        </p>
-                        <button
-                          onClick={(e) =>
-                            toggleDataMahasiswaBerprestasiAkademikForm(e)
-                          }
-                          className="flex items-center px-3 py-2"
-                        >
-                          {showDataMahasiswaBerprestasiAkademikForm ? (
-                            <FontAwesomeIcon icon={faChevronUp} />
-                          ) : (
-                            <FontAwesomeIcon icon={faChevronDown} />
-                          )}
-                        </button>
-                      </div>
-
-                      {showDataMahasiswaBerprestasiAkademikForm && (
-                        <div className="mt-2 flex flex-col p-4">
-                          <>
-                            <button
-                              className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                              onClick={(e) => {
-                                openAddPrestasiIlmiahMahasiswaModal(e);
-                              }}
-                            >
-                              <Image src={plusIcon} alt="Plus Icon" />
-                              <p className="text-white text-[14px]">
-                                Tambah Prestasi Ilmiah Mahasiswa
-                              </p>
-                            </button>
-                            <div className="mt-6 overflow-x-auto">
-                              <table className="min-w-full text-[16px] border-collapse table-fixed">
-                                <thead>
-                                  <tr className="bg-gray-100 text-center">
-                                    <th className="px-4 py-2 w-[20%] rounded-tl-lg rounded-bl-lg">
-                                      Bidang Prestasi
-                                    </th>
-                                    <th className="px-4 py-2 w-[15%]">NIM</th>
-                                    <th className="px-4 py-2 w-[15%]">Nama</th>
-                                    <th className="px-4 py-2 w-[15%]">
-                                      Tingkat Prestasi
-                                    </th>
-                                    <th className="px-4 py-2 w-[10%]">
-                                      Lampiran
-                                    </th>
-                                    <th className="px-4 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
-                                      Action
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {prestasiIlmiahMahasiswaFormValue.length ===
-                                  0 ? (
-                                    <tr>
-                                      <td
-                                        colSpan={6}
-                                        className="text-center py-4"
-                                      >
-                                        <div className="bg-gray-50 p-4 rounded-lg shadow-md">
-                                          <h2 className="text-xl font-semibold text-gray-700">
-                                            Silahkan Tambah Prestasi Ilmiah
-                                            Mahasiswa
-                                          </h2>
-                                          <p className="text-gray-500 mt-2">
-                                            Saat ini belum ada data prestasi
-                                            ilmiah yang dimasukkan. Klik tombol
-                                            tambah prestasi ilmiah mahasiswa
-                                            untuk menambahkannya.
-                                          </p>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  ) : (
-                                    prestasiIlmiahMahasiswaFormValue.map(
-                                      (data: any, index: any) => (
-                                        <tr key={index}>
-                                          <td className="border-b text-center border-gray-200 px-4 break-words overflow-wrap">
-                                            {data.bidang_prestasi}
-                                          </td>
-                                          <td className="border-b text-center border-gray-200 px-4 max-w-[200px] break-words overflow-wrap">
-                                            {data.nim}
-                                          </td>
-                                          <td className="border-b text-center border-gray-200 px-4">
-                                            {data.nama}
-                                          </td>
-                                          <td className="border-b text-center border-gray-200 px-4">
-                                            {data.tingkat_prestasi}
-                                          </td>
-                                          <td className="border-b text-center border-gray-200 px-4">
-                                            <FileButton
-                                              data={data}
-                                              className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600"
-                                            />
-                                          </td>
-                                          <td className="border-b border-gray-200 px-4 py-4">
-                                            <div className="flex gap-2 items-center justify-center">
-                                              <EditButton
-                                                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                                                onClick={(e) => {
-                                                  setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                                    data
-                                                  );
-                                                  setPreviewUrlEditPrestasiIlmiahMahasiswaModal(
-                                                    URL.createObjectURL(
-                                                      data.file
-                                                    )
-                                                  );
-                                                  openEditPrestasiIlmiahMahasiswaModal(
-                                                    e
-                                                  );
-                                                }}
-                                              />
-                                              <TrashButton
-                                                className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                                                onClick={(e) => {
-                                                  setIdSelectedPrestasiIlmiahMahasiswaDeleteModal(
-                                                    data.id
-                                                  );
-                                                  openDeletePrestasiIlmiahMahasiswaModal(
-                                                    e
-                                                  );
-                                                }}
-                                              />
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      )
-                                    )
-                                  )}
-                                </tbody>
-                              </table>
-                            </div>
-                          </>
-                          <Modal
-                            isOpen={isModalAddPrestasiIlmiahMahasiswaOpen}
-                            onClose={closeAddPrestasiIlmiahMahasiswaModal}
-                            onAdd={handleAddPrestasiIlmiahMahasiswa}
-                            modalType="Tambah"
-                            title="Tambah Prestasi Akademik Mahasiswa"
-                          >
-                            <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                              <InputField
-                                type="text"
-                                placeholder="Masukkan Bidang Prestasi"
-                                onChange={(e) =>
-                                  setBidangPrestasiAddPrestasiIlmiahMahasiswaModal(
-                                    e.target.value
-                                  )
-                                }
-                                value={
-                                  bidangPrestasiAddPrestasiIlmiahMahasiswaModal
-                                }
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              />
-                              <InputField
-                                type="text"
-                                placeholder="Masukkan NIM"
-                                onChange={(e) =>
-                                  setNimAddPrestasiIlmiahMahasiswaModal(
-                                    e.target.value
-                                  )
-                                }
-                                value={nimAddPrestasiIlmiahMahasiswaModal}
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              />
-                              <InputField
-                                type="text"
-                                placeholder="Masukkan Nama Lengkap"
-                                onChange={(e) =>
-                                  setNamaLengkapAddPrestasiIlmiahMahasiswaModal(
-                                    e.target.value
-                                  )
-                                }
-                                value={
-                                  namaLengkapAddPrestasiIlmiahMahasiswaModal
-                                }
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              />
-                              <select
-                                value={
-                                  tingkatPrestasiAddPrestasiIlmiahMahasiswaModal
-                                }
-                                onChange={(e) =>
-                                  setTingkatPrestasiAddPrestasiIlmiahMahasiswaModal(
-                                    e.target.value
-                                  )
-                                }
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              >
-                                <option value="">Pilih Tingkat Prestasi</option>
-                                <option value="Lokal">Lokal</option>
-                                <option value="Nasional">Nasional</option>
-                                <option value="Internasional">
-                                  Internasional
-                                </option>
-                              </select>
-                              <input
-                                type="file"
-                                accept="application/pdf"
-                                onChange={(e) =>
-                                  handleFileChangeAddPrestasiIlmiahMahasiswaModal(
-                                    e
-                                  )
-                                }
-                                className="mb-3"
-                              />
-                              {previewUrlAddPrestasiIlmiahMahasiswaModal && (
-                                <iframe
-                                  src={
-                                    previewUrlAddPrestasiIlmiahMahasiswaModal
-                                  }
-                                  title="Preview PDF"
-                                  width="100%"
-                                  height="300"
-                                  className="mb-3"
-                                />
-                              )}
-                            </form>
-                          </Modal>
-                          <Modal
-                            isOpen={isModalEditPrestasiIlmiahMahasiswaOpen}
-                            onClose={closeEditPrestasiIlmiahMahasiswaModal}
-                            onEdit={handleEditPrestasiIlmiahMahasiswa}
-                            modalType="Edit"
-                            title="Tambah Prestasi Akademik Mahasiswa"
-                          >
-                            <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                              <InputField
-                                type="text"
-                                placeholder="Masukkan Bidang Prestasi"
-                                onChange={(e) =>
-                                  setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                    {
-                                      ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                      bidang_prestasi: e.target.value,
-                                    }
-                                  )
-                                }
-                                value={
-                                  dataSelectedPrestasiIlmiahMahasiswaEditModal.bidang_prestasi
-                                }
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              />
-                              <InputField
-                                type="text"
-                                placeholder="Masukkan NIM"
-                                onChange={(e) =>
-                                  setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                    {
-                                      ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                      nim: e.target.value,
-                                    }
-                                  )
-                                }
-                                value={
-                                  dataSelectedPrestasiIlmiahMahasiswaEditModal.nim
-                                }
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              />
-                              <InputField
-                                type="text"
-                                placeholder="Masukkan Nama Lengkap"
-                                onChange={(e) =>
-                                  setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                    {
-                                      ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                      nama: e.target.value,
-                                    }
-                                  )
-                                }
-                                value={
-                                  dataSelectedPrestasiIlmiahMahasiswaEditModal.nama
-                                }
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              />
-                              <select
-                                value={
-                                  dataSelectedPrestasiIlmiahMahasiswaEditModal.tingkat_prestasi
-                                }
-                                onChange={(e) =>
-                                  setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                    {
-                                      ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                      tingkat_prestasi: e.target.value,
-                                    }
-                                  )
-                                }
-                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                              >
-                                <option value="">Pilih Tingkat Prestasi</option>
-                                <option value="Lokal">Lokal</option>
-                                <option value="Nasional">Nasional</option>
-                                <option value="Internasional">
-                                  Internasional
-                                </option>
-                              </select>
-                              <input
-                                type="file"
-                                accept="application/pdf"
-                                onChange={(e) =>
-                                  handleFileChangeEditPrestasiIlmiahMahasiswaModal(
-                                    e
-                                  )
-                                }
-                                className="mb-3"
-                              />
-                              <iframe
-                                src={previewUrlEditPrestasiIlmiahMahasiswaModal}
-                                title="Preview PDF"
-                                width="100%"
-                                height="300"
-                                className="mb-3"
-                              />
-                            </form>
-                          </Modal>
-                          <Modal
-                            isOpen={isModalDeletePrestasiIlmiahMahasiswaOpen}
-                            onClose={closeDeletePrestasiIlmiahMahasiswaModal}
-                            onDelete={handleDeletePrestasiIlmiahMahasiswa}
-                            modalType="Delete"
-                            title="Hapus Prestasi Ilmiah Mahasiswa"
-                          >
-                            <p>
-                              Apakah Anda yakin ingin menghapus Prestasi Ilmiah
-                              Mahasiswa ini?
-                            </p>
-                          </Modal>
-                        </div>
-                      )}
-                    </div> */}
                               </div>
                               <div className="mt-4 border rounded-lg">
                                 <div className="flex flex-col gap-8">
@@ -4557,7 +4232,7 @@ export default function Home() {
                                       key={index}
                                       className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
                                     >
-                                      <img
+                                      <Image
                                         src={src}
                                         alt={`Preview ${index + 1}`}
                                         className="max-h-[200px]"
@@ -4765,7 +4440,7 @@ export default function Home() {
                                       key={index}
                                       className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
                                     >
-                                      <img
+                                      <Image
                                         src={src}
                                         alt={`Preview ${index + 1}`}
                                         className="max-h-[200px]"

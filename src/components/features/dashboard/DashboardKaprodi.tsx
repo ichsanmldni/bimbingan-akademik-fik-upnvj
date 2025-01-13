@@ -1425,13 +1425,13 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
-                <img
+                <Image
                   src={imagePreview}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : dataKaprodi && dataKaprodi.profile_image ? (
-                <img
+                <Image
                   src={dataKaprodi.profile_image}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
@@ -1577,7 +1577,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                 </div>
                 <div className="flex flex-col gap-4 mt-4 border rounded-xl p-8">
                   <div className="flex gap-6">
-                    <img
+                    <Image
                       src={selectedDataDosenPA?.profile_image}
                       alt="Profile Image"
                       className="size-[120px] rounded-full cursor-pointer"
@@ -1640,7 +1640,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                         }}
                       >
                         <div className="flex items-center gap-4">
-                          <img
+                          <Image
                             src={data.profile_image}
                             alt="Profile Image"
                             className="w-8 h-8 rounded-full cursor-pointer"
@@ -1836,7 +1836,8 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                             {selectedDataLaporanBimbingan?.dokumentasi
                               ?.split(", ")
                               .map((data, index) => (
-                                <img
+                                <Image
+                                  alt="dokumentasi"
                                   key={index}
                                   className="ronded rounded-xl"
                                   src={data}

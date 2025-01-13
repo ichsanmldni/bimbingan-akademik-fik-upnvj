@@ -1709,13 +1709,13 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
-                <img
+                <Image
+                  alt="preview"
                   src={imagePreview}
-                  alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : dataDosen && dataDosen?.profile_image ? (
-                <img
+                <Image
                   src={dataDosen.profile_image}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
@@ -2095,7 +2095,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         <div className="flex flex-col gap-2">
                           <p>Dokumentasi :</p>
                           <div className="relative">
-                            <img
+                            <Image
                               className="w-[200px] cursor-pointer"
                               src={data.dokumentasi_kehadiran}
                               alt="Dokumentasi Kehadiran"
@@ -2113,7 +2113,8 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         </div>
                         <div className="flex flex-col gap-2">
                           <p>Tanda Tangan Kehadiran :</p>
-                          <img
+                          <Image
+                            alt="ttd absensi"
                             className="self-center p-4 w-[100px]"
                             src={data.ttd_kehadiran}
                           />
@@ -2503,7 +2504,8 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         {dataClickedLaporanBimbingan?.dokumentasi
                           ?.split(", ")
                           .map((data, index) => (
-                            <img
+                            <Image
+                              alt="dokumentasi"
                               key={index}
                               className="ronded rounded-xl"
                               src={data}
@@ -2523,90 +2525,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         </div>
                       )}
                     </div>
-                    {/* <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">Dokumentasi</h3>
-                          <img
-                            src={dataClickedLaporanBimbingan?.dokumentasi}
-                          />
-                          <p>
-                            {dataClickedLaporanBimbingan?.kendala_mahasiswa}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">
-                            Solusi yang ditawarkan
-                          </h3>
-                          <p>{dataClickedLaporanBimbingan?.solusi}</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">Kesimpulan</h3>
-                          <p>{dataClickedLaporanBimbingan?.kesimpulan}</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">Dokumentasi</h3>
-                          <div className="grid grid-cols-2 gap-4 items-center">
-                            {dataClickedLaporanBimbingan?.dokumentasi ? (
-                              dataClickedLaporanBimbingan.dokumentasi
-                                .split(", ")
-                                .map((data, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex justify-center border rounded-lg"
-                                  >
-                                    <img
-                                      src={data}
-                                      alt="dokumentasi"
-                                      className="min-h-[100px] p-4 max-h-[200px]"
-                                    />
-                                  </div>
-                                ))
-                            ) : (
-                              <p>-</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-3">
-                          <h3 className="font-medium">Feedback Kaprodi</h3>
-                          {dataClickedLaporanBimbingan?.feedback_kaprodi !==
-                          null ? (
-                            <p>
-                              {dataClickedLaporanBimbingan?.feedback_kaprodi}
-                            </p>
-                          ) : (
-                            <div className="flex flex-col gap-3">
-                              <textarea
-                                placeholder={
-                                  feedbackKaprodi === ""
-                                    ? "Input Feedback"
-                                    : feedbackKaprodi
-                                }
-                                onChange={(e) => {
-                                  setFeedbackKaprodi(e.target.value);
-                                }}
-                                value={feedbackKaprodi}
-                                className="px-3 pt-2 h-[200px] text-[15px] border rounded-lg"
-                              ></textarea>
-                              <button
-                                onClick={() => {
-                                  handleEditLaporanBimbingan(
-                                    dataClickedLaporanBimbingan?.id,
-                                    dataClickedLaporanBimbingan?.dosen_pa_id,
-                                    "Sudah Diberikan Feedback"
-                                  );
-                                  setIsDetailLaporanKaprodiClicked(
-                                    !isDetailLaporanKaprodiClicked
-                                  );
-                                  setSelectedDataLaporanBimbingan(null);
-                                }}
-                                className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg w-1/5"
-                              >
-                                Submit
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div> */}
                   </div>
                 </div>
               </div>

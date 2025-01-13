@@ -640,13 +640,13 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
-                <img
+                <Image
                   src={imagePreview}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : dataMahasiswa && dataMahasiswa.profile_image ? (
-                <img
+                <Image
                   src={dataMahasiswa.profile_image}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
@@ -990,7 +990,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                                                         key={index}
                                                         className="relative mb-2"
                                                       >
-                                                        <img
+                                                        <Image
                                                           src={preview}
                                                           alt={`Preview ${index}`}
                                                           className="w-full h-auto rounded border border-gray-300"
@@ -1157,7 +1157,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                                                         key={index}
                                                         className="relative mb-2"
                                                       >
-                                                        <img
+                                                        <Image
                                                           src={preview}
                                                           alt={`Preview ${index}`}
                                                           className="w-full h-auto rounded border border-gray-300"

@@ -10,6 +10,7 @@ import ProfileModal from "./ProfileModal";
 import NotificationButton from "./NotificationButton";
 import { MessageSquareText } from "lucide-react";
 import axios from "axios";
+import Image from "next/image";
 
 const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
@@ -130,7 +131,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           className="w-6 h-6 cursor-pointer"
         />
         {dataUser?.profile_image ? (
-          <img
+          <Image
             src={`../${dataUser.profile_image}`}
             alt="Profile"
             className="rounded-full size-8 cursor-pointer"

@@ -1,6 +1,7 @@
 import React from "react";
 import { UserRound } from "lucide-react";
 import ProfileImage from "../ProfileImage";
+import Image from "next/image";
 
 export default function MessageMahasiswa({ data, onClick }: any) {
   const date = new Date(data.waktu_pesan_terakhir);
@@ -29,7 +30,7 @@ export default function MessageMahasiswa({ data, onClick }: any) {
       <div className="flex gap-4">
         <div className="rounded-full size-12 bg-orange-200">
           {data.mahasiswa?.profile_image ? (
-            <img
+            <Image
               src={`../${data.mahasiswa.profile_image}`}
               alt="Profile"
               className="rounded-full size-12 cursor-pointer"

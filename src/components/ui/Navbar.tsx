@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // perbaiki import useNavigate
 import { Bell, MessageSquareText } from "lucide-react";
 import Notification from "./Notification";
+import Image from "next/image";
 
 export default function Navbar() {
   const [showNotification, setShowNotification] = useState(false);
@@ -21,7 +22,7 @@ export default function Navbar() {
       style={{ zIndex: 50 }} // zIndex memastikan navbar tetap di atas konten lain
     >
       <button onClick={() => navigate("/")} className="flex items-center">
-        <img
+        <Image
           src="src\assets\LOGO UPNVJ.png"
           className="h-[40px] w-[40px]"
           alt="Logo UPNVJ"
