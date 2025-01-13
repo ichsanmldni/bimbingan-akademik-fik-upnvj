@@ -76,10 +76,12 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/is-hotkey": "^0.1.10",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-signature-canvas": "^1.0.6",
     "autoprefixer": "^10.4.20",
     "babel-plugin-styled-components": "^2.1.4",
     "eslint": "^8",

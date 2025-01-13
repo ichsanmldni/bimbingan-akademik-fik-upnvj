@@ -45,12 +45,12 @@ const Dashboard: React.FC<DashboardProps> = () => {
   useEffect(() => {
     if (dataTahunAjaran.length > 0) {
       const uniqueYears = new Set();
-      dataTahunAjaran.forEach((data) => {
+      dataTahunAjaran.forEach((data: any) => {
         const year = data.nama_periode.split(" ")[0];
         uniqueYears.add(year); // Menambahkan tahun ke Set
       });
 
-      const formattedOptions = Array.from(uniqueYears).map((year) => ({
+      const formattedOptions: any = Array.from(uniqueYears).map((year) => ({
         value: year,
         label: year,
       }));

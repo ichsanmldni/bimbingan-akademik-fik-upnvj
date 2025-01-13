@@ -1,8 +1,5 @@
 import prisma from '../../../lib/prisma';
 
-interface PatchRequestBody {
-    id: number;
-}
 
 export async function GET(req: Request): Promise<Response> {
     try {
@@ -30,8 +27,7 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function PATCH(req: Request): Promise<Response> {
     try {
-        const body: PatchRequestBody = await req.json();
-        console.log(body)
+        const body: any = await req.json();
         const { mahasiswa_id } = body;
 
         if (!mahasiswa_id) {

@@ -1,19 +1,5 @@
 import prisma from '../../../lib/prisma';
 
-interface PesanBot {
-  id?: number; // Optional for POST, required for GET
-  sesi_chatbot_mahasiswa_id: number;
-  pesan: string;
-  waktu_kirim: Date; // Adjust type according to your schema
-}
-
-interface RiwayatPesanChatbot {
-  sesi_chatbot_mahasiswa_id: number;
-  pesan: string;
-  role: string; // Assuming role is a string, adjust if necessary
-  waktu_kirim: Date; // Adjust type according to your schema
-}
-
 export async function GET(req: Request): Promise<Response> {
   try {
     const pesanBot = await prisma.pesanbot.findMany();
@@ -33,7 +19,7 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: PesanBot = await req.json();
+    const body: any = await req.json();
 
     const { sesi_chatbot_mahasiswa_id, pesan, waktu_kirim } = body;
 
@@ -52,7 +38,7 @@ export async function POST(req: Request): Promise<Response> {
       },
     });
 
-    const riwayatPesanChatbot: RiwayatPesanChatbot = {
+    const riwayatPesanChatbot: any = {
       sesi_chatbot_mahasiswa_id,
       pesan,
       role: "assistant",

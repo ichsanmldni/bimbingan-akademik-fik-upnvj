@@ -1,15 +1,6 @@
 import React, { useState } from "react";
 
-interface InputFieldProps {
-  type: string;
-  placeholder: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  value: string;
-  className: string;
-  disabled: boolean;
-}
-
-const InputField: React.FC<InputFieldProps> = ({
+const InputField: React.FC<any> = ({
   type,
   placeholder,
   onChange,

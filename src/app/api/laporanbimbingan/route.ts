@@ -2,30 +2,14 @@ import fs from 'fs/promises';
 import path from 'path';
 import prisma from '../../../lib/prisma';
 
-interface NotifikasiKaprodi {
-  kaprodi_id: number;
-  isi: string;
-  read: boolean;
-  waktu: Date;
-}
-
-interface NotifikasiDosenPA {
-  dosen_pa_id: number;
-  isi: string;
-  read: boolean;
-  waktu: Date;
-}
-
 export async function GET(req: Request): Promise<Response> {
   try {
-    // Mengambil data laporan bimbingan dari database
     const laporanBimbingan = await prisma.laporanbimbingan.findMany({
       include: {
         dosen_pa: true,
       },
     });
 
-    // Mengembalikan data laporan bimbingan sebagai JSON
     return new Response(JSON.stringify(laporanBimbingan), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -75,7 +59,7 @@ export async function POST(req: Request): Promise<Response> {
     } = body;
 
     if (jenis_bimbingan === "Perwalian") {
-      const jumlahPeserta = parseInt(bimbingan_id.split(",").map(id => id.trim()).length)
+      const jumlahPeserta = parseInt(bimbingan_id.split(",").map((id: any) => id.trim()).length)
       const jumlahKeteranganIPK = jumlah_ipk_a + jumlah_ipk_b + jumlah_ipk_c + jumlah_ipk_d + jumlah_ipk_e
       const jumlahPrestasiBeasiswa = jumlah_beasiswa_bbm + jumlah_beasiswa_pegadaian + jumlah_beasiswa_ppa + jumlah_beasiswa_supersemar + jumlah_beasiswa_ykl + jumlah_beasiswa_dll
 
@@ -197,7 +181,7 @@ export async function POST(req: Request): Promise<Response> {
 
     let savedTtdImagePaths: string[] = [];
     if (tanda_tangan_dosen_pa) {
-      const base64Strings = tanda_tangan_dosen_pa.split(", ").map((str) => str.trim());
+      const base64Strings = tanda_tangan_dosen_pa.split(", ").map((str: any) => str.trim());
       for (const base64Data of base64Strings) {
         try {
           const match = base64Data.match(/^data:image\/(\w+);base64,/);
@@ -222,7 +206,7 @@ export async function POST(req: Request): Promise<Response> {
     }
     const savedTtdImagePathsString = savedTtdImagePaths.join(", ");
 
-    const notifikasiKaprodi: NotifikasiKaprodi = {
+    const notifikasiKaprodi: any = {
       kaprodi_id,
       isi: `Laporan bimbingan baru dari Dosen ${nama_dosen_pa} telah diterima. Mohon segera ditinjau dan berikan feedback Anda!`,
       read: false,
@@ -231,11 +215,11 @@ export async function POST(req: Request): Promise<Response> {
 
     await prisma.notifikasikaprodi.create({ data: notifikasiKaprodi });
 
-    let laporanBimbingan
+    let laporanBimbingan: any
     if (jenis_bimbingan === "Perwalian") {
       laporanBimbingan = await prisma.laporanbimbingan.create({
         data: {
-          jumlah_mahasiswa: parseInt(bimbingan_id.split(",").map(id => id.trim()).length),
+          jumlah_mahasiswa: parseInt(bimbingan_id.split(",").map((id: any) => id.trim()).length),
           status,
           nama_kaprodi,
           kaprodi_id,
@@ -262,7 +246,7 @@ export async function POST(req: Request): Promise<Response> {
           jadwal_bimbingan
         },
       });
-      prestasi_ilmiah_mahasiswa?.map(async (data) =>
+      prestasi_ilmiah_mahasiswa?.map(async (data: any) =>
         await prisma.prestasiilmiahmahasiswa.create({
           data: {
             laporan_bimbingan_id: laporanBimbingan.id,
@@ -274,7 +258,7 @@ export async function POST(req: Request): Promise<Response> {
           }
         })
       )
-      prestasi_porseni_mahasiswa?.map(async (data) =>
+      prestasi_porseni_mahasiswa?.map(async (data: any) =>
         await prisma.prestasiporsenimahasiswa.create({
           data: {
             laporan_bimbingan_id: laporanBimbingan.id,
@@ -286,7 +270,7 @@ export async function POST(req: Request): Promise<Response> {
           }
         })
       )
-      data_status_mahasiswa?.map(async (data) =>
+      data_status_mahasiswa?.map(async (data: any) =>
         await prisma.datastatusmahasiswa.create({
           data: {
             laporan_bimbingan_id: laporanBimbingan.id,
@@ -299,7 +283,7 @@ export async function POST(req: Request): Promise<Response> {
     } else if (jenis_bimbingan === "Pribadi") {
       laporanBimbingan = await prisma.laporanbimbingan.create({
         data: {
-          jumlah_mahasiswa: parseInt(bimbingan_id.split(",").map(id => id.trim()).length),
+          jumlah_mahasiswa: parseInt(bimbingan_id.split(",").map((id: any) => id.trim()).length),
           status,
           nama_kaprodi,
           kaprodi_id,
@@ -330,9 +314,9 @@ export async function POST(req: Request): Promise<Response> {
 
 
 
-    const bimbinganIds = bimbingan_id.split(",").map(id => id.trim()); // Mengubah string menjadi array dan membersihkan spasi
+    const bimbinganIds = bimbingan_id.split(",").map((id: any) => id.trim()); // Mengubah string menjadi array dan membersihkan spasi
 
-    const updateBimbinganPromises = bimbinganIds.map(async (id) => {
+    const updateBimbinganPromises = bimbinganIds.map(async (id: any) => {
       return prisma.bimbingan.update({
         where: { id: Number(id) }, // Mengonversi id menjadi angka
         data: { laporan_bimbingan_id: laporanBimbingan.id },
@@ -391,7 +375,7 @@ export async function PATCH(req: Request): Promise<Response> {
       throw new Error('Record not found');
     }
 
-    const notifikasiDosenPA: NotifikasiDosenPA = {
+    const notifikasiDosenPA: any = {
       dosen_pa_id,
       isi: `Laporan bimbingan Anda yang dilaksanakan pada ${existingRecord.jadwal_bimbingan} kini telah mendapatkan feedback dari Kaprodi ${existingRecord.nama_kaprodi}. Silakan cek!`,
       read: false,

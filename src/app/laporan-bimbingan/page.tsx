@@ -52,7 +52,7 @@ import PDFModal from "./pdfModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const HOTKEYS = {
+const HOTKEYS: { [key: string]: string } = {
   "mod+b": "bold",
   "mod+i": "italic",
   "mod+u": "underline",
@@ -62,336 +62,291 @@ const HOTKEYS = {
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
 
-const initialValue: Descendant[] = [
+const initialValue: any = [
   {
     type: "paragraph",
     children: [{ text: "" }],
   },
 ];
 
-interface User {
-  id: number;
-  role: string;
-  [key: string]: any; // Allow additional properties
-}
-
-interface Dosen {
-  id: number;
-  nama_lengkap: string;
-  [key: string]: any; // Allow additional properties
-}
-
-interface Kaprodi {
-  id: number;
-  dosen: Dosen;
-  dosen_id: number;
-  kaprodi_jurusan: {
-    jurusan: string;
-  };
-}
-
-interface Bimbingan {
-  id: number;
-  pengajuan_bimbingan: {
-    nama_lengkap: string;
-    jadwal_bimbingan: string;
-    jenis_bimbingan: string;
-    sistem_bimbingan: string;
-    dosen_pa_id: number;
-  };
-  laporan_bimbingan_id: string | null;
-}
-
 export default function Home() {
-  const [selectedKaprodi, setSelectedKaprodi] = useState<string>("");
-  const [selectedSemester, setSelectedSemester] = useState<string>("");
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState<string>("");
-  const [pendahuluan, setPendahuluan] = useState([]);
-  const [kesimpulan, setKesimpulan] = useState([]);
-  const [roleUser, setRoleUser] = useState<string>("");
-  const [dataUser, setDataUser] = useState<User>({} as User);
-  const [dataDosenPA, setDataDosenPA] = useState<Dosen[]>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
-  const [optionsKaprodi, setOptionsKaprodi] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [optionsSemester, setOptionsSemester] = useState<
-    { value: string; label: string }[]
-  >([
+  const [selectedKaprodi, setSelectedKaprodi] = useState<any>("");
+  const [selectedSemester, setSelectedSemester] = useState<any>("");
+  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState<any>("");
+  const [pendahuluan, setPendahuluan] = useState<any>([]);
+  const [kesimpulan, setKesimpulan] = useState<any>([]);
+  const [roleUser, setRoleUser] = useState<any>("");
+  const [dataUser, setDataUser] = useState<any>({});
+  const [dataDosenPA, setDataDosenPA] = useState<any>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any>([]);
+  const [optionsKaprodi, setOptionsKaprodi] = useState<any>([]);
+  const [optionsSemester, setOptionsSemester] = useState<any>([
     { value: "Ganjil", label: "Ganjil" },
     { value: "Genap", label: "Genap" },
   ]);
-  const [dataSelectedKaprodi, setDataSelectedKaprodi] =
-    useState<Kaprodi | null>(null);
-  const [dataTahunAjaran, setDataTahunAjaran] = useState<any[]>([]);
-  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [dataBimbingan, setDataBimbingan] = useState<Bimbingan[]>([]);
-  const [userProfile, setUserProfile] = useState<{
-    nama_lengkap: string;
-    email: string;
-    nip: string;
-    no_whatsapp: string;
-  } | null>(null);
-  const [selectedBimbingan, setSelectedBimbingan] = useState<Bimbingan[]>([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]); // Adjust type as needed
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [dataSelectedKaprodi, setDataSelectedKaprodi] = useState<any>(null);
+  const [dataTahunAjaran, setDataTahunAjaran] = useState<any>([]);
+  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState<any>([]);
+  const [dataBimbingan, setDataBimbingan] = useState<any>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [selectedBimbingan, setSelectedBimbingan] = useState<any>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<any>([]); // Adjust type as needed
+  const [imagePreviews, setImagePreviews] = useState<any>([]);
 
-  const [jurusanFilter, setJurusanFilter] = useState("");
-  const [jadwalFilter, setJadwalFilter] = useState("");
-  const [jenisBimbinganFilter, setJenisBimbinganFilter] = useState("");
+  const [jurusanFilter, setJurusanFilter] = useState<any>("");
+  const [jadwalFilter, setJadwalFilter] = useState<any>("");
+  const [jenisBimbinganFilter, setJenisBimbinganFilter] = useState<any>("");
   const [
     showPrestasiAkademikMahasiswaForm,
     setShowPrestasiAkademikMahasiswaForm,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     jumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm,
     setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm,
     setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm,
     setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm,
     setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm,
     setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm,
     setJumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm,
     setJumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm,
     setJumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm,
     setJumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm,
     setJumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [
     jumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm,
     setJumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm,
-  ] = useState(0);
+  ] = useState<any>(0);
   const [showPrestasiIlmiahMahasiswaForm, setShowPrestasiIlmiahMahasiswaForm] =
-    useState(false);
+    useState<any>(false);
   const [
     prestasiIlmiahMahasiswaFormValue,
     setPrestasiIlmiahMahasiswaFormValue,
-  ] = useState([]);
+  ] = useState<any>([]);
   const [
     prestasiMahasiswaMengikutiPorseniFormValue,
     setPrestasiMahasiswaMengikutiPorseniFormValue,
-  ] = useState([]);
+  ] = useState<any>([]);
   const [dataStatusMahasiswaFormValue, setDataStatusMahasiswaFormValue] =
-    useState([]);
+    useState<any>([]);
   const [
     isModalAddPrestasiIlmiahMahasiswaOpen,
     setIsModalAddPrestasiIlmiahMahasiswaOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalAddPrestasiMahasiswaMengikutiPorseniOpen,
     setIsModalAddPrestasiMahasiswaMengikutiPorseniOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalAddDataStatusMahasiswaOpen,
     setIsModalAddDataStatusMahasiswaOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalEditPrestasiIlmiahMahasiswaOpen,
     setIsModalEditPrestasiIlmiahMahasiswaOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalEditPrestasiMahasiswaMengikutiPorseniOpen,
     setIsModalEditPrestasiMahasiswaMengikutiPorseniOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalEditDataStatusMahasiswaOpen,
     setIsModalEditDataStatusMahasiswaOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalDeletePrestasiIlmiahMahasiswaOpen,
     setIsModalDeletePrestasiIlmiahMahasiswaOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalDeletePrestasiMahasiswaMengikutiPorseniOpen,
     setIsModalDeletePrestasiMahasiswaMengikutiPorseniOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     isModalDeleteDataStatusMahasiswaOpen,
     setIsModalDeleteDataStatusMahasiswaOpen,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     dataSelectedPrestasiIlmiahMahasiswaEditModal,
     setDataSelectedPrestasiIlmiahMahasiswaEditModal,
-  ] = useState({});
+  ] = useState<any>({});
   const [
     dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
     setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
-  ] = useState({});
+  ] = useState<any>({});
   const [
     dataSelectedDataStatusMahasiswaEditModal,
     setDataSelectedDataStatusMahasiswaEditModal,
-  ] = useState({});
+  ] = useState<any>({});
   const [
     idSelectedPrestasiIlmiahMahasiswaDeleteModal,
     setIdSelectedPrestasiIlmiahMahasiswaDeleteModal,
-  ] = useState(null);
+  ] = useState<any>(null);
   const [
     idSelectedPrestasiMahasiswaMengikutiPorseniDeleteModal,
     setIdSelectedPrestasiMahasiswaMengikutiPorseniDeleteModal,
-  ] = useState(null);
+  ] = useState<any>(null);
   const [
     idSelectedDataStatusMahasiswaDeleteModal,
     setIdSelectedDataStatusMahasiswaDeleteModal,
-  ] = useState(null);
+  ] = useState<any>(null);
   const [
     bidangPrestasiAddPrestasiIlmiahMahasiswaModal,
     setBidangPrestasiAddPrestasiIlmiahMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     jenisKegiatanAddPrestasiMahasiswaMengikutiPorseniModal,
     setJenisKegiatanAddPrestasiMahasiswaMengikutiPorseniModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     nimAddPrestasiIlmiahMahasiswaModal,
     setNimAddPrestasiIlmiahMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     nimAddPrestasiMahasiswaMengikutiPorseniModal,
     setNimAddPrestasiMahasiswaMengikutiPorseniModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [nimAddDataStatusMahasiswaModal, setNimAddDataStatusMahasiswaModal] =
-    useState("");
+    useState<any>("");
   const [
     namaLengkapAddPrestasiIlmiahMahasiswaModal,
     setNamaLengkapAddPrestasiIlmiahMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     namaLengkapAddPrestasiMahasiswaMengikutiPorseniModal,
     setNamaLengkapAddPrestasiMahasiswaMengikutiPorseniModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     namaLengkapAddDataStatusMahasiswaModal,
     setNamaLengkapAddDataStatusMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     tingkatPrestasiAddPrestasiIlmiahMahasiswaModal,
     setTingkatPrestasiAddPrestasiIlmiahMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     tingkatPrestasiAddPrestasiMahasiswaMengikutiPorseniModal,
     setTingkatPrestasiAddPrestasiMahasiswaMengikutiPorseniModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     statusAddDataStatusMahasiswaModal,
     setStatusAddDataStatusMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     fileAddPrestasiIlmiahMahasiswaModal,
     setFileAddPrestasiIlmiahMahasiswaModal,
-  ] = useState(null);
+  ] = useState<any>(null);
   const [
     fileAddPrestasiMahasiswaMengikutiPorseniModal,
     setFileAddPrestasiMahasiswaMengikutiPorseniModal,
-  ] = useState(null);
+  ] = useState<any>(null);
   const [
     previewUrlAddPrestasiIlmiahMahasiswaModal,
     setPreviewUrlAddPrestasiIlmiahMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     previewUrlAddPrestasiMahasiswaMengikutiPorseniModal,
     setPreviewUrlAddPrestasiMahasiswaMengikutiPorseniModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     previewUrlEditPrestasiIlmiahMahasiswaModal,
     setPreviewUrlEditPrestasiIlmiahMahasiswaModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     previewUrlEditPrestasiMahasiswaMengikutiPorseniModal,
     setPreviewUrlEditPrestasiMahasiswaMengikutiPorseniModal,
-  ] = useState("");
+  ] = useState<any>("");
   const [
     showPrestasiMahasiswaMendapatkanBeasiswaForm,
     setShowPrestasiMahasiswaMendapatkanBeasiswaForm,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [
     showPrestasiMahasiswaMengikutiPorseniForm,
     setShowPrestasiMahasiswaMengikutiPorseniForm,
-  ] = useState(false);
+  ] = useState<any>(false);
   const [showDataStatusMahasiswaForm, setShowDataStatusMahasiswaForm] =
-    useState(false);
+    useState<any>(false);
   const [
     showDataMahasiswaBerprestasiAkademikForm,
     setShowDataMahasiswaBerprestasiAkademikForm,
-  ] = useState(false);
-  const [jadwalOptions, setJadwalOptions] = useState([]);
-  const [jurusanOptions, setJurusanOptions] = useState([]);
+  ] = useState<any>(false);
+  const [jadwalOptions, setJadwalOptions] = useState<any>([]);
+  const [jurusanOptions, setJurusanOptions] = useState<any>([]);
 
-  const sigCanvas = useRef({});
+  const sigCanvas: any = useRef<any>(null);
   const clearSignature = () => {
     sigCanvas.current.clear();
   };
 
-  const togglePrestasiAkademikMahasiswaForm = (e) => {
+  const togglePrestasiAkademikMahasiswaForm = (e: any) => {
     e.preventDefault();
     setShowPrestasiAkademikMahasiswaForm(!showPrestasiAkademikMahasiswaForm);
   };
-  const togglePrestasiIlmiahMahasiswaForm = (e) => {
+  const togglePrestasiIlmiahMahasiswaForm = (e: any) => {
     e.preventDefault();
     setShowPrestasiIlmiahMahasiswaForm(!showPrestasiIlmiahMahasiswaForm);
   };
-  const openAddPrestasiIlmiahMahasiswaModal = (e) => {
+  const openAddPrestasiIlmiahMahasiswaModal = (e: any) => {
     e.preventDefault();
     setIsModalAddPrestasiIlmiahMahasiswaOpen(true);
   };
-  const openAddPrestasiMahasiswaMengikutiPorseniModal = (e) => {
+  const openAddPrestasiMahasiswaMengikutiPorseniModal = (e: any) => {
     e.preventDefault();
     setIsModalAddPrestasiMahasiswaMengikutiPorseniOpen(true);
   };
-  const openAddDataStatusMahasiswaModal = (e) => {
+  const openAddDataStatusMahasiswaModal = (e: any) => {
     e.preventDefault();
     setIsModalAddDataStatusMahasiswaOpen(true);
   };
 
-  const openEditPrestasiIlmiahMahasiswaModal = (e) => {
+  const openEditPrestasiIlmiahMahasiswaModal = (e: any) => {
     e.preventDefault();
     setIsModalEditPrestasiIlmiahMahasiswaOpen(true);
   };
-  const openEditPrestasiMahasiswaMengikutiPorseniModal = (e) => {
+  const openEditPrestasiMahasiswaMengikutiPorseniModal = (e: any) => {
     e.preventDefault();
     setIsModalEditPrestasiMahasiswaMengikutiPorseniOpen(true);
   };
-  const openEditDataStatusMahasiswaModal = (e) => {
+  const openEditDataStatusMahasiswaModal = (e: any) => {
     e.preventDefault();
     setIsModalEditDataStatusMahasiswaOpen(true);
   };
 
-  const openDeletePrestasiIlmiahMahasiswaModal = (e) => {
+  const openDeletePrestasiIlmiahMahasiswaModal = (e: any) => {
     e.preventDefault();
     setIsModalDeletePrestasiIlmiahMahasiswaOpen(true);
   };
-  const openDeletePrestasiMahasiswaMengikutiPorseniModal = (e) => {
+  const openDeletePrestasiMahasiswaMengikutiPorseniModal = (e: any) => {
     e.preventDefault();
     setIsModalDeletePrestasiMahasiswaMengikutiPorseniOpen(true);
   };
-  const openDeleteDataStatusMahasiswaModal = (e) => {
+  const openDeleteDataStatusMahasiswaModal = (e: any) => {
     e.preventDefault();
     setIsModalDeleteDataStatusMahasiswaOpen(true);
   };
@@ -449,9 +404,14 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState("");
 
-  const [dataKonsultasiMahasiswa, setDataKonsultasiMahasiswa] = useState([]);
+  const [dataKonsultasiMahasiswa, setDataKonsultasiMahasiswa] = useState<any>(
+    []
+  );
 
-  const DataRowKonsultasiMahasiswa = ({ data, index }) => {
+  const DataRowKonsultasiMahasiswa: React.FC<{ data: any; index: any }> = ({
+    data,
+    index,
+  }) => {
     const [visiblePermasalahan, setVisiblePermasalahan] = useState(100);
     const [visibleSolusi, setVisibleSolusi] = useState(100);
     const increment = 100;
@@ -533,7 +493,10 @@ export default function Home() {
     );
   };
 
-  const DataRowAbsensiMahasiswa = ({ data, index }) => {
+  const DataRowAbsensiMahasiswa: React.FC<{ data: any; index: any }> = ({
+    data,
+    index,
+  }) => {
     return (
       <tr key={index}>
         <td className="border-b text-center align-top border-gray-200 px-2 py-2">
@@ -554,7 +517,7 @@ export default function Home() {
 
   const handleAddPrestasiMahasiswaMengikutiPorseni = async (e: any) => {
     e.preventDefault();
-    setPrestasiMahasiswaMengikutiPorseniFormValue((prevValues) => [
+    setPrestasiMahasiswaMengikutiPorseniFormValue((prevValues: any) => [
       ...prevValues,
       {
         id: generateUniqueId(),
@@ -570,7 +533,7 @@ export default function Home() {
   };
   const handleAddDataStatusMahasiswa = async (e: any) => {
     e.preventDefault();
-    setDataStatusMahasiswaFormValue((prevValues) => [
+    setDataStatusMahasiswaFormValue((prevValues: any) => [
       ...prevValues,
       {
         id: generateUniqueId(),
@@ -583,7 +546,7 @@ export default function Home() {
   };
   const handleAddPrestasiIlmiahMahasiswa = async (e: any) => {
     e.preventDefault();
-    setPrestasiIlmiahMahasiswaFormValue((prevValues) => [
+    setPrestasiIlmiahMahasiswaFormValue((prevValues: any) => [
       ...prevValues,
       {
         id: generateUniqueId(),
@@ -602,8 +565,8 @@ export default function Home() {
   };
 
   const handleEditPrestasiIlmiahMahasiswa = async () => {
-    setPrestasiIlmiahMahasiswaFormValue((prevValues) => {
-      return prevValues.map((item) =>
+    setPrestasiIlmiahMahasiswaFormValue((prevValues: any) => {
+      return prevValues.map((item: any) =>
         item.id === dataSelectedPrestasiIlmiahMahasiswaEditModal.id
           ? {
               ...item,
@@ -621,8 +584,8 @@ export default function Home() {
     closeEditPrestasiIlmiahMahasiswaModal();
   };
   const handleEditPrestasiMahasiswaMengikutiPorseni = async () => {
-    setPrestasiMahasiswaMengikutiPorseniFormValue((prevValues) => {
-      return prevValues.map((item) =>
+    setPrestasiMahasiswaMengikutiPorseniFormValue((prevValues: any) => {
+      return prevValues.map((item: any) =>
         item.id === dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.id
           ? {
               ...item,
@@ -640,8 +603,8 @@ export default function Home() {
     closeEditPrestasiMahasiswaMengikutiPorseniModal();
   };
   const handleEditDataStatusMahasiswa = async () => {
-    setDataStatusMahasiswaFormValue((prevValues) => {
-      return prevValues.map((item) =>
+    setDataStatusMahasiswaFormValue((prevValues: any) => {
+      return prevValues.map((item: any) =>
         item.id === dataSelectedDataStatusMahasiswaEditModal.id
           ? {
               ...item,
@@ -656,32 +619,32 @@ export default function Home() {
   };
 
   const handleDeletePrestasiIlmiahMahasiswa = async () => {
-    setPrestasiIlmiahMahasiswaFormValue((prevValues) =>
+    setPrestasiIlmiahMahasiswaFormValue((prevValues: any) =>
       prevValues.filter(
-        (item) => item.id !== idSelectedPrestasiIlmiahMahasiswaDeleteModal
+        (item: any) => item.id !== idSelectedPrestasiIlmiahMahasiswaDeleteModal
       )
     );
     closeDeletePrestasiIlmiahMahasiswaModal();
   };
   const handleDeletePrestasiMahasiswaMengikutiPorseni = async () => {
-    setPrestasiMahasiswaMengikutiPorseniFormValue((prevValues) =>
+    setPrestasiMahasiswaMengikutiPorseniFormValue((prevValues: any) =>
       prevValues.filter(
-        (item) =>
+        (item: any) =>
           item.id !== idSelectedPrestasiMahasiswaMengikutiPorseniDeleteModal
       )
     );
     closeDeletePrestasiMahasiswaMengikutiPorseniModal();
   };
   const handleDeleteDataStatusMahasiswa = async () => {
-    setDataStatusMahasiswaFormValue((prevValues) =>
+    setDataStatusMahasiswaFormValue((prevValues: any) =>
       prevValues.filter(
-        (item) => item.id !== idSelectedDataStatusMahasiswaDeleteModal
+        (item: any) => item.id !== idSelectedDataStatusMahasiswaDeleteModal
       )
     );
     closeDeleteDataStatusMahasiswaModal();
   };
 
-  const handleFileChangeEditPrestasiIlmiahMahasiswaModal = (e) => {
+  const handleFileChangeEditPrestasiIlmiahMahasiswaModal = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setDataSelectedPrestasiIlmiahMahasiswaEditModal({
@@ -693,7 +656,9 @@ export default function Home() {
       );
     }
   };
-  const handleFileChangeEditPrestasiMahasiswaMengikutiPorseniModal = (e) => {
+  const handleFileChangeEditPrestasiMahasiswaMengikutiPorseniModal = (
+    e: any
+  ) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal({
@@ -706,7 +671,7 @@ export default function Home() {
     }
   };
 
-  const handleFileChangeAddPrestasiIlmiahMahasiswaModal = (e) => {
+  const handleFileChangeAddPrestasiIlmiahMahasiswaModal = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFileAddPrestasiIlmiahMahasiswaModal(selectedFile);
@@ -718,7 +683,9 @@ export default function Home() {
       setPreviewUrlAddPrestasiIlmiahMahasiswaModal(""); // Reset preview jika tidak ada file
     }
   };
-  const handleFileChangeAddPrestasiMahasiswaMengikutiPorseniModal = (e) => {
+  const handleFileChangeAddPrestasiMahasiswaMengikutiPorseniModal = (
+    e: any
+  ) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFileAddPrestasiMahasiswaMengikutiPorseniModal(selectedFile);
@@ -730,23 +697,23 @@ export default function Home() {
       setPreviewUrlAddPrestasiMahasiswaMengikutiPorseniModal(""); // Reset preview jika tidak ada file
     }
   };
-  const togglePrestasiMahasiswaMendapatkanBeasiswaForm = (e) => {
+  const togglePrestasiMahasiswaMendapatkanBeasiswaForm = (e: any) => {
     e.preventDefault();
     setShowPrestasiMahasiswaMendapatkanBeasiswaForm(
       !showPrestasiMahasiswaMendapatkanBeasiswaForm
     );
   };
-  const togglePrestasiMahasiswaMengikutiPorseniForm = (e) => {
+  const togglePrestasiMahasiswaMengikutiPorseniForm = (e: any) => {
     e.preventDefault();
     setShowPrestasiMahasiswaMengikutiPorseniForm(
       !showPrestasiMahasiswaMengikutiPorseniForm
     );
   };
-  const toggleDataStatusMahasiswaForm = (e) => {
+  const toggleDataStatusMahasiswaForm = (e: any) => {
     e.preventDefault();
     setShowDataStatusMahasiswaForm(!showDataStatusMahasiswaForm);
   };
-  const toggleDataMahasiswaBerprestasiAkademikForm = (e) => {
+  const toggleDataMahasiswaBerprestasiAkademikForm = (e: any) => {
     e.preventDefault();
     setShowDataMahasiswaBerprestasiAkademikForm(
       !showDataMahasiswaBerprestasiAkademikForm
@@ -758,16 +725,18 @@ export default function Home() {
       ...new Set(
         dataBimbingan
           .filter(
-            (data) =>
+            (data: any) =>
               data.pengajuan_bimbingan.jenis_bimbingan === jenisBimbinganFilter
           )
-          .filter((data) => data.pengajuan_bimbingan.jurusan === jurusanFilter)
-          .filter((data) => data.laporan_bimbingan_id === null)
-          .map((data) => data.pengajuan_bimbingan.jadwal_bimbingan)
-          .sort((a, b) => {
-            const parseDate = (str) => {
+          .filter(
+            (data: any) => data.pengajuan_bimbingan.jurusan === jurusanFilter
+          )
+          .filter((data: any) => data.laporan_bimbingan_id === null)
+          .map((data: any) => data.pengajuan_bimbingan.jadwal_bimbingan)
+          .sort((a: any, b: any) => {
+            const parseDate = (str: any) => {
               // Contoh: "Senin, 13 Januari 2025 10:00-11:00"
-              const months = {
+              const months: { [key: string]: number } = {
                 Januari: 0,
                 Februari: 1,
                 Maret: 2,
@@ -789,8 +758,8 @@ export default function Home() {
               return new Date(year, months[month], day, hour, minute);
             };
 
-            const dateA = parseDate(a);
-            const dateB = parseDate(b);
+            const dateA: any = parseDate(a);
+            const dateB: any = parseDate(b);
 
             return dateA - dateB; // Ascending order
           })
@@ -808,10 +777,10 @@ export default function Home() {
       ...new Set(
         dataBimbingan
           .filter(
-            (data) =>
+            (data: any) =>
               data.pengajuan_bimbingan.jenis_bimbingan === jenisBimbinganFilter
           )
-          .map((data) => data.pengajuan_bimbingan.jurusan)
+          .map((data: any) => data.pengajuan_bimbingan.jurusan)
       ),
     ];
     setJurusanOptions(opsiJurusan);
@@ -840,13 +809,13 @@ export default function Home() {
 
   const jenisBimbinganOptions = [
     ...new Set(
-      dataBimbingan.map((data) => data.pengajuan_bimbingan.jenis_bimbingan)
+      dataBimbingan.map((data: any) => data.pengajuan_bimbingan.jenis_bimbingan)
     ),
   ];
 
   const filteredBimbingan = dataBimbingan
-    .filter((data) => data.laporan_bimbingan_id === null)
-    .filter((data) => {
+    .filter((data: any) => data.laporan_bimbingan_id === null)
+    .filter((data: any) => {
       const matchesJurusan = jurusanFilter
         ? data.pengajuan_bimbingan.jurusan === jurusanFilter
         : true;
@@ -861,20 +830,22 @@ export default function Home() {
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
-  const toggleBimbingan = (data: Bimbingan) => {
-    setSelectedBimbingan((prevSelected) => {
-      if (prevSelected.some((bimbingan) => bimbingan.id === data.id)) {
-        return prevSelected.filter((bimbingan) => bimbingan.id !== data.id);
+  const toggleBimbingan = (data: any) => {
+    setSelectedBimbingan((prevSelected: any) => {
+      if (prevSelected.some((bimbingan: any) => bimbingan.id === data.id)) {
+        return prevSelected.filter(
+          (bimbingan: any) => bimbingan.id !== data.id
+        );
       } else {
         return [...prevSelected, data];
       }
     });
-    if (selectedBimbingan.some((bimbingan) => bimbingan.id === data.id)) {
-      setImagePreviews((prev) =>
-        prev.filter((preview) => preview !== data.dokumentasi_kehadiran)
+    if (selectedBimbingan.some((bimbingan: any) => bimbingan.id === data.id)) {
+      setImagePreviews((prev: any) =>
+        prev.filter((preview: any) => preview !== data.dokumentasi_kehadiran)
       );
     } else {
-      setImagePreviews((prev) => [...prev, data.dokumentasi_kehadiran]);
+      setImagePreviews((prev: any) => [...prev, data.dokumentasi_kehadiran]);
     }
   };
 
@@ -895,9 +866,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
@@ -910,9 +879,7 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get<Kaprodi[]>(
-        `${API_BASE_URL}/api/datakaprodi`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
@@ -935,7 +902,7 @@ export default function Home() {
       const data = await response.data.data;
 
       // Memfilter dan memformat data tahun ajaran
-      const tahunAjaran = data.map((item) => {
+      const tahunAjaran = data.map((item: any) => {
         return `${item.tahun_periode}/${item.tahun_periode + 1}`;
       });
 
@@ -964,7 +931,7 @@ export default function Home() {
       };
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message ||
+        (error as any).response?.data?.message ||
         "Terjadi kesalahan. Silakan coba lagi.";
       throw new Error(errorMessage);
     }
@@ -991,38 +958,39 @@ export default function Home() {
           [
             ...new Set(
               selectedBimbingan.map(
-                (data) => data.pengajuan_bimbingan.jadwal_bimbingan
+                (data: any) => data.pengajuan_bimbingan.jadwal_bimbingan
               )
             ),
           ].length > 1
             ? [
                 ...new Set(
                   selectedBimbingan.map(
-                    (data) => data.pengajuan_bimbingan.jadwal_bimbingan
+                    (data: any) => data.pengajuan_bimbingan.jadwal_bimbingan
                   )
                 ),
               ].join(" | ")
             : [
                 ...new Set(
                   selectedBimbingan.map(
-                    (data) => data.pengajuan_bimbingan.jadwal_bimbingan
+                    (data: any) => data.pengajuan_bimbingan.jadwal_bimbingan
                   )
                 ),
               ][0],
         nama_kaprodi: selectedKaprodi,
         status: "Menunggu Feedback Kaprodi",
-        dosen_pa_id: dataDosenPA.find((data) => data.nip === dataUser.nip)?.id,
+        dosen_pa_id: dataDosenPA.find((data: any) => data.nip === dataUser.nip)
+          ?.id,
         nama_dosen_pa: dataUser.nama,
         jenis_bimbingan: [
           ...new Set(
             selectedBimbingan.map(
-              (bimbingan) => bimbingan.pengajuan_bimbingan.jenis_bimbingan
+              (bimbingan: any) => bimbingan.pengajuan_bimbingan.jenis_bimbingan
             )
           ),
         ].join(", "),
         topik_bimbingan: null,
         bimbingan_id: [
-          ...new Set(selectedBimbingan.map((bimbingan) => bimbingan.id)),
+          ...new Set(selectedBimbingan.map((bimbingan: any) => bimbingan.id)),
         ].join(", "),
         tahun_ajaran: selectedTahunAjaran,
         semester: selectedSemester,
@@ -1050,7 +1018,7 @@ export default function Home() {
         kesimpulan,
         dokumentasi:
           imagePreviews.length > 0
-            ? [...new Set(imagePreviews.map((data) => data))].join(", ")
+            ? [...new Set(imagePreviews.map((data: any) => data))].join(", ")
             : null,
         tanda_tangan_dosen_pa: isSignatureValid ? signatureData : null,
       };
@@ -1092,7 +1060,8 @@ export default function Home() {
       toast.error(
         <div className="flex items-center">
           <span>
-            {error.message || "Pelaporan bimbingan gagal. Silahkan coba lagi!"}
+            {(error as any).message ||
+              "Pelaporan bimbingan gagal. Silahkan coba lagi!"}
           </span>
         </div>,
         {
@@ -1185,13 +1154,13 @@ export default function Home() {
 
     const maxHeight = 276;
 
-    laporanData.pendahuluan.forEach((paragraph) => {
+    laporanData.pendahuluan.forEach((paragraph: any) => {
       if (paragraph.children && paragraph.children.length > 0) {
         const text = paragraph.children[0].text;
         const lines = doc.splitTextToSize(text, maxWidth);
         const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
 
-        lines.forEach((line, index) => {
+        lines.forEach((line: any, index: any) => {
           // Check if yPosition exceeds maxHeight
           if (yPosition > maxHeight) {
             doc.addPage(); // Add a new page
@@ -1207,7 +1176,7 @@ export default function Home() {
             if (index < lines.length - 1) {
               if (words.length > 1) {
                 const totalSpaces = words.filter(
-                  (word) => word.trim() === ""
+                  (word: any) => word.trim() === ""
                 ).length;
                 const totalExtraSpace = totalWidth - lineWidth;
                 const baseSpaceWidth = Math.floor(
@@ -1277,9 +1246,9 @@ export default function Home() {
 
     let tablePrestasiAkademikYPosition = textPrestasiAkademikYPosition + 4;
 
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [["Range IPK", "Jumlah Mahasiswa"]],
-      body: tableData.map((item) => [item.range, item.jumlah]),
+      body: tableData.map((item: any) => [item.range, item.jumlah]),
       startY: tablePrestasiAkademikYPosition,
       theme: "plain", // Tema polos
       headStyles: {
@@ -1301,13 +1270,14 @@ export default function Home() {
       margin: { left: 20 },
     });
 
-    let textPrestasiIlmiahYPosition = doc.autoTable.previous.finalY + 10;
+    let textPrestasiIlmiahYPosition =
+      (doc as any).autoTable.previous.finalY + 10;
 
     const prestasiData = laporanData.prestasi_ilmiah_mahasiswa;
     const bodyDataIlmiah =
       prestasiData.length === 0
         ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
-        : prestasiData.map((item) => [
+        : prestasiData.map((item: any) => [
             item.bidang_prestasi,
             item.nim,
             item.nama,
@@ -1325,7 +1295,7 @@ export default function Home() {
 
     let tablePrestasiIlmiahYPosition = textPrestasiIlmiahYPosition + 4;
 
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [["Bidang Prestasi", "NIM", "Nama", "Tingkat Prestasi"]],
       theme: "plain", // Tema polos
       body: bodyDataIlmiah,
@@ -1349,7 +1319,8 @@ export default function Home() {
       margin: { left: 20 },
     });
 
-    let textPrestasiBeasiswaYPosition = doc.autoTable.previous.finalY + 10;
+    let textPrestasiBeasiswaYPosition =
+      (doc as any).autoTable.previous.finalY + 10;
 
     // Table for Beasiswa
     const tableBeasiswaData = [
@@ -1382,7 +1353,7 @@ export default function Home() {
 
     let tablePrestasiBeasiswaYPosition = textPrestasiBeasiswaYPosition + 4;
 
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [["Jenis Beasiswa", "Jumlah Mahasiswa"]],
       body: tableBeasiswaData.map((item) => [item.beasiswa, item.jumlah]),
       startY: tablePrestasiBeasiswaYPosition,
@@ -1406,14 +1377,15 @@ export default function Home() {
       margin: { left: 20 },
     });
 
-    let textPrestasiPorseniYPosition = doc.autoTable.previous.finalY + 10;
+    let textPrestasiPorseniYPosition =
+      (doc as any).autoTable.previous.finalY + 10;
 
     const prestasiPorseniData = laporanData.prestasi_porseni_mahasiswa;
 
     const bodyDataPorseni =
       prestasiPorseniData.length === 0
         ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
-        : prestasiPorseniData.map((item) => [
+        : prestasiPorseniData.map((item: any) => [
             item.jenis_kegiatan,
             item.nim,
             item.nama,
@@ -1435,7 +1407,7 @@ export default function Home() {
 
     let tablePrestasiPorseniYPosition = textPrestasiPorseniYPosition + 4;
 
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [["Jenis Kegiatan", "NIM", "Nama", "Tingkat Prestasi"]],
       theme: "plain", // Tema polos
       body: bodyDataPorseni,
@@ -1459,14 +1431,14 @@ export default function Home() {
       margin: { left: 20 },
     });
 
-    let textStatusDataYPosition = doc.autoTable.previous.finalY + 10;
+    let textStatusDataYPosition = (doc as any).autoTable.previous.finalY + 10;
 
     const statusData = laporanData.data_status_mahasiswa;
 
     const bodyDataStatus =
       statusData.length === 0
         ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
-        : statusData.map((item) => [item.nim, item.nama, item.status]);
+        : statusData.map((item: any) => [item.nim, item.nama, item.status]);
 
     const tableStatusDataHeight = 1 * 15;
 
@@ -1479,7 +1451,7 @@ export default function Home() {
 
     let tableStatusDataYPosition = textStatusDataYPosition + 4;
 
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [["NIM", "Nama", "Status"]],
       theme: "plain", // Tema polos
       body: bodyDataStatus,
@@ -1510,18 +1482,18 @@ export default function Home() {
     const bodyBimbingan =
       bimbinganData.length === 0
         ? [["-", "-", "-", "-"]] // Baris default untuk data kosong
-        : bimbinganData.map((item, index) => [
+        : bimbinganData.map((item: any, index: any) => [
             index + 1,
             item.pengajuan_bimbingan.nim,
             item.pengajuan_bimbingan.nama_lengkap,
             item.ttd_kehadiran,
           ]);
 
-    function calculateTableHeight(doc, options) {
+    function calculateTableHeight(doc: any, options: any) {
       const cloneOptions = { ...options, startY: 0, margin: { bottom: 0 } };
       doc.addPage();
-      doc.autoTable(cloneOptions);
-      const tableHeight = doc.autoTable.previous.finalY - 62;
+      (doc as any).autoTable(cloneOptions);
+      const tableHeight = (doc as any).autoTable.previous.finalY - 62;
       doc.deletePage(doc.internal.getNumberOfPages()); // Hapus halaman sementara
       return tableHeight;
     }
@@ -1548,7 +1520,7 @@ export default function Home() {
       },
       tableWidth: "auto", // Lebar tabel otomatis
       margin: { bottom: 70 },
-      didDrawCell: (data) => {
+      didDrawCell: (data: any) => {
         if (
           data.row.index >= 0 &&
           data.column.index === 3 &&
@@ -1564,7 +1536,7 @@ export default function Home() {
           }
         }
       },
-      didParseCell: (data) => {
+      didParseCell: (data: any) => {
         if (
           data.row.index >= 0 &&
           data.column.index === 3 &&
@@ -1577,7 +1549,7 @@ export default function Home() {
           }
         }
       },
-      didDrawPage: (data) => {
+      didDrawPage: (data: any) => {
         // Menambahkan TTD di setiap halaman setelah kolom tabel terakhir
         const lastColumnWidth =
           data.table.columns[data.table.columns.length - 1].width;
@@ -1586,7 +1558,7 @@ export default function Home() {
         const now = new Date();
 
         // Mengatur opsi untuk format tanggal
-        const options = {
+        const options: Intl.DateTimeFormatOptions = {
           year: "numeric",
           month: "long",
           day: "numeric",
@@ -1644,7 +1616,7 @@ export default function Home() {
     doc.setFont("times new roman");
     doc.text(`Tahun Akademik    :    ${laporanData.tahun_ajaran}`, 15, 42); // Moved up by 10y
     doc.text(`Semester                   :    ${laporanData.semester}`, 15, 48); // Moved up by 10y
-    doc.autoTable(tableOptions);
+    (doc as any).autoTable(tableOptions);
 
     doc.addPage("a4", "landscape");
     const judulLembarKonsultasi = "LEMBAR KONSULTASI MAHASISWA";
@@ -1659,13 +1631,13 @@ export default function Home() {
     doc.text(`Semester                   :    ${laporanData.semester}`, 15, 38); // Moved up by 10y
 
     const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
-      (data) => data.permasalahan !== null
+      (data: any) => data.permasalahan !== null
     );
 
     const bodyBimbinganLembarKonsultasi =
       bimbinganDataLembarKonsultasi.length === 0
         ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
-        : bimbinganDataLembarKonsultasi.map((item, index) => [
+        : bimbinganDataLembarKonsultasi.map((item: any, index: any) => [
             index + 1,
             formatTanggal(item.pengajuan_bimbingan.jadwal_bimbingan),
             item.pengajuan_bimbingan.nim,
@@ -1676,7 +1648,7 @@ export default function Home() {
             item.ttd_kehadiran,
           ]);
 
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [
         [
           "No",
@@ -1712,7 +1684,7 @@ export default function Home() {
       },
       tableWidth: "auto", // Lebar tabel otomatis
       margin: { bottom: 30 },
-      didDrawCell: (data) => {
+      didDrawCell: (data: any) => {
         if (
           data.row.index >= 0 &&
           data.column.index === 7 &&
@@ -1741,7 +1713,7 @@ export default function Home() {
           }
         }
       },
-      didParseCell: (data) => {
+      didParseCell: (data: any) => {
         if (
           data.row.index >= 0 &&
           data.column.index === 7 &&
@@ -1776,7 +1748,7 @@ export default function Home() {
     doc.setFont("times new roman");
 
     let yPositionKesimpulan = 30;
-    laporanData.kesimpulan.forEach((paragraph) => {
+    laporanData.kesimpulan.forEach((paragraph: any) => {
       // Check if the paragraph has children and extract the text
       if (paragraph.children && paragraph.children.length > 0) {
         const text = paragraph.children[0].text;
@@ -1788,7 +1760,7 @@ export default function Home() {
         const alignment = paragraph.align || "left"; // Default to left if no alignment is specified
 
         // Add each line to the document and adjust yPosition
-        lines.forEach((line, index) => {
+        lines.forEach((line: any, index: any) => {
           if (yPositionKesimpulan > maxHeight) {
             doc.addPage(); // Add a new page
             yPositionKesimpulan = 20; // Reset yPosition for the new page
@@ -1803,7 +1775,7 @@ export default function Home() {
               // Hanya justify jika bukan baris terakhir
               if (words.length > 1) {
                 const totalSpaces = words.filter(
-                  (word) => word.trim() === ""
+                  (word: any) => word.trim() === ""
                 ).length;
                 const totalExtraSpace = totalWidth - lineWidth;
                 const baseSpaceWidth = Math.floor(
@@ -1844,7 +1816,7 @@ export default function Home() {
     const now = new Date();
 
     // Mengatur opsi untuk format tanggal
-    const options = {
+    const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -1960,13 +1932,13 @@ export default function Home() {
     doc.text(`Nama Dosen PA     :    ${laporanData.nama_dosen_pa}`, 15, 44); // Moved up by 10y
 
     const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
-      (data) => data.permasalahan !== null
+      (data: any) => data.permasalahan !== null
     );
 
     const bodyBimbinganLembarKonsultasi =
       bimbinganDataLembarKonsultasi.length === 0
         ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
-        : bimbinganDataLembarKonsultasi.map((item, index) => [
+        : bimbinganDataLembarKonsultasi.map((item: any, index: any) => [
             index + 1,
             formatTanggal(item.pengajuan_bimbingan.jadwal_bimbingan),
             item.pengajuan_bimbingan.nim,
@@ -1977,7 +1949,7 @@ export default function Home() {
             item.ttd_kehadiran,
           ]);
 
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [
         [
           "No",
@@ -2013,7 +1985,7 @@ export default function Home() {
       },
       tableWidth: "auto", // Lebar tabel otomatis
       margin: { bottom: 30 },
-      didDrawCell: (data) => {
+      didDrawCell: (data: any) => {
         if (
           data.row.index >= 0 &&
           data.column.index === 7 &&
@@ -2042,7 +2014,7 @@ export default function Home() {
           }
         }
       },
-      didParseCell: (data) => {
+      didParseCell: (data: any) => {
         if (
           data.row.index >= 0 &&
           data.column.index === 7 &&
@@ -2089,10 +2061,10 @@ export default function Home() {
 
   const getDataDosenPAById = async () => {
     try {
-      const dataDosenPA = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosenpa`
+      const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
+      const dosen = dataDosenPA.data.find(
+        (data: any) => data.nip === dataUser.nip
       );
-      const dosen = dataDosenPA.data.find((data) => data.nip === dataUser.nip);
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -2113,11 +2085,9 @@ export default function Home() {
 
   const getDataBimbinganByDosenPaId = async () => {
     try {
-      const dataDosenPa = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosenPa = dataDosenPa.data.find(
-        (data) => data.nim === dataUser.nim
+        (data: any) => data.nim === dataUser.nim
       );
 
       if (!dosenPa) {
@@ -2126,14 +2096,12 @@ export default function Home() {
 
       const dosenpaid = dosenPa.id;
 
-      const dataBimbingan = await axios.get<Bimbingan[]>(
-        `${API_BASE_URL}/api/bimbingan`
-      );
+      const dataBimbingan = await axios.get(`${API_BASE_URL}/api/bimbingan`);
       const userbimbingan = dataBimbingan.data.filter(
-        (data) => data.pengajuan_bimbingan.dosen_pa_id === dosenpaid
+        (data: any) => data.pengajuan_bimbingan.dosen_pa_id === dosenpaid
       );
       const bimbingan = userbimbingan.filter(
-        (data) => data.status_pengesahan_kehadiran === "Sah"
+        (data: any) => data.status_pengesahan_kehadiran === "Sah"
       );
 
       setDataBimbingan(bimbingan);
@@ -2168,7 +2136,7 @@ export default function Home() {
       // Membaca file sebagai Data URL untuk preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreviews((prev) => [...prev, reader.result as string]); // Tambahkan preview baru ke state
+        setImagePreviews((prev: any) => [...prev, reader.result as string]); // Tambahkan preview baru ke state
       };
       reader.readAsDataURL(file);
     }
@@ -2179,13 +2147,13 @@ export default function Home() {
     index: number
   ) => {
     e.preventDefault();
-    setImagePreviews((prev) => {
+    setImagePreviews((prev: any) => {
       URL.revokeObjectURL(prev[index]);
-      return prev.filter((_, i) => i !== index);
+      return prev.filter((_: any, i: any) => i !== index);
     });
   };
 
-  const formatTanggal = (jadwal) => {
+  const formatTanggal = (jadwal: any) => {
     // Memisahkan string berdasarkan spasi
     const parts = jadwal.split(" ");
 
@@ -2198,13 +2166,13 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const selectedSet = new Set(selectedBimbingan.map((data) => data.id));
+    const selectedSet = new Set(selectedBimbingan.map((data: any) => data.id));
 
     const filteredSelectedBimbingan = selectedBimbingan.filter(
-      (data) => data.permasalahan !== null
+      (data: any) => data.permasalahan !== null
     );
 
-    const formattedData = filteredSelectedBimbingan.map((data) => ({
+    const formattedData = filteredSelectedBimbingan.map((data: any) => ({
       tanggal: formatTanggal(data.pengajuan_bimbingan.jadwal_bimbingan),
       nim: data.pengajuan_bimbingan.nim,
       nama: data.pengajuan_bimbingan.nama_lengkap,
@@ -2213,16 +2181,16 @@ export default function Home() {
       ttd_mhs: data.ttd_kehadiran,
     }));
 
-    const filteredData = dataKonsultasiMahasiswa.filter((item) =>
+    const filteredData = dataKonsultasiMahasiswa.filter((item: any) =>
       selectedSet.has(item.id)
     );
 
     const newData = [
       ...filteredData,
       ...formattedData.filter(
-        (newItem) =>
+        (newItem: any) =>
           !filteredData.some(
-            (oldItem) =>
+            (oldItem: any) =>
               oldItem.tanggal === newItem.tanggal &&
               oldItem.nim === newItem.nim &&
               oldItem.nama === newItem.nama &&
@@ -2251,7 +2219,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken = jwtDecode(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -2261,7 +2229,7 @@ export default function Home() {
 
   useEffect(() => {
     if (dataKaprodi.length > 0) {
-      const formattedOptions = dataKaprodi.map((data) => {
+      const formattedOptions = dataKaprodi.map((data: any) => {
         return {
           value: data.nama,
           label: `${data.nama} (Kaprodi ${data.kaprodi_jurusan})`,
@@ -2274,7 +2242,7 @@ export default function Home() {
 
   useEffect(() => {
     if (dataTahunAjaran.length > 0) {
-      const formattedOptions = dataTahunAjaran.map((data) => {
+      const formattedOptions = dataTahunAjaran.map((data: any) => {
         return {
           value: data,
           label: `${data}`,
@@ -2293,7 +2261,9 @@ export default function Home() {
 
   useEffect(() => {
     if (dataKaprodi.length > 0) {
-      const data = dataKaprodi.find((data) => data.nama === selectedKaprodi);
+      const data = dataKaprodi.find(
+        (data: any) => data.nama === selectedKaprodi
+      );
       setDataSelectedKaprodi(data || null);
     }
   }, [selectedKaprodi]);
@@ -2320,7 +2290,7 @@ export default function Home() {
 
   useEffect(() => {
     const dataFindKaprodi = dataKaprodi.find(
-      (data) => data.kaprodi_jurusan === jurusanFilter
+      (data: any) => data.kaprodi_jurusan === jurusanFilter
     );
 
     if (dataFindKaprodi) {
@@ -2334,11 +2304,11 @@ export default function Home() {
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.nim === dataUser.nim)
+            ? dataMahasiswa.find((data: any) => data.nim === dataUser.nim)
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.nip === dataUser.nip)
+              ? dataDosenPA.find((data: any) => data.nip === dataUser.nip)
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.nip === dataUser.nip)
+                ? dataKaprodi.find((data: any) => data.nip === dataUser.nip)
                 : undefined
         }
       />
@@ -2348,8 +2318,9 @@ export default function Home() {
             className="flex flex-col gap-4 p-8"
             onSubmit={handleAddLaporanBimbingan}
           >
-            {dataBimbingan.filter((data) => data.laporan_bimbingan_id === null)
-              .length === 0 ? (
+            {dataBimbingan.filter(
+              (data: any) => data.laporan_bimbingan_id === null
+            ).length === 0 ? (
               <div className="flex flex-col items-center">
                 <svg
                   className="h-12 w-12 text-red-500 mb-4"
@@ -2388,7 +2359,7 @@ export default function Home() {
                       <option disabled value="">
                         Pilih Jenis Bimbingan
                       </option>
-                      {jenisBimbinganOptions.map((jenis, index) => (
+                      {jenisBimbinganOptions.map((jenis: any, index: any) => (
                         <option key={index} value={jenis}>
                           {jenis}
                         </option>
@@ -2422,7 +2393,7 @@ export default function Home() {
                         <option disabled value="">
                           Pilih Jurusan
                         </option>
-                        {jurusanOptions.map((jurusan, index) => (
+                        {jurusanOptions.map((jurusan: any, index: any) => (
                           <option key={index} value={jurusan}>
                             {jurusan}
                           </option>
@@ -2463,7 +2434,7 @@ export default function Home() {
                         <option disabled value="">
                           Pilih Jadwal Bimbingan
                         </option>
-                        {jadwalOptions.map((jadwal, index) => (
+                        {jadwalOptions.map((jadwal: any, index: any) => (
                           <option key={index} value={jadwal}>
                             {jadwal}
                           </option>
@@ -2491,9 +2462,9 @@ export default function Home() {
                 <div>
                   {jenisBimbinganFilter === "Perwalian" &&
                   dataBimbingan
-                    .filter((data) => data.laporan_bimbingan_id === null)
+                    .filter((data: any) => data.laporan_bimbingan_id === null)
                     .filter(
-                      (data) =>
+                      (data: any) =>
                         data.pengajuan_bimbingan.jenis_bimbingan === "Perwalian"
                     ).length === 0 ? (
                     <div className="flex flex-col items-center">
@@ -2526,9 +2497,9 @@ export default function Home() {
                     </div>
                   ) : jenisBimbinganFilter === "Pribadi" &&
                     dataBimbingan
-                      .filter((data) => data.laporan_bimbingan_id === null)
+                      .filter((data: any) => data.laporan_bimbingan_id === null)
                       .filter(
-                        (data) =>
+                        (data: any) =>
                           data.pengajuan_bimbingan.jenis_bimbingan === "Pribadi"
                       ).length === 0 ? (
                     <div className="flex flex-col border rounded-xl mt-6 p-10 items-center">
@@ -2642,10 +2613,12 @@ export default function Home() {
                       <div>
                         <div className="flex mt-6 mb-4 justify-between items-center">
                           <p className="font-medium">
-                            Pilih Bimbingan ({filteredBimbingan.length}) :
+                            Pilih Bimbingan ({selectedBimbingan.length}) :
                           </p>
                           <div className="flex items-center">
-                            <label className="font-medium">Select All</label>
+                            <label className="font-medium">
+                              Select All ({filteredBimbingan.length})
+                            </label>
                             <input
                               type="checkbox"
                               checked={
@@ -2656,12 +2629,12 @@ export default function Home() {
                               onChange={(e) => {
                                 if (e.target.checked) {
                                   const allFilteredBimbingan =
-                                    filteredBimbingan.map((data) => data);
+                                    filteredBimbingan.map((data: any) => data);
 
                                   setSelectedBimbingan(allFilteredBimbingan);
 
-                                  allFilteredBimbingan.map((data) =>
-                                    setImagePreviews((prev) => [
+                                  allFilteredBimbingan.map((data: any) =>
+                                    setImagePreviews((prev: any) => [
                                       ...prev,
                                       data.dokumentasi_kehadiran,
                                     ])
@@ -2679,11 +2652,11 @@ export default function Home() {
 
                         <div className="overflow-x-auto mt-2">
                           <div className="flex space-x-4 pb-4">
-                            {filteredBimbingan.map((data) => (
+                            {filteredBimbingan.map((data: any) => (
                               <div
                                 className={`border rounded-lg min-w-[30%] flex flex-col gap-1 text-[15px] cursor-pointer ${
                                   selectedBimbingan.some(
-                                    (bimbingan) => bimbingan.id === data.id
+                                    (bimbingan: any) => bimbingan.id === data.id
                                   )
                                     ? "bg-orange-500 text-white font-medium"
                                     : ""
@@ -2749,7 +2722,8 @@ export default function Home() {
                                     <input
                                       type="checkbox"
                                       checked={selectedBimbingan.some(
-                                        (bimbingan) => bimbingan.id === data.id
+                                        (bimbingan: any) =>
+                                          bimbingan.id === data.id
                                       )}
                                       onChange={() => toggleBimbingan(data)}
                                       className="size-4 self-start mt-4 cursor-pointer"
@@ -2770,7 +2744,7 @@ export default function Home() {
                             </h1>
                             <SelectField
                               options={optionsTahunAjaran}
-                              onChange={(e) =>
+                              onChange={(e: any) =>
                                 setSelectedTahunAjaran(e.target.value)
                               }
                               value={selectedTahunAjaran}
@@ -2779,7 +2753,7 @@ export default function Home() {
                             />
                             <SelectField
                               options={optionsSemester}
-                              onChange={(e) =>
+                              onChange={(e: any) =>
                                 setSelectedSemester(e.target.value)
                               }
                               value={selectedSemester}
@@ -2814,7 +2788,7 @@ export default function Home() {
                                       Prestasi Akademik Mahasiswa
                                     </p>
                                     <button
-                                      onClick={(e) =>
+                                      onClick={(e: any) =>
                                         togglePrestasiAkademikMahasiswaForm(e)
                                       }
                                       className="flex items-center px-3 py-2"
@@ -2837,7 +2811,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -2856,7 +2830,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -2875,7 +2849,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -2894,7 +2868,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -2913,7 +2887,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -3039,7 +3013,9 @@ export default function Home() {
                                                         <div className="flex gap-2 items-center justify-center">
                                                           <EditButton
                                                             className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                              e: any
+                                                            ) => {
                                                               setDataSelectedPrestasiIlmiahMahasiswaEditModal(
                                                                 data
                                                               );
@@ -3055,7 +3031,9 @@ export default function Home() {
                                                           />
                                                           <TrashButton
                                                             className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                              e: any
+                                                            ) => {
                                                               setIdSelectedPrestasiIlmiahMahasiswaDeleteModal(
                                                                 data.id
                                                               );
@@ -3089,7 +3067,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Bidang Prestasi"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setBidangPrestasiAddPrestasiIlmiahMahasiswaModal(
                                                 e.target.value
                                               )
@@ -3102,7 +3080,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan NIM"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setNimAddPrestasiIlmiahMahasiswaModal(
                                                 e.target.value
                                               )
@@ -3115,7 +3093,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setNamaLengkapAddPrestasiIlmiahMahasiswaModal(
                                                 e.target.value
                                               )
@@ -3187,7 +3165,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Bidang Prestasi"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedPrestasiIlmiahMahasiswaEditModal(
                                                 {
                                                   ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
@@ -3204,7 +3182,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan NIM"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedPrestasiIlmiahMahasiswaEditModal(
                                                 {
                                                   ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
@@ -3220,7 +3198,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedPrestasiIlmiahMahasiswaEditModal(
                                                 {
                                                   ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
@@ -3330,7 +3308,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -3349,7 +3327,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -3368,7 +3346,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -3385,7 +3363,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -3402,7 +3380,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -3421,7 +3399,7 @@ export default function Home() {
                                           disabled={false}
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
-                                          onChange={(e) =>
+                                          onChange={(e: any) =>
                                             setJumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm(
                                               parseInt(e.target.value, 10)
                                             )
@@ -3549,7 +3527,9 @@ export default function Home() {
                                                         <div className="flex gap-2 items-center justify-center">
                                                           <EditButton
                                                             className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                              e: any
+                                                            ) => {
                                                               setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
                                                                 data
                                                               );
@@ -3565,7 +3545,9 @@ export default function Home() {
                                                           />
                                                           <TrashButton
                                                             className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                              e: any
+                                                            ) => {
                                                               setIdSelectedPrestasiMahasiswaMengikutiPorseniDeleteModal(
                                                                 data.id
                                                               );
@@ -3601,7 +3583,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Jenis Kegiatan"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setJenisKegiatanAddPrestasiMahasiswaMengikutiPorseniModal(
                                                 e.target.value
                                               )
@@ -3614,7 +3596,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan NIM"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setNimAddPrestasiMahasiswaMengikutiPorseniModal(
                                                 e.target.value
                                               )
@@ -3627,7 +3609,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setNamaLengkapAddPrestasiMahasiswaMengikutiPorseniModal(
                                                 e.target.value
                                               )
@@ -3699,7 +3681,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Jenis Kegiatan"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
                                                 {
                                                   ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
@@ -3716,7 +3698,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan NIM"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
                                                 {
                                                   ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
@@ -3732,7 +3714,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
                                                 {
                                                   ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
@@ -3907,7 +3889,9 @@ export default function Home() {
                                                         <div className="flex gap-2 items-center justify-center">
                                                           <EditButton
                                                             className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                              e: any
+                                                            ) => {
                                                               setDataSelectedDataStatusMahasiswaEditModal(
                                                                 data
                                                               );
@@ -3918,7 +3902,9 @@ export default function Home() {
                                                           />
                                                           <TrashButton
                                                             className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                                                            onClick={(e) => {
+                                                            onClick={(
+                                                              e: any
+                                                            ) => {
                                                               setIdSelectedDataStatusMahasiswaDeleteModal(
                                                                 data.id
                                                               );
@@ -3952,7 +3938,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan NIM"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setNimAddDataStatusMahasiswaModal(
                                                 e.target.value
                                               )
@@ -3965,7 +3951,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setNamaLengkapAddDataStatusMahasiswaModal(
                                                 e.target.value
                                               )
@@ -4014,7 +4000,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan NIM"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedDataStatusMahasiswaEditModal(
                                                 {
                                                   ...dataSelectedDataStatusMahasiswaEditModal,
@@ -4030,7 +4016,7 @@ export default function Home() {
                                           <InputField
                                             type="text"
                                             placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e) =>
+                                            onChange={(e: any) =>
                                               setDataSelectedDataStatusMahasiswaEditModal(
                                                 {
                                                   ...dataSelectedDataStatusMahasiswaEditModal,
@@ -4566,7 +4552,7 @@ export default function Home() {
                                   Dokumentasi
                                 </label>
                                 <div className="grid grid-cols-3 gap-4 m-6">
-                                  {imagePreviews.map((src, index) => (
+                                  {imagePreviews.map((src: any, index: any) => (
                                     <div
                                       key={index}
                                       className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
@@ -4631,7 +4617,6 @@ export default function Home() {
                                 <SignatureCanvas
                                   ref={sigCanvas}
                                   penColor="black"
-                                  penWidth={7} // Set the pen width to make the signature thicker
                                   canvasProps={{
                                     className:
                                       "border border-gray-300 rounded-lg h-[300px]",
@@ -4648,7 +4633,9 @@ export default function Home() {
                             <div className="flex justify-end gap-2">
                               <p>Sudah selesai membuat laporan?</p>
                               <a
-                                onClick={(e) => handlePreviewPDFPerwalian(e)}
+                                onClick={(e: any) =>
+                                  handlePreviewPDFPerwalian(e)
+                                }
                                 className="text-blue-500 underline text-end cursor-pointer hover:text-blue-700"
                               >
                                 Preview PDF Laporan
@@ -4673,7 +4660,7 @@ export default function Home() {
                             </h1>
                             <SelectField
                               options={optionsTahunAjaran}
-                              onChange={(e) =>
+                              onChange={(e: any) =>
                                 setSelectedTahunAjaran(e.target.value)
                               }
                               value={selectedTahunAjaran}
@@ -4682,7 +4669,7 @@ export default function Home() {
                             />
                             <SelectField
                               options={optionsSemester}
-                              onChange={(e) =>
+                              onChange={(e: any) =>
                                 setSelectedSemester(e.target.value)
                               }
                               value={selectedSemester}
@@ -4692,7 +4679,7 @@ export default function Home() {
                             <SelectField
                               options={optionsKaprodi}
                               disabled
-                              onChange={(e) =>
+                              onChange={(e: any) =>
                                 setSelectedKaprodi(e.target.value)
                               }
                               value={selectedKaprodi}
@@ -4773,7 +4760,7 @@ export default function Home() {
                                   Dokumentasi
                                 </label>
                                 <div className="grid grid-cols-3 gap-4 m-6">
-                                  {imagePreviews.map((src, index) => (
+                                  {imagePreviews.map((src: any, index: any) => (
                                     <div
                                       key={index}
                                       className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
@@ -4838,7 +4825,6 @@ export default function Home() {
                                 <SignatureCanvas
                                   ref={sigCanvas}
                                   penColor="black"
-                                  penWidth={7} // Set the pen width to make the signature thicker
                                   canvasProps={{
                                     className:
                                       "border border-gray-300 rounded-lg h-[300px]",
@@ -4855,7 +4841,7 @@ export default function Home() {
                             <div className="flex justify-end gap-2">
                               <p>Sudah selesai membuat laporan?</p>
                               <a
-                                onClick={(e) => handlePreviewPDFPribadi(e)}
+                                onClick={(e: any) => handlePreviewPDFPribadi(e)}
                                 className="text-blue-500 underline text-end cursor-pointer hover:text-blue-700"
                               >
                                 Preview PDF Laporan
@@ -4934,27 +4920,19 @@ export default function Home() {
   );
 }
 
-const RichTextPendahuluan = ({ value, onChange }) => {
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+const RichTextPendahuluan: React.FC<{ value: any; onChange: any }> = ({
+  value,
+  onChange,
+}) => {
+  const renderElement = useCallback((props: any) => <Element {...props} />, []);
+  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
-  const [editorValue, setEditorValue] = useState<Descendant[]>(value);
-  useEffect(() => {
-    setEditorValue(value);
-  }, [value]);
-
   const handleChange = (newValue: Descendant[]) => {
-    setEditorValue(newValue); // Update local state
     onChange(newValue); // Call the onChange prop to notify parent
   };
   return (
-    <Slate
-      editor={editor}
-      value={editorValue}
-      onChange={handleChange}
-      initialValue={initialValue}
-    >
+    <Slate editor={editor} onChange={handleChange} initialValue={initialValue}>
       <Toolbar>
         <MarkButton format="bold" />
         <MarkButton format="italic" />
@@ -4983,28 +4961,20 @@ const RichTextPendahuluan = ({ value, onChange }) => {
     </Slate>
   );
 };
-const RichTextKesimpulan = ({ value, onChange }) => {
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+const RichTextKesimpulan: React.FC<{ value: any; onChange: any }> = ({
+  value,
+  onChange,
+}) => {
+  const renderElement = useCallback((props: any) => <Element {...props} />, []);
+  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-  const [editorValue, setEditorValue] = useState<Descendant[]>(value);
-
-  useEffect(() => {
-    setEditorValue(value);
-  }, [value]);
 
   const handleChange = (newValue: Descendant[]) => {
-    setEditorValue(newValue); // Update local state
     onChange(newValue); // Call the onChange prop to notify parent
   };
 
   return (
-    <Slate
-      editor={editor}
-      value={editorValue}
-      onChange={handleChange}
-      initialValue={initialValue}
-    >
+    <Slate editor={editor} onChange={handleChange} initialValue={initialValue}>
       <Toolbar>
         <MarkButton format="bold" />
         <MarkButton format="italic" />
@@ -5034,41 +5004,34 @@ const RichTextKesimpulan = ({ value, onChange }) => {
   );
 };
 
-const toggleBlock = (editor, format) => {
+const toggleBlock = (editor: any, format: any) => {
   const isActive = isBlockActive(
     editor,
     format,
     TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
   );
-  const isList = LIST_TYPES.includes(format);
 
   Transforms.unwrapNodes(editor, {
-    match: (n) =>
+    match: (n: any) =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
-      LIST_TYPES.includes(n.type) &&
       !TEXT_ALIGN_TYPES.includes(format),
     split: true,
   });
-  let newProperties: Partial<SlateElement>;
+  let newProperties: any;
   if (TEXT_ALIGN_TYPES.includes(format)) {
     newProperties = {
       align: isActive ? undefined : format,
     };
   } else {
     newProperties = {
-      type: isActive ? "paragraph" : isList ? "list-item" : format,
+      type: isActive ? "paragraph" : format,
     };
   }
   Transforms.setNodes<SlateElement>(editor, newProperties);
-
-  if (!isActive && isList) {
-    const block = { type: format, children: [] };
-    Transforms.wrapNodes(editor, block);
-  }
 };
 
-const toggleMark = (editor, format) => {
+const toggleMark = (editor: any, format: any) => {
   const isActive = isMarkActive(editor, format);
 
   if (isActive) {
@@ -5078,7 +5041,7 @@ const toggleMark = (editor, format) => {
   }
 };
 
-const isBlockActive = (editor, format, blockType = "type") => {
+const isBlockActive = (editor: any, format: any, blockType: any = "type") => {
   const { selection } = editor;
   if (!selection) return false;
 

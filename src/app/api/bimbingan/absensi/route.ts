@@ -101,7 +101,7 @@ export async function PATCH(req: Request): Promise<Response> {
 
         let savedImageTtdPaths = "";
         if (ttd_kehadiran) {
-            const base64Strings = ttd_kehadiran.split(", ").map((str) => str.trim());
+            const base64Strings = ttd_kehadiran.split(", ").map((str: any) => str.trim());
             for (const base64Data of base64Strings) {
                 try {
                     const match = base64Data.match(/^data:image\/(\w+);base64,/);
@@ -127,7 +127,7 @@ export async function PATCH(req: Request): Promise<Response> {
 
         let savedImageDokumentasiPaths = "";
         if (dokumentasi_kehadiran) {
-            const base64Strings = dokumentasi_kehadiran.split(", ").map((str) => str.trim());
+            const base64Strings = dokumentasi_kehadiran.split(", ").map((str: any) => str.trim());
             for (const base64Data of base64Strings) {
                 try {
                     const match = base64Data.match(/^data:image\/(\w+);base64,/);

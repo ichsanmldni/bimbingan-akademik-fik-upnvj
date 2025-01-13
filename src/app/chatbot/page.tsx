@@ -11,88 +11,27 @@ import { jwtDecode } from "jwt-decode";
 import { env } from "process";
 import React, { useEffect, useRef, useState } from "react";
 
-interface User {
-  id: number;
-  role: string;
-  // Add other user properties as needed
-}
-
-interface ChatMessageBot {
-  sesi_chatbot_mahasiswa_id: number;
-  pesan: string;
-  waktu_kirim: string; // Adjust type according to your schema
-}
-
-interface ChatMessageMahasiswa {
-  sesi_chatbot_mahasiswa_id: number;
-  pesan: string;
-  waktu_kirim: string; // Adjust type according to your schema
-}
-
-interface RiwayatPesanChatbot {
-  sesi_chatbot_mahasiswa_id: number;
-  pesan: string;
-  role: string;
-  waktu_kirim: string; // Adjust type according to your schema
-}
-
-interface PesanChatbot {
-  sesi_chatbot_mahasiswa_id: number;
-  pesan: string;
-  role: string;
-  waktu_kirim: string; // Adjust type according to your schema
-}
-
-interface DosenPA {
-  dosen_id: number;
-  name: string;
-  email: string;
-  phone: string;
-}
-
-interface JadwalKosong {
-  dosen_id: number;
-  jadwal: { hari: string; jam: string }[];
-}
-
-interface InformasiAkademik {
-  id: number;
-  judul: string;
-  deskripsi: string;
-}
-
 export default function Home() {
   const [roleUser, setRoleUser] = useState<string>("");
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState<any[]>([]);
   const [dataSesiChatbotMahasiswa, setDataSesiChatbotMahasiswa] = useState<
     any[]
   >([]);
-  const [dataChatbotMahasiswa, setDataChatbotMahasiswa] = useState<
-    ChatMessageMahasiswa[]
-  >([]);
-  const [dataPesanBot, setDataPesanBot] = useState<ChatMessageBot[]>([]);
-  const [dataRiwayatPesanChatbot, setDataRiwayatPesanChatbot] = useState<
-    RiwayatPesanChatbot[]
-  >([]);
-  const [chatbotData, setChatbotData] = useState<PesanChatbot[]>([]);
-  const [sortedChatbotData, setSortedChatbotData] = useState<PesanChatbot[]>(
-    []
-  );
-  const [dataUser, setDataUser] = useState<User | null>(null);
-  const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState<{
-    dosen_pa: DosenPA[];
-    jadwal_kosong_semua_dosen_pa: JadwalKosong[];
-    jadwal_kosong_dosen_pa_user: JadwalKosong;
-    informasi_akademik: InformasiAkademik[];
-  }>({
+  const [dataChatbotMahasiswa, setDataChatbotMahasiswa] = useState([]);
+  const [dataPesanBot, setDataPesanBot] = useState([]);
+  const [dataRiwayatPesanChatbot, setDataRiwayatPesanChatbot] = useState([]);
+  const [chatbotData, setChatbotData] = useState<any>([]);
+  const [sortedChatbotData, setSortedChatbotData] = useState([]);
+  const [dataUser, setDataUser] = useState<any>(null);
+  const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState({
     dosen_pa: [],
     jadwal_kosong_semua_dosen_pa: [],
     jadwal_kosong_dosen_pa_user: { dosen_id: 0, jadwal: [] },
     informasi_akademik: [],
   });
   const [activeSesiChatbotMahasiswa, setActiveSesiChatbotMahasiswa] =
-    useState<number>(0);
+    useState(0);
   const [mahasiswaID, setMahasiswaID] = useState();
   const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
 
@@ -162,7 +101,7 @@ export default function Home() {
       const response = await axios.get(`${API_BASE_URL}/api/chatbotmahasiswa`);
 
       const dataChatbotMahasiswaFiltered = response.data.filter(
-        (data: PesanChatbot) =>
+        (data: any) =>
           data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
       );
       setDataChatbotMahasiswa(dataChatbotMahasiswaFiltered);
@@ -177,7 +116,7 @@ export default function Home() {
       const response = await axios.get(`${API_BASE_URL}/api/pesanbot`);
 
       const dataPesanBotFiltered = response.data.filter(
-        (data: PesanChatbot) =>
+        (data: any) =>
           data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
       );
       setDataPesanBot(dataPesanBotFiltered);
@@ -194,7 +133,7 @@ export default function Home() {
       );
 
       const dataRiwayatPesanChatbotFiltered = response.data.filter(
-        (data: RiwayatPesanChatbot) =>
+        (data: any) =>
           data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
       );
       setDataRiwayatPesanChatbot(dataRiwayatPesanChatbotFiltered);
@@ -222,20 +161,20 @@ export default function Home() {
 
     const dosenList = customDataConsumeGPT.dosen_pa
       .map(
-        (dosen) =>
+        (dosen: any) =>
           `Dosen: ${dosen.name}, Email: ${dosen.email}, Telepon: ${dosen.phone}`
       )
       .join("\n");
 
     const jadwalKosong = customDataConsumeGPT.jadwal_kosong_semua_dosen_pa
       .map(
-        (jadwal) =>
-          `Dosen ID: ${jadwal.dosen_id}, Jadwal: ${jadwal.jadwal.map((j) => `${j.hari}: ${j.jam}`).join(", ")}`
+        (jadwal: any) =>
+          `Dosen ID: ${jadwal.dosen_id}, Jadwal: ${jadwal.jadwal.map((j: any) => `${j.hari}: ${j.jam}`).join(", ")}`
       )
       .join("\n");
 
     const informasiAkademik = customDataConsumeGPT.informasi_akademik
-      .map((info) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
+      .map((info: any) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
       .join("\n");
 
     const customContext = `
@@ -251,7 +190,7 @@ export default function Home() {
       ${informasiAkademik}
     `;
 
-    const filteredMessages = dataRiwayatPesanChatbot
+    const filteredMessages: any = dataRiwayatPesanChatbot
       .slice(-10)
       .map(({ role, pesan }) => ({
         role,
@@ -306,15 +245,13 @@ export default function Home() {
     }
   };
 
-  const addPesanBot = (newChat: ChatMessageBot) =>
+  const addPesanBot = (newChat: any) =>
     postData(`${API_BASE_URL}/api/pesanbot`, newChat);
 
-  const addChatbotMahasiswa = (newChat: ChatMessageMahasiswa) =>
+  const addChatbotMahasiswa = (newChat: any) =>
     postData(`${API_BASE_URL}/api/chatbotmahasiswa`, newChat);
 
-  const handleAddChatChatbotMahasiswa = async (
-    newData: ChatMessageMahasiswa
-  ) => {
+  const handleAddChatChatbotMahasiswa = async (newData: any) => {
     if (!newData || !newData.pesan) {
       console.error("Data baru atau pesan tidak valid.");
       return;
@@ -377,8 +314,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const sortedChatbotData = [...chatbotData].sort(
-      (a, b) =>
+    const sortedChatbotData: any = [...chatbotData].sort(
+      (a: any, b: any) =>
         new Date(a.waktu_kirim).getTime() - new Date(b.waktu_kirim).getTime()
     );
 
@@ -398,14 +335,14 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken: any = jwtDecode(token);
         setDataUser(decodedToken);
 
         if (decodedToken.role === "Mahasiswa") {
           setRoleUser("Mahasiswa");
         } else if (
           decodedToken.role === "Dosen" &&
-          dataDosenPA.find((data) => data.dosen_id === decodedToken.id)
+          dataDosenPA.find((data: any) => data.dosen_id === decodedToken.id)
         ) {
           setRoleUser("Dosen PA");
         } else if (
@@ -429,8 +366,8 @@ export default function Home() {
       dataAllMahasiswa &&
       dataAllMahasiswa.length > 0
     ) {
-      const mahasiswa = dataAllMahasiswa.find(
-        (data) => data.nim === dataUser.nim
+      const mahasiswa: any = dataAllMahasiswa.find(
+        (data: any) => data.nim === dataUser.nim
       );
       console.log(mahasiswa);
       setMahasiswaID(mahasiswa?.id);
@@ -438,12 +375,14 @@ export default function Home() {
   }, [dataAllMahasiswa, dataUser]);
 
   useEffect(() => {
-    const dataChatbotMahasiswaWithRole = dataChatbotMahasiswa.map((item) => ({
-      ...item,
-      role: "Mahasiswa",
-    }));
+    const dataChatbotMahasiswaWithRole = dataChatbotMahasiswa.map(
+      (item: any) => ({
+        ...item,
+        role: "Mahasiswa",
+      })
+    );
 
-    const dataPesanBotWithRole = dataPesanBot.map((item) => ({
+    const dataPesanBotWithRole = dataPesanBot.map((item: any) => ({
       ...item,
       role: "Bot",
     }));
@@ -490,7 +429,7 @@ export default function Home() {
                 id="message-container"
                 className="flex-1 w-full flex flex-col"
               >
-                {sortedChatbotData.map((data, index) => (
+                {sortedChatbotData.map((data: any, index) => (
                   <React.Fragment key={index}>
                     {data.role === "Mahasiswa" ? (
                       <BubbleChatEnd key={index + "message"} data={data} />

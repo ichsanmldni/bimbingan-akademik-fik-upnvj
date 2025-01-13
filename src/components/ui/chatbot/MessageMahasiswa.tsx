@@ -35,7 +35,10 @@ export default function MessageMahasiswa({ data, onClick }: any) {
               className="rounded-full size-12 cursor-pointer"
             />
           ) : (
-            <ProfileImage className="size-12 cursor-pointer" />
+            <ProfileImage
+              onClick={() => {}}
+              className="size-12 cursor-pointer"
+            />
           )}
         </div>
         <div className="flex flex-col gap-2">

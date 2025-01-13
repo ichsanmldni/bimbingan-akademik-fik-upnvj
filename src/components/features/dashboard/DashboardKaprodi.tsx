@@ -23,57 +23,15 @@ import store from "@/components/store/store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-interface DashboardKaprodiProps {
-  selectedSubMenuDashboard: string;
-  dataUser: { id: number; [key: string]: any };
-}
-
-interface UserProfile {
-  nama_lengkap: string;
-  email: string;
-  nip: string;
-  no_whatsapp: string;
-}
-
-interface DosenPA {
-  id: number;
-  dosen: {
-    profile_image: string;
-    nama_lengkap: string;
-    nip: string;
-    email: string;
-    no_whatsapp: string;
-  };
-}
-
-interface LaporanBimbingan {
-  id: number;
-  nama_mahasiswa: string;
-  waktu_bimbingan: string;
-  nama_dosen_pa: string;
-  jumlah_mahasiswa: number;
-  jenis_bimbingan: string;
-  sistem_bimbingan: string;
-  status: string;
-  kesimpulan: string;
-  dokumentasi: string | null;
-  feedback_kaprodi: string | null;
-  dosen_pa_id: number;
-}
-
-const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
-  selectedSubMenuDashboard,
-  dataUser,
-}) => {
+const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState<string>("");
   const [emailKaprodi, setEmailKaprodi] = useState<string>("");
   const [nip, setNip] = useState<string>("");
   const [noTelpKaprodi, setNoTelpKaprodi] = useState<string>("");
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [selectedDataLaporanBimbingan, setSelectedDataLaporanBimbingan] =
-    useState<LaporanBimbingan | null>(null);
-  const [selectedDataDosenPA, setSelectedDataDosenPA] =
-    useState<DosenPA | null>(null);
+    useState(null);
+  const [selectedDataDosenPA, setSelectedDataDosenPA] = useState(null);
   const [feedbackKaprodi, setFeedbackKaprodi] = useState<string>("");
   const [selectedTahunAjaran, setSelectedTahunAjaran] = useState<string>("");
   const [selectedSemester, setSelectedSemester] = useState<string>("");
@@ -81,18 +39,18 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
     useState<boolean>(false);
   const [isDetailDosenPAClicked, setIsDetailDosenPAClicked] =
     useState<boolean>(false);
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
-  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState<
-    LaporanBimbingan[]
-  >([]);
+  const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
+  const [dataLaporanBimbinganByDosenPAID, setDataLaporanBimbinganByDosenPAID] =
+    useState<any>([]);
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataBimbinganBySelectedDosenPA, setDataBimbinganBySelectedDosenPA] =
-    useState<any[]>([]);
+    useState([]);
   const [dataBimbingan, setDataBimbingan] = useState([]);
-  const [dataAllMahasiswa, setDataAllMahasiswa] = useState<any[]>([]);
+  const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState<any>({});
   const [dataKaprodiUser, setDataKaprodiUser] = useState<any>({});
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [
     selectedDataPrestasiIlmiahMahasiswa,
     setSelectedDataPrestasiIlmiahMahasiswa,
@@ -106,12 +64,12 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
-  const handleDetailLaporanKaprodi = (data: LaporanBimbingan) => {
+  const handleDetailLaporanKaprodi = (data) => {
     setSelectedDataLaporanBimbingan(data);
     setIsDetailLaporanKaprodiClicked((prev) => !prev);
   };
 
-  const handleDetailDosenPA = (data: DosenPA) => {
+  const handleDetailDosenPA = (data) => {
     setSelectedDataDosenPA(data);
     setIsDetailDosenPAClicked((prev) => !prev);
   };
@@ -281,6 +239,34 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       );
 
       setDataLaporanBimbingan(laporanBimbingan);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataLaporanBimbinganBySelectedDosenPA = async () => {
+    try {
+      const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
+
+      const dosenPA = dataDosenPA.data.find(
+        (data: any) => data.nip === selectedDataDosenPA.nip
+      );
+
+      if (!dosenPA) {
+        throw new Error("Dosen PA tidak ditemukan");
+      }
+
+      const dosenPAID = dosenPA.id;
+
+      const dataLaporanBimbingan = await axios.get(
+        `${API_BASE_URL}/api/laporanbimbingan`
+      );
+
+      const laporanBimbingan = dataLaporanBimbingan.data.filter(
+        (data: any) => data.dosen_pa_id === dosenPAID
+      );
+
+      setDataLaporanBimbinganByDosenPAID(laporanBimbingan);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -528,7 +514,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
               data.tanda_tangan_dosen_pa,
               item.ttd_kehadiran,
             ]);
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [
           [
             "No",
@@ -761,7 +747,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
       let tablePrestasiAkademikYPosition = textPrestasiAkademikYPosition + 4;
 
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [["Range IPK", "Jumlah Mahasiswa"]],
         body: tableData.map((item) => [item.range, item.jumlah]),
         startY: tablePrestasiAkademikYPosition,
@@ -785,7 +771,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         margin: { left: 20 },
       });
 
-      let textPrestasiIlmiahYPosition = doc.autoTable.previous.finalY + 10;
+      let textPrestasiIlmiahYPosition =
+        (doc as any).autoTable.previous.finalY + 10;
 
       const prestasiData = selectedDataPrestasiIlmiahMahasiswa;
       const bodyDataIlmiah =
@@ -809,7 +796,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
       let tablePrestasiIlmiahYPosition = textPrestasiIlmiahYPosition + 4;
 
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [["Bidang Prestasi", "NIM", "Nama", "Tingkat Prestasi"]],
         theme: "plain", // Tema polos
         body: bodyDataIlmiah,
@@ -833,7 +820,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         margin: { left: 20 },
       });
 
-      let textPrestasiBeasiswaYPosition = doc.autoTable.previous.finalY + 10;
+      let textPrestasiBeasiswaYPosition =
+        (doc as any).autoTable.previous.finalY + 10;
 
       // Table for Beasiswa
       const tableBeasiswaData = [
@@ -866,7 +854,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
       let tablePrestasiBeasiswaYPosition = textPrestasiBeasiswaYPosition + 4;
 
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [["Jenis Beasiswa", "Jumlah Mahasiswa"]],
         body: tableBeasiswaData.map((item) => [item.beasiswa, item.jumlah]),
         startY: tablePrestasiBeasiswaYPosition,
@@ -890,7 +878,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         margin: { left: 20 },
       });
 
-      let textPrestasiPorseniYPosition = doc.autoTable.previous.finalY + 10;
+      let textPrestasiPorseniYPosition =
+        (doc as any).autoTable.previous.finalY + 10;
 
       const prestasiPorseniData = selectedDataPrestasiPorseniMahasiswa;
 
@@ -922,7 +911,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
       let tablePrestasiPorseniYPosition = textPrestasiPorseniYPosition + 4;
 
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [["Jenis Kegiatan", "NIM", "Nama", "Tingkat Prestasi"]],
         theme: "plain", // Tema polos
         body: bodyDataPorseni,
@@ -946,7 +935,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
         margin: { left: 20 },
       });
 
-      let textStatusDataYPosition = doc.autoTable.previous.finalY + 10;
+      let textStatusDataYPosition = (doc as any).autoTable.previous.finalY + 10;
 
       const statusData = selectedDataStatusMahasiswa;
 
@@ -966,7 +955,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
       let tableStatusDataYPosition = textStatusDataYPosition + 4;
 
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [["NIM", "Nama", "Status"]],
         theme: "plain", // Tema polos
         body: bodyDataStatus,
@@ -1010,8 +999,8 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       function calculateTableHeight(doc, options) {
         const cloneOptions = { ...options, startY: 0, margin: { bottom: 0 } };
         doc.addPage();
-        doc.autoTable(cloneOptions);
-        const tableHeight = doc.autoTable.previous.finalY - 62;
+        (doc as any).autoTable(cloneOptions);
+        const tableHeight = (doc as any).autoTable.previous.finalY - 62;
         doc.deletePage(doc.internal.getNumberOfPages()); // Hapus halaman sementara
         return tableHeight;
       }
@@ -1074,7 +1063,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
           const now = new Date();
 
           // Mengatur opsi untuk format tanggal
-          const options = {
+          const options: Intl.DateTimeFormatOptions = {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -1127,7 +1116,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       doc.setFont("times new roman");
       doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 42); // Moved up by 10y
       doc.text(`Semester                   :    ${data.semester}`, 15, 48); // Moved up by 10y
-      doc.autoTable(tableOptions);
+      (doc as any).autoTable(tableOptions);
 
       doc.addPage("a4", "landscape");
       const judulLembarKonsultasi = "LEMBAR KONSULTASI MAHASISWA";
@@ -1162,7 +1151,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
               item.ttd_kehadiran,
             ]);
 
-      doc.autoTable({
+      (doc as any).autoTable({
         head: [
           [
             "No",
@@ -1330,7 +1319,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
       const now = new Date();
 
       // Mengatur opsi untuk format tanggal
-      const options = {
+      const options: Intl.DateTimeFormatOptions = {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -1388,6 +1377,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
   useEffect(() => {
     setImagePreview(null);
     getDataKaprodiByNip();
+    setIsDetailLaporanKaprodiClicked(false);
   }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
@@ -1399,6 +1389,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
 
   useEffect(() => {
     getDataBimbinganByDosenPaId();
+    getDataLaporanBimbinganBySelectedDosenPA();
   }, [selectedDataDosenPA]);
 
   useEffect(() => {
@@ -1625,11 +1616,10 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                       <p>Jumlah laporan bimbingan : </p>
                       <p>
                         {
-                          dataBimbinganBySelectedDosenPA.filter(
+                          dataLaporanBimbinganByDosenPAID.filter(
                             (data) =>
-                              data.laporan_bimbingan !== null &&
-                              data.laporan_bimbingan?.status ===
-                                "Sudah Diberikan Feedback"
+                              data !== null &&
+                              data.status === "Sudah Diberikan Feedback"
                           ).length
                         }{" "}
                         Laporan Bimbingan
@@ -1827,7 +1817,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                         <div className="flex flex-col gap-2">
                           <h3 className="font-medium">PDF Laporan Bimbingan</h3>
                           <a
-                            onClick={(e) => {
+                            onClick={(e: any) => {
                               handlePreviewPDF(e, selectedDataLaporanBimbingan);
                             }}
                             className="flex underline hover:cursor-pointer items-center text-blue-600 hover:text-blue-800 font-semibold"
@@ -1846,8 +1836,12 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                           <div className="flex overflow-x-auto gap-8 border p-8 rounded-xl mt-2 h-[300px]">
                             {selectedDataLaporanBimbingan?.dokumentasi
                               ?.split(", ")
-                              .map((data) => (
-                                <img className="ronded rounded-xl" src={data} />
+                              .map((data, index) => (
+                                <img
+                                  key={index}
+                                  className="ronded rounded-xl"
+                                  src={data}
+                                />
                               ))}
                           </div>
                         </div>
@@ -1882,7 +1876,7 @@ const DashboardKaprodi: React.FC<DashboardKaprodiProps> = ({
                                     "Sudah Diberikan Feedback"
                                   );
                                 }}
-                                className="text-white bg-green-500 text-[14px] py-2 font-medium rounded-lg ml-auto w-1/5 hover:bg--600 transition duration-200"
+                                className="text-white bg-green-500 hover:bg-green-600 text-[14px] py-2 font-medium rounded-lg ml-auto w-1/5 hover:bg--600 transition duration-200"
                               >
                                 Submit
                               </button>

@@ -38,7 +38,7 @@ export async function POST(req: Request): Promise<Response> {
             );
         }
 
-        const dataStatusMahasiswa = await prisma.dataStatusMahasiswa.create({
+        const dataStatusMahasiswa = await prisma.datastatusmahasiswa.create({
             data: {
                 laporan_bimbingan_id, nama, nim, status
             },

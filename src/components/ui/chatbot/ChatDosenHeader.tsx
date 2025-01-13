@@ -13,7 +13,7 @@ export default function ChatDosenHeader({ data }: any) {
             className="rounded-full size-12 cursor-pointer"
           />
         ) : (
-          <ProfileImage className="size-12 cursor-pointer" />
+          <ProfileImage onClick={() => {}} className="size-12 cursor-pointer" />
         )}
       </div>
       <p className="text-[18px]">{data?.nama}</p>

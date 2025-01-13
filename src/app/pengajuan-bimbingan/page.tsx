@@ -15,55 +15,6 @@ import { id } from "date-fns/locale";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-interface User {
-  id: number;
-  role: string;
-  [key: string]: any; // Allow additional properties
-}
-
-interface DosenPA {
-  id: number;
-  dosen: {
-    nama_lengkap: string;
-  };
-  dosen_id: number;
-}
-
-interface Mahasiswa {
-  id: number;
-  nama_lengkap: string;
-  nim: string;
-  email: string;
-  no_whatsapp: string;
-  jurusan: string;
-  dosen_pa_id: number;
-}
-
-interface JadwalDosenPA {
-  id: number;
-  hari: string;
-  jam_mulai: string;
-  jam_selesai: string;
-}
-
-interface JenisBimbingan {
-  id: number;
-  jenis_bimbingan: string;
-  order: number;
-}
-
-interface TopikBimbinganPribadi {
-  id: number;
-  topik_bimbingan: string;
-  order: number;
-}
-
-interface SistemBimbingan {
-  id: number;
-  sistem_bimbingan: string;
-  order: number;
-}
-
 export default function Home() {
   const [namaLengkap, setNamaLengkap] = useState<string>("");
   const [nim, setNim] = useState<string>("");
@@ -71,25 +22,20 @@ export default function Home() {
   const [noWa, setNoWa] = useState<string>("");
   const [jurusan, setJurusan] = useState<string>("");
   const [roleUser, setRoleUser] = useState<string>("");
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<any[]>([]); // Adjust type as needed
+  const [dataDosenPA, setDataDosenPA] = useState<any>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any>([]); // Adjust type as needed
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
   const [selectedHari, setSelectedHari] = useState<string>("");
   const [selectedJam, setSelectedJam] = useState<string>("");
-  const [dataUser, setDataUser] = useState<User>({} as User);
-  const [dataJadwalDosenPa, setDataJadwalDosenPa] = useState<JadwalDosenPA[]>(
-    []
-  );
+  const [dataUser, setDataUser] = useState<any>({});
+  const [dataJadwalDosenPa, setDataJadwalDosenPa] = useState<any>([]);
   const [selectedJenisBimbingan, setSelectedJenisBimbingan] =
     useState<string>("");
   const [selectedTopikBimbinganPribadi, setSelectedTopikBimbinganPribadi] =
     useState<string>("");
-  const [dataJenisBimbingan, setDataJenisBimbingan] = useState<
-    JenisBimbingan[]
-  >([]);
-  const [dataTopikBimbinganPribadi, setDataTopikBimbinganPribadi] = useState<
-    TopikBimbinganPribadi[]
-  >([]);
+  const [dataJenisBimbingan, setDataJenisBimbingan] = useState<any>([]);
+  const [dataTopikBimbinganPribadi, setDataTopikBimbinganPribadi] =
+    useState<any>([]);
   const [optionsJenisBimbingan, setOptionsJenisBimbingan] = useState<
     { value: string; label: string }[]
   >([]);
@@ -97,17 +43,13 @@ export default function Home() {
     useState<{ value: string; label: string }[]>([]);
   const [selectedSistemBimbingan, setSelectedSistemBimbingan] =
     useState<string>("");
-  const [dataSistemBimbingan, setDataSistemBimbingan] = useState<
-    SistemBimbingan[]
-  >([]);
+  const [dataSistemBimbingan, setDataSistemBimbingan] = useState<any>([]);
   const [optionsSistemBimbingan, setOptionsSistemBimbingan] = useState<
     { value: string; label: string }[]
   >([]);
-  const [userDosenPa, setuserDosenPa] = useState<DosenPA | null>(null);
-  const [dataMahasiswaUser, setDataMahasiswaUser] = useState<Mahasiswa | null>(
-    null
-  );
-  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
+  const [userDosenPa, setuserDosenPa] = useState<any>(null);
+  const [dataMahasiswaUser, setDataMahasiswaUser] = useState<any>(null);
+  const [dataMahasiswa, setDataMahasiswa] = useState<any>([]);
   const [permasalahan, setPermasalahan] = useState("");
   const [selectedIsPermasalahan, setSelectedIsPermasalahan] = useState("");
 
@@ -115,7 +57,7 @@ export default function Home() {
 
   const getDataJadwalDosenPaByDosenPa = async () => {
     try {
-      const dataDosenPa = await axios.get<DosenPA[]>(
+      const dataDosenPa = await axios.get<any>(
         `${API_BASE_URL}/api/datadosenpa`
       );
 
@@ -129,7 +71,7 @@ export default function Home() {
 
       const dosenpaid = dosenPa.id;
 
-      const response = await axios.get<JadwalDosenPA[]>(
+      const response = await axios.get<any>(
         `${API_BASE_URL}/api/datajadwaldosenpa/${dosenpaid}`
       );
 
@@ -147,7 +89,7 @@ export default function Home() {
 
   const getDataDosenPaByMahasiswa = async () => {
     try {
-      const dataDosenPa = await axios.get<DosenPA[]>(
+      const dataDosenPa = await axios.get<any>(
         `${API_BASE_URL}/api/datadosenpa`
       );
 
@@ -169,7 +111,7 @@ export default function Home() {
 
   const getDataMahasiswaByUser = async () => {
     try {
-      const dataMahasiswa = await axios.get<Mahasiswa[]>(
+      const dataMahasiswa = await axios.get<any>(
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
@@ -190,7 +132,7 @@ export default function Home() {
 
   const getDataJenisBimbingan = async () => {
     try {
-      const response = await axios.get<JenisBimbingan[]>(
+      const response = await axios.get<any>(
         `${API_BASE_URL}/api/datajenisbimbingan`
       );
 
@@ -208,7 +150,7 @@ export default function Home() {
   };
   const getDataTopikBimbinganPribadi = async () => {
     try {
-      const response = await axios.get<TopikBimbinganPribadi[]>(
+      const response = await axios.get<any>(
         `${API_BASE_URL}/api/datatopikbimbinganpribadi`
       );
 
@@ -229,7 +171,7 @@ export default function Home() {
 
   const getDataSistemBimbingan = async () => {
     try {
-      const response = await axios.get<SistemBimbingan[]>(
+      const response = await axios.get<any>(
         `${API_BASE_URL}/api/datasistembimbingan`
       );
 
@@ -353,9 +295,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const response = await axios.get<any>(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -389,7 +329,7 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get<Mahasiswa[]>(
+      const response = await axios.get<any>(
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
@@ -494,7 +434,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken = jwtDecode<any>(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -586,7 +526,7 @@ export default function Home() {
             <div className="flex flex-col">
               <DatePicker
                 selected={selectedDateTime}
-                onChange={(date) => {
+                onChange={(date: any) => {
                   setSelectedDateTime(date);
                   if (date) {
                     setSelectedHari(getDayName(date));

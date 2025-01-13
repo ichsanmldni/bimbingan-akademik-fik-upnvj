@@ -2,7 +2,7 @@
 
 import Logo from "@/components/ui/LogoUPNVJ";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import NavbarUser from "@/components/ui/NavbarUser";
 import { jwtDecode } from "jwt-decode";
 import DashboardDosenPA from "@/components/features/dashboard/DashboardDosenPA";
@@ -14,36 +14,11 @@ import { setSelectedSubMenu } from "@/components/store/selectedSubMenuSlice";
 import { RootState } from "@/components/store/store";
 import { useRouter, useSearchParams } from "next/navigation";
 
-interface User {
-  id: number;
-  role: string;
-}
-
-interface Dosen {
-  id: number;
-  // Add other dosen properties as needed
-}
-
-interface DosenPA {
-  dosen_id: number;
-  // Add other Dosen PA properties as needed
-}
-
-interface Kaprodi {
-  dosen_id: number;
-  // Add other Kaprodi properties as needed
-}
-
-interface Mahasiswa {
-  id: number;
-  // Add other mahasiswa properties as needed
-}
-
-export default function Home() {
+const Dashboard = () => {
   const [dataUser, setDataUser] = useState<any>(null);
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
+  const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataKaprodi, setDataKaprodi] = useState([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -57,9 +32,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -75,9 +48,7 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get<Kaprodi[]>(
-        `${API_BASE_URL}/api/datakaprodi`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -93,9 +64,7 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get<Mahasiswa[]>(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -132,7 +101,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken = jwtDecode(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -163,11 +132,14 @@ export default function Home() {
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.nim === dataUser?.nim) || {}
+            ? dataMahasiswa.find((data: any) => data.nim === dataUser?.nim) ||
+              {}
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.nip === dataUser?.nip) || {}
+              ? dataDosenPA.find((data: any) => data.nip === dataUser?.nip) ||
+                {}
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.nip === dataUser?.nip) || {}
+                ? dataKaprodi.find((data: any) => data.nip === dataUser?.nip) ||
+                  {}
                 : {}
         }
       />
@@ -336,5 +308,13 @@ export default function Home() {
         </p>
       </div>
     </div>
+  );
+};
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Dashboard />
+    </Suspense>
   );
 }

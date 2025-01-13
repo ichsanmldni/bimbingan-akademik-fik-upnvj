@@ -19,49 +19,23 @@ import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
 import { select } from "slate";
 import ProfileImage from "@/components/ui/ProfileImage";
 
-interface User {
-  id: number;
-  [key: string]: any;
-}
-
-interface DosenPA {
-  id: number;
-  dosen: {
-    nama_lengkap: string;
-  };
-  dosen_id: number;
-}
-
-interface ChatData {
-  id: number;
-  waktu_kirim: string;
-  chat_pribadi_id: number;
-  role: string; // "Mahasiswa" or "Dosen PA"
-  [key: string]: any; // Allow additional properties
-}
-
 export default function ChatDosenPA() {
-  const [dataUser, setDataUser] = useState<User>({} as User);
-  const [userDosenPA, setUserDosenPA] = useState<DosenPA | null>(null);
-  const [isMahasiswaChatting, setIsMahasiswaChatting] =
-    useState<boolean>(false);
+  const [dataUser, setDataUser] = useState<any>({});
+  const [userDosenPA, setUserDosenPA] = useState<any>(null);
+  const [isMahasiswaChatting, setIsMahasiswaChatting] = useState<any>(false);
   const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState<any>(
     {}
   );
   const [selectedDataPesanSiaran, setSelectedDataPesanSiaran] = useState<any>(
     []
   );
-  const [dataPesanSiaran, setDataPesanSiaran] = useState();
-  const [chatData, setChatData] = useState<ChatData[]>([]);
-  const [dataPesanChatSiaran, setDataPesanChatSiaran] = useState<ChatData[]>(
-    []
-  );
-  const [chatMahasiswaData, setChatMahasiswaData] = useState<ChatData[]>([]);
-  const [chatDosenPAData, setChatDosenPAData] = useState<ChatData[]>([]);
-  const [sortedChatData, setSortedChatData] = useState<ChatData[]>([]);
-  const [sortedPesanChatSiaran, setSortedPesanChatSiaran] = useState<
-    ChatData[]
-  >([]);
+  const [dataPesanSiaran, setDataPesanSiaran] = useState([]);
+  const [chatData, setChatData] = useState<any>([]);
+  const [dataPesanChatSiaran, setDataPesanChatSiaran] = useState<any>([]);
+  const [chatMahasiswaData, setChatMahasiswaData] = useState<any>([]);
+  const [chatDosenPAData, setChatDosenPAData] = useState<any>([]);
+  const [sortedChatData, setSortedChatData] = useState<any>([]);
+  const [sortedPesanChatSiaran, setSortedPesanChatSiaran] = useState<any>([]);
   const [mahasiswaID, setMahasiswaID] = useState();
   const [isDetailChatPribadiClicked, setIsDetailChatPribadiClicked] =
     useState(false);
@@ -69,7 +43,7 @@ export default function ChatDosenPA() {
     useState(false);
 
   const [statusPembacaanPesanSiaran, setStatusPembacaanPesanSiaran] =
-    useState();
+    useState<any>({});
 
   const [allPesanChatMahasiswa, setAllPesanChatMahasiswa] = useState([]);
 
@@ -88,7 +62,7 @@ export default function ChatDosenPA() {
   };
 
   const getStatusPembacaanPesanSiaran = async () => {
-    const dataStatusPembacaan = await axios.get<DosenPA[]>(
+    const dataStatusPembacaan = await axios.get(
       `${API_BASE_URL}/api/statuspembacaanpesansiaran`
     );
 
@@ -100,9 +74,7 @@ export default function ChatDosenPA() {
   };
 
   const getDataMahasiswaIDByNIM = async () => {
-    const dataMahasiswa = await axios.get<DosenPA[]>(
-      `${API_BASE_URL}/api/datamahasiswa`
-    );
+    const dataMahasiswa = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
 
     const mahasiswa = dataMahasiswa.data.find(
       (data) => data.nim === dataUser.nim
@@ -130,11 +102,9 @@ export default function ChatDosenPA() {
 
   const getDataDosenPaByMahasiswaID = async () => {
     try {
-      const dataDosenPa = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const dataDosenPa = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
-      const dataMahasiswa = await axios.get<any[]>(
+      const dataMahasiswa = await axios.get(
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
@@ -158,7 +128,7 @@ export default function ChatDosenPA() {
 
   const getDataChatPribadiByMahasiswaId = async () => {
     try {
-      const dataChatPribadi = await axios.get<any[]>(
+      const dataChatPribadi = await axios.get(
         `${API_BASE_URL}/api/chatpribadi`
       );
 
@@ -180,10 +150,10 @@ export default function ChatDosenPA() {
   };
   const getDataPesanSiaranByMahasiswaId = async () => {
     try {
-      const dataPesanSiaran = await axios.get<any[]>(
+      const dataPesanSiaran = await axios.get(
         `${API_BASE_URL}/api/pesansiaran`
       );
-      const dataMahasiswa = await axios.get<any[]>(
+      const dataMahasiswa = await axios.get(
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
@@ -207,7 +177,7 @@ export default function ChatDosenPA() {
 
   const getDataChatDosenPAByChatPribadiId = async () => {
     try {
-      const dataChatDosenPA = await axios.get<ChatData[]>(
+      const dataChatDosenPA = await axios.get(
         `${API_BASE_URL}/api/chatdosenpa`
       );
 
@@ -228,10 +198,10 @@ export default function ChatDosenPA() {
 
   const getDataChatMahasiswa = async () => {
     try {
-      const dataChatMahasiswa = await axios.get<ChatData[]>(
+      const dataChatMahasiswa = await axios.get(
         `${API_BASE_URL}/api/chatmahasiswa`
       );
-      setAllPesanChatMahasiswa(dataChatMahasiswa);
+      setAllPesanChatMahasiswa(dataChatMahasiswa.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -240,7 +210,7 @@ export default function ChatDosenPA() {
 
   const getDataChatMahasiswaByChatPribadiId = async () => {
     try {
-      const dataChatMahasiswa = await axios.get<ChatData[]>(
+      const dataChatMahasiswa = await axios.get<any>(
         `${API_BASE_URL}/api/chatmahasiswa`
       );
 
@@ -263,13 +233,16 @@ export default function ChatDosenPA() {
 
   const getDataPesanChatSiaranByPesanSiaranId = async () => {
     try {
-      const dataPesanChatSiaran = await axios.get<ChatData[]>(
+      const dataPesanChatSiaran = await axios.get(
         `${API_BASE_URL}/api/pesanchatsiaran`
       );
 
-      const dataChatSiaran = dataPesanChatSiaran.data.filter(
-        (data) => data.pesan_siaran_id === dataPesanSiaran[0]?.id
-      );
+      let dataChatSiaran;
+      if (dataPesanSiaran && dataPesanSiaran.length > 0) {
+        dataChatSiaran = dataPesanChatSiaran.data.filter(
+          (data) => data.pesan_siaran_id === dataPesanSiaran[0]?.id
+        );
+      }
 
       if (!dataChatSiaran) {
         return;
@@ -287,7 +260,7 @@ export default function ChatDosenPA() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken = jwtDecode(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -521,10 +494,10 @@ export default function ChatDosenPA() {
                         </div>
                       </div>
                       <div
-                        className={`${statusPembacaanPesanSiaran?.is_read ? "pb-8" : "flex flex-col gap-2"}`}
+                        className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "pb-8" : "flex flex-col gap-2"}`}
                       >
                         <p
-                          className={`${statusPembacaanPesanSiaran?.is_read ? "" : "font-semibold text-orange-500"} align-top min-w-[170px]`}
+                          className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "" : "font-semibold text-orange-500"} align-top min-w-[170px]`}
                         >
                           {(() => {
                             const date = new Date(data.waktu_pesan_terakhir);
@@ -584,7 +557,10 @@ export default function ChatDosenPA() {
                             className="rounded-full size-12 cursor-pointer"
                           />
                         ) : (
-                          <ProfileImage className="size-12 cursor-pointer" />
+                          <ProfileImage
+                            onClick={() => {}}
+                            className="size-12 cursor-pointer"
+                          />
                         )}
                       </div>
                       <div className="flex flex-col gap-2">

@@ -7,24 +7,11 @@ import ChatDosenPA from "@/components/features/chatpribadi/ChatDosenPA";
 import ChatMahasiswa from "@/components/features/chatpribadi/ChatMahasiswa";
 import { env } from "process";
 
-interface User {
-  id: number;
-  role: string;
-}
-
-interface DosenPA {
-  dosen_id: number;
-}
-
-interface Kaprodi {
-  dosen_id: number;
-}
-
 export default function ChatPribadi() {
-  const [roleUser, setRoleUser] = useState<string>("");
-  const [dataUser, setDataUser] = useState<User | null>(null);
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
+  const [roleUser, setRoleUser] = useState("");
+  const [dataUser, setDataUser] = useState<any>(null);
+  const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataKaprodi, setDataKaprodi] = useState([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -66,7 +53,7 @@ export default function ChatPribadi() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken: any = jwtDecode(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);

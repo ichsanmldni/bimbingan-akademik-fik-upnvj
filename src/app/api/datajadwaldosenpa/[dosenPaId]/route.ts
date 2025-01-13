@@ -58,6 +58,20 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
+    const existingRecord = await prisma.jadwaldosenpa.findMany({
+      where: { dosen_pa_id },
+    });
+    const existingHariRecord = existingRecord.filter(data => data.hari === hari)
+    const existingJamMulaiRecord = existingHariRecord.find(data => data.jam_mulai === jam_mulai)
+
+    if (existingJamMulaiRecord) {
+      return new Response(
+        JSON.stringify({ message: 'Jadwal ini sudah ada!' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+
     const jadwalDosenPA = await prisma.jadwaldosenpa.create({
       data: {
         dosen_pa_id,

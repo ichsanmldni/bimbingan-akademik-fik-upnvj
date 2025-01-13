@@ -37,25 +37,9 @@ if (!JWT_EXPIRED) {
 
 const EXPIRED_TIME = convertTimeToSeconds(JWT_EXPIRED);
 
-interface User {
-  id: number;
-  password: string;
-  nim?: string;
-  nip?: string;
-  email?: string;
-}
-
-interface RequestBody {
-  nim?: string;
-  nip?: string;
-  email?: string;
-  password: string;
-  role: 'Mahasiswa' | 'Dosen PA' | 'Kaprodi' | 'Admin';
-}
-
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: RequestBody = await req.json();
+    const body: any = await req.json();
 
     const { nim, nip, email, password, role } = body;
 
@@ -72,7 +56,7 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    let user: User | null;
+    let user: any | null;
 
     if (role === 'Mahasiswa') {
       const authHeader = {
@@ -108,7 +92,7 @@ export async function POST(req: Request): Promise<Response> {
         if (response.data.data.nim) {
           user = response.data.data;
           const mahasiswa = await prisma.mahasiswa.findUnique({
-            where: { nim: user.nim },
+            where: { nim: user?.nim },
           });
 
           if (!mahasiswa) {
@@ -116,11 +100,11 @@ export async function POST(req: Request): Promise<Response> {
               const newMahasiswa = await prisma.mahasiswa.create({
                 data: {
                   profile_image: null,
-                  nama: user.nama,
-                  email: user.email,
-                  nim: user.nim,
-                  hp: user.hp,
-                  jurusan: user.nama_program_studi,
+                  nama: user?.nama,
+                  email: user?.email,
+                  nim: user?.nim,
+                  hp: user?.hp,
+                  jurusan: user?.nama_program_studi,
                   peminatan: null,
                   dosen_pa_id: null,
                 },
@@ -128,7 +112,7 @@ export async function POST(req: Request): Promise<Response> {
             } catch (prismaError) {
               console.error('Prisma error:', prismaError);
               // Simpan pesan kesalahan Prisma ke dalam variabel  
-              const prismaErrorMessage = prismaError.message || 'Gagal membuat mahasiswa!';
+              const prismaErrorMessage = (prismaError as Error).message || 'Gagal membuat mahasiswa!';
               return new Response(JSON.stringify({ message: prismaErrorMessage }), {
                 status: 500,
                 headers: { 'Content-Type': 'application/json' },
@@ -178,7 +162,7 @@ export async function POST(req: Request): Promise<Response> {
           });
         } else {
           console.error('General error:', error);
-          return new Response(JSON.stringify({ message: error.message }), {
+          return new Response(JSON.stringify({ message: (error as Error).message }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
           });
@@ -277,8 +261,8 @@ export async function POST(req: Request): Promise<Response> {
 
         const response = await axios.post(url, formData, { headers: combinedHeaders });
 
-        const filteredJurusan = response.data.data.filter(data => data.nama_fakultas === 'Fakultas Ilmu Komputer');
-        const matchingJurusan = filteredJurusan.find(data => data.nidn_dosen_ketua_prodi === user.nip);
+        const filteredJurusan = response.data.data.filter((data: any) => data.nama_fakultas === 'Fakultas Ilmu Komputer');
+        const matchingJurusan = filteredJurusan.find((data: any) => data.nidn_dosen_ketua_prodi === user.nip);
         const namaJurusan = matchingJurusan.nama_program_studi;
 
         await prisma.kaprodi.update({

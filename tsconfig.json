@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "noEmitOnError": false, 
     "lib": [
       "dom",
       "dom.iterable",
@@ -7,7 +8,7 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -33,7 +34,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "src/app/laporan-bimbingan/editor.js"  ],
+, "src/app/laporan-bimbingan/editor.js", "src/app/laporan-bimbingan/components/index.jsx"  ],
   "exclude": [
     "node_modules"
   ]

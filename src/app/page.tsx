@@ -13,43 +13,19 @@ import axios from "axios";
 import chatbotIcon from "../assets/images/chatbot.png";
 import { Provider, useDispatch } from "react-redux";
 import store from "@/components/store/store";
-import { setSelectedSubMenu } from "@/components/store/selectedSubMenuSlice";
-import { useRouter } from "next/router";
-
-interface User {
-  id: number;
-  role: string;
-  // Add other properties based on your user data structure
-}
-
-interface Dosen {
-  id: number;
-  // Add other properties based on your dosen data structure
-}
-
-interface Mahasiswa {
-  id: number;
-  // Add other properties based on your mahasiswa data structure
-}
-
-interface Kaprodi {
-  id: number;
-  // Add other properties based on your kaprodi data structure
-}
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
 export default function Home() {
   const cards = Array(9).fill(null);
 
-  const [roleUser, setRoleUser] = useState<string>("");
-  const [activeNavbar, setActiveNavbar] = useState<string>("Dashboard");
-  const [dataDosenPA, setDataDosenPA] = useState<Dosen[]>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
-  const [dataUser, setDataUser] = useState<User | null>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const dispatch = useDispatch();
+  const [roleUser, setRoleUser] = useState<any>("");
+  const [activeNavbar, setActiveNavbar] = useState<any>("Dashboard");
+  const [dataDosenPA, setDataDosenPA] = useState<any>([]);
+  const [dataKaprodi, setDataKaprodi] = useState<any>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<any>([]);
+  const [dataUser, setDataUser] = useState<any>(null);
+  const [isNavigating, setIsNavigating] = useState<any>(false);
   useEffect(() => {
     if (isNavigating) {
       // Reset isNavigating after a short delay
@@ -63,9 +39,7 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get<Mahasiswa[]>(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -80,9 +54,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get<Dosen[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -97,9 +69,7 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get<Kaprodi[]>(
-        `${API_BASE_URL}/api/datakaprodi`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -119,7 +89,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken: any = jwtDecode(token);
         setDataUser(decodedToken);
 
         if (decodedToken.role === "Mahasiswa") {

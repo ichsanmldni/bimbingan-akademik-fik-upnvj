@@ -1,12 +1,6 @@
 // /app/api/datadosen/route.ts
 import prisma from '../../../lib/prisma';
 
-interface BimbinganRequestBody {
-  pengajuan_bimbingan_id?: number;
-  id?: number;
-  laporan_bimbingan_id?: number;
-}
-
 export async function GET(req: Request): Promise<Response> {
   try {
     // Fetching data from the database
@@ -33,7 +27,7 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: BimbinganRequestBody = await req.json();
+    const body: any = await req.json();
     const { pengajuan_bimbingan_id, permasalahan } = body;
 
     if (!pengajuan_bimbingan_id) {
@@ -64,7 +58,7 @@ export async function POST(req: Request): Promise<Response> {
 
 export async function PATCH(req: Request): Promise<Response> {
   try {
-    const body: BimbinganRequestBody = await req.json();
+    const body: any = await req.json();
     const { id, laporan_bimbingan_id } = body;
 
     if (!id || !laporan_bimbingan_id) {

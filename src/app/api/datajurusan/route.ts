@@ -31,7 +31,7 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     const dataJurusan = response.data;
-    const dataJurusanFIK = dataJurusan.data.filter(data => data.nama_fakultas === "Fakultas Ilmu Komputer")
+    const dataJurusanFIK = dataJurusan.data.filter((data: any) => data.nama_fakultas === "Fakultas Ilmu Komputer")
 
     return new Response(JSON.stringify(dataJurusanFIK), {
       status: 200,

@@ -35,38 +35,34 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   const isActive = (path: string) => pathname === path;
 
-  const getDataNotifikasiByUserId = async (id) => {
+  const getDataNotifikasiByUserId = async () => {
     try {
       let response;
-      roleUser === "Mahasiswa"
-        ? (response = await axios.get(
-            `${API_BASE_URL}/api/datanotifikasimahasiswa`
-          ))
-        : roleUser === "Dosen PA"
-          ? (response = await axios.get(
-              `${API_BASE_URL}/api/datanotifikasidosenpa`
-            ))
-          : roleUser === "Kaprodi"
-            ? (response = await axios.get(
-                `${API_BASE_URL}/api/datanotifikasikaprodi`
-              ))
-            : (response = {});
+      if (roleUser === "Mahasiswa") {
+        response = await axios.get(
+          `${API_BASE_URL}/api/datanotifikasimahasiswa`
+        );
+      } else if (roleUser === "Dosen PA") {
+        response = await axios.get(`${API_BASE_URL}/api/datanotifikasidosenpa`);
+      } else if (roleUser === "Kaprodi") {
+        response = await axios.get(`${API_BASE_URL}/api/datanotifikasikaprodi`);
+      }
 
       let notifikasiUser;
 
-      roleUser === "Mahasiswa"
-        ? (notifikasiUser = response.data.filter((data: any) =>
-            data.mahasiswa_id === id ? id : dataUser.id
-          ))
-        : roleUser === "Dosen PA"
-          ? (notifikasiUser = response.data.filter((data: any) =>
-              data.dosen_pa_id === id ? id : dataUser.id
-            ))
-          : roleUser === "Kaprodi"
-            ? (notifikasiUser = response.data.filter((data: any) =>
-                data.kaprodi_id === id ? id : dataUser.id
-              ))
-            : (notifikasiUser = {});
+      if (roleUser === "Mahasiswa") {
+        notifikasiUser = response.data.filter(
+          (data: any) => data.mahasiswa_id === dataUser.id
+        );
+      } else if (roleUser === "Dosen PA") {
+        notifikasiUser = response.data.filter(
+          (data: any) => data.dosen_pa_id === dataUser.id
+        );
+      } else if (roleUser === "Kaprodi") {
+        notifikasiUser = response.data.filter(
+          (data: any) => data.kaprodi_id === dataUser.id
+        );
+      }
 
       const data = await response.data;
       setDataNotifikasi(data);
@@ -77,7 +73,9 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   };
 
   useEffect(() => {
-    getDataNotifikasiByUserId();
+    if (dataUser && dataUser.id) {
+      getDataNotifikasiByUserId();
+    }
   }, [dataUser]);
 
   return (

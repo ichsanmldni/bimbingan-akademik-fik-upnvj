@@ -42,8 +42,8 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: ChatPribadiRequestBody = await req.json();
-    const { mahasiswa_id, dosen_pa_id, waktu_pesan_terakhir, is_mahasiswa_pesan_terakhir_read, is_dosenpa_pesan_terakhir_read_, pesan_terakhir, pengirim_pesan_terakhir } = body;
+    const body: any = await req.json();
+    const { mahasiswa_id, dosen_pa_id, waktu_pesan_terakhir, is_mahasiswa_pesan_terakhir_read, is_dosenpa_pesan_terakhir_read, pesan_terakhir, pengirim_pesan_terakhir } = body;
 
     // Validate required fields
     if (!mahasiswa_id || !dosen_pa_id || !waktu_pesan_terakhir || is_mahasiswa_pesan_terakhir_read === undefined || is_dosenpa_pesan_terakhir_read === undefined || !pesan_terakhir || !pengirim_pesan_terakhir) {

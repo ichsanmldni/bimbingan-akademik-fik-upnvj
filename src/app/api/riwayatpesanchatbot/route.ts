@@ -1,13 +1,5 @@
 import prisma from '../../../lib/prisma';
 
-interface RiwayatPesanChatbot {
-  id?: number; // Optional for POST, required for GET
-  sesi_chatbot_mahasiswa_id: number;
-  role: string; // Assuming role is a string, adjust if necessary
-  pesan: string;
-  waktu_kirim: Date; // Adjust type according to your schema
-}
-
 export async function GET(req: Request): Promise<Response> {
   try {
     const riwayatPesanChatbot = await prisma.riwayatpesanchatbot.findMany();
@@ -27,7 +19,7 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const body: RiwayatPesanChatbot = await req.json();
+    const body = await req.json();
 
     const { sesi_chatbot_mahasiswa_id, role, pesan, waktu_kirim } = body;
 

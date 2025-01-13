@@ -12,61 +12,16 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { env } from "process";
 
-interface User {
-  id: number;
-  role: string;
-}
-
-interface Bab {
-  id: number;
-  nama: string;
-  order: number;
-}
-
-interface SubBab {
-  id: number;
-  nama: string;
-  isi: string;
-  order: number;
-}
-
-interface Dosen {
-  id: number;
-  // Add other dosen properties as needed
-}
-
-interface DosenPA {
-  dosen_id: number;
-  // Add other Dosen PA properties as needed
-}
-
-interface Kaprodi {
-  dosen_id: number;
-  // Add other Kaprodi properties as needed
-}
-
-interface Mahasiswa {
-  id: number;
-  // Add other mahasiswa properties as needed
-}
-
-interface SubBabData {
-  id: number;
-  nama: string;
-  isi: string;
-}
-
 export default function Home() {
-  const [openMenu, setOpenMenu] = useState<string>("");
-  const [roleUser, setRoleUser] = useState<string>("");
-  const [dataUser, setDataUser] = useState<User | null>(null);
-  const [dataBab, setDataBab] = useState<Bab[]>([]);
-  const [dataSubBab, setDataSubBab] = useState<SubBab[]>([]);
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<Kaprodi[]>([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState<Mahasiswa[]>([]);
-  const [selectedSubBabData, setSelectedSubBabData] =
-    useState<SubBabData | null>(null);
+  const [openMenu, setOpenMenu] = useState("");
+  const [roleUser, setRoleUser] = useState("");
+  const [dataUser, setDataUser] = useState<any>(null);
+  const [dataBab, setDataBab] = useState([]);
+  const [dataSubBab, setDataSubBab] = useState([]);
+  const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataKaprodi, setDataKaprodi] = useState([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState([]);
+  const [selectedSubBabData, setSelectedSubBabData] = useState<any>(null);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -76,13 +31,15 @@ export default function Home() {
 
   const getDataBab = async () => {
     try {
-      const response = await axios.get<Bab[]>(`${API_BASE_URL}/api/databab`);
+      const response = await axios.get(`${API_BASE_URL}/api/databab`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
       }
 
-      const sortedDataBab = response.data.sort((a, b) => a.order - b.order);
+      const sortedDataBab = response.data.sort(
+        (a: any, b: any) => a.order - b.order
+      );
       setDataBab(sortedDataBab);
     } catch (error) {
       console.error("Error:", error);
@@ -92,9 +49,9 @@ export default function Home() {
 
   const getDataSubBabByBab = async (selectedBab: string) => {
     try {
-      const response = await axios.get<Bab[]>(`${API_BASE_URL}/api/databab`);
+      const response = await axios.get(`${API_BASE_URL}/api/databab`);
 
-      const bab = response.data.find((data) => data.nama === selectedBab);
+      const bab = response.data.find((data: any) => data.nama === selectedBab);
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -102,7 +59,7 @@ export default function Home() {
 
       const babid = bab.id;
 
-      const subBabResponse = await axios.get<SubBab[]>(
+      const subBabResponse = await axios.get(
         `${API_BASE_URL}/api/datasubbab/${babid}`
       );
 
@@ -111,7 +68,7 @@ export default function Home() {
       }
 
       const sortedDataSubBab = subBabResponse.data.sort(
-        (a, b) => a.order - b.order
+        (a: any, b: any) => a.order - b.order
       );
       setDataSubBab(sortedDataSubBab);
     } catch (error) {
@@ -125,9 +82,9 @@ export default function Home() {
     selectedSubBab: string
   ) => {
     try {
-      const response = await axios.get<Bab[]>(`${API_BASE_URL}/api/databab`);
+      const response = await axios.get(`${API_BASE_URL}/api/databab`);
 
-      const bab = response.data.find((data) => data.nama === selectedBab);
+      const bab = response.data.find((data: any) => data.nama === selectedBab);
 
       if (!bab) {
         throw new Error("Bab tidak ditemukan");
@@ -135,11 +92,11 @@ export default function Home() {
 
       const babid = bab.id;
 
-      const subBabResponse = await axios.get<SubBab[]>(
+      const subBabResponse = await axios.get(
         `${API_BASE_URL}/api/datasubbab/${babid}`
       );
       const subbab = subBabResponse.data.find(
-        (data) => data.nama === selectedSubBab
+        (data: any) => data.nama === selectedSubBab
       );
 
       setSelectedSubBabData(subbab || null);
@@ -151,9 +108,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -169,9 +124,7 @@ export default function Home() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get<Kaprodi[]>(
-        `${API_BASE_URL}/api/datakaprodi`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -187,9 +140,7 @@ export default function Home() {
 
   const getDataMahasiswa = async () => {
     try {
-      const response = await axios.get<Mahasiswa[]>(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -214,7 +165,7 @@ export default function Home() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken: any = jwtDecode(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);
@@ -238,11 +189,12 @@ export default function Home() {
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.id === dataUser?.id) || {}
+            ? dataMahasiswa.find((data: any) => data.id === dataUser?.id) || {}
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.id === dataUser?.id) || {}
+              ? dataDosenPA.find((data: any) => data.id === dataUser?.id) || {}
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.id === dataUser?.id) || {}
+                ? dataKaprodi.find((data: any) => data.id === dataUser?.id) ||
+                  {}
                 : {}
         }
       />
@@ -267,7 +219,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex flex-col gap-4">
-            {dataBab.map((data) => {
+            {dataBab.map((data: any) => {
               return (
                 <div key={data.id}>
                   <div
@@ -296,7 +248,7 @@ export default function Home() {
                   </div>
                   {openMenu === data.nama && (
                     <div className="text-[14px] text-gray-700">
-                      {dataSubBab.map((data) => (
+                      {dataSubBab.map((data: any) => (
                         <p
                           key={data.id}
                           onClick={() =>

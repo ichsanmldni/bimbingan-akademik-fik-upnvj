@@ -23,41 +23,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Span } from "slate";
 
-interface DashboardMahasiswaProps {
-  selectedSubMenuDashboard: string;
-  dataUser: Record<string, any>; // Adjust type as needed
-}
-
-interface Jurusan {
-  id: string;
-  jurusan: string;
-  order: number;
-}
-
-interface Peminatan {
-  id: string;
-  peminatan: string;
-  order: number;
-}
-
-interface DosenPA {
-  id: string;
-  dosen: {
-    nama_lengkap: string;
-  };
-}
-
-interface PengajuanBimbingan {
-  id: string;
-  mahasiswa_id: string;
-  nama_lengkap: string;
-  jenis_bimbingan: string;
-  sistem_bimbingan: string;
-  keterangan: string;
-  jadwal_bimbingan: string;
-  status: string;
-}
-
 const schedule = {
   Senin: [],
   Selasa: [],
@@ -66,10 +31,7 @@ const schedule = {
   Jumat: [],
 };
 
-const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
-  selectedSubMenuDashboard,
-  dataUser,
-}) => {
+const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapMahasiswa, setNamaLengkapMahasiswa] = useState<string>("");
   const [emailMahasiswa, setEmailMahasiswa] = useState<string>("");
   const [nim, setNim] = useState<string>("");
@@ -77,26 +39,18 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   const [selectedJurusan, setSelectedJurusan] = useState<string>("");
   const [selectedPeminatan, setSelectedPeminatan] = useState<string>("");
   const [selectedDosenPA, setSelectedDosenPA] = useState<string>("");
-  const [dataJurusan, setDataJurusan] = useState<Jurusan[]>([]);
-  const [dataPeminatan, setDataPeminatan] = useState<Peminatan[]>([]);
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
+  const [dataJurusan, setDataJurusan] = useState([]);
+  const [dataPeminatan, setDataPeminatan] = useState([]);
+  const [dataDosenPA, setDataDosenPA] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [documentation, setDocumentation] = useState(null);
-  const [optionsJurusan, setOptionsJurusan] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [optionsPeminatan, setOptionsPeminatan] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [optionsDosenPA, setOptionsDosenPA] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState<
-    PengajuanBimbingan[]
-  >([]);
+  const [optionsJurusan, setOptionsJurusan] = useState([]);
+  const [optionsPeminatan, setOptionsPeminatan] = useState([]);
+  const [optionsDosenPA, setOptionsDosenPA] = useState([]);
+  const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState([]);
   const [dataBimbingan, setDataBimbingan] = useState<any>([]);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [dataMahasiswa, setDataMahasiswa] = useState<Record<string, any>>({});
+  const [imagePreview, setImagePreview] = useState(null);
+  const [dataMahasiswa, setDataMahasiswa] = useState<any>();
   const [userProfile, setUserProfile] = useState({
     nama: "",
     email: "",
@@ -117,7 +71,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
-  const sigCanvas = useRef({});
+  const sigCanvas: any = useRef();
 
   const openModal = (id) => {
     setIsOpen(true);
@@ -149,7 +103,7 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
   };
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files || []);
+    const files: any = Array.from(e.target.files || []);
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
     const maxSize = 10 * 1024 * 1024;
 
@@ -570,7 +524,8 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
         jurusan: selectedJurusan,
         peminatan: selectedPeminatan,
         dosen_pa_id:
-          dataDosenPA.find((data) => data.nama === selectedDosenPA)?.id || null,
+          dataDosenPA.find((data: any) => data.nama === selectedDosenPA)?.id ||
+          null,
         profile_image: !imagePreview ? null : imagePreview,
       };
 
@@ -1011,7 +966,6 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                                               </label>
                                               <SignatureCanvas
                                                 ref={sigCanvas}
-                                                penWidth={7}
                                                 penColor="black"
                                                 canvasProps={{
                                                   className:
@@ -1180,7 +1134,6 @@ const DashboardMahasiswa: React.FC<DashboardMahasiswaProps> = ({
                                               <SignatureCanvas
                                                 ref={sigCanvas}
                                                 penColor="black"
-                                                penWidth={7}
                                                 canvasProps={{
                                                   className:
                                                     "border border-gray-300 rounded w-full h-[200px] hover:cursor-pointer",

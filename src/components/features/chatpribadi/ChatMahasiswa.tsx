@@ -17,34 +17,13 @@ import { env } from "process";
 import TextInputPesanSiaran from "@/components/ui/chatbot/TextInputPesanSiaran";
 import PesanSiaranHeader from "@/components/ui/chatbot/PesanSiaranHeader";
 
-interface User {
-  id: number;
-  [key: string]: any; // Allow additional properties
-}
-
-interface DosenPA {
-  id: number;
-  dosen: {
-    nama_lengkap: string;
-  };
-  dosen_id: number;
-}
-
-interface ChatData {
-  id: number;
-  waktu_kirim: string;
-  chat_pribadi_id: string;
-  role: string; // "Mahasiswa" or "Dosen PA"
-  [key: string]: any; // Allow additional properties
-}
-
 export default function ChatMahasiswa() {
-  const [dataUser, setDataUser] = useState<User>({} as User);
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<any[]>([]); // Adjust type as needed
-  const [userDosenPA, setUserDosenPA] = useState<DosenPA | null>(null);
-  const [dataChatPribadi, setDataChatPribadi] = useState<any[]>([]);
-  const [dataPesanSiaran, setDataPesanSiaran] = useState<any[]>([]);
+  const [dataUser, setDataUser] = useState<any>({});
+  const [dataDosenPA, setDataDosenPA] = useState([]);
+  const [dataKaprodi, setDataKaprodi] = useState([]); // Adjust type as needed
+  const [userDosenPA, setUserDosenPA] = useState(null);
+  const [dataChatPribadi, setDataChatPribadi] = useState([]);
+  const [dataPesanSiaran, setDataPesanSiaran] = useState([]);
   const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState<any>(
     {}
   );
@@ -57,19 +36,15 @@ export default function ChatMahasiswa() {
     useState<boolean>(false);
   const [isDetailPesanSiaranClicked, setIsDetailPesanSiaranClicked] =
     useState<boolean>(false);
-  const [sortedChatData, setSortedChatData] = useState<ChatData[]>([]);
-  const [sortedPesanSiaranData, setSortedPesanSiaranData] = useState<
-    ChatData[]
-  >([]);
-  const [chatData, setChatData] = useState<ChatData[]>([]);
-  const [pesanChatSiaranData, setPesanChatSiaranData] = useState<ChatData[]>(
-    []
-  );
-  const [chatMahasiswaData, setChatMahasiswaData] = useState<ChatData[]>([]);
-  const [chatDosenPAData, setChatDosenPAData] = useState<ChatData[]>([]);
+  const [sortedChatData, setSortedChatData] = useState([]);
+  const [sortedPesanSiaranData, setSortedPesanSiaranData] = useState([]);
+  const [chatData, setChatData] = useState([]);
+  const [pesanChatSiaranData, setPesanChatSiaranData] = useState([]);
+  const [chatMahasiswaData, setChatMahasiswaData] = useState([]);
+  const [chatDosenPAData, setChatDosenPAData] = useState([]);
   const [dosenPAID, setDosenPAID] = useState();
-  const [allPesanSiaran, setAllPesanSiaran] = useState();
-  const [allPesanChatSiaran, setAllPesanChatSiaran] = useState();
+  const [allPesanSiaran, setAllPesanSiaran] = useState([]);
+  const [allPesanChatSiaran, setAllPesanChatSiaran] = useState([]);
   const [isDosenBroadcast, setIsDosenBroadcast] = useState(false);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
@@ -77,9 +52,7 @@ export default function ChatMahasiswa() {
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const getDataDosenIDByNIP = async () => {
-    const dataDosenPA = await axios.get<DosenPA[]>(
-      `${API_BASE_URL}/api/datadosenpa`
-    );
+    const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
     const dosenPA = dataDosenPA.data.find((data) => data.nip === dataUser.nip);
     setDosenPAID(dosenPA.id);
@@ -176,9 +149,7 @@ export default function ChatMahasiswa() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -194,9 +165,7 @@ export default function ChatMahasiswa() {
 
   const getDataKaprodi = async () => {
     try {
-      const response = await axios.get<any[]>(
-        `${API_BASE_URL}/api/datakaprodi`
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");
@@ -212,9 +181,7 @@ export default function ChatMahasiswa() {
 
   const getDataDosenPaByDosenID = async () => {
     try {
-      const dataDosenPA = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
+      const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       const dosenPa = dataDosenPA.data.find((data) => data.id === dosenPAID);
 
@@ -244,7 +211,7 @@ export default function ChatMahasiswa() {
 
   const getDataChatPribadiByDosenPAID = async () => {
     try {
-      const dataChatPribadi = await axios.get<any[]>(
+      const dataChatPribadi = await axios.get(
         `${API_BASE_URL}/api/chatpribadi`
       );
 
@@ -264,7 +231,7 @@ export default function ChatMahasiswa() {
   };
   const getDataPesanSiaran = async () => {
     try {
-      const dataPesanSiaran = await axios.get<any[]>(
+      const dataPesanSiaran = await axios.get(
         `${API_BASE_URL}/api/pesansiaran`
       );
 
@@ -278,7 +245,7 @@ export default function ChatMahasiswa() {
   };
   const getDataPesanChatSiaran = async () => {
     try {
-      const dataPesanChatSiaran = await axios.get<any[]>(
+      const dataPesanChatSiaran = await axios.get(
         `${API_BASE_URL}/api/pesanchatsiaran`
       );
 
@@ -292,7 +259,7 @@ export default function ChatMahasiswa() {
   };
   const getDataPesanSiaranByDosenPAID = async () => {
     try {
-      const dataPesanSiaran = await axios.get<any[]>(
+      const dataPesanSiaran = await axios.get(
         `${API_BASE_URL}/api/pesansiaran`
       );
 
@@ -313,7 +280,7 @@ export default function ChatMahasiswa() {
 
   const getDataChatDosenPABySelectedChatPribadiId = async () => {
     try {
-      const dataChatDosenPA = await axios.get<ChatData[]>(
+      const dataChatDosenPA = await axios.get(
         `${API_BASE_URL}/api/chatdosenpa`
       );
 
@@ -333,7 +300,7 @@ export default function ChatMahasiswa() {
 
   const getDataPesanChatSiaranByDosenPAID = async () => {
     try {
-      const dataPesanChatSiaran = await axios.get<ChatData[]>(
+      const dataPesanChatSiaran = await axios.get(
         `${API_BASE_URL}/api/pesanchatsiaran`
       );
 
@@ -355,7 +322,7 @@ export default function ChatMahasiswa() {
 
   const getDataChatMahasiswaBySelectedChatPribadiId = async () => {
     try {
-      const dataChatMahasiswa = await axios.get<ChatData[]>(
+      const dataChatMahasiswa = await axios.get(
         `${API_BASE_URL}/api/chatmahasiswa`
       );
 
@@ -379,7 +346,7 @@ export default function ChatMahasiswa() {
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<User>(token);
+        const decodedToken = jwtDecode(token);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);

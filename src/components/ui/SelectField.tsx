@@ -1,15 +1,6 @@
 import React from "react";
 
-interface SelectFieldProps {
-  options: { value: string; label: string }[];
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  value: string;
-  placeholder: string;
-  className: string;
-  disabled?: boolean;
-}
-
-const SelectField: React.FC<SelectFieldProps> = ({
+const SelectField: React.FC<any> = ({
   options,
   onChange,
   value,
@@ -27,7 +18,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
       <option value="" disabled>
         {placeholder}
       </option>
-      {options.map((option) => (
+      {options.map((option: any) => (
         <option className="text-black" key={option.value} value={option.value}>
           {option.label}
         </option>

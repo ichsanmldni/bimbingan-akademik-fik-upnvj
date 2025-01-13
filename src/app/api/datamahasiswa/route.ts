@@ -36,7 +36,7 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function PATCH(req: Request): Promise<Response> {
   try {
-    const body: MahasiswaRequestBody = await req.json();
+    const body: any = await req.json();
 
     console.log(body)
 

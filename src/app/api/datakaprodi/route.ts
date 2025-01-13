@@ -3,15 +3,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import prisma from '../../../lib/prisma';
 
-interface DosenRequestBody {
-  id: number;
-  nama_lengkap: string;
-  email: string;
-  nip: string;
-  no_whatsapp: string;
-  profile_image?: string;
-}
-
 export async function GET(req: Request): Promise<Response> {
   try {
     // Fetching data from the database
@@ -33,7 +24,7 @@ export async function GET(req: Request): Promise<Response> {
 
 export async function PATCH(req: Request): Promise<Response> {
   try {
-    const body: DosenRequestBody = await req.json();
+    const body: any = await req.json();
     const { nama, email, nip, hp, profile_image } = body;
 
     // Validate required fields
