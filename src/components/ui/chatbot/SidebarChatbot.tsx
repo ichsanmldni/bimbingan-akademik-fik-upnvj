@@ -78,7 +78,7 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
       <div className="flex flex-col w-full">
         <button
           onClick={() => setActiveSesiChatbotMahasiswa(0)}
-          className={`mb-1 text-[14px] text-left py-2 px-3 shadow-sm hover:bg-gray-50 rounded-lg ${
+          className={`mb-1 text-[14px] text-left outline-none py-2 px-3 shadow-sm hover:bg-gray-50 rounded-lg ${
             activeSesiChatbotMahasiswa === "New Session"
               ? "bg-gray-50 shadow-md"
               : ""
@@ -104,7 +104,7 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
                 <button
                   onClick={() => setActiveSesiChatbotMahasiswa(item.id)}
                   key={index}
-                  className={`mb-1 text-[14px] w-full text-left py-2 px-3 rounded-lg hover:shadow-sm ${
+                  className={`mb-1 outline-none text-[14px] w-full text-left py-2 px-3 rounded-lg hover:shadow-sm ${
                     activeSesiChatbotMahasiswa === item.id
                       ? "shadow-sm bg-gray-50"
                       : "hover:bg-gray-50"

@@ -93,6 +93,8 @@ export default function Home() {
   });
   const [activeSesiChatbotMahasiswa, setActiveSesiChatbotMahasiswa] =
     useState<number>(0);
+  const [mahasiswaID, setMahasiswaID] = useState();
+  const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
 
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
@@ -196,6 +198,19 @@ export default function Home() {
           data.sesi_chatbot_mahasiswa_id === activeSesiChatbotMahasiswa
       );
       setDataRiwayatPesanChatbot(dataRiwayatPesanChatbotFiltered);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
+
+      console.log(response.data);
+
+      setDataAllMahasiswa(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -333,7 +348,7 @@ export default function Home() {
       } else {
         const newChat = {
           ...newData,
-          mahasiswa_id: dataUser?.id,
+          mahasiswa_id: mahasiswaID,
         };
 
         const result = await addChatbotMahasiswa(newChat);
@@ -408,6 +423,21 @@ export default function Home() {
   }, [dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
+    if (
+      dataUser &&
+      dataUser.nim &&
+      dataAllMahasiswa &&
+      dataAllMahasiswa.length > 0
+    ) {
+      const mahasiswa = dataAllMahasiswa.find(
+        (data) => data.nim === dataUser.nim
+      );
+      console.log(mahasiswa);
+      setMahasiswaID(mahasiswa?.id);
+    }
+  }, [dataAllMahasiswa, dataUser]);
+
+  useEffect(() => {
     const dataChatbotMahasiswaWithRole = dataChatbotMahasiswa.map((item) => ({
       ...item,
       role: "Mahasiswa",
@@ -429,6 +459,7 @@ export default function Home() {
   useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
+    getDataMahasiswa();
     getDataSesiChatbotMahasiswa();
   }, []);
 

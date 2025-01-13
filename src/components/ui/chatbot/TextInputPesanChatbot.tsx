@@ -13,10 +13,20 @@ export default function TextInputPesanChatbot({
         type="text"
         id="textInput"
         placeholder="Ketik pesan atau pertanyaan Anda di sini..."
-        className="flex-grow text-black placeholder:text-textField-2 p-4 rounded stroke-textField-1 border border-gray-300"
+        className="flex-grow outline-none text-black placeholder:text-textField-2 p-4 rounded stroke-textField-1 border border-gray-300"
         value={text}
         onChange={(e) => {
           setText(e.target.value);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault(); // Mencegah perilaku default (misalnya, submit form)
+            handleAddChatChatbotMahasiswa({
+              pesan: text,
+              waktu_kirim: new Date().toISOString(),
+            });
+            setText(""); // Reset input setelah mengirim pesan
+          }
         }}
       />
       <button
