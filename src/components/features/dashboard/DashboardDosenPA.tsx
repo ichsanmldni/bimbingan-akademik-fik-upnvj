@@ -1714,7 +1714,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
-              ) : dataDosen?.profile_image ? (
+              ) : dataDosen && dataDosen?.profile_image ? (
                 <img
                   src={dataDosen.profile_image}
                   alt="Profile"

@@ -645,7 +645,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
-              ) : dataMahasiswa.profile_image ? (
+              ) : dataMahasiswa && dataMahasiswa.profile_image ? (
                 <img
                   src={dataMahasiswa.profile_image}
                   alt="Profile"

@@ -1430,7 +1430,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
-              ) : dataKaprodi.profile_image ? (
+              ) : dataKaprodi && dataKaprodi.profile_image ? (
                 <img
                   src={dataKaprodi.profile_image}
                   alt="Profile"
