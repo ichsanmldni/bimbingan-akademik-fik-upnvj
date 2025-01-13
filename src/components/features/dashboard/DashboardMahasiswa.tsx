@@ -84,8 +84,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         (data) => data.id === selectedBimbinganId
       );
 
-      console.log(selectedDataBimbingan[0]);
-
       setSelectedTopikBimbingan(
         selectedDataBimbingan[0].pengajuan_bimbingan.topik_bimbingan
       );

@@ -5,7 +5,6 @@ import broadcastIcon from "../../../assets/images/broadcast-icon.png";
 import Image from "next/image";
 
 export default function PesanSiaranHeader(data) {
-  console.log(data);
   return (
     <div className="flex gap-4 p-4 items-center">
       <div className="rounded-full size-12 bg-orange-200">

@@ -1136,7 +1136,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         (data) => data.permasalahan !== null
       );
 
-      console.log(data);
       const bodyBimbinganLembarKonsultasi =
         bimbinganDataLembarKonsultasi.length === 0
           ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
@@ -1350,7 +1349,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       // Menambahkan gambar tanda tangan (di bawah jabatan)
       const yImagePosition = jabatanYPosition + 4; // Jarak antar elemen
       const xImagePosition = 160; // Posisi X sesuai kebutuhan
-      console.log(data);
+
       doc.addImage(
         data.tanda_tangan_dosen_pa,
         "PNG",

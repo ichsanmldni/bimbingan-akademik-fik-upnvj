@@ -149,34 +149,6 @@ const NotificationModal: React.FC<any> = ({
 
   return (
     <div className={className}>
-      <style>
-        {`  
-          /* Custom scrollbar styles */  
-          .scrollbar {  
-            scrollbar-width: thin; /* For Firefox */  
-            scrollbar-color: #d1d5db #f9fafb; /* For Firefox: thumb color and track color */  
-          }  
-  
-          /* For WebKit browsers (Chrome, Safari) */  
-          .scrollbar::-webkit-scrollbar {  
-            width: 8px; /* Width of the scrollbar */  
-          }  
-  
-          .scrollbar::-webkit-scrollbar-track {  
-            background: #f9fafb; /* Track color */  
-            border-radius: 10px; /* Rounded corners for the track */  
-          }  
-  
-          .scrollbar::-webkit-scrollbar-thumb {  
-            background-color: #d1d5db; /* Thumb color */  
-            border-radius: 10px; /* Rounded corners for the thumb */  
-          }  
-  
-          .scrollbar::-webkit-scrollbar-thumb:hover {  
-            background-color: #a1a1a1; /* Thumb color on hover */  
-          }  
-        `}
-      </style>
       <div
         ref={modalRef}
         className="bg-white bg-opacity-30 backdrop-blur-md border border-gray-200 rounded-lg shadow-2xl w-80"
@@ -192,7 +164,7 @@ const NotificationModal: React.FC<any> = ({
             </button>
           )}
         </div>
-        <div className="flex flex-col max-h-[300px] mb-6 overflow-y-auto px-4 scrollbar">
+        <div className="flex flex-col max-h-[300px] mb-6 overflow-y-auto px-4">
           {dataNotifikasi.length > 0 ? (
             dataNotifikasi
               .slice()

@@ -8,7 +8,6 @@ const NotificationButton: React.FC<any> = ({
   className,
 }) => {
   const [notificationCount, setNotificationCount] = useState(0);
-  console.log(dataNotification);
 
   useEffect(() => {
     const count = dataNotification?.filter(

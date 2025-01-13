@@ -376,7 +376,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         `${API_BASE_URL}/api/datadosenpa`,
         updatedData
       );
-      console.log("Dosen PA updated successfully:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error updating order:", error);
@@ -437,7 +436,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const result = await patchDosenPA(dosenPAValue);
       getDataDosenById();
       setImagePreview(null);
-      console.log("Response from backend:", result);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
@@ -447,8 +445,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     setDataClickedLaporanBimbingan(data);
     setIsDetailLaporanDosenClicked((prev) => !prev);
   };
-
-  console.log(startTime, endTime);
 
   const handleAddJadwalDosen = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -569,7 +565,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       };
 
       const result = await patchPengajuanBimbingan(pengajuanBimbinganValue);
-      console.log(result);
+
       toast.success(
         <div className="flex items-center">
           <span>
@@ -1347,7 +1343,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         (data) => data.permasalahan !== null
       );
 
-      console.log(data);
       const bodyBimbinganLembarKonsultasi =
         bimbinganDataLembarKonsultasi.length === 0
           ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
@@ -1561,7 +1556,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       // Menambahkan gambar tanda tangan (di bawah jabatan)
       const yImagePosition = jabatanYPosition + 4; // Jarak antar elemen
       const xImagePosition = 160; // Posisi X sesuai kebutuhan
-      console.log(data);
+
       doc.addImage(
         data.tanda_tangan_dosen_pa,
         "PNG",

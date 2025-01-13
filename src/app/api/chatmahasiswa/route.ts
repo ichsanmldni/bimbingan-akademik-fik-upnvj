@@ -31,7 +31,6 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
   try {
     const body: ChatMahasiswaRequestBody = await req.json();
-    console.log(body)
     const { chat_pribadi_id, mahasiswa_id, dosen_pa_id, pesan, waktu_kirim } = body;
 
     // If chat_pribadi_id is not provided, create a new chat record
