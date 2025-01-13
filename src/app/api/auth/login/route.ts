@@ -92,7 +92,7 @@ export async function POST(req: Request): Promise<Response> {
         if (response.data.data.nim) {
           user = response.data.data;
           const mahasiswa = await prisma.mahasiswa.findUnique({
-            where: { nim: user?.nim },
+            where: { nim: user.nim },
           });
 
           if (!mahasiswa) {
