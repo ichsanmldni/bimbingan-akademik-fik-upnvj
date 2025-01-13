@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { SendHorizontal } from "lucide-react";
 
-export default function TextInputPesanMahasiswa({
-  handleAddChatMahasiswa = (newMessage: any) => {},
+export default function TextInputPesanSiaran({
+  handleAddPesanChatSiaran = (newMessage: any) => {},
+  userDosenPA,
 }) {
   const [text, setText] = useState("");
-
   return (
     <div className="flex gap-4 w-full">
       <input
         autoFocus
         type="text"
         id="textInput"
-        placeholder="Ketik pesan atau pertanyaan Anda di sini..."
-        className="flex-grow text-black outline-none placeholder:text-textField-2 p-4 rounded stroke-textField-1 border border-gray-300"
+        placeholder="Ketik pesan siaran Anda di sini..."
+        className="flex-grow outline-none text-black placeholder:text-textField-2 p-4 rounded stroke-textField-1 border border-gray-300"
         value={text}
         onChange={(e) => {
           setText(e.target.value);
@@ -21,7 +21,8 @@ export default function TextInputPesanMahasiswa({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault(); // Mencegah perilaku default (misalnya, submit form)
-            handleAddChatMahasiswa({
+            handleAddPesanChatSiaran({
+              dosen_pa_id: userDosenPA.id,
               pesan: text,
               waktu_kirim: new Date().toISOString(),
             });
@@ -31,9 +32,10 @@ export default function TextInputPesanMahasiswa({
       />
       <button
         onClick={() => {
-          handleAddChatMahasiswa({
+          handleAddPesanChatSiaran({
+            dosen_pa_id: userDosenPA.id,
             pesan: text,
-            waktu_kirim: new Date().toISOString(),
+            waktu_kirim: new Date(),
           });
           setText("");
         }}

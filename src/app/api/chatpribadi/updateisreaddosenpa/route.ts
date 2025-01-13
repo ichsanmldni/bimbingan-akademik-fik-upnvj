@@ -29,7 +29,7 @@ export async function PATCH(req: Request): Promise<Response> {
 
     const chatPribadi = await prisma.chatpribadi.update({
       where: { id },
-      data: { is_pesan_terakhir_read: true },
+      data: { is_dosenpa_pesan_terakhir_read: true },
     });
 
     return new Response(JSON.stringify(chatPribadi), {

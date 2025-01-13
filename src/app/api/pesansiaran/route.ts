@@ -1,14 +1,17 @@
 // /app/api/datadosen/route.ts
 import prisma from '../../../lib/prisma';
 
-
 export async function GET(req: Request): Promise<Response> {
     try {
         // Fetching data from the database
-        const notifikasiDosenPA = await prisma.notifikasidosenpa.findMany();
+        const pesanSiaran = await prisma.pesansiaran.findMany({
+            include: {
+                dosen_pa: true,
+            },
+        });
 
         // Returning data as JSON
-        return new Response(JSON.stringify(notifikasiDosenPA), {
+        return new Response(JSON.stringify(pesanSiaran), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });
@@ -21,19 +24,20 @@ export async function GET(req: Request): Promise<Response> {
     }
 }
 
-export async function PATCH(req: any): Promise<any> {
+export async function PATCH(req: Request): Promise<Response> {
     try {
         const body: any = await req.json();
-        const { id, read } = body;
+        const { id, pesan_terakhir, waktu_pesan_terakhir } = body;
 
-        if (!id || read === true) {
+        // Validate required fields
+        if (!id || !pesan_terakhir || !waktu_pesan_terakhir) {
             return new Response(
                 JSON.stringify({ message: 'Invalid data' }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
         }
 
-        const existingRecord = await prisma.notifikasidosenpa.findUnique({
+        const existingRecord = await prisma.pesansiaran.findUnique({
             where: { id },
         });
 
@@ -44,18 +48,12 @@ export async function PATCH(req: any): Promise<any> {
             );
         }
 
-        const updatedNotifikasiDosenPA = await prisma.notifikasidosenpa.update({
+        const pesanSiaran = await prisma.pesansiaran.update({
             where: { id },
-            data: { read: true },
+            data: { pesan_terakhir, waktu_pesan_terakhir },
         });
 
-        const responsePayload = {
-            status: "success",
-            message: "Notifikasi telah terbaca!",
-            data: updatedNotifikasiDosenPA,
-        };
-
-        return new Response(JSON.stringify(responsePayload), {
+        return new Response(JSON.stringify(pesanSiaran), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });

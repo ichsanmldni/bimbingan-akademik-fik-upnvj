@@ -7,11 +7,17 @@ import backIcon from "../../../assets/images/back-icon-black.png";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
+import broadcastIcon from "../../../assets/images/broadcast-icon.png";
+import chatIcon from "../../../assets/images/userpa-icon.png";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
 import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
 import { env } from "process";
+import { MessageSquareText } from "lucide-react";
+import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
+import { select } from "slate";
+import ProfileImage from "@/components/ui/ProfileImage";
 
 interface User {
   id: number;
@@ -42,10 +48,30 @@ export default function ChatDosenPA() {
   const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState<any>(
     {}
   );
+  const [selectedDataPesanSiaran, setSelectedDataPesanSiaran] = useState<any>(
+    []
+  );
+  const [dataPesanSiaran, setDataPesanSiaran] = useState();
   const [chatData, setChatData] = useState<ChatData[]>([]);
+  const [dataPesanChatSiaran, setDataPesanChatSiaran] = useState<ChatData[]>(
+    []
+  );
   const [chatMahasiswaData, setChatMahasiswaData] = useState<ChatData[]>([]);
   const [chatDosenPAData, setChatDosenPAData] = useState<ChatData[]>([]);
   const [sortedChatData, setSortedChatData] = useState<ChatData[]>([]);
+  const [sortedPesanChatSiaran, setSortedPesanChatSiaran] = useState<
+    ChatData[]
+  >([]);
+  const [mahasiswaID, setMahasiswaID] = useState();
+  const [isDetailChatPribadiClicked, setIsDetailChatPribadiClicked] =
+    useState(false);
+  const [isDetailPesanSiaranClicked, setIsDetailPesanSiaranClicked] =
+    useState(false);
+
+  const [statusPembacaanPesanSiaran, setStatusPembacaanPesanSiaran] =
+    useState();
+
+  const [allPesanChatMahasiswa, setAllPesanChatMahasiswa] = useState([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -61,11 +87,34 @@ export default function ChatDosenPA() {
     }
   };
 
+  const getStatusPembacaanPesanSiaran = async () => {
+    const dataStatusPembacaan = await axios.get<DosenPA[]>(
+      `${API_BASE_URL}/api/statuspembacaanpesansiaran`
+    );
+
+    const dataStatus = dataStatusPembacaan.data.find(
+      (data) => data.mahasiswa.nim === dataUser.nim
+    );
+
+    setStatusPembacaanPesanSiaran(dataStatus);
+  };
+
+  const getDataMahasiswaIDByNIM = async () => {
+    const dataMahasiswa = await axios.get<DosenPA[]>(
+      `${API_BASE_URL}/api/datamahasiswa`
+    );
+
+    const mahasiswa = dataMahasiswa.data.find(
+      (data) => data.nim === dataUser.nim
+    );
+    setMahasiswaID(mahasiswa.id);
+  };
+
   const handleAddChatMahasiswa = async (newData: any) => {
     const newChat = {
       ...newData,
       chat_pribadi_id: selectedDataChatPribadi.id || undefined,
-      mahasiswa_id: dataUser.id,
+      mahasiswa_id: mahasiswaID,
       dosen_pa_id: userDosenPA?.id,
     };
 
@@ -84,12 +133,13 @@ export default function ChatDosenPA() {
       const dataDosenPa = await axios.get<DosenPA[]>(
         `${API_BASE_URL}/api/datadosenpa`
       );
+
       const dataMahasiswa = await axios.get<any[]>(
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
       const dataUserMahasiswa = dataMahasiswa.data.find(
-        (data) => data.id === dataUser.id
+        (data) => data.id === mahasiswaID
       );
       const dosenPa = dataDosenPa.data.find(
         (data) => data.id === dataUserMahasiswa.dosen_pa_id
@@ -106,28 +156,6 @@ export default function ChatDosenPA() {
     }
   };
 
-  const getDataDosenPAByDosenId = async () => {
-    try {
-      const dataDosenPA = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
-
-      const dosen = dataDosenPA.data.find(
-        (data) => data.dosen_id == dataUser.id
-      );
-
-      if (!dosen) {
-        console.error("Dosen tidak ditemukan");
-        return;
-      }
-
-      setUserDosenPA(dosen);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
   const getDataChatPribadiByMahasiswaId = async () => {
     try {
       const dataChatPribadi = await axios.get<any[]>(
@@ -135,16 +163,42 @@ export default function ChatDosenPA() {
       );
 
       const dataChat = dataChatPribadi.data.find(
-        (data) => data.mahasiswa_id === dataUser.id
+        (data) => data.mahasiswa_id === mahasiswaID
       );
 
       if (!dataChat) {
         setIsMahasiswaChatting(false);
         setSelectedDataChatPribadi({});
-        return; // Hentikan eksekusi jika dosen PA tidak ditemukan
+        return;
       }
       setIsMahasiswaChatting(true);
       setSelectedDataChatPribadi(dataChat);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataPesanSiaranByMahasiswaId = async () => {
+    try {
+      const dataPesanSiaran = await axios.get<any[]>(
+        `${API_BASE_URL}/api/pesansiaran`
+      );
+      const dataMahasiswa = await axios.get<any[]>(
+        `${API_BASE_URL}/api/datamahasiswa`
+      );
+
+      const mahasiswa = dataMahasiswa.data.find(
+        (data) => data.id === mahasiswaID
+      );
+
+      const dataSiaran = dataPesanSiaran.data.filter(
+        (data) => data.dosen_pa_id === mahasiswa.dosen_pa_id
+      );
+
+      if (!dataSiaran) {
+        return;
+      }
+      setDataPesanSiaran(dataSiaran);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -172,12 +226,25 @@ export default function ChatDosenPA() {
     }
   };
 
+  const getDataChatMahasiswa = async () => {
+    try {
+      const dataChatMahasiswa = await axios.get<ChatData[]>(
+        `${API_BASE_URL}/api/chatmahasiswa`
+      );
+      setAllPesanChatMahasiswa(dataChatMahasiswa);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
   const getDataChatMahasiswaByChatPribadiId = async () => {
     try {
       const dataChatMahasiswa = await axios.get<ChatData[]>(
         `${API_BASE_URL}/api/chatmahasiswa`
       );
 
+      console.log(selectedDataChatPribadi);
       const dataChat = dataChatMahasiswa.data.filter(
         (data) => data.chat_pribadi_id === selectedDataChatPribadi.id
       );
@@ -188,6 +255,26 @@ export default function ChatDosenPA() {
       }
       setChatMahasiswaData(dataChat);
       setIsMahasiswaChatting(true);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataPesanChatSiaranByPesanSiaranId = async () => {
+    try {
+      const dataPesanChatSiaran = await axios.get<ChatData[]>(
+        `${API_BASE_URL}/api/pesanchatsiaran`
+      );
+
+      const dataChatSiaran = dataPesanChatSiaran.data.filter(
+        (data) => data.pesan_siaran_id === dataPesanSiaran[0]?.id
+      );
+
+      if (!dataChatSiaran) {
+        return;
+      }
+      setDataPesanChatSiaran(dataChatSiaran);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -206,20 +293,34 @@ export default function ChatDosenPA() {
         console.error("Invalid token:", error);
       }
     }
+    getDataChatMahasiswa();
   }, []);
 
   useEffect(() => {
-    if (dataUser && dataUser.id) {
-      getDataDosenPAByDosenId();
-      getDataDosenPaByMahasiswaID();
-      getDataChatPribadiByMahasiswaId();
+    if (dataUser && dataUser.nim) {
+      getDataMahasiswaIDByNIM();
+      getStatusPembacaanPesanSiaran();
     }
   }, [dataUser]);
+
+  useEffect(() => {
+    if (mahasiswaID) {
+      getDataDosenPaByMahasiswaID();
+      getDataChatPribadiByMahasiswaId();
+      getDataPesanSiaranByMahasiswaId();
+    }
+  }, [mahasiswaID]);
 
   useEffect(() => {
     getDataChatMahasiswaByChatPribadiId();
     getDataChatDosenPAByChatPribadiId();
   }, [isMahasiswaChatting, selectedDataChatPribadi]);
+
+  useEffect(() => {
+    if (dataPesanSiaran) {
+      getDataPesanChatSiaranByPesanSiaranId();
+    }
+  }, [dataPesanSiaran]);
 
   useEffect(() => {
     const mahasiswaDataWithRole = chatMahasiswaData.map((item) => ({
@@ -238,9 +339,6 @@ export default function ChatDosenPA() {
   }, [chatMahasiswaData, chatDosenPAData]);
 
   useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
     const sortedChatData = [...chatData].sort(
       (a, b) =>
         new Date(a.waktu_kirim).getTime() - new Date(b.waktu_kirim).getTime()
@@ -248,6 +346,15 @@ export default function ChatDosenPA() {
 
     setSortedChatData(sortedChatData);
   }, [chatData]);
+
+  useEffect(() => {
+    const sortedPesanChatSiaran = [...dataPesanChatSiaran].sort(
+      (a, b) =>
+        new Date(a.waktu_kirim).getTime() - new Date(b.waktu_kirim).getTime()
+    );
+
+    setSortedPesanChatSiaran(sortedPesanChatSiaran);
+  }, [dataPesanChatSiaran]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("id-ID", {
@@ -261,55 +368,370 @@ export default function ChatDosenPA() {
 
   let previousDate: string | null = null;
 
+  const handleClickDetailChatPribadi = (data: any) => {
+    console.log(data);
+    setSelectedDataChatPribadi(data);
+    setIsDetailChatPribadiClicked(true);
+    if (!data.is_mahasiswa_pesan_terakhir_read) {
+      handleEditChatPribadi(data);
+    }
+  };
+
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [sortedChatData]);
+  }, [sortedChatData, handleClickDetailChatPribadi]);
+
+  const handleClickDetailPesanSiaran = (data: any, statusPembacaan) => {
+    setSelectedDataPesanSiaran(data);
+    setIsDetailPesanSiaranClicked(true);
+    if (statusPembacaan && !statusPembacaan?.is_read) {
+      handleEditStatusPembacaan(statusPembacaan);
+    }
+  };
+
+  const handleEditStatusPembacaan = async (data: any) => {
+    const updatedData = {
+      mahasiswa_id: data?.mahasiswa_id,
+    };
+
+    try {
+      const result = await patchStatusPembacaanPesanSiaran(updatedData);
+    } catch (error) {
+      console.error("Registration error:", (error as Error).message);
+    }
+  };
+
+  const patchStatusPembacaanPesanSiaran = async (updatedData: any) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/statuspembacaanpesansiaran`,
+        updatedData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [sortedPesanChatSiaran, handleClickDetailPesanSiaran]);
+
+  const handleEditChatPribadi = async (data: any) => {
+    const updatedData = {
+      id: data.id,
+    };
+
+    try {
+      const result = await patchChatPribadi(updatedData);
+    } catch (error) {
+      console.error("Registration error:", (error as Error).message);
+    }
+  };
+
+  const patchChatPribadi = async (updatedData: any) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/chatpribadi/updateisreadmahasiswa`,
+        updatedData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    getStatusPembacaanPesanSiaran();
+  }, [isDetailPesanSiaranClicked]);
+
+  const date = new Date(selectedDataChatPribadi.waktu_pesan_terakhir);
+  const formattedDate = date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  // Format waktu dalam UTC+7
+  const formattedTime = date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true, // Format AM/PM
+    timeZone: "Asia/Jakarta", // Menggunakan zona waktu UTC+7
+  });
+
+  // Gabungkan tanggal dan waktu
+  const formattedDateTime = `${formattedDate} ${formattedTime}`;
 
   return (
-    <div className="h-full">
-      <NavbarChatbot isPathChatbot={false} />
+    <div>
       <div className="flex">
-        <div className="flex flex-col h-screen w-full pt-[72px]">
-          <div className="pl-4 flex border items-center">
-            <Link href="/chatbot">
-              <Image src={backIcon} className="size-8" alt="back-icon" />
-            </Link>
-            <HeaderChatbot namaDosenPA={userDosenPA?.dosen?.nama_lengkap} />
-          </div>
-          <div className="h-full overflow-y-scroll px-[40px] flex flex-col w-full justify-between gap-8">
-            <div id="message-container" className="flex-1 w-full flex flex-col">
-              {sortedChatData.map((data, index) => {
-                const currentDate = formatDate(data.waktu_kirim);
-                const showDateHeader = currentDate !== previousDate;
-                previousDate = currentDate;
-
+        {!isDetailChatPribadiClicked && !isDetailPesanSiaranClicked ? (
+          <div className="flex flex-col w-full h-[100vh] justify-start">
+            <div className="flex gap-4 px-8 py-4 border justify-start items-center">
+              <Link href="/chatbot">
+                <Image alt="back-icon" src={backIcon} />
+              </Link>
+              <div className="p-3 rounded-full bg-orange-200">
+                <MessageSquareText />
+              </div>
+              <p className="text-[20px] font-semibold">Pesan</p>
+            </div>
+            <div className="flex flex-col mb-4 overflow-y-auto h-[200%]">
+              {dataPesanSiaran?.map((data, index) => {
                 return (
-                  <React.Fragment key={index}>
-                    {showDateHeader && (
-                      <div className="text-center my-4 text-gray-500 text-sm">
-                        {currentDate}
+                  <div key={index} className="flex flex-col mt-6">
+                    <p className="mx-auto mb-6 text-sm text-gray-500 font-medium">
+                      Pesan Siaran
+                    </p>
+                    <div
+                      onClick={() =>
+                        handleClickDetailPesanSiaran(
+                          data,
+                          statusPembacaanPesanSiaran
+                        )
+                      }
+                      className={`flex px-[32px] rounded-xl mx-8 py-4 border justify-between cursor-pointer`}
+                    >
+                      <div className="flex gap-4">
+                        <div className="rounded-full flex size-12 justify-center items-center bg-orange-200">
+                          <Image
+                            src={broadcastIcon}
+                            className="size-10"
+                            alt=""
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <p className={`text-[18px] font-medium`}>
+                            Pesan Siaran Mahasiswa Bimbingan{" "}
+                            <span>{data.dosen_pa.nama.split(",")[0]}</span>
+                          </p>
+                          <div className="max-h-[40px] max-w-[900px] overflow-hidden">
+                            <p className="whitespace-nowrap overflow-ellipsis overflow-hidden">
+                              <span>{data.dosen_pa.nama.split(",")[0]}: </span>
+                              {data.pesan_terakhir}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    {data.role === "Dosen PA" ? (
-                      <BubbleChatStart key={index + "message"} data={data} />
-                    ) : (
-                      <BubbleChatEnd key={index + "message"} data={data} />
-                    )}
-                  </React.Fragment>
+                      <div
+                        className={`${statusPembacaanPesanSiaran?.is_read ? "pb-8" : "flex flex-col gap-2"}`}
+                      >
+                        <p
+                          className={`${statusPembacaanPesanSiaran?.is_read ? "" : "font-semibold text-orange-500"} align-top min-w-[170px]`}
+                        >
+                          {(() => {
+                            const date = new Date(data.waktu_pesan_terakhir);
+                            const formattedDate = date.toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                              }
+                            );
+
+                            // Format waktu dalam UTC+7
+                            const formattedTime = date.toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true, // Format AM/PM
+                                timeZone: "Asia/Jakarta", // Menggunakan zona waktu UTC+7
+                              }
+                            );
+
+                            // Gabungkan tanggal dan waktu
+                            const formattedDateTime = `${formattedDate} ${formattedTime}`;
+                            return formattedDateTime;
+                          })()}
+                        </p>
+
+                        <p
+                          className={`${statusPembacaanPesanSiaran?.is_read ? "hidden" : "font-semibold"}`}
+                        >
+                          Belum Dibaca!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
-
-              <div ref={messageEndRef} />
+              <div className="flex flex-col mt-6">
+                <p className="mx-auto mb-6 text-sm text-gray-500 font-medium">
+                  Pesan Pribadi
+                </p>
+                {selectedDataChatPribadi.id && (
+                  <div
+                    onClick={() =>
+                      handleClickDetailChatPribadi(selectedDataChatPribadi)
+                    }
+                    className={`flex px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
+                  >
+                    <div className="flex gap-4">
+                      <div className="rounded-full size-12 bg-orange-200">
+                        {selectedDataChatPribadi.dosen_pa?.profile_image ? (
+                          <img
+                            src={`../${selectedDataChatPribadi.dosen_pa.profile_image}`}
+                            alt="Profile"
+                            className="rounded-full size-12 cursor-pointer"
+                          />
+                        ) : (
+                          <ProfileImage className="size-12 cursor-pointer" />
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <p>{selectedDataChatPribadi.dosen_pa?.nama}</p>
+                        <p
+                          className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "" : "font-semibold"}`}
+                        >
+                          {selectedDataChatPribadi.pengirim_pesan_terakhir ===
+                            "Mahasiswa" && <span>Anda: </span>}
+                          {selectedDataChatPribadi.pesan_terakhir}
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "pb-8" : "flex flex-col gap-2"}`}
+                    >
+                      <p
+                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "" : "font-semibold text-orange-500"}`}
+                      >
+                        {formattedDateTime}
+                      </p>
+                      <p
+                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "hidden" : "font-semibold"}`}
+                      >
+                        Belum Dibaca!
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {!selectedDataChatPribadi.id && (
+                  <div
+                    className={`flex px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
+                    onClick={() => setIsDetailChatPribadiClicked(true)}
+                  >
+                    <div className="flex gap-4">
+                      <div className="rounded-full flex size-12 justify-center items-center bg-orange-200">
+                        <Image src={chatIcon} className="size-6" alt="" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <p className={`text-[18px] font-medium`}>
+                          Pesan Pribadi dengan Dosen Pembimbing Akademik
+                        </p>
+                        {selectedDataChatPribadi.id && (
+                          <p>Anda: {selectedDataChatPribadi.pesan_terakhir}</p>
+                        )}
+                        {!selectedDataChatPribadi.id && (
+                          <p>
+                            Anda belum memiliki pesan kepada dosen pembimbing
+                            akademik! silahkan ketuk untuk mulai percakapan
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <div className="px-10 py-4">
-            <TextInputPesanMahasiswa
-              handleAddChatMahasiswa={handleAddChatMahasiswa}
-            />
+        ) : isDetailChatPribadiClicked ? (
+          <div className="flex flex-col h-screen w-full">
+            <div className="pl-4 flex border items-center">
+              <button
+                onClick={() => {
+                  setIsDetailChatPribadiClicked(false);
+                  getDataChatPribadiByMahasiswaId();
+                }}
+              >
+                <Image alt="back-icon" src={backIcon} className="size-8" />
+              </button>
+              <HeaderChatbot data={userDosenPA} />
+            </div>
+            <div className="h-full overflow-y-scroll px-[40px] flex flex-col w-full justify-between gap-8">
+              <div
+                id="message-container"
+                className="flex-1 w-full flex flex-col"
+              >
+                {sortedChatData.map((data, index) => {
+                  const currentDate = formatDate(data.waktu_kirim);
+                  const showDateHeader = currentDate !== previousDate;
+                  previousDate = currentDate;
+
+                  return (
+                    <React.Fragment key={index}>
+                      {showDateHeader && (
+                        <div className="text-center my-4 text-gray-500 text-sm">
+                          {currentDate}
+                        </div>
+                      )}
+                      {data.role === "Dosen PA" ? (
+                        <BubbleChatStart key={index + "message"} data={data} />
+                      ) : (
+                        <BubbleChatEnd key={index + "message"} data={data} />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+                <div ref={messageEndRef} />
+              </div>
+            </div>
+            <div className="px-10 py-4">
+              <TextInputPesanMahasiswa
+                handleAddChatMahasiswa={handleAddChatMahasiswa}
+              />
+            </div>
           </div>
-        </div>
+        ) : isDetailPesanSiaranClicked ? (
+          <div className="flex flex-col h-screen pb-[40px] w-full">
+            <div className="pl-4 flex border items-center">
+              <button
+                onClick={() => {
+                  setIsDetailPesanSiaranClicked(false);
+                  getDataPesanSiaranByMahasiswaId();
+                }}
+              >
+                <Image alt="back-icon" src={backIcon} className="size-8" />
+              </button>
+              <HeaderChatbot data={userDosenPA} />
+            </div>
+            <div className="h-full overflow-y-scroll px-[40px] flex flex-col w-full justify-between gap-8">
+              <div
+                id="message-container"
+                className="flex-1 w-full flex flex-col"
+              >
+                {sortedPesanChatSiaran.map((data, index) => {
+                  const currentDate = formatDate(data.waktu_kirim);
+                  const showDateHeader = currentDate !== previousDate;
+                  previousDate = currentDate;
+
+                  return (
+                    <React.Fragment key={index}>
+                      {showDateHeader && (
+                        <div className="text-center my-4 text-gray-500 text-sm">
+                          {currentDate}
+                        </div>
+                      )}
+
+                      <BubbleChatStart key={index + "message"} data={data} />
+                    </React.Fragment>
+                  );
+                })}
+                <div ref={messageEndRef} />
+              </div>
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );

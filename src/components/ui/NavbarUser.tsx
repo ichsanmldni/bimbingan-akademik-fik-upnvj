@@ -35,7 +35,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   const isActive = (path: string) => pathname === path;
 
-  const getDataNotifikasiByUserId = async () => {
+  const getDataNotifikasiByUserId = async (id) => {
     try {
       let response;
       roleUser === "Mahasiswa"
@@ -55,16 +55,16 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
       let notifikasiUser;
 
       roleUser === "Mahasiswa"
-        ? (notifikasiUser = response.data.filter(
-            (data: any) => data.mahasiswa_id === dataUser.id
+        ? (notifikasiUser = response.data.filter((data: any) =>
+            data.mahasiswa_id === id ? id : dataUser.id
           ))
         : roleUser === "Dosen PA"
-          ? (notifikasiUser = response.data.filter(
-              (data: any) => data.dosen_pa_id === dataUser.id
+          ? (notifikasiUser = response.data.filter((data: any) =>
+              data.dosen_pa_id === id ? id : dataUser.id
             ))
           : roleUser === "Kaprodi"
-            ? (notifikasiUser = response.data.filter(
-                (data: any) => data.kaprodi_id === dataUser.id
+            ? (notifikasiUser = response.data.filter((data: any) =>
+                data.kaprodi_id === id ? id : dataUser.id
               ))
             : (notifikasiUser = {});
 
@@ -123,13 +123,12 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
         </Link>
       </div>
       <div className="flex gap-10 justify-end w-[20%] items-center">
-        {roleUser === "Dosen PA" && (
-          <Link href="/chatpribadi">
-            <MessageSquareText className="cursor-pointer" />
-          </Link>
-        )}
+        <Link href="/chatpribadi">
+          <MessageSquareText className="cursor-pointer" />
+        </Link>
         <NotificationButton
           onClick={() => setIsModalNotificationOpen((prev) => !prev)}
+          dataNotification={dataNotifikasi}
           className="w-6 h-6 cursor-pointer"
         />
         {dataUser?.profile_image ? (
@@ -151,6 +150,9 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           dataNotifikasi={dataNotifikasi}
           className="fixed inset-0 flex items-start mt-[70px] mr-[180px] justify-end z-50"
           onClose={closeNotificationModal}
+          refreshData={getDataNotifikasiByUserId}
+          dataUser={dataUser}
+          roleUser={roleUser}
         />
       )}
       {isModalProfileOpen && (

@@ -9,6 +9,7 @@ export default function TextInputPesanChatbot({
   return (
     <div className="flex gap-4 w-full">
       <input
+        autoFocus
         type="text"
         id="textInput"
         placeholder="Ketik pesan atau pertanyaan Anda di sini..."

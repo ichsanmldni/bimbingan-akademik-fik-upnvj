@@ -36,8 +36,9 @@ model chatpribadi {
   id                      Int                  @id @default(autoincrement())
   mahasiswa_id            Int
   dosen_pa_id             Int
-  is_pesan_terakhir_read  Boolean
-  pesan_terakhir          String
+  is_mahasiswa_pesan_terakhir_read  Boolean?
+  is_dosenpa_pesan_terakhir_read  Boolean?
+  pesan_terakhir          String               @db.Text
   waktu_pesan_terakhir    DateTime
   pengirim_pesan_terakhir String
   dosen_pa                dosenpa              @relation(fields: [dosen_pa_id], references: [id], map: "ChatPribadi_dosen_pa_id_fkey")
@@ -47,6 +48,37 @@ model chatpribadi {
 
   @@index([dosen_pa_id], map: "ChatPribadi_dosen_pa_id_fkey")
   @@index([mahasiswa_id], map: "ChatPribadi_mahasiswa_id_fkey")
+}
+
+model pesansiaran {
+  id                     Int                 @id @default(autoincrement())
+  dosen_pa_id            Int      
+  pesan_terakhir         String              @db.Text
+  waktu_pesan_terakhir   DateTime
+  pesanchatsiaran        pesanchatsiaran[]
+  statuspembacaanpesansiaran  statuspembacaanpesansiaran[]
+  dosen_pa               dosenpa             @relation(fields: [dosen_pa_id], references: [id], map: "PesanSiaran_dosen_pa_id_fkey")
+
+  @@index([dosen_pa_id], map: "Dosen_dosen_pa_id_fkey")
+}
+
+model statuspembacaanpesansiaran {  
+  id                Int            @id @default(autoincrement())  
+  pesan_siaran_id   Int            @unique(map: "PesanSiaran_id_key")
+  mahasiswa_id      Int            @unique(map: "Mahasiswa_id_key")
+  is_read           Boolean        @default(false)  
+  pesan_siaran      pesansiaran    @relation(fields: [pesan_siaran_id], references: [id])  
+  mahasiswa         mahasiswa      @relation(fields: [mahasiswa_id], references: [id])  
+}  
+
+model pesanchatsiaran {
+  id                     Int           @id @default(autoincrement())
+  pesan_siaran_id        Int
+  pesan                  String        @db.Text
+  waktu_kirim            DateTime
+  pesan_siaran           pesansiaran   @relation(fields: [pesan_siaran_id], references: [id], map: "PesanChatSiaran_pesan_siaran_id_fkey")
+
+  @@index([pesan_siaran_id], map: "PesanChatSiaran_pesan_siaran_id_fkey")
 }
 
 model dosenpa {
@@ -63,6 +95,7 @@ model dosenpa {
   mahasiswa            mahasiswa[]
   notifikasidosenpa    notifikasidosenpa[]
   pengajuanbimbingan   pengajuanbimbingan[]
+  pesansiaran          pesansiaran[]
 }
 
 model kaprodi {
@@ -178,6 +211,7 @@ model mahasiswa {
   profile_image        String?
   dosen_pa_id          Int?
   dosen_pa             dosenpa?               @relation(fields: [dosen_pa_id], references: [id], map: "Mahasiswa_dosen_pa_id_fkey")
+  statuspembacaanpesansiaran  statuspembacaanpesansiaran[]
   chatpribadi          chatpribadi[]
   notifikasimahasiswa  notifikasimahasiswa[]
   pengajuanbimbingan   pengajuanbimbingan[]

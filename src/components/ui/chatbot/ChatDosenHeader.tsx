@@ -1,13 +1,22 @@
 import React from "react";
 import { UserRound } from "lucide-react";
+import ProfileImage from "../ProfileImage";
 
-export default function ChatDosenHeader({ namaDosenPA }: any) {
+export default function ChatDosenHeader({ data }: any) {
   return (
     <div className="flex gap-4 p-4 items-center">
-      <div className="p-1 rounded-full bg-orange-200">
-        <UserRound className="" />
+      <div className="rounded-full bg-orange-200">
+        {data?.profile_image ? (
+          <img
+            src={`../${data?.profile_image}`}
+            alt="Profile"
+            className="rounded-full size-12 cursor-pointer"
+          />
+        ) : (
+          <ProfileImage className="size-12 cursor-pointer" />
+        )}
       </div>
-      <p className="text-[18px]">{namaDosenPA}</p>
+      <p className="text-[18px]">{data?.nama}</p>
     </div>
   );
 }

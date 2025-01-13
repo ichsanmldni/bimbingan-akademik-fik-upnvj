@@ -31,6 +31,7 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
   try {
     const body: ChatMahasiswaRequestBody = await req.json();
+    console.log(body)
     const { chat_pribadi_id, mahasiswa_id, dosen_pa_id, pesan, waktu_kirim } = body;
 
     // If chat_pribadi_id is not provided, create a new chat record
@@ -40,7 +41,8 @@ export async function POST(req: Request): Promise<Response> {
           mahasiswa_id,
           dosen_pa_id,
           waktu_pesan_terakhir: waktu_kirim,
-          is_pesan_terakhir_read: false,
+          is_dosenpa_pesan_terakhir_read: false,
+          is_mahasiswa_pesan_terakhir_read: true,
           pesan_terakhir: pesan,
           pengirim_pesan_terakhir: "Mahasiswa",
         },
@@ -92,7 +94,8 @@ export async function POST(req: Request): Promise<Response> {
       data: {
         pesan_terakhir: pesan,
         waktu_pesan_terakhir: waktu_kirim,
-        is_pesan_terakhir_read: false,
+        is_mahasiswa_pesan_terakhir_read: true,
+        is_dosenpa_pesan_terakhir_read: false,
         pengirim_pesan_terakhir: "Mahasiswa",
       },
     });

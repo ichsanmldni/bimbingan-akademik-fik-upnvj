@@ -113,7 +113,7 @@ export default function Home() {
 
   const getDataDosenPA = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/api/datadosenpa`);
+      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       if (response.status !== 200) {
         throw new Error("Gagal mengambil data");

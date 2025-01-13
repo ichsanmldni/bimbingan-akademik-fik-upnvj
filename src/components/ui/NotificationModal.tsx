@@ -3,21 +3,107 @@ import React, { useEffect, useRef } from "react";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
 import { format, formatDate } from "date-fns";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
-interface ModalProps {
-  onClose: () => void;
-  className: string;
-  dataNotifikasi: any;
-}
-
-const NotificationModal: React.FC<ModalProps> = ({
+const NotificationModal: React.FC<any> = ({
+  refreshData,
+  dataUser,
   onClose,
   className,
   dataNotifikasi,
+  roleUser,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+
+  const patchReadNotififikasiMahasiswa = async (selectedNotification) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/datanotifikasimahasiswa`,
+        {
+          id: selectedNotification.id,
+          read: false,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error read notification :", error);
+      throw error;
+    }
+  };
+  const patchReadNotififikasiDosenPA = async (selectedNotification) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/datanotifikasidosenpa`,
+        {
+          id: selectedNotification.id,
+          read: false,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error read notification :", error);
+      throw error;
+    }
+  };
+  const patchReadNotififikasiKaprodi = async (selectedNotification) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/datanotifikasikaprodi`,
+        {
+          id: selectedNotification.id,
+          read: false,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error read notification :", error);
+      throw error;
+    }
+  };
+
+  const handleMarkAllAsRead = () => {
+    if (roleUser === "Mahasiswa") {
+      dataNotifikasi.map((data) => {
+        if (data.read === false) {
+          patchReadNotififikasiMahasiswa(data);
+        }
+      });
+      refreshData(dataUser.id);
+    }
+    if (roleUser === "Dosen PA") {
+      dataNotifikasi.map((data) => {
+        if (data.read === false) {
+          patchReadNotififikasiDosenPA(data);
+        }
+      });
+      refreshData(dataUser.id);
+    } else if (roleUser === "Kaprodi") {
+      dataNotifikasi.map((data) => {
+        if (data.read === false) {
+          patchReadNotififikasiKaprodi(data);
+        }
+      });
+      refreshData(dataUser.id);
+    }
+  };
+
   const handleNotificationClick = (data) => {
+    if (roleUser === "Mahasiswa") {
+      if (data.read === false) {
+        patchReadNotififikasiMahasiswa(data);
+      }
+    } else if (roleUser === "Dosen PA") {
+      if (data.read === false) {
+        patchReadNotififikasiDosenPA(data);
+      }
+    } else if (roleUser === "Kaprodi") {
+      if (data.read === false) {
+        patchReadNotififikasiKaprodi(data);
+      }
+    }
     let submenu;
     if (data.isi === "Pengajuan bimbinganmu berhasil diterima!") {
       submenu = "Riwayat%20Pengajuan%20Bimbingan";
@@ -95,9 +181,17 @@ const NotificationModal: React.FC<ModalProps> = ({
         ref={modalRef}
         className="bg-white bg-opacity-30 backdrop-blur-md border border-gray-200 rounded-lg shadow-2xl w-80"
       >
-        <h2 className="text-lg font-semibold px-6 pt-4 pb-4 text-gray-800">
-          Notifikasi
-        </h2>
+        <div className="flex justify-between px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-800">Notifikasi</h2>
+          {dataNotifikasi.filter((data) => data.read === false).length > 0 && (
+            <button
+              className={`text-blue-600 underline text-sm ${dataNotifikasi.filter((data) => data.read === false).length > 4 ? "pr-2" : ""}`}
+              onClick={handleMarkAllAsRead}
+            >
+              mark all as read
+            </button>
+          )}
+        </div>
         <div className="flex flex-col max-h-[300px] mb-6 overflow-y-auto px-4 scrollbar">
           {dataNotifikasi.length > 0 ? (
             dataNotifikasi

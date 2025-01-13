@@ -1,19 +1,26 @@
-// /app/api/datadosen/route.ts
 import prisma from '../../../lib/prisma';
 
+interface PatchRequestBody {
+    id: number;
+}
 
 export async function GET(req: Request): Promise<Response> {
     try {
-        // Fetching data from the database
-        const notifikasiDosenPA = await prisma.notifikasidosenpa.findMany();
+        // Mengambil data sesi chatbot mahasiswa dari database
+        const statusPembacaanPesanSiaran = await prisma.statuspembacaanpesansiaran.findMany({
+            include: {
+                pesan_siaran: true,
+                mahasiswa: true
+            },
+        });
 
-        // Returning data as JSON
-        return new Response(JSON.stringify(notifikasiDosenPA), {
+        // Mengembalikan data sesi chatbot mahasiswa sebagai JSON
+        return new Response(JSON.stringify(statusPembacaanPesanSiaran), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });
     } catch (error) {
-        // Handling errors
+        // Menangani kesalahan
         return new Response(
             JSON.stringify({ message: 'Something went wrong', error: error instanceof Error ? error.message : 'Unknown error' }),
             { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -21,20 +28,21 @@ export async function GET(req: Request): Promise<Response> {
     }
 }
 
-export async function PATCH(req: any): Promise<any> {
+export async function PATCH(req: Request): Promise<Response> {
     try {
-        const body: any = await req.json();
-        const { id, read } = body;
+        const body: PatchRequestBody = await req.json();
+        console.log(body)
+        const { mahasiswa_id } = body;
 
-        if (!id || read === true) {
+        if (!mahasiswa_id) {
             return new Response(
                 JSON.stringify({ message: 'Invalid data' }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
             );
         }
 
-        const existingRecord = await prisma.notifikasidosenpa.findUnique({
-            where: { id },
+        const existingRecord = await prisma.statuspembacaanpesansiaran.findUnique({
+            where: { mahasiswa_id },
         });
 
         if (!existingRecord) {
@@ -44,18 +52,12 @@ export async function PATCH(req: any): Promise<any> {
             );
         }
 
-        const updatedNotifikasiDosenPA = await prisma.notifikasidosenpa.update({
-            where: { id },
-            data: { read: true },
+        const statusPembacaanPesanSiaran = await prisma.statuspembacaanpesansiaran.update({
+            where: { mahasiswa_id },
+            data: { is_read: true },
         });
 
-        const responsePayload = {
-            status: "success",
-            message: "Notifikasi telah terbaca!",
-            data: updatedNotifikasiDosenPA,
-        };
-
-        return new Response(JSON.stringify(responsePayload), {
+        return new Response(JSON.stringify(statusPembacaanPesanSiaran), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });

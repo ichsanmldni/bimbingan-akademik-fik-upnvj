@@ -5,7 +5,6 @@ interface ChatPribadiRequestBody {
   mahasiswa_id: number;
   dosen_pa_id: number;
   waktu_pesan_terakhir: string;
-  is_pesan_terakhir_read: boolean;
   pesan_terakhir: string;
   pengirim_pesan_terakhir: string;
 }
@@ -44,10 +43,10 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
   try {
     const body: ChatPribadiRequestBody = await req.json();
-    const { mahasiswa_id, dosen_pa_id, waktu_pesan_terakhir, is_pesan_terakhir_read, pesan_terakhir, pengirim_pesan_terakhir } = body;
+    const { mahasiswa_id, dosen_pa_id, waktu_pesan_terakhir, is_mahasiswa_pesan_terakhir_read, is_dosenpa_pesan_terakhir_read_, pesan_terakhir, pengirim_pesan_terakhir } = body;
 
     // Validate required fields
-    if (!mahasiswa_id || !dosen_pa_id || !waktu_pesan_terakhir || is_pesan_terakhir_read === undefined || !pesan_terakhir || !pengirim_pesan_terakhir) {
+    if (!mahasiswa_id || !dosen_pa_id || !waktu_pesan_terakhir || is_mahasiswa_pesan_terakhir_read === undefined || is_dosenpa_pesan_terakhir_read === undefined || !pesan_terakhir || !pengirim_pesan_terakhir) {
       return new Response(
         JSON.stringify({ message: 'All fields are required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -59,7 +58,8 @@ export async function POST(req: Request): Promise<Response> {
         mahasiswa_id,
         dosen_pa_id,
         waktu_pesan_terakhir,
-        is_pesan_terakhir_read,
+        is_mahasiswa_pesan_terakhir_read,
+        is_dosenpa_pesan_terakhir_read,
         pesan_terakhir,
         pengirim_pesan_terakhir,
       },

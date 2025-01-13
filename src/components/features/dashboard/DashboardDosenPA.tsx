@@ -79,7 +79,6 @@ interface DataLaporanBimbingan {
   jenis_bimbingan: string;
   sistem_bimbingan: string;
   status: string;
-  kendala_mahasiswa: string;
   solusi: string;
   kesimpulan: string;
   dokumentasi: string | null;
