@@ -1545,25 +1545,25 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   return (
     <Provider store={store}>
       {selectedSubMenuDashboard === "Profile Kaprodi" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
-          <div className="border px-[70px] py-[30px] rounded-lg">
+        <div className="md:w-[75%] p-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
+          <div className="border px-6 md:px-[70px] py-6 md:py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
                 <img
                   src={imagePreview}
                   alt="Profile"
-                  className="size-[200px] rounded-full object-cover"
+                  className="size-[80px] min-w-[80px] size-[200px] rounded-full object-cover"
                 />
               ) : dataKaprodi && dataKaprodi.profile_image ? (
                 <img
                   src={dataKaprodi.profile_image}
                   alt="Profile"
-                  className="size-[200px] rounded-full object-cover"
+                  className="size-[80px] min-w-[80px] size-[200px] rounded-full object-cover"
                 />
               ) : (
                 <ProfileImage
                   onClick={() => {}}
-                  className="size-[200px] rounded-full"
+                  className="size-[80px] min-w-[80px] size-[200px] rounded-full"
                 />
               )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
@@ -1577,7 +1577,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                 />
                 <label
                   htmlFor="fileInput"
-                  className="bg-orange-500 hover:bg-orange-600 w-[30%] px-4 py-2 text-white rounded-md text-center cursor-pointer"
+                  className="bg-orange-500 hover:bg-orange-600 md:w-[30%] px-4 py-2 text-white rounded-md text-center cursor-pointer"
                 >
                   Pilih Foto
                 </label>
@@ -1648,13 +1648,13 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         </div>
       )}
       {selectedSubMenuDashboard === "Statistik Bimbingan Akademik" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
+        <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] mb-12 md:mb-0 py-[30px]">
           <div className="border px-[30px] py-[30px] rounded-lg">
             <div className="flex flex-col gap-4">
               <div className="flex gap-5">
                 <div className="relative">
                   <select
-                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px] ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
+                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px] ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
                     value={selectedTahunAjaran}
                     onChange={(e) => setSelectedTahunAjaran(e.target.value)}
                   >
@@ -1672,7 +1672,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                     ))}
                   </select>
                   <div
-                    className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                    className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
                   >
                     <svg
                       className="w-4 h-4 text-gray-400"
@@ -1692,7 +1692,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                 </div>
                 <div className="relative">
                   <select
-                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px] ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
+                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px] ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
                     value={selectedSemester}
                     onChange={(e) => setSelectedSemester(e.target.value)}
                   >
@@ -1711,7 +1711,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                     ))}
                   </select>
                   <div
-                    className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                    className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
                   >
                     <svg
                       className="w-4 h-4 text-gray-400"
@@ -1751,7 +1751,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         </div>
       )}
       {selectedSubMenuDashboard === "Data Dosen PA" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
+        <div className="md:w-[75%] p-6 md:pl-[30px] md:pr-[128px] py-[30px]">
           <div className="flex flex-col gap-4 rounded-lg">
             <h1 className="font-semibold text-[24px]">Data Dosen PA</h1>
             {isDetailDosenPAClicked ? (
@@ -1887,7 +1887,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       )}
       {selectedSubMenuDashboard ===
         "Riwayat Laporan Bimbingan Role Kaprodi" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
+        <div className="md:w-[75%] px-6 md:pl-[30px] md:pr-[128px] py-[30px]">
           <div className=" flex flex-col gap-6 rounded-lg">
             <h1 className="font-semibold text-[24px]">
               Riwayat Laporan Bimbingan
@@ -1919,7 +1919,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                             </p>
                           </div>
                           <div
-                            className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-3 self-center rounded-lg`}
+                            className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-1 md:p-3 self-center rounded-lg`}
                           >
                             <p className="text-white text-center">
                               {data.status}
@@ -1930,7 +1930,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                     ))}
                 </div>
               ) : (
-                <div>
+                <div className="mb-12 md:0">
                   <div className="flex gap-2 mt-2">
                     <Image
                       src={backIconOrange}

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Logo from "@/components/ui/LogoUPNVJ";
 import backIcon from "../../../assets/images/back-icon-black.png";
 import Link from "next/link";
+import LogoBimafik from "../LogoBimafik";
 
 export default function NavbarChatbot({ isPathChatbot }: any) {
   const [showNotification, setShowNotification] = useState(false);
@@ -19,7 +20,7 @@ export default function NavbarChatbot({ isPathChatbot }: any) {
 
   return (
     <div
-      className="flex w-full h-[70px] items-center justify-between shadow-sm px-8 bg-white fixed top-0 left-0 z-50"
+      className="flex w-full h-[70px] items-center justify-between shadow-sm px-4 md:px-8 bg-white fixed top-0 left-0 z-50"
       style={{ zIndex: 50 }}
     >
       <div className="flex gap-2">
@@ -30,8 +31,10 @@ export default function NavbarChatbot({ isPathChatbot }: any) {
           <Image src={backIcon} alt="back-icon" />
         </a>
         <a href="/chatbot" className="flex items-center">
-          <Logo className="size-[40px]" />
-          <p className="font-semibold text-[20px] ml-4">
+          <div className="min-w-[40px]">
+            <LogoBimafik className="size-[40px]" />
+          </div>
+          <p className="font-semibold text-[14px] md:text-[20px] ml-4">
             Chatbot Bimbingan Akademik FIK
           </p>
         </a>

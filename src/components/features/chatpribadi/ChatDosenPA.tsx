@@ -456,8 +456,8 @@ export default function ChatDosenPA() {
             <div className="flex flex-col mb-4 overflow-y-auto h-[200%]">
               {dataPesanSiaran?.map((data, index) => {
                 return (
-                  <div key={index} className="flex flex-col mt-6">
-                    <p className="mx-auto mb-6 text-sm text-gray-500 font-medium">
+                  <div key={index} className="flex flex-col mt-4 md:mt-6">
+                    <p className="mx-auto mb-2 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
                       Pesan Siaran
                     </p>
                     <div
@@ -467,10 +467,10 @@ export default function ChatDosenPA() {
                           statusPembacaanPesanSiaran
                         )
                       }
-                      className={`flex px-[32px] rounded-xl mx-8 py-4 border justify-between cursor-pointer`}
+                      className={`flex gap-2 md:gap-0 px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between cursor-pointer`}
                     >
                       <div className="flex gap-4">
-                        <div className="rounded-full flex size-12 justify-center items-center bg-orange-200">
+                        <div className="min-w-[40px] rounded-full size-10 justify-center items-center bg-orange-200">
                           <Image
                             src={broadcastIcon}
                             className="size-10"
@@ -478,12 +478,14 @@ export default function ChatDosenPA() {
                           />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <p className={`text-[18px] font-medium`}>
+                          <p
+                            className={`text-[12px] md:text-[18px] font-medium`}
+                          >
                             Pesan Siaran Mahasiswa Bimbingan{" "}
                             <span>{data.dosen_pa.nama.split(",")[0]}</span>
                           </p>
-                          <div className="max-h-[40px] max-w-[900px] overflow-hidden">
-                            <p className="whitespace-nowrap overflow-ellipsis overflow-hidden">
+                          <div className="md:max-h-[40px] md:max-w-[900px] overflow-hidden">
+                            <p className="text-[12px] md:text-[16px] whitespace-nowrap overflow-ellipsis overflow-hidden">
                               <span>{data.dosen_pa.nama.split(",")[0]}: </span>
                               {data.pesan_terakhir}
                             </p>
@@ -494,7 +496,7 @@ export default function ChatDosenPA() {
                         className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "pb-8" : "flex flex-col gap-2"}`}
                       >
                         <p
-                          className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "" : "font-semibold text-orange-500"} align-top min-w-[170px]`}
+                          className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "" : "font-semibold text-orange-500"} text-[12px] md:text-[14px] align-top md:min-w-[170px]`}
                         >
                           {(() => {
                             const date = new Date(data.waktu_pesan_terakhir);
@@ -525,7 +527,7 @@ export default function ChatDosenPA() {
                         </p>
 
                         <p
-                          className={`${statusPembacaanPesanSiaran?.is_read ? "hidden" : "font-semibold"}`}
+                          className={`${statusPembacaanPesanSiaran?.is_read ? "hidden" : "font-semibold text-[12px] md:text-[16px]"}`}
                         >
                           Belum Dibaca!
                         </p>
@@ -534,8 +536,8 @@ export default function ChatDosenPA() {
                   </div>
                 );
               })}
-              <div className="flex flex-col mt-6">
-                <p className="mx-auto mb-6 text-sm text-gray-500 font-medium">
+              <div className="flex flex-col mt-4 md:mt-6">
+                <p className="mx-auto mb-2 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
                   Pesan Pribadi
                 </p>
                 {selectedDataChatPribadi.id && (
@@ -543,24 +545,24 @@ export default function ChatDosenPA() {
                     onClick={() =>
                       handleClickDetailChatPribadi(selectedDataChatPribadi)
                     }
-                    className={`flex px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
+                    className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
                   >
                     <div className="flex gap-4">
-                      <div className="rounded-full size-12 bg-orange-200">
+                      <div className="rounded-full size-10 md:size-12 bg-orange-200">
                         {selectedDataChatPribadi.dosen_pa?.profile_image ? (
                           <img
                             src={`../${selectedDataChatPribadi.dosen_pa.profile_image}`}
                             alt="Profile"
-                            className="rounded-full size-12 cursor-pointer"
+                            className="rounded-full size-10 md:size-12 cursor-pointer"
                           />
                         ) : (
                           <ProfileImage
                             onClick={() => {}}
-                            className="size-12 cursor-pointer"
+                            className="size-10 md:size-12 cursor-pointer"
                           />
                         )}
                       </div>
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 text-[12px] md:text-[16px]">
                         <p>{selectedDataChatPribadi.dosen_pa?.nama}</p>
                         <p
                           className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "" : "font-semibold"}`}
@@ -572,15 +574,15 @@ export default function ChatDosenPA() {
                       </div>
                     </div>
                     <div
-                      className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "pb-8" : "flex flex-col gap-2"}`}
+                      className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "text-[12px] md:text-[16px] pb-6 md:pb-8" : "text-[12px] md:text-[16px]  flex flex-col gap-2"}`}
                     >
                       <p
-                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "" : "font-semibold text-orange-500"}`}
+                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "text-[12px] md:text-[16px]" : "text-[12px] md:text-[16px] font-semibold text-orange-500"}`}
                       >
                         {formattedDateTime}
                       </p>
                       <p
-                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "hidden" : "font-semibold"}`}
+                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "hidden" : " text-[12px] md:text-[16px] font-semibold"}`}
                       >
                         Belum Dibaca!
                       </p>
@@ -589,11 +591,11 @@ export default function ChatDosenPA() {
                 )}
                 {!selectedDataChatPribadi.id && (
                   <div
-                    className={`flex px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
+                    className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
                     onClick={() => setIsDetailChatPribadiClicked(true)}
                   >
                     <div className="flex gap-4">
-                      <div className="rounded-full flex size-12 justify-center items-center bg-orange-200">
+                      <div className="rounded-full flex min-w-[12px] size-12 justify-center items-center bg-orange-200">
                         <Image src={chatIcon} className="size-6" alt="chat" />
                       </div>
                       <div className="flex flex-col gap-2">

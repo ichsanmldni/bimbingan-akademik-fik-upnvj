@@ -474,7 +474,7 @@ export default function Home() {
         }
       />
       <div className="pt-[100px]">
-        <div className="mt-4 mb-10 mx-[130px] border rounded-lg">
+        <div className="mt-4 mb-10 mx-4 md:mx-[130px] border rounded-lg">
           <h1 className="font-semibold text-[30px] text-center pt-4">
             Pengajuan Bimbingan Akademik Mahasiswa
           </h1>
@@ -659,10 +659,10 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="border">
+      <div className="border hidden md:block">
         <div className="flex justify-between mx-32 py-8 border-black border-b">
           <div className="flex gap-5 w-2/5 items-center">
-            <Logo className="size-[100px]" />
+            <Logo className="size-[100px] min-w-[100px]" />
             <h1 className="text-start font-semibold text-[30px]">
               Bimbingan Akademik Mahasiswa FIK
             </h1>

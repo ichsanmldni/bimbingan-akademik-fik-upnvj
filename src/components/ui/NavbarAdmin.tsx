@@ -15,7 +15,7 @@ const NavbarAdmin: React.FC<NavbarAdminProps> = ({
   return (
     <div className="w-[20%] p-5 border h-[1000px]">
       <div className="flex gap-2 items-center ">
-        <Logo className="size-[56px]" />
+        <Logo className="size-[56px] " />
         <a href="/" className="font-bold">
           Bimbingan Akademik Mahasiswa FIK
         </a>

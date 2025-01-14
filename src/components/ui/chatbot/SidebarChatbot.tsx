@@ -73,15 +73,13 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
   }, [data]);
 
   return (
-    <div className="flex flex-col items-start pt-[80px] px-6 pb-8 bg-white shadow-md w-[320px] gap-4 overflow-y-scroll h-screen">
+    <div className="h-full flex flex-col items-start pt-[80px] px-6 pb-8 bg-white shadow-md w-[200px] md:w-[320px] gap-4 overflow-y-scroll">
       <p className="font-semibold text-[16px] px-1 py-2">Riwayat Chatbot</p>
       <div className="flex flex-col w-full">
         <button
           onClick={() => setActiveSesiChatbotMahasiswa(0)}
           className={`mb-1 text-[14px] text-left outline-none py-2 px-3 shadow-sm hover:bg-gray-50 rounded-lg ${
-            activeSesiChatbotMahasiswa === "New Session"
-              ? "bg-gray-50 shadow-md"
-              : ""
+            activeSesiChatbotMahasiswa === 0 ? "bg-gray-50 shadow-md" : ""
           }`}
         >
           New Chat
@@ -100,10 +98,10 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
               <p className="font-bold text-[14px] text-gray-600 my-2">
                 {group}
               </p>
-              {grouped[group].map((item, index) => (
+              {grouped[group].map((item) => (
                 <button
                   onClick={() => setActiveSesiChatbotMahasiswa(item.id)}
-                  key={index}
+                  key={item.id} // Use item.id as the key for better performance
                   className={`mb-1 outline-none text-[14px] w-full text-left py-2 px-3 rounded-lg hover:shadow-sm ${
                     activeSesiChatbotMahasiswa === item.id
                       ? "shadow-sm bg-gray-50"

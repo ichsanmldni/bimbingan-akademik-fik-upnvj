@@ -7,15 +7,22 @@ import { usePathname } from "next/navigation";
 import ProfileImage from "./ProfileImage";
 import NotificationModal from "./NotificationModal";
 import ProfileModal from "./ProfileModal";
-import NotificationButton from "./NotificationButton";
 import { MessageSquareText } from "lucide-react";
 import axios from "axios";
 import Image from "next/image";
+import notificationIcon from "../../assets/images/bell.png";
+import { Home, BookOpen, FileText, FilePlus, Bell, User } from "lucide-react";
+import LogoBimafik from "./LogoBimafik";
 
 const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
   const [isModalProfileOpen, setIsModalProfileOpen] = useState(false);
+  const [isModalNotificationMobileOpen, setIsModalNotificationMobileOpen] =
+    useState(false);
+  const [isModalProfileMobileOpen, setIsModalProfileMobileOpen] =
+    useState(false);
   const [dataNotifikasi, setDataNotifikasi] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -29,9 +36,15 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
     setIsModalNotificationOpen(false);
     setIsModalProfileOpen(true);
   };
-
   const closeProfileModal = () => {
     setIsModalProfileOpen(false);
+  };
+  const closeProfileMobileModal = () => {
+    setIsModalProfileMobileOpen(false);
+  };
+
+  const closeNotificationMobileModal = () => {
+    setIsModalNotificationMobileOpen(false);
   };
 
   const isActive = (path: string) => pathname === path;
@@ -74,100 +87,197 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   };
 
   useEffect(() => {
+    const count = dataNotifikasi?.filter((data) => data.read === false).length;
+    setNotificationCount(count);
+  }, [dataNotifikasi]);
+
+  useEffect(() => {
     if (dataUser && dataUser.id) {
       getDataNotifikasiByUserId();
     }
   }, [dataUser]);
 
   return (
-    <div className="fixed z-[999] w-full bg-white border flex py-5 px-[128px]">
-      <div className="flex w-[35%] items-center gap-5">
-        <Logo className="size-[40px]" />
-        <a href="/" className="font-semibold">
-          Bimbingan Akademik Mahasiswa FIK
-        </a>
-      </div>
-      <div
-        className={`flex items-center pl-8 w-[45%] ${roleUser === "Kaprodi" ? "gap-10" : "gap-6"}`}
-      >
-        <a
-          href="/"
-          className={`${isActive("/") ? "font-bold text-orange-500" : ""}`}
+    <>
+      {/* Navbar atas untuk layar medium ke atas */}
+      <div className="fixed z-[999] flex justify-between md:justify-start w-full bg-white border py-5 px-[24px] md:px-[128px] md:flex">
+        <LogoBimafik className="md:hidden size-[40px]" />
+        <div className="hidden md:flex md:w-[35%] items-center gap-5">
+          <Logo className="size-[40px]" />
+          <a href="/" className="font-semibold">
+            Bimbingan Akademik Mahasiswa FIK
+          </a>
+        </div>
+        <div
+          className={`hidden md:flex items-center pl-8 w-[45%] ${roleUser === "Kaprodi" ? "gap-10" : "gap-6"} md:flex`}
         >
-          Beranda
-        </a>
-        <Link
-          href="/informasi-akademik"
-          className={`${
-            isActive("/informasi-akademik") ? "font-bold text-orange-500" : ""
-          }`}
-        >
-          Informasi Akademik
-        </Link>
-        <Link
-          href="/pengajuan-bimbingan"
-          className={`${
-            isActive("/pengajuan-bimbingan") ? "font-bold text-orange-500" : ""
-          } ${roleUser !== "Mahasiswa" && "hidden"}`}
-        >
-          Pengajuan Bimbingan
-        </Link>
-        <Link
-          href="/laporan-bimbingan"
-          className={`${
-            isActive("/laporan-bimbingan") ? "font-bold text-orange-500" : ""
-          } ${roleUser !== "Dosen PA" && "hidden"}`}
-        >
-          Laporan Bimbingan
-        </Link>
-      </div>
-      <div className="flex gap-10 justify-end w-[20%] items-center">
-        {roleUser === "Dosen PA" && (
+          <a
+            href="/"
+            className={`${isActive("/") ? "font-bold text-orange-500" : ""}`}
+          >
+            Beranda
+          </a>
+          <Link
+            href="/informasi-akademik"
+            className={`${
+              isActive("/informasi-akademik") ? "font-bold text-orange-500" : ""
+            }`}
+          >
+            Informasi Akademik
+          </Link>
+          <Link
+            href="/pengajuan-bimbingan"
+            className={`${
+              isActive("/pengajuan-bimbingan")
+                ? "font-bold text-orange-500"
+                : ""
+            } ${roleUser !== "Mahasiswa" && "hidden"}`}
+          >
+            Pengajuan Bimbingan
+          </Link>
+          <Link
+            href="/laporan-bimbingan"
+            className={`${
+              isActive("/laporan-bimbingan") ? "font-bold text-orange-500" : ""
+            } ${roleUser !== "Dosen PA" && "hidden"}`}
+          >
+            Laporan Bimbingan
+          </Link>
+        </div>
+        <div className="flex gap-10 justify-end md:w-[20%] items-center md:flex">
           <Link href="/chatpribadi">
             <MessageSquareText className="cursor-pointer" />
           </Link>
-        )}
-        {roleUser === "Mahasiswa" && (
-          <Link href="/chatpribadi">
-            <MessageSquareText className="cursor-pointer" />
-          </Link>
-        )}
-        <NotificationButton
-          onClick={() => setIsModalNotificationOpen((prev) => !prev)}
-          dataNotification={dataNotifikasi}
-          className="w-6 h-6 cursor-pointer"
-        />
-        {dataUser?.profile_image ? (
-          <img
-            src={`../${dataUser.profile_image}`}
-            alt="Profile"
-            className="rounded-full size-8 cursor-pointer"
-            onClick={handleProfileClick}
+          <div
+            className="relative inline-block cursor-pointer hidden md:block"
+            onClick={() => setIsModalNotificationOpen((prev) => !prev)}
+          >
+            <Image
+              src={notificationIcon}
+              alt="Notification Icon"
+              className="w-6 h-6 cursor-pointer"
+              width={24}
+              height={24}
+            />
+            {notificationCount > 0 && (
+              <span className="absolute top-[-5px] right-[-5px] bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {notificationCount}
+              </span>
+            )}
+          </div>
+          {dataUser?.profile_image ? (
+            <img
+              src={`../${dataUser.profile_image}`}
+              alt="Profile"
+              className="hidden rounded-full size-8 cursor-pointer md:block"
+              onClick={handleProfileClick}
+            />
+          ) : (
+            <ProfileImage
+              className="hidden md:block size-8 cursor-pointer"
+              onClick={handleProfileClick}
+            />
+          )}
+        </div>
+        {isModalNotificationOpen && (
+          <NotificationModal
+            dataNotifikasi={dataNotifikasi}
+            className="fixed inset-0 flex items-start mt-[70px] mr-[180px] justify-end z-50"
+            onClose={closeNotificationModal}
+            refreshData={getDataNotifikasiByUserId}
+            dataUser={dataUser}
+            roleUser={roleUser}
           />
-        ) : (
-          <ProfileImage
-            className="size-8 cursor-pointer"
-            onClick={handleProfileClick}
+        )}
+        {isModalProfileOpen && (
+          <ProfileModal
+            className="fixed inset-0 flex items-start mt-[70px] mr-[130px] justify-end z-50"
+            onClose={closeProfileModal}
           />
         )}
       </div>
-      {isModalNotificationOpen && (
-        <NotificationModal
-          dataNotifikasi={dataNotifikasi}
-          className="fixed inset-0 flex items-start mt-[70px] mr-[180px] justify-end z-50"
-          onClose={closeNotificationModal}
-          refreshData={getDataNotifikasiByUserId}
-          dataUser={dataUser}
-          roleUser={roleUser}
-        />
-      )}
-      {isModalProfileOpen && (
-        <ProfileModal
-          className="fixed inset-0 flex items-start mt-[70px] mr-[130px] justify-end z-50"
-          onClose={closeProfileModal}
-        />
-      )}
-    </div>
+      <div className="fixed z-[999] bottom-0 left-0 w-full bg-white border-t flex py-3 md:hidden">
+        <div className="flex items-center justify-around w-full">
+          <a
+            href="/"
+            className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/") ? "text-orange-500" : ""}`}
+          >
+            <Home className="size-6" />
+            <span className="text-xs">Beranda</span>
+          </a>
+          <Link
+            href="/informasi-akademik"
+            className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/informasi-akademik") ? "text-orange-500" : ""}`}
+          >
+            <BookOpen className="size-6" />
+            <span className="text-xs">Informasi</span>
+          </Link>
+          {roleUser === "Mahasiswa" && (
+            <Link
+              href="/pengajuan-bimbingan"
+              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/pengajuan-bimbingan") ? "text-orange-500" : ""}`}
+            >
+              <FilePlus className="size-6" />
+              <span className="text-xs">Pengajuan</span>
+            </Link>
+          )}
+          {roleUser === "Dosen PA" && (
+            <Link
+              href="/laporan-bimbingan"
+              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/laporan-bimbingan") ? "text-orange-500" : ""}`}
+            >
+              <FileText className="size-6" />
+              <span className="text-xs">Laporan</span>
+            </Link>
+          )}
+          <div
+            className={`relative flex flex-col items-center ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""}`}
+            onClick={() => setIsModalNotificationMobileOpen((prev) => !prev)}
+          >
+            <Bell className="size-6" />
+            {notificationCount > 0 && (
+              <span className="absolute bg-red-600 top-[-5px] left-[45px] text-white text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {notificationCount}
+              </span>
+            )}
+            <span className="text-xs">Notifikasi</span>
+          </div>
+          <div
+            className={`flex flex-col items-center ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""}`}
+            onClick={() => setIsModalProfileMobileOpen((prev) => !prev)}
+          >
+            {dataUser?.profile_image ? (
+              <img
+                src={`../${dataUser.profile_image}`}
+                alt="Profile"
+                className="rounded-full size-6"
+                width={24}
+                height={24}
+              />
+            ) : (
+              <User className="size-6" />
+            )}
+            <span className="text-xs">Profil</span>
+          </div>
+        </div>
+        {isModalNotificationMobileOpen && (
+          <NotificationModal
+            dataNotifikasi={dataNotifikasi}
+            className="fixed inset-0 flex items-end mb-[90px] mr-3 justify-end z-50"
+            onClose={closeNotificationMobileModal}
+            refreshData={getDataNotifikasiByUserId}
+            dataUser={dataUser}
+            roleUser={roleUser}
+          />
+        )}
+        {isModalProfileMobileOpen && (
+          <ProfileModal
+            className="fixed inset-0 flex items-end mb-[90px] mr-3 justify-end z-50"
+            onClose={closeProfileMobileModal}
+          />
+        )}
+      </div>
+    </>
   );
 };
 

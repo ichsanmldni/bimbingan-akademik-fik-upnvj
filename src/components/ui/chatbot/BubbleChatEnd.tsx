@@ -10,7 +10,7 @@ const BubbleChatEnd = ({ data }: any) => {
 
   return (
     <div className="w-full flex mt-4 justify-end">
-      <div className="px-4 py-2 rounded-lg max-w-[800px] border bg-white">
+      <div className="px-4 py-2 rounded-lg max-w[200px] md:max-w-[800px] border bg-white">
         <p className="pr-4">{data.pesan}</p>
         <p className="text-[10px] mt-[2px] text-end">{formattedTime}</p>
       </div>

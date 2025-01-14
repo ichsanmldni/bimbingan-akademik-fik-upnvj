@@ -1705,25 +1705,25 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   return (
     <>
       {selectedSubMenuDashboard === "Profile Dosen PA" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
-          <div className="border px-[70px] py-[30px] rounded-lg">
+        <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
+          <div className="border px-4 md:px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
                 <img
                   alt="preview"
                   src={imagePreview}
-                  className="size-[200px] rounded-full object-cover"
+                  className="size-[80px] min-w-[80px] md:size-[200px] rounded-full object-cover"
                 />
               ) : dataDosen && dataDosen?.profile_image ? (
                 <img
                   src={dataDosen.profile_image}
                   alt="Profile"
-                  className="size-[200px] rounded-full object-cover"
+                  className="size-[80px] min-w-[80px] md:size-[200px] rounded-full object-cover"
                 />
               ) : (
                 <ProfileImage
                   onClick={() => {}}
-                  className="size-[200px] rounded-full"
+                  className="size-[80px] min-w-[80px] md:size-[200px] rounded-full"
                 />
               )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
@@ -1737,7 +1737,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                 />
                 <label
                   htmlFor="fileInput"
-                  className="bg-orange-500 hover:bg-orange-600 w-[30%] px-4 py-2 text-white rounded-md text-center cursor-pointer"
+                  className="bg-orange-500 hover:bg-orange-600 md:w-[30%] px-4 py-2 text-white rounded-md text-center cursor-pointer"
                 >
                   Pilih Foto
                 </label>
@@ -1806,7 +1806,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         </div>
       )}
       {selectedSubMenuDashboard === "Jadwal Kosong Dosen Role Dosen PA" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
+        <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
           <div className=" flex flex-col gap-6 border px-[25px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
               Jadwal Kosong Dosen Pembimbing Akademik
@@ -1834,7 +1834,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                   </button>
                   {openDay === day && (
                     <div className="flex flex-col gap-4 px-4 pb-2">
-                      <div className="grid grid-cols-3 w-[90%] gap-6 mt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 w-[90%] gap-6 mt-6">
                         {dataJadwalDosenPA
                           .filter((data) => data.hari === day)
                           .sort((a, b) => {
@@ -2024,7 +2024,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         </div>
       )}
       {selectedSubMenuDashboard === "Pengesahan Absensi Bimbingan" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px] min-h-[500px]">
+        <div className="md:w-[75%] px-4 md:pl-[30px] mb-12 md:pr-[128px] py-4 md:py-[30px] md:min-h-[500px]">
           <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
               Pengesahan Absensi Bimbingan Akademik Mahasiswa
@@ -2206,7 +2206,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       )}
       {selectedSubMenuDashboard ===
         "Pengajuan Bimbingan Akademik Mahasiswa" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px]">
+        <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
           <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
               Pengajuan Bimbingan Akademik Mahasiswa
@@ -2348,11 +2348,11 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       )}
       {selectedSubMenuDashboard ===
         "Riwayat Laporan Bimbingan Role Dosen PA" && (
-        <div className="w-[75%] pl-[30px] pr-[128px] py-[30px] min-h-[500px]">
+        <div className="md:w-[75%] border md:border-none mt-4 md:mt-0 mx-4 md:mx-0 rounded-lg md:rounded-none px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px] min-h-[500px]">
           <div className=" flex flex-col gap-6 rounded-lg">
             {!isDetailLaporanDosenClicked ? (
               <div className="flex flex-col gap-4">
-                <h1 className="font-semibold text-[24px]">
+                <h1 className="font-semibold text-[18px] md:text-[24px]">
                   Riwayat Laporan Bimbingan Akademik
                 </h1>
                 {dataLaporanBimbingan.length > 0 ? (
@@ -2416,7 +2416,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                 )}
               </div>
             ) : (
-              <div>
+              <div className="mb-20">
                 <div className="flex gap-2 mt-2">
                   <Image
                     src={backIconOrange}

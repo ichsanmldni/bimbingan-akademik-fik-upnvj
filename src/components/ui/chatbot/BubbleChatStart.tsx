@@ -24,7 +24,7 @@ const BubbleChatStart = ({ data }: any) => {
 
   return (
     <div className="w-full flex mt-4 justify-start">
-      <div className="px-4 py-2 rounded-lg max-w-[800px] border bg-white">
+      <div className="px-4 py-2 rounded-lg max-w-[200px] md:max-w-[800px] border bg-white">
         {data.pesan.split("\n").map((line: any, index: any) => (
           <React.Fragment key={index}>
             {formatText(line)}

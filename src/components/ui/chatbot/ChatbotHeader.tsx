@@ -7,12 +7,12 @@ const ChatbotHeader = () => {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <p className="font-bold text-[48px]">Halo!</p>
-        <p className="font-bold text-[32px]">
+        <p className="font-bold text-[24px] md:text-[48px]">Halo!</p>
+        <p className="font-bold text=[16px] md:text-[32px]">
           Ada yang bisa saya bantu seputar informasi perkuliahan Anda?
         </p>
       </div>
-      <div className="flex gap-[48px]">
+      <div className="flex gap-[24px] md:gap-[48px]">
         <Link href="/chatpribadi" className="w-full">
           <Menu
             icon={MessageSquareText}

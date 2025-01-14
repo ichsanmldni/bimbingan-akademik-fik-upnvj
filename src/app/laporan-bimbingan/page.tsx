@@ -2320,16 +2320,16 @@ export default function Home() {
                 : undefined
         }
       />
-      <div className="pt-[100px]">
-        <div className="mt-4 mb-[100px] mx-[130px] border rounded-lg">
+      <div className="pt-20 md:pt-[100px]">
+        <div className="mt-4 mb-20 md:mb-[100px] mx-2 md:mx-[130px] border rounded-lg">
           <form
-            className="flex flex-col gap-4 p-8"
+            className="flex flex-col gap-4 px-2 py-4 md:p-8"
             onSubmit={handleAddLaporanBimbingan}
           >
             {dataBimbingan.filter(
               (data: any) => data.laporan_bimbingan_id === null
             ).length === 0 ? (
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center p-4">
                 <svg
                   className="h-12 w-12 text-red-500 mb-4"
                   xmlns="http://www.w3.org/2000/svg"
@@ -2358,7 +2358,7 @@ export default function Home() {
             ) : (
               <div>
                 <div className="flex gap-4">
-                  <div className="relative">
+                  <div className="relative max-w-[30%] md:max-w[100%]">
                     <select
                       value={jenisBimbinganFilter}
                       onChange={(e) => setJenisBimbinganFilter(e.target.value)}
@@ -2391,7 +2391,7 @@ export default function Home() {
                     </span>
                   </div>
                   {jenisBimbinganFilter !== "" && (
-                    <div className="relative">
+                    <div className="relative max-w-[30%] md:max-w[100%]">
                       <select
                         disabled={jenisBimbinganFilter === "" ? true : false}
                         value={jurusanFilter}
@@ -2426,7 +2426,7 @@ export default function Home() {
                     </div>
                   )}
                   {jenisBimbinganFilter !== "" && jurusanFilter !== "" && (
-                    <div className="relative">
+                    <div className="relative max-w-[30%] md:max-w[100%]">
                       <select
                         disabled={
                           jenisBimbinganFilter === ""
@@ -2662,7 +2662,7 @@ export default function Home() {
                           <div className="flex space-x-4 pb-4">
                             {filteredBimbingan.map((data: any) => (
                               <div
-                                className={`border rounded-lg min-w-[30%] flex flex-col gap-1 text-[15px] cursor-pointer ${
+                                className={`border rounded-lg min-w-[70%] md:min-w-[30%] flex flex-col gap-1 text-[15px] cursor-pointer ${
                                   selectedBimbingan.some(
                                     (bimbingan: any) => bimbingan.id === data.id
                                   )
@@ -2745,7 +2745,7 @@ export default function Home() {
                       </div>
                       {selectedBimbingan.length > 0 ? (
                         jenisBimbinganFilter === "Perwalian" ? (
-                          <div className="flex flex-col gap-4 mt-6 border p-8 rounded-lg">
+                          <div className="flex flex-col gap-4 mt-6 border py-2 px-4 md:p-8 rounded-lg">
                             <h1 className="text-center font-bold text-[20px] mb-2">
                               LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK
                               FAKULTAS ILMU KOMPUTER UPN “VETERAN” JAKARTA
@@ -2812,7 +2812,7 @@ export default function Home() {
                                   {showPrestasiAkademikMahasiswaForm && (
                                     <div className="mt-2 flex flex-col gap-4 p-4">
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-1/2 md:w-1/6">
                                           IPK &ge; 3.5
                                         </label>
                                         <InputField
@@ -2831,7 +2831,7 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-1/2 md:w-1/6">
                                           3 &le; IPK &lt; 3.5
                                         </label>
                                         <InputField
@@ -2850,7 +2850,7 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-1/2 md:w-1/6">
                                           2.5 &le; IPK &lt; 3
                                         </label>
                                         <InputField
@@ -2869,7 +2869,7 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-1/2 md:w-1/6">
                                           2 &le; IPK &lt; 2.5
                                         </label>
                                         <InputField
@@ -2888,7 +2888,7 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-1/2 md:w-1/6">
                                           IPK &lt; 2
                                         </label>
                                         <InputField
@@ -2943,7 +2943,7 @@ export default function Home() {
                                             src={plusIcon}
                                             alt="Plus Icon"
                                           />
-                                          <p className="text-white text-[14px]">
+                                          <p className="text-white text-[10px] md:text-[14px]">
                                             Tambah Prestasi Ilmiah Mahasiswa
                                           </p>
                                         </button>
@@ -3311,7 +3311,9 @@ export default function Home() {
                                   {showPrestasiMahasiswaMendapatkanBeasiswaForm && (
                                     <div className="mt-2 flex flex-col gap-4 p-4">
                                       <div className="flex items-center">
-                                        <label className="w-1/6">BBM</label>
+                                        <label className="w-2/3 md:w-1/6">
+                                          BBM
+                                        </label>
                                         <InputField
                                           disabled={false}
                                           type="number"
@@ -3328,7 +3330,7 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-2/3 md:w-1/6">
                                           Pegadaian
                                         </label>
                                         <InputField
@@ -3347,7 +3349,7 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-2/3 md:w-1/6">
                                           Supersemar
                                         </label>
                                         <InputField
@@ -3366,7 +3368,9 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">PPA</label>
+                                        <label className="w-2/3 md:w-1/6">
+                                          PPA
+                                        </label>
                                         <InputField
                                           disabled={false}
                                           type="number"
@@ -3383,7 +3387,9 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">YKL</label>
+                                        <label className="w-2/3 md:w-1/6">
+                                          YKL
+                                        </label>
                                         <InputField
                                           disabled={false}
                                           type="number"
@@ -3400,7 +3406,7 @@ export default function Home() {
                                         />
                                       </div>
                                       <div className="flex items-center">
-                                        <label className="w-1/6">
+                                        <label className="w-2/3 md:w-1/6">
                                           Dan lain-lain
                                         </label>
                                         <InputField
@@ -3457,7 +3463,7 @@ export default function Home() {
                                             src={plusIcon}
                                             alt="Plus Icon"
                                           />
-                                          <p className="text-white text-[14px]">
+                                          <p className="text-white text-[10px] md:text-[14px]">
                                             Tambah Prestasi Porseni Mahasiswa
                                           </p>
                                         </button>
@@ -3835,7 +3841,7 @@ export default function Home() {
                                             src={plusIcon}
                                             alt="Plus Icon"
                                           />
-                                          <p className="text-white text-[14px]">
+                                          <p className="text-white text-[10px] md:text-[14px]">
                                             Tambah Data Status Mahasiswa
                                           </p>
                                         </button>
@@ -4284,7 +4290,7 @@ export default function Home() {
                                 </label>
                               </div>
                             )}
-                            <div className="flex flex-col w-1/2 mx-auto gap-2 my-4">
+                            <div className="flex flex-col w-full md:w-1/2 mx-auto gap-2 my-4">
                               <p className="text-center font-medium">
                                 Silahkan Tanda Tangan Laporan Perwalian
                               </p>
@@ -4573,10 +4579,10 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="border">
+      <div className="border hidden md:block">
         <div className="flex justify-between mx-32 py-8 border-black border-b">
           <div className="flex gap-5 w-2/5 items-center">
-            <Logo className="size-[100px]" />
+            <Logo className="size-[100px] min-w-[100px]" />
             <h1 className="text-start font-semibold text-[30px]">
               Bimbingan Akademik Mahasiswa FIK
             </h1>

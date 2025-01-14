@@ -189,35 +189,20 @@ export default function Home() {
         roleUser={roleUser}
         dataUser={
           roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data: any) => data.id === dataUser?.id) || {}
+            ? dataMahasiswa.find((data: any) => data.nim === dataUser?.nim) ||
+              {}
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data: any) => data.id === dataUser?.id) || {}
+              ? dataDosenPA.find((data: any) => data.nip === dataUser?.nip) ||
+                {}
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data: any) => data.id === dataUser?.id) ||
+                ? dataKaprodi.find((data: any) => data.nip === dataUser?.nip) ||
                   {}
                 : {}
         }
       />
-      <div className="flex w-full pt-[80px]">
-        <div className="flex flex-col w-[25%] border ml-32 gap-6 pt-10 pb-6 px-8">
-          <div className="flex flex-col gap-4">
-            <h1 className="text-[18px] font-semibold">Informasi Akademik</h1>
-            <div className="relative flex gap-2 rounded-lg p-2 bg-[#F8FAFC]">
-              <input
-                type="text"
-                placeholder="Cari"
-                className="pl-8 pr-2 w-full outline-none bg-transparent"
-              />
-              <span className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                <Image
-                  src={searchIcon}
-                  alt="Search Icon"
-                  width={20}
-                  height={20}
-                />
-              </span>
-            </div>
-          </div>
+      <div className="flex w-full h-screen pt-[80px]">
+        <div className="flex flex-col w-[40%] md:w-[25%] border md:ml-32 gap-6 pt-10 pb-6 px-8">
+          <h1 className="md:text-[18px] font-semibold">Informasi Akademik</h1>
           <div className="flex flex-col gap-4">
             {dataBab.map((data: any) => {
               return (
@@ -267,18 +252,18 @@ export default function Home() {
           </div>
         </div>
         {/* ini isi */}
-        <div className="w-[75%] h-[500px] py-10 px-[100px]">
+        <div className="md:w-[75%] w-[70%] h-[500px] py-10 px-4 md:px-[100px]">
           <h1 className="font-bold text-[18px]">{selectedSubBabData?.nama}</h1>
-          <p className="mt-5 leading-[26px] text-justify">
+          <p className="mt-5 leading-[26px] overflow-y-auto text-justify">
             {selectedSubBabData?.isi}
           </p>
         </div>
       </div>
 
-      <div className="border">
+      <div className="hidden md:block border">
         <div className="flex justify-between mx-32 py-8 border-black border-b">
           <div className="flex gap-5 w-2/5 items-center">
-            <Logo className="size-[100px]" />
+            <Logo className="size-[100px] min-w-[100px]" />
             <h1 className="text-start font-semibold text-[30px]">
               Bimbingan Akademik Mahasiswa FIK
             </h1>

@@ -143,11 +143,11 @@ const Dashboard = () => {
                 : {}
         }
       />
-      <div className="flex w-full pt-[80px]">
-        <div className="flex flex-col w-[25%] border ml-32 gap-6 pt-8 pb-6 px-8">
+      <div className="md:flex min-h-screen w-full pt-[80px]">
+        <div className="flex flex-col md:w-[25%] border rounded-lg md:rounded-none mt-4 md:mt-0 mx-4 md:mx-0 md:ml-32 gap-6 pt-4 md:pt-8 pb-4 md:pb-6 px-4 md:px-8">
           <h1 className="text-[18px] font-semibold">Dashboard {roleUser}</h1>
           {roleUser === "Mahasiswa" && (
-            <div className="flex flex-col gap-1">
+            <div className="flex mb-4 flex-col gap-1">
               <button
                 className={`${selectedSubMenuDashboard === "Profile Mahasiswa" && "bg-orange-400 text-white font-medium"} text-left text-[14px] rounded-xl py-2 px-3`}
                 onClick={() =>
@@ -289,10 +289,10 @@ const Dashboard = () => {
         )}
       </div>
 
-      <div className="border">
+      <div className="border hidden md:block">
         <div className="flex justify-between mx-32 py-8 border-black border-b">
           <div className="flex gap-5 w-2/5 items-center">
-            <Logo className="size-[100px]" />
+            <Logo className="size-[100px] min-w-[100px]" />
             <h1 className="text-start font-semibold text-[30px]">
               Bimbingan Akademik Mahasiswa FIK
             </h1>

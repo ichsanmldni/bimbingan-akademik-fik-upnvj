@@ -454,8 +454,6 @@ export default function ChatMahasiswa() {
 
   let previousDate: string | null = null;
 
-  console.log(selectedDataPesanSiaran);
-
   return (
     <div>
       <div className="flex">
@@ -476,7 +474,7 @@ export default function ChatMahasiswa() {
                   Pesan Siaran
                 </p>
                 <div
-                  className={`flex px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
+                  className={`flex px-4 md:px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
                   onClick={() => handleClickDetailPesanSiaran()}
                 >
                   <div className="flex gap-4">
@@ -484,11 +482,13 @@ export default function ChatMahasiswa() {
                       <Image src={broadcastIcon} className="size-10" alt="" />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <p className={`text-[18px] font-medium`}>
+                      <p className={`text-[14px] md:text-[18px] font-medium`}>
                         Pesan Siaran Mahasiswa Bimbingan
                       </p>
                       {selectedDataPesanSiaran.id && (
-                        <p>Anda: {selectedDataPesanSiaran.pesan_terakhir}</p>
+                        <p className="text-[14px] md:text-[16px]">
+                          Anda: {selectedDataPesanSiaran.pesan_terakhir}
+                        </p>
                       )}
                       {!selectedDataPesanSiaran.id && (
                         <p>

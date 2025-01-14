@@ -26,6 +26,7 @@ export default function Home() {
   const [dataMahasiswa, setDataMahasiswa] = useState<any>([]);
   const [dataUser, setDataUser] = useState<any>(null);
   const [isNavigating, setIsNavigating] = useState<any>(false);
+
   useEffect(() => {
     if (isNavigating) {
       // Reset isNavigating after a short delay
@@ -137,15 +138,15 @@ export default function Home() {
               }
             />
             <div className="bg-slate-100 h-screen">
-              <div className="flex h-full items-center gap-[80px] mx-[128px]">
+              <div className="flex flex-col md:flex-row h-full justify-center md:items-center gap-[80px] mx-[28px] md:mx-[128px]">
                 {roleUser === "Mahasiswa" && (
-                  <div className="flex flex-col gap-5 w-2/5">
-                    <h1 className="font-[800] text-[40px]">
+                  <div className="flex flex-col gap-5 md:w-2/5">
+                    <h1 className="font-[800] text-[24px] md:text-[40px]">
                       Ajukan bimbingan akademik sekarang dan raih sukses
                       akademik!
                     </h1>
                     <Link
-                      className="bg-orange-500 hover:bg-orange-600 w-1/3 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
+                      className="bg-orange-500 hover:bg-orange-600 md:w-1/3 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
                       href="/pengajuan-bimbingan"
                     >
                       Ajukan Bimbingan
@@ -154,7 +155,7 @@ export default function Home() {
                 )}
                 {roleUser === "Dosen PA" && (
                   <div className="flex flex-col gap-5">
-                    <h1 className="font-[800] text-[40px]">
+                    <h1 className="font-[800] text-[24px] md:text-[40px]">
                       Laporkan Hasil Bimbingan untuk Membantu Mahasiswa Lebih
                       Baik!
                     </h1>
@@ -163,7 +164,7 @@ export default function Home() {
                       membantu mahasiswa berkembang.
                     </p>
                     <Link
-                      className="bg-orange-500 hover:bg-orange-600 w-[35%] rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
+                      className="bg-orange-500 hover:bg-orange-600 md:w-[35%] rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
                       href="/laporan-bimbingan"
                     >
                       Laporkan Bimbingan
@@ -171,8 +172,8 @@ export default function Home() {
                   </div>
                 )}
                 {roleUser === "Kaprodi" && (
-                  <div className="flex flex-col gap-5 w-2/5">
-                    <h1 className="font-[800] text-[40px]">
+                  <div className="flex flex-col gap-5 w-full md:w-2/5">
+                    <h1 className="font-[800] text-[24px] md:text-[40px]">
                       Pantau dan Evaluasi Laporan Bimbingan!
                     </h1>
                     <p>
@@ -189,7 +190,7 @@ export default function Home() {
                   </div>
                 )}
                 <Image
-                  className={`${roleUser === "Dosen PA" ? "w-[46%]" : "w-1/2"}`}
+                  className={`${roleUser === "Dosen PA" ? "md:w-[46%]" : "md:w-1/2"}`}
                   src={landingPageImage}
                   alt="Bimbingan"
                 />
@@ -198,7 +199,7 @@ export default function Home() {
             {roleUser === "Mahasiswa" && (
               <Link
                 href="/chatbot"
-                className="fixed bottom-8 right-8 bg-orange-500 p-4 rounded-full hover:bg-orange-600 shadow-lg"
+                className="fixed top-[120px] right-4 md:top-[100px] md:right-8 bg-orange-500 p-4 rounded-full shadow-lg animate-pulse-size"
                 aria-label="Akses Chatbot"
               >
                 <Image
@@ -208,10 +209,11 @@ export default function Home() {
                 />
               </Link>
             )}
-            <div className="">
+
+            <div className="hidden md:block border">
               <div className="flex justify-between mx-32 py-8 border-black border-b">
                 <div className="flex gap-5 w-2/5 items-center">
-                  <Logo className="size-[100px]" />
+                  <Logo className="size-[100px] min-w-[100px] " />
                   <h1 className="text-start font-semibold text-[30px]">
                     Bimbingan Akademik Mahasiswa FIK
                   </h1>
