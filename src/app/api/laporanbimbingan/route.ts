@@ -26,7 +26,6 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
   try {
     const body: any = await req.json();
-    console.log(body)
     const {
       kaprodi_id,
       status,

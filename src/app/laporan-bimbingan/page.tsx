@@ -487,7 +487,7 @@ export default function Home() {
           )}
         </td>
         <td className="border-b text-center align-top border-gray-200 px-2 py-2">
-          <Image
+          <img
             alt="ttd mhs"
             src={data.ttd_mhs}
             className="size-[48px] mx-auto p-1"
@@ -513,7 +513,7 @@ export default function Home() {
           {data.pengajuan_bimbingan.nama_lengkap}
         </td>
         <td className="border-b text-center align-top border-gray-200 px-2 py-2">
-          <Image
+          <img
             alt="ttd absen"
             src={data.ttd_kehadiran}
             className="size-[48px] mx-auto p-1"
@@ -4232,7 +4232,7 @@ export default function Home() {
                                       key={index}
                                       className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
                                     >
-                                      <Image
+                                      <img
                                         src={src}
                                         alt={`Preview ${index + 1}`}
                                         className="max-h-[200px]"
@@ -4440,7 +4440,7 @@ export default function Home() {
                                       key={index}
                                       className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
                                     >
-                                      <Image
+                                      <img
                                         src={src}
                                         alt={`Preview ${index + 1}`}
                                         className="max-h-[200px]"

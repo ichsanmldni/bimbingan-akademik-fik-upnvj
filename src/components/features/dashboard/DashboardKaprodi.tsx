@@ -33,20 +33,25 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     useState(null);
   const [selectedDataDosenPA, setSelectedDataDosenPA] = useState(null);
   const [feedbackKaprodi, setFeedbackKaprodi] = useState<string>("");
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState<string>("");
-  const [selectedSemester, setSelectedSemester] = useState<string>("");
+  const [selectedTahunAjaran, setSelectedTahunAjaran] =
+    useState<string>("Semua Tahun Ajaran");
+  const [selectedSemester, setSelectedSemester] =
+    useState<string>("Semua Semester");
   const [isDetailLaporanKaprodiClicked, setIsDetailLaporanKaprodiClicked] =
     useState<boolean>(false);
   const [isDetailDosenPAClicked, setIsDetailDosenPAClicked] =
     useState<boolean>(false);
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
+  const [filteredDataLaporanBimbingan, setFilteredDataLaporanBimbingan] =
+    useState([]);
   const [dataLaporanBimbinganByDosenPAID, setDataLaporanBimbinganByDosenPAID] =
     useState<any>([]);
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataBimbinganBySelectedDosenPA, setDataBimbinganBySelectedDosenPA] =
     useState([]);
   const [dataBimbingan, setDataBimbingan] = useState([]);
+  const [filteredDataBimbingan, setFilteredDataBimbingan] = useState([]);
   const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState<any>({});
   const [dataKaprodiUser, setDataKaprodiUser] = useState<any>({});
@@ -61,6 +66,8 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   ] = useState([]);
   const [selectedDataStatusMahasiswa, setSelectedDataStatusMahasiswa] =
     useState([]);
+  const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
+  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -72,6 +79,32 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   const handleDetailDosenPA = (data) => {
     setSelectedDataDosenPA(data);
     setIsDetailDosenPAClicked((prev) => !prev);
+  };
+
+  const getDataTahunAJaran = async () => {
+    try {
+      const response = await axios.post<any>(
+        `${API_BASE_URL}/api/datatahunajaran`
+      );
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+      const data = await response.data.data;
+
+      // Memfilter dan memformat data tahun ajaran
+      const tahunAjaran = data.map((item: any) => {
+        return `${item.tahun_periode}/${item.tahun_periode + 1}`;
+      });
+
+      // Menghilangkan duplikat dengan menggunakan Set
+      const uniqueTahunAjaran = [...new Set(tahunAjaran)];
+
+      // Menyimpan data tahun ajaran yang sudah difilter
+      setDataTahunAjaran(uniqueTahunAjaran);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
   };
 
   const getDataDosenPA = async () => {
@@ -432,6 +465,52 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       throw error;
     }
   };
+
+  const getDataBimbinganFilteredByTahunAjaranAndSemester = () => {
+    console.log(selectedTahunAjaran);
+    if (selectedTahunAjaran === "Semua Tahun Ajaran") {
+      setFilteredDataBimbingan(dataBimbingan);
+      return;
+    }
+    const filteredDataBimbinganByTahunAjaran = dataBimbingan
+      .filter((data) => data.laporan_bimbingan_id !== null)
+      .filter(
+        (data) => data.laporan_bimbingan.tahun_ajaran === selectedTahunAjaran
+      );
+    if (selectedSemester === "Semua Semester") {
+      setFilteredDataBimbingan(filteredDataBimbinganByTahunAjaran);
+      return;
+    }
+    const filteredDataBimbinganBySemester = filteredDataBimbinganByTahunAjaran
+      .filter((data) => data.laporan_bimbingan_id !== null)
+      .filter((data) => data.laporan_bimbingan.semester === selectedSemester);
+    setFilteredDataBimbingan(filteredDataBimbinganBySemester);
+    return;
+  };
+
+  const getDataLaporanBimbinganFilteredByTahunAjaranAndSemester = () => {
+    if (selectedTahunAjaran === "Semua Tahun Ajaran") {
+      setFilteredDataLaporanBimbingan(dataLaporanBimbingan);
+      return;
+    }
+    const filteredDataLaporanBimbinganByTahunAjaran =
+      dataLaporanBimbingan.filter(
+        (data) => data.tahun_ajaran === selectedTahunAjaran
+      );
+    if (selectedSemester === "Semua Semester") {
+      setFilteredDataLaporanBimbingan(
+        filteredDataLaporanBimbinganByTahunAjaran
+      );
+      return;
+    }
+    const filteredDataLaporanBimbinganBySemester =
+      filteredDataLaporanBimbinganByTahunAjaran.filter(
+        (data) => data.semester === selectedSemester
+      );
+    setFilteredDataLaporanBimbingan(filteredDataLaporanBimbinganBySemester);
+    return;
+  };
+
   const getDataStatusMahasiswaByIdLaporan = async () => {
     try {
       const dataStatusMahasiswa = await axios.get<any>(
@@ -449,12 +528,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       throw error;
     }
   };
-
-  useEffect(() => {
-    getDataPrestasiIlmiahMahasiswaByIdLaporan();
-    getDataPrestasiPorseniMahasiswaByIdLaporan();
-    getDataStatusMahasiswaByIdLaporan();
-  }, [selectedDataLaporanBimbingan]);
 
   const handlePreviewPDF = async (
     e: React.FormEvent<HTMLFormElement>,
@@ -1374,9 +1447,17 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   };
 
   useEffect(() => {
+    getDataPrestasiIlmiahMahasiswaByIdLaporan();
+    getDataPrestasiPorseniMahasiswaByIdLaporan();
+    getDataStatusMahasiswaByIdLaporan();
+  }, [selectedDataLaporanBimbingan]);
+
+  useEffect(() => {
     setImagePreview(null);
     getDataKaprodiByNip();
     setIsDetailLaporanKaprodiClicked(false);
+    setSelectedTahunAjaran("Semua Tahun Ajaran");
+    setSelectedSemester("Semua Semester");
   }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
@@ -1387,8 +1468,14 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   }, [dataUser]);
 
   useEffect(() => {
-    getDataBimbinganByDosenPaId();
-    getDataLaporanBimbinganBySelectedDosenPA();
+    if (
+      selectedDataDosenPA &&
+      selectedDataDosenPA.nip &&
+      selectedDataDosenPA.id
+    ) {
+      getDataBimbinganByDosenPaId();
+      getDataLaporanBimbinganBySelectedDosenPA();
+    }
   }, [selectedDataDosenPA]);
 
   useEffect(() => {
@@ -1416,7 +1503,44 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     getDataDosenPA();
     getDataMahasiswa();
     getDataBimbingan();
+    getDataTahunAJaran();
   }, []);
+  useEffect(() => {
+    if (dataTahunAjaran.length > 0) {
+      const formattedOptions = dataTahunAjaran.map((data: any) => {
+        return {
+          value: data,
+          label: `${data}`,
+        };
+      });
+
+      setOptionsTahunAjaran(formattedOptions);
+    }
+  }, [dataTahunAjaran]);
+
+  useEffect(() => {
+    if (
+      dataBimbingan &&
+      dataBimbingan.length > 0 &&
+      dataLaporanBimbingan &&
+      dataLaporanBimbingan.length > 0
+    ) {
+      getDataBimbinganFilteredByTahunAjaranAndSemester();
+      getDataLaporanBimbinganFilteredByTahunAjaranAndSemester();
+    }
+  }, [selectedTahunAjaran, selectedSemester]);
+
+  useEffect(() => {
+    if (
+      dataBimbingan &&
+      dataBimbingan.length > 0 &&
+      dataLaporanBimbingan &&
+      dataLaporanBimbingan.length > 0
+    ) {
+      getDataBimbinganFilteredByTahunAjaranAndSemester();
+      getDataLaporanBimbinganFilteredByTahunAjaranAndSemester();
+    }
+  }, [dataLaporanBimbingan, dataBimbingan]);
 
   return (
     <Provider store={store}>
@@ -1425,13 +1549,13 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
-                <Image
+                <img
                   src={imagePreview}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : dataKaprodi && dataKaprodi.profile_image ? (
-                <Image
+                <img
                   src={dataKaprodi.profile_image}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
@@ -1528,31 +1652,100 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
           <div className="border px-[30px] py-[30px] rounded-lg">
             <div className="flex flex-col gap-4">
               <div className="flex gap-5">
-                <SelectField
-                  options={[{ value: "2024/2025", label: "2024/2025" }]}
-                  onChange={(e) => setSelectedTahunAjaran(e.target.value)}
-                  value={selectedTahunAjaran}
-                  placeholder="Semua Tahun Ajaran"
-                  className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[240px]`}
-                />
-                <SelectField
-                  options={[
-                    { value: "Gasal", label: "Gasal" },
-                    { value: "Genap", label: "Genap" },
-                  ]}
-                  onChange={(e) => setSelectedSemester(e.target.value)}
-                  value={selectedSemester}
-                  placeholder="Semua Semester"
-                  className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]`}
-                />
-              </div>
-              <div className="border rounded-lg font-semibold text-[18px]">
-                <h1 className="p-6">Persentase Sebaran</h1>
-                <div className="w-full mt-4 mx-auto max-w-[320px]">
-                  <DonutChart />
+                <div className="relative">
+                  <select
+                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px] ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
+                    value={selectedTahunAjaran}
+                    onChange={(e) => setSelectedTahunAjaran(e.target.value)}
+                  >
+                    <option value="Semua Tahun Ajaran">
+                      Semua Tahun Ajaran
+                    </option>
+                    {optionsTahunAjaran.map((option: any) => (
+                      <option
+                        className="text-black"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div
+                    className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                  >
+                    <svg
+                      className="w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+                <div className="relative">
+                  <select
+                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px] ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
+                    value={selectedSemester}
+                    onChange={(e) => setSelectedSemester(e.target.value)}
+                  >
+                    <option value="Semua Semester">Semua Semester</option>
+                    {[
+                      { value: "Ganjil", label: "Ganjil" },
+                      { value: "Genap", label: "Genap" },
+                    ].map((option: any) => (
+                      <option
+                        className="text-black"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div
+                    className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                  >
+                    <svg
+                      className="w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </div>
                 </div>
               </div>
-              <TabelStatistikLaporan />
+              {filteredDataBimbingan && filteredDataLaporanBimbingan && (
+                <div className="flex flex-col gap-5">
+                  <div className="border rounded-lg font-semibold text-[18px]">
+                    <h1 className="p-6">
+                      Persentase Sebaran Bimbingan Pribadi
+                    </h1>
+                    <div className="w-full mt-4 mx-auto">
+                      <DonutChart dataBimbingan={filteredDataBimbingan} />
+                    </div>
+                  </div>
+                  <TabelStatistikLaporan
+                    dataBimbingan={filteredDataBimbingan}
+                    dataLaporanBimbingan={filteredDataLaporanBimbingan}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1577,7 +1770,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                 </div>
                 <div className="flex flex-col gap-4 mt-4 border rounded-xl p-8">
                   <div className="flex gap-6">
-                    <Image
+                    <img
                       src={selectedDataDosenPA?.profile_image}
                       alt="Profile Image"
                       className="size-[120px] rounded-full cursor-pointer"
@@ -1640,7 +1833,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                         }}
                       >
                         <div className="flex items-center gap-4">
-                          <Image
+                          <img
                             src={data.profile_image}
                             alt="Profile Image"
                             className="w-8 h-8 rounded-full cursor-pointer"
@@ -1836,7 +2029,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                             {selectedDataLaporanBimbingan?.dokumentasi
                               ?.split(", ")
                               .map((data, index) => (
-                                <Image
+                                <img
                                   alt="dokumentasi"
                                   key={index}
                                   className="ronded rounded-xl"
@@ -1884,90 +2077,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                           )}
                         </div>
                       </div>
-                      {/* <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">Dokumentasi</h3>
-                          <img
-                            src={selectedDataLaporanBimbingan?.dokumentasi}
-                          />
-                          <p>
-                            {selectedDataLaporanBimbingan?.kendala_mahasiswa}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">
-                            Solusi yang ditawarkan
-                          </h3>
-                          <p>{selectedDataLaporanBimbingan?.solusi}</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">Kesimpulan</h3>
-                          <p>{selectedDataLaporanBimbingan?.kesimpulan}</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <h3 className="font-medium">Dokumentasi</h3>
-                          <div className="grid grid-cols-2 gap-4 items-center">
-                            {selectedDataLaporanBimbingan?.dokumentasi ? (
-                              selectedDataLaporanBimbingan.dokumentasi
-                                .split(", ")
-                                .map((data, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex justify-center border rounded-lg"
-                                  >
-                                    <img
-                                      src={data}
-                                      alt="dokumentasi"
-                                      className="min-h-[100px] p-4 max-h-[200px]"
-                                    />
-                                  </div>
-                                ))
-                            ) : (
-                              <p>-</p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-3">
-                          <h3 className="font-medium">Feedback Kaprodi</h3>
-                          {selectedDataLaporanBimbingan?.feedback_kaprodi !==
-                          null ? (
-                            <p>
-                              {selectedDataLaporanBimbingan?.feedback_kaprodi}
-                            </p>
-                          ) : (
-                            <div className="flex flex-col gap-3">
-                              <textarea
-                                placeholder={
-                                  feedbackKaprodi === ""
-                                    ? "Input Feedback"
-                                    : feedbackKaprodi
-                                }
-                                onChange={(e) => {
-                                  setFeedbackKaprodi(e.target.value);
-                                }}
-                                value={feedbackKaprodi}
-                                className="px-3 pt-2 h-[200px] text-[15px] border rounded-lg"
-                              ></textarea>
-                              <button
-                                onClick={() => {
-                                  handleEditLaporanBimbingan(
-                                    selectedDataLaporanBimbingan?.id,
-                                    selectedDataLaporanBimbingan?.dosen_pa_id,
-                                    "Sudah Diberikan Feedback"
-                                  );
-                                  setIsDetailLaporanKaprodiClicked(
-                                    !isDetailLaporanKaprodiClicked
-                                  );
-                                  setSelectedDataLaporanBimbingan(null);
-                                }}
-                                className="text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg w-1/5"
-                              >
-                                Submit
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div> */}
                     </div>
                   </div>
                 </div>

@@ -194,7 +194,6 @@ export default function Home() {
         `${API_BASE_URL}/api/pengajuanbimbingan`,
         newData
       );
-      console.log(response);
       return {
         success: true,
         message: response.data.message || "Pengajuan berhasil!",

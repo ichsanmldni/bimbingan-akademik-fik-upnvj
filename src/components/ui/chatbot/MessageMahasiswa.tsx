@@ -30,7 +30,7 @@ export default function MessageMahasiswa({ data, onClick }: any) {
       <div className="flex gap-4">
         <div className="rounded-full size-12 bg-orange-200">
           {data.mahasiswa?.profile_image ? (
-            <Image
+            <img
               src={`../${data.mahasiswa.profile_image}`}
               alt="Profile"
               className="rounded-full size-12 cursor-pointer"

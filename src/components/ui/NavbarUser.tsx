@@ -122,16 +122,23 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
         </Link>
       </div>
       <div className="flex gap-10 justify-end w-[20%] items-center">
-        <Link href="/chatpribadi">
-          <MessageSquareText className="cursor-pointer" />
-        </Link>
+        {roleUser === "Dosen PA" && (
+          <Link href="/chatpribadi">
+            <MessageSquareText className="cursor-pointer" />
+          </Link>
+        )}
+        {roleUser === "Mahasiswa" && (
+          <Link href="/chatpribadi">
+            <MessageSquareText className="cursor-pointer" />
+          </Link>
+        )}
         <NotificationButton
           onClick={() => setIsModalNotificationOpen((prev) => !prev)}
           dataNotification={dataNotifikasi}
           className="w-6 h-6 cursor-pointer"
         />
         {dataUser?.profile_image ? (
-          <Image
+          <img
             src={`../${dataUser.profile_image}`}
             alt="Profile"
             className="rounded-full size-8 cursor-pointer"

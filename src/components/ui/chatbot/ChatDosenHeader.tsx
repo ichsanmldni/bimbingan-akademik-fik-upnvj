@@ -8,7 +8,7 @@ export default function ChatDosenHeader({ data }: any) {
     <div className="flex gap-4 p-4 items-center">
       <div className="rounded-full bg-orange-200">
         {data?.profile_image ? (
-          <Image
+          <img
             src={`../${data?.profile_image}`}
             alt="Profile"
             className="rounded-full size-12 cursor-pointer"

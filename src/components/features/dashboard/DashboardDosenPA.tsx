@@ -1709,13 +1709,13 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
           <div className="border px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
-                <Image
+                <img
                   alt="preview"
                   src={imagePreview}
                   className="size-[200px] rounded-full object-cover"
                 />
               ) : dataDosen && dataDosen?.profile_image ? (
-                <Image
+                <img
                   src={dataDosen.profile_image}
                   alt="Profile"
                   className="size-[200px] rounded-full object-cover"
@@ -2095,7 +2095,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         <div className="flex flex-col gap-2">
                           <p>Dokumentasi :</p>
                           <div className="relative">
-                            <Image
+                            <img
                               className="w-[200px] cursor-pointer"
                               src={data.dokumentasi_kehadiran}
                               alt="Dokumentasi Kehadiran"
@@ -2113,7 +2113,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         </div>
                         <div className="flex flex-col gap-2">
                           <p>Tanda Tangan Kehadiran :</p>
-                          <Image
+                          <img
                             alt="ttd absensi"
                             className="self-center p-4 w-[100px]"
                             src={data.ttd_kehadiran}
@@ -2504,7 +2504,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         {dataClickedLaporanBimbingan?.dokumentasi
                           ?.split(", ")
                           .map((data, index) => (
-                            <Image
+                            <img
                               alt="dokumentasi"
                               key={index}
                               className="ronded rounded-xl"

@@ -548,7 +548,7 @@ export default function ChatDosenPA() {
                     <div className="flex gap-4">
                       <div className="rounded-full size-12 bg-orange-200">
                         {selectedDataChatPribadi.dosen_pa?.profile_image ? (
-                          <Image
+                          <img
                             src={`../${selectedDataChatPribadi.dosen_pa.profile_image}`}
                             alt="Profile"
                             className="rounded-full size-12 cursor-pointer"
