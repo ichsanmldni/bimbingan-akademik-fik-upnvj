@@ -13,5 +13,8 @@ const config: Config = {
       },
     },
   },
+  plugins: [
+    require("tailwindcss-displaymodes")
+  ]
 };
 export default config;
