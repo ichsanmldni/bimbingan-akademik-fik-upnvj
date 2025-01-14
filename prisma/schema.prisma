@@ -383,7 +383,7 @@ model mastersubbabinformasiakademik {
   id                         Int                        @id @default(autoincrement())
   bab_informasi_akademik_id  Int
   nama                       String
-  isi                        String
+  isi                        String                     @db.Text()
   order                      Int
   bab_informasi_akademik     masterbabinformasiakademik @relation(fields: [bab_informasi_akademik_id], references: [id])
 

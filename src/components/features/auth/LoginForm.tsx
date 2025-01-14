@@ -101,7 +101,9 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
   };
 
   return (
-    <div className={`border rounded-lg w-1/2 self-center ${isAdmin && "p-4"}`}>
+    <div
+      className={`border mx-4 md:mx-0 rounded-xl md:rounded-lg md:w-1/2 self-center ${isAdmin && "p-4"}`}
+    >
       <h3 className="text-center pt-4 pb-2 px-20 font-semibold text-[28px]">
         {isAdmin ? "Welcome, Admin!" : "Masuk sekarang!"}
       </h3>

@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col items-center">
       <Logo className="mt-8 mx-auto size-[72px]" />
-      <div className="flex gap-20 justify-center">
+      <div className="md:flex gap-20 justify-center">
         <LoginImage />
         <LoginForm isAdmin={false} />
       </div>
