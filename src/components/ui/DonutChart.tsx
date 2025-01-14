@@ -79,7 +79,13 @@ const DonutChart = ({ dataBimbingan }) => {
     layout: {},
     plugins: {
       legend: {
-        position: "bottom",
+        position: "bottom" as
+          | "center"
+          | "top"
+          | "right"
+          | "bottom"
+          | "left"
+          | "chartArea",
         labels: {
           padding: 20,
           color: "black",

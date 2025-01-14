@@ -88,7 +88,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
           <div className="border py-6 rounded-lg font-semibold text-[18px]">
             <h1 className="px-6 mb-6">Persentase Sebaran</h1>
             <div className="w-full mt-4 mx-auto max-w-[320px]">
-              <DonutChart />
+              <DonutChart dataBimbingan={[]} />
             </div>
           </div>
           <TabelDashboardAdmin />
