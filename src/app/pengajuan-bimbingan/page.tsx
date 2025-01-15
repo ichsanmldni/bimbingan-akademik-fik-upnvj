@@ -558,7 +558,18 @@ export default function Home() {
                 )}
                 <div className={`flex gap-4`}>
                   {dataJadwalDosenPa
-                    .filter((jadwal) => jadwal.hari === selectedHari)
+                    .filter((data) => data.hari === selectedHari)
+                    .sort((a, b) => {
+                      // Mengonversi jam_mulai ke format yang bisa dibandingkan
+                      const jamMulaiA = a.jam_mulai.split(":").map(Number);
+                      const jamMulaiB = b.jam_mulai.split(":").map(Number);
+
+                      // Menghitung total menit untuk perbandingan
+                      const totalMenitA = jamMulaiA[0] * 60 + jamMulaiA[1];
+                      const totalMenitB = jamMulaiB[0] * 60 + jamMulaiB[1];
+
+                      return totalMenitA - totalMenitB; // Mengurutkan dari yang terkecil
+                    })
                     .map((jadwal) => (
                       <div
                         key={jadwal.id}

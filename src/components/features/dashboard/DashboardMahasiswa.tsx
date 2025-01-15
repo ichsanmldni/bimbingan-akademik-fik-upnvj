@@ -793,16 +793,35 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                       <div className="px-2 py-4 md:px-4 md:pt-6 md:pb-2">
                         {filteredJadwal.length > 0 ? (
                           <div className="grid grid-cols-3 gap-4">
-                            {filteredJadwal.map((data, index) => (
-                              <div
-                                key={index}
-                                className="flex flex-col items-center justify-center bg-white shadow rounded p-2"
-                              >
-                                <span className="text-[14px] font-medium">
-                                  {`${data.jam_mulai} - ${data.jam_selesai}`}
-                                </span>
-                              </div>
-                            ))}
+                            {filteredJadwal
+                              .filter((data) => data.hari === day)
+                              .sort((a, b) => {
+                                // Mengonversi jam_mulai ke format yang bisa dibandingkan
+                                const jamMulaiA = a.jam_mulai
+                                  .split(":")
+                                  .map(Number);
+                                const jamMulaiB = b.jam_mulai
+                                  .split(":")
+                                  .map(Number);
+
+                                // Menghitung total menit untuk perbandingan
+                                const totalMenitA =
+                                  jamMulaiA[0] * 60 + jamMulaiA[1];
+                                const totalMenitB =
+                                  jamMulaiB[0] * 60 + jamMulaiB[1];
+
+                                return totalMenitA - totalMenitB; // Mengurutkan dari yang terkecil
+                              })
+                              .map((data, index) => (
+                                <div
+                                  key={index}
+                                  className="flex flex-col items-center justify-center bg-white shadow rounded p-2"
+                                >
+                                  <span className="text-[14px] font-medium">
+                                    {`${data.jam_mulai} - ${data.jam_selesai}`}
+                                  </span>
+                                </div>
+                              ))}
                           </div>
                         ) : (
                           <p className="text-red-500 text-[14px]">
