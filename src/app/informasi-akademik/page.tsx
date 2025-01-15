@@ -200,7 +200,7 @@ export default function Home() {
                 : {}
         }
       />
-      <div className="flex w-full h-screen pt-[80px]">
+      <div className="flex w-full overflow-y-auto min-h-screen pt-[80px]">
         <div className="flex flex-col w-[40%] md:w-[25%] border md:ml-32 gap-6 pt-10 pb-6 px-8">
           <h1 className="md:text-[18px] font-semibold">Informasi Akademik</h1>
           <div className="flex flex-col gap-4">
