@@ -24,16 +24,18 @@ export default function Home() {
   const [chatbotData, setChatbotData] = useState<any>([]);
   const [sortedChatbotData, setSortedChatbotData] = useState([]);
   const [dataUser, setDataUser] = useState<any>(null);
+
   const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState({
     dosen_pa: [],
     jadwal_kosong_semua_dosen_pa: [],
-    jadwal_kosong_dosen_pa_user: { dosen_id: 0, jadwal: [] },
     informasi_akademik: [],
   });
+  const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
   const [activeSesiChatbotMahasiswa, setActiveSesiChatbotMahasiswa] =
     useState(0);
   const [mahasiswaID, setMahasiswaID] = useState();
   const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
+  const [dataInformasiAkademik, setDataInformasiAkademik] = useState([]);
 
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
@@ -62,6 +64,38 @@ export default function Home() {
 
       const data = await response.data;
       setDataDosenPA(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataJadwalDosenPA = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/datajadwaldosenpa`);
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataJadwalDosenPA(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataInformasiAkademik = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/datasubbab`);
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+      setDataInformasiAkademik(data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -156,41 +190,75 @@ export default function Home() {
     }
   };
 
-  const getChatGPTResponse = async (sesiId: number, userMessage: string) => {
+  useEffect(() => {
+    if (dataDosenPA && dataJadwalDosenPA && dataInformasiAkademik) {
+      setCustomDataConsumeGPT({
+        dosen_pa: dataDosenPA.map((dosen) => ({
+          name: dosen.nama,
+          email: dosen.email,
+          phone: dosen.telepon || "Tidak tersedia",
+        })),
+        jadwal_kosong_semua_dosen_pa: dataJadwalDosenPA.map((jadwal) => ({
+          dosen_id: jadwal.dosen_pa_id,
+          jadwal: [
+            {
+              hari: jadwal.hari,
+              jam: `${jadwal.jam_mulai} - ${jadwal.jam_selesai}`,
+            },
+          ],
+        })),
+        informasi_akademik: dataInformasiAkademik.map((info) => ({
+          judul: info.nama,
+          deskripsi: info.isi,
+        })),
+      });
+    }
+  }, [dataDosenPA, dataJadwalDosenPA, dataInformasiAkademik]);
+
+  const getChatGPTResponse = async (sesiId, userMessage) => {
     if (!userMessage) throw new Error("Pesan pengguna tidak boleh kosong.");
+
+    if (!customDataConsumeGPT) throw new Error("Data belum tersedia.");
+
+    const maxInfoCount = 5; // Maksimal jumlah informasi akademik
 
     const dosenList = customDataConsumeGPT.dosen_pa
       .map(
-        (dosen: any) =>
+        (dosen) =>
           `Dosen: ${dosen.name}, Email: ${dosen.email}, Telepon: ${dosen.phone}`
       )
       .join("\n");
 
     const jadwalKosong = customDataConsumeGPT.jadwal_kosong_semua_dosen_pa
       .map(
-        (jadwal: any) =>
-          `Dosen ID: ${jadwal.dosen_id}, Jadwal: ${jadwal.jadwal.map((j: any) => `${j.hari}: ${j.jam}`).join(", ")}`
+        (jadwal) =>
+          `Dosen ID: ${jadwal.dosen_id}, Jadwal: ${jadwal.jadwal
+            .map((j) => `${j.hari}: ${j.jam}`)
+            .join(", ")}`
       )
       .join("\n");
 
     const informasiAkademik = customDataConsumeGPT.informasi_akademik
-      .map((info: any) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
+      .slice(0, maxInfoCount) // Batasi jumlah elemen
+      .map((info) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
       .join("\n");
 
     const customContext = `
-      Berikut adalah informasi penting: untuk pengetahuan kamu sebelum menjawab pertanyaannya
-      
-      Dosen Pembimbing Akademik:
-      ${dosenList}
+  Berikut adalah informasi penting untuk pengetahuan kamu sebelum menjawab pertanyaannya:
+  
+  Dosen Pembimbing Akademik:
+  ${dosenList}
 
-      Jadwal Kosong Dosen:
-      ${jadwalKosong}
+  Jadwal Kosong Dosen:
+  ${jadwalKosong}
 
-      Informasi Akademik:
-      ${informasiAkademik}
-    `;
+  Informasi Akademik (terbatas ${maxInfoCount} data):
+  ${informasiAkademik}
+`;
 
-    const filteredMessages: any = dataRiwayatPesanChatbot
+    console.log(customContext);
+
+    const filteredMessages = dataRiwayatPesanChatbot
       .slice(-10)
       .map(({ role, pesan }) => ({
         role,
@@ -210,7 +278,7 @@ export default function Home() {
           messages: [
             {
               role: "system",
-              content: `Anda adalah asisten ai, ${customContext}`,
+              content: `Anda adalah asisten AI. ${customContext}`,
             },
             ...filteredMessages,
           ],
@@ -227,10 +295,7 @@ export default function Home() {
         data.choices[0]?.message?.content || "Tidak ada respons dari model."
       );
     } catch (error) {
-      console.error(
-        "Error getting ChatGPT response:",
-        (error as Error).message
-      );
+      console.error("Error getting ChatGPT response:", error.message);
       throw new Error("Gagal mendapatkan respons dari ChatGPT.");
     }
   };
@@ -328,6 +393,8 @@ export default function Home() {
     }
   }, [sortedChatbotData]); // Mengawasi perubahan pada chatData
 
+  console.log(dataDosenPA, dataJadwalDosenPA);
+
   useEffect(() => {
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
@@ -400,7 +467,16 @@ export default function Home() {
     getDataKaprodi();
     getDataMahasiswa();
     getDataSesiChatbotMahasiswa();
+    getDataJadwalDosenPA();
+    getDataInformasiAkademik();
   }, []);
+
+  console.log(
+    dataDosenPA,
+    dataKaprodi,
+    dataJadwalDosenPA,
+    dataInformasiAkademik
+  );
 
   useEffect(() => {
     getDataChatbotMahasiswabySesiChatbotMahasiswaID();
