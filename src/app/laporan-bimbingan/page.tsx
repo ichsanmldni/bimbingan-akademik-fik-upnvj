@@ -80,13 +80,10 @@ export default function Home() {
   const [dataDosenPA, setDataDosenPA] = useState<any>([]);
   const [dataKaprodi, setDataKaprodi] = useState<any>([]);
   const [optionsKaprodi, setOptionsKaprodi] = useState<any>([]);
-  const [optionsSemester, setOptionsSemester] = useState<any>([
-    { value: "Ganjil", label: "Ganjil" },
-    { value: "Genap", label: "Genap" },
-  ]);
+  const [optionsJenisBimbingan, setOptionsJenisBimbingan] = useState<any>([]);
+  const [optionsSemester, setOptionsSemester] = useState<any>([]);
   const [dataSelectedKaprodi, setDataSelectedKaprodi] = useState<any>(null);
   const [dataTahunAjaran, setDataTahunAjaran] = useState<any>([]);
-  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState<any>([]);
   const [dataBimbingan, setDataBimbingan] = useState<any>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedBimbingan, setSelectedBimbingan] = useState<any>([]);
@@ -96,6 +93,8 @@ export default function Home() {
   const [jurusanFilter, setJurusanFilter] = useState<any>("");
   const [jadwalFilter, setJadwalFilter] = useState<any>("");
   const [jenisBimbinganFilter, setJenisBimbinganFilter] = useState<any>("");
+  const [tahunAjaranFilter, setTahunAjaranFilter] = useState<any>("");
+  const [semesterFilter, setSemesterFilter] = useState<any>("");
   const [
     showPrestasiAkademikMahasiswaForm,
     setShowPrestasiAkademikMahasiswaForm,
@@ -729,6 +728,74 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const opsiSemester = [
+      ...new Set(
+        dataBimbingan
+          .filter(
+            (data: any) =>
+              data.pengajuan_bimbingan.tahun_ajaran === tahunAjaranFilter
+          )
+          .map((data: any) => data.pengajuan_bimbingan.semester)
+      ),
+    ];
+    setOptionsSemester(opsiSemester);
+    setSemesterFilter("");
+    setJenisBimbinganFilter("");
+    setJurusanFilter("");
+    setJadwalFilter("");
+    setSelectedTahunAjaran(tahunAjaranFilter);
+    setSelectedSemester("");
+    setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(0);
+    setPrestasiIlmiahMahasiswaFormValue([]);
+    setPrestasiMahasiswaMengikutiPorseniFormValue([]);
+    setDataStatusMahasiswaFormValue([]);
+    setSelectedTahunAjaran("");
+    setSelectedSemester("");
+    setPendahuluan([]);
+    setKesimpulan([]);
+    setImagePreviews([]);
+  }, [tahunAjaranFilter]);
+
+  useEffect(() => {
+    const optionsJenisBimbingan = [
+      ...new Set(
+        dataBimbingan
+          .filter(
+            (data: any) =>
+              data.pengajuan_bimbingan.tahun_ajaran === tahunAjaranFilter
+          )
+          .filter(
+            (data: any) => data.pengajuan_bimbingan.semester === semesterFilter
+          )
+          .map((data: any) => data.pengajuan_bimbingan.jenis_bimbingan)
+      ),
+    ];
+    setOptionsJenisBimbingan(optionsJenisBimbingan);
+    setJenisBimbinganFilter("");
+    setJurusanFilter("");
+    setJadwalFilter("");
+    setSelectedSemester(semesterFilter);
+    setSelectedSemester("");
+    setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(0);
+    setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(0);
+    setPrestasiIlmiahMahasiswaFormValue([]);
+    setPrestasiMahasiswaMengikutiPorseniFormValue([]);
+    setDataStatusMahasiswaFormValue([]);
+    setSelectedTahunAjaran("");
+    setSelectedSemester("");
+    setPendahuluan([]);
+    setKesimpulan([]);
+    setImagePreviews([]);
+  }, [semesterFilter]);
+
+  useEffect(() => {
     const opsiJadwal = [
       ...new Set(
         dataBimbingan
@@ -815,9 +882,9 @@ export default function Home() {
     setImagePreviews([]);
   }, [jadwalFilter]);
 
-  const jenisBimbinganOptions = [
+  const tahunAjaranOptions = [
     ...new Set(
-      dataBimbingan.map((data: any) => data.pengajuan_bimbingan.jenis_bimbingan)
+      dataBimbingan.map((data: any) => data.pengajuan_bimbingan.tahun_ajaran)
     ),
   ];
 
@@ -1000,8 +1067,8 @@ export default function Home() {
         bimbingan_id: [
           ...new Set(selectedBimbingan.map((bimbingan: any) => bimbingan.id)),
         ].join(", "),
-        tahun_ajaran: selectedTahunAjaran,
-        semester: selectedSemester,
+        tahun_ajaran: tahunAjaranFilter,
+        semester: semesterFilter,
         pendahuluan,
         jumlah_ipk_a: jumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm,
         jumlah_ipk_b: jumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm,
@@ -1097,8 +1164,8 @@ export default function Home() {
 
     const laporanData = {
       nama_dosen_pa: userProfile?.nama,
-      tahun_ajaran: selectedTahunAjaran,
-      semester: selectedSemester,
+      tahun_ajaran: tahunAjaranFilter,
+      semester: semesterFilter,
       kaprodi: selectedKaprodi,
       pendahuluan,
       jumlah_ipk_a: jumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm,
@@ -1699,7 +1766,7 @@ export default function Home() {
           data.section === "body"
         ) {
           const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
-          if (imgSrc) {
+          if (imgSrc !== "-") {
             const imgWidth = 8;
             const imgHeight = 8;
             const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
@@ -1712,7 +1779,8 @@ export default function Home() {
           data.section === "body"
         ) {
           const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
-          if (imgSrc) {
+          console.log(imgSrc);
+          if (imgSrc !== "-") {
             const imgWidth = 8;
             const imgHeight = 8;
             const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
@@ -1722,13 +1790,14 @@ export default function Home() {
         }
       },
       didParseCell: (data: any) => {
+        console.log(data);
         if (
           data.row.index >= 0 &&
           data.column.index === 7 &&
           data.section === "body"
         ) {
           const imgSrc = data.row.raw[7];
-          if (imgSrc) {
+          if (imgSrc !== "-") {
             data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
             data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
           }
@@ -1738,13 +1807,16 @@ export default function Home() {
           data.section === "body"
         ) {
           const imgSrc = data.row.raw[6];
-          if (imgSrc) {
+          if (imgSrc !== "-") {
             data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
             data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
           }
         }
         if (data.row.index >= 0 && data.section === "body") {
-          if (data.column.index === 4 || data.column.index === 5) {
+          if (
+            (data.column.index === 4 && data.cell.raw !== "-") ||
+            (data.column.index === 5 && data.cell.raw !== "-")
+          ) {
             data.cell.styles.halign = "justify"; // Justify alignment
           }
         }
@@ -1890,7 +1962,7 @@ export default function Home() {
 
     const laporanData = {
       nama_dosen_pa: userProfile?.nama,
-      tahun_ajaran: selectedTahunAjaran,
+      tahun_ajaran: tahunAjaranFilter,
       semester: selectedSemester,
       kaprodi: selectedKaprodi,
       pendahuluan,
@@ -2249,19 +2321,6 @@ export default function Home() {
   }, [dataKaprodi]);
 
   useEffect(() => {
-    if (dataTahunAjaran.length > 0) {
-      const formattedOptions = dataTahunAjaran.map((data: any) => {
-        return {
-          value: data,
-          label: `${data}`,
-        };
-      });
-
-      setOptionsTahunAjaran(formattedOptions);
-    }
-  }, [dataTahunAjaran]);
-
-  useEffect(() => {
     if (dataUser && dataUser.nip) {
       getDataDosenPAById();
     }
@@ -2275,10 +2334,6 @@ export default function Home() {
       setDataSelectedKaprodi(data || null);
     }
   }, [selectedKaprodi]);
-
-  useEffect(() => {
-    setSelectedSemester("");
-  }, [selectedTahunAjaran]);
 
   useEffect(() => {
     if (dataUser.role === "Mahasiswa") {
@@ -2295,7 +2350,6 @@ export default function Home() {
       getDataBimbinganByDosenPaId();
     }
   }, [userProfile]);
-
   useEffect(() => {
     const dataFindKaprodi = dataKaprodi.find(
       (data: any) => data.kaprodi_jurusan === jurusanFilter
@@ -2321,7 +2375,7 @@ export default function Home() {
         }
       />
       <div className="pt-20 md:pt-[100px]">
-        <div className="mt-4 mb-20 md:mb-[100px] mx-2 md:mx-[130px] border rounded-lg">
+        <div className="mt-4 mb-20 md:mb-[280px] mx-2 md:mx-[130px] border rounded-lg">
           <form
             className="flex flex-col gap-4 px-2 py-4 md:p-8"
             onSubmit={handleAddLaporanBimbingan}
@@ -2360,18 +2414,20 @@ export default function Home() {
                 <div className="flex gap-4">
                   <div className="relative max-w-[30%] md:max-w[100%]">
                     <select
-                      value={jenisBimbinganFilter}
-                      onChange={(e) => setJenisBimbinganFilter(e.target.value)}
+                      value={tahunAjaranFilter}
+                      onChange={(e) => setTahunAjaranFilter(e.target.value)}
                       className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
                     >
                       <option disabled value="">
-                        Pilih Jenis Bimbingan
+                        Pilih Tahun Ajaran
                       </option>
-                      {jenisBimbinganOptions.map((jenis: any, index: any) => (
-                        <option key={index} value={jenis}>
-                          {jenis}
-                        </option>
-                      ))}
+                      {tahunAjaranOptions.map(
+                        (tahun_ajaran: any, index: any) => (
+                          <option key={index} value={tahun_ajaran}>
+                            {tahun_ajaran}
+                          </option>
+                        )
+                      )}
                     </select>
                     <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
                       <svg
@@ -2390,20 +2446,19 @@ export default function Home() {
                       </svg>
                     </span>
                   </div>
-                  {jenisBimbinganFilter !== "" && (
+                  {tahunAjaranFilter !== "" && (
                     <div className="relative max-w-[30%] md:max-w[100%]">
                       <select
-                        disabled={jenisBimbinganFilter === "" ? true : false}
-                        value={jurusanFilter}
-                        onChange={(e) => setJurusanFilter(e.target.value)}
-                        className="block w-full py-2 px-4 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
+                        value={semesterFilter}
+                        onChange={(e) => setSemesterFilter(e.target.value)}
+                        className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
                       >
                         <option disabled value="">
-                          Pilih Jurusan
+                          Pilih Semester
                         </option>
-                        {jurusanOptions.map((jurusan: any, index: any) => (
-                          <option key={index} value={jurusan}>
-                            {jurusan}
+                        {optionsSemester.map((semester: any, index: any) => (
+                          <option key={index} value={semester}>
+                            {semester}
                           </option>
                         ))}
                       </select>
@@ -2425,26 +2480,21 @@ export default function Home() {
                       </span>
                     </div>
                   )}
-                  {jenisBimbinganFilter !== "" && jurusanFilter !== "" && (
+                  {tahunAjaranFilter !== "" && semesterFilter !== "" && (
                     <div className="relative max-w-[30%] md:max-w[100%]">
                       <select
-                        disabled={
-                          jenisBimbinganFilter === ""
-                            ? true
-                            : jurusanFilter === ""
-                              ? true
-                              : false
+                        value={jenisBimbinganFilter}
+                        onChange={(e) =>
+                          setJenisBimbinganFilter(e.target.value)
                         }
-                        value={jadwalFilter}
-                        onChange={(e) => setJadwalFilter(e.target.value)}
-                        className="block w-full px-4 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
+                        className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
                       >
                         <option disabled value="">
-                          Pilih Jadwal Bimbingan
+                          Pilih Jenis Bimbingan
                         </option>
-                        {jadwalOptions.map((jadwal: any, index: any) => (
-                          <option key={index} value={jadwal}>
-                            {jadwal}
+                        {optionsJenisBimbingan.map((jenis: any, index: any) => (
+                          <option key={index} value={jenis}>
+                            {jenis}
                           </option>
                         ))}
                       </select>
@@ -2466,14 +2516,101 @@ export default function Home() {
                       </span>
                     </div>
                   )}
+                  {tahunAjaranFilter !== "" &&
+                    semesterFilter !== "" &&
+                    jenisBimbinganFilter !== "" && (
+                      <div className="relative max-w-[30%] md:max-w[100%]">
+                        <select
+                          disabled={jenisBimbinganFilter === "" ? true : false}
+                          value={jurusanFilter}
+                          onChange={(e) => setJurusanFilter(e.target.value)}
+                          className="block w-full py-2 px-4 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
+                        >
+                          <option disabled value="">
+                            Pilih Jurusan
+                          </option>
+                          {jurusanOptions.map((jurusan: any, index: any) => (
+                            <option key={index} value={jurusan}>
+                              {jurusan}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-black"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    )}
+                  {tahunAjaranFilter !== "" &&
+                    semesterFilter !== "" &&
+                    jenisBimbinganFilter !== "" &&
+                    jurusanFilter !== "" && (
+                      <div className="relative max-w-[30%] md:max-w[100%]">
+                        <select
+                          disabled={
+                            jenisBimbinganFilter === ""
+                              ? true
+                              : jurusanFilter === ""
+                                ? true
+                                : false
+                          }
+                          value={jadwalFilter}
+                          onChange={(e) => setJadwalFilter(e.target.value)}
+                          className="block w-full px-4 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
+                        >
+                          <option disabled value="">
+                            Pilih Jadwal Bimbingan
+                          </option>
+                          {jadwalOptions.map((jadwal: any, index: any) => (
+                            <option key={index} value={jadwal}>
+                              {jadwal}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-black"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    )}
                 </div>
                 <div>
-                  {jenisBimbinganFilter === "Perwalian" &&
+                  {tahunAjaranFilter &&
+                  semesterFilter &&
                   dataBimbingan
                     .filter((data: any) => data.laporan_bimbingan_id === null)
                     .filter(
                       (data: any) =>
-                        data.pengajuan_bimbingan.jenis_bimbingan === "Perwalian"
+                        data.pengajuan_bimbingan.tahun_ajaran ===
+                        tahunAjaranFilter
+                    )
+                    .filter(
+                      (data: any) =>
+                        data.pengajuan_bimbingan.semester === semesterFilter
                     ).length === 0 ? (
                     <div className="flex flex-col items-center">
                       <svg
@@ -2492,15 +2629,55 @@ export default function Home() {
                       </svg>
 
                       <p className="text-center text-red-500">
-                        Saat ini tidak ada bimbingan Perwalian yang perlu
-                        dilaporkan.
+                        Saat ini tidak ada bimbingan {tahunAjaranFilter}{" "}
+                        {semesterFilter} yang perlu dilaporkan.
                       </p>
                       <p className="text-center text-gray-600">
-                        Semua bimbingan Perwalian yang telah Anda lakukan telah
-                        dilaporkan, atau belum ada bimbingan Perwalian yang baru
-                        dilaksanakan. Jika Anda telah melakukan bimbingan
-                        Perwalian, pastikan absensi mahasiswa telah diverifikasi
-                        agar dapat dilaporkan dengan status yang sah.
+                        Semua bimbingan tahun ajaran {tahunAjaranFilter}{" "}
+                        {semesterFilter} yang telah Anda lakukan telah
+                        dilaporkan, atau belum ada bimbingan tahun ajaran{" "}
+                        {tahunAjaranFilter} {semesterFilter} yang baru
+                        dilaksanakan. Jika Anda telah melakukan bimbingan tahun
+                        ajaran {tahunAjaranFilter} {semesterFilter}, pastikan
+                        absensi mahasiswa telah diverifikasi agar dapat
+                        dilaporkan dengan status yang sah.
+                      </p>
+                    </div>
+                  ) : jenisBimbinganFilter &&
+                    dataBimbingan
+                      .filter((data: any) => data.laporan_bimbingan_id === null)
+                      .filter(
+                        (data: any) =>
+                          data.pengajuan_bimbingan.jenis_bimbingan ===
+                          jenisBimbinganFilter
+                      ).length === 0 ? (
+                    <div className="flex flex-col items-center">
+                      <svg
+                        className="h-12 w-12 text-red-500 mb-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+
+                      <p className="text-center text-red-500">
+                        Saat ini tidak ada bimbingan ${jenisBimbinganFilter}{" "}
+                        yang perlu dilaporkan.
+                      </p>
+                      <p className="text-center text-gray-600">
+                        Semua bimbingan ${jenisBimbinganFilter} yang telah Anda
+                        lakukan telah dilaporkan, atau belum ada bimbingan $
+                        {jenisBimbinganFilter} yang baru dilaksanakan. Jika Anda
+                        telah melakukan bimbingan ${jenisBimbinganFilter},
+                        pastikan absensi mahasiswa telah diverifikasi agar dapat
+                        dilaporkan dengan status yang sah.
                       </p>
                     </div>
                   ) : jenisBimbinganFilter === "Pribadi" &&
@@ -2536,6 +2713,54 @@ export default function Home() {
                         dilaksanakan. Jika Anda telah melakukan bimbingan
                         Pribadi, pastikan absensi mahasiswa telah diverifikasi
                         agar dapat dilaporkan dengan status yang sah.
+                      </p>
+                    </div>
+                  ) : tahunAjaranFilter === "" ? (
+                    <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
+                      <svg
+                        className="h-12 w-12 text-red-500 mb-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+
+                      <p className="text-center text-red-500">
+                        Anda belum memilih tahun ajaran.
+                      </p>
+                      <p className="text-center text-gray-600">
+                        Mohon untuk memilih tahun ajaran yang akan dilaporkan.
+                      </p>
+                    </div>
+                  ) : semesterFilter === "" ? (
+                    <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
+                      <svg
+                        className="h-12 w-12 text-red-500 mb-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+
+                      <p className="text-center text-red-500">
+                        Anda belum memilih semester.
+                      </p>
+                      <p className="text-center text-gray-600">
+                        Mohon untuk memilih semester yang ingin dilaporkan.
                       </p>
                     </div>
                   ) : jenisBimbinganFilter === "" ? (
@@ -2744,30 +2969,16 @@ export default function Home() {
                         </div>
                       </div>
                       {selectedBimbingan.length > 0 ? (
-                        jenisBimbinganFilter === "Perwalian" ? (
+                        [
+                          "Perwalian (Sebelum Isi KRS Baru)",
+                          "Perwalian (Sesudah UTS)",
+                          "Perwalian (Sesudah UAS)",
+                        ].includes(jenisBimbinganFilter) ? (
                           <div className="flex flex-col gap-4 mt-6 border py-2 px-4 md:p-8 rounded-lg">
                             <h1 className="text-center font-bold text-[20px] mb-2">
                               LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK
                               FAKULTAS ILMU KOMPUTER UPN “VETERAN” JAKARTA
                             </h1>
-                            <SelectField
-                              options={optionsTahunAjaran}
-                              onChange={(e: any) =>
-                                setSelectedTahunAjaran(e.target.value)
-                              }
-                              value={selectedTahunAjaran}
-                              placeholder="Pilih Tahun Ajaran"
-                              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
-                            />
-                            <SelectField
-                              options={optionsSemester}
-                              onChange={(e: any) =>
-                                setSelectedSemester(e.target.value)
-                              }
-                              value={selectedSemester}
-                              placeholder="Pilih Semester"
-                              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
-                            />
                             <SelectField
                               options={optionsKaprodi}
                               disabled
@@ -4340,24 +4551,6 @@ export default function Home() {
                               LEMBAR KONSULTASI MAHASISWA
                             </h1>
                             <SelectField
-                              options={optionsTahunAjaran}
-                              onChange={(e: any) =>
-                                setSelectedTahunAjaran(e.target.value)
-                              }
-                              value={selectedTahunAjaran}
-                              placeholder="Pilih Tahun Ajaran"
-                              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
-                            />
-                            <SelectField
-                              options={optionsSemester}
-                              onChange={(e: any) =>
-                                setSelectedSemester(e.target.value)
-                              }
-                              value={selectedSemester}
-                              placeholder="Pilih Semester"
-                              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
-                            />
-                            <SelectField
                               options={optionsKaprodi}
                               disabled
                               onChange={(e: any) =>
@@ -4580,21 +4773,8 @@ export default function Home() {
       </div>
 
       <div className="border hidden md:block">
-        <div className="flex justify-between mx-32 py-8 border-black border-b">
-          <div className="flex gap-5 w-2/5 items-center">
-            <Logo className="size-[100px] min-w-[100px]" />
-            <h1 className="text-start font-semibold text-[30px]">
-              Bimbingan Akademik Mahasiswa FIK
-            </h1>
-          </div>
-          <div className="flex items-end gap-5">
-            <Link href="/informasi-akademik" className="text-[14px]">
-              Informasi Akademik
-            </Link>
-          </div>
-        </div>
         <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2024 Bimbingan Akademik Mahasiswa FIK UPNVJ
+          Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
         </p>
       </div>
     </div>

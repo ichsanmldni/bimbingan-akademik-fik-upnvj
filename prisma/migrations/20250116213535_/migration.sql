@@ -32,13 +32,36 @@ CREATE TABLE `chatpribadi` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `mahasiswa_id` INTEGER NOT NULL,
     `dosen_pa_id` INTEGER NOT NULL,
-    `is_pesan_terakhir_read` BOOLEAN NOT NULL,
-    `pesan_terakhir` VARCHAR(191) NOT NULL,
+    `is_mahasiswa_pesan_terakhir_read` BOOLEAN NULL,
+    `is_dosenpa_pesan_terakhir_read` BOOLEAN NULL,
+    `pesan_terakhir` TEXT NOT NULL,
     `waktu_pesan_terakhir` DATETIME(3) NOT NULL,
     `pengirim_pesan_terakhir` VARCHAR(191) NOT NULL,
 
     INDEX `ChatPribadi_dosen_pa_id_fkey`(`dosen_pa_id`),
     INDEX `ChatPribadi_mahasiswa_id_fkey`(`mahasiswa_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `pesansiaran` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `dosen_pa_id` INTEGER NOT NULL,
+    `pesan_terakhir` TEXT NOT NULL,
+    `waktu_pesan_terakhir` DATETIME(3) NOT NULL,
+
+    INDEX `Dosen_dosen_pa_id_fkey`(`dosen_pa_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `pesanchatsiaran` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `pesan_siaran_id` INTEGER NOT NULL,
+    `pesan` TEXT NOT NULL,
+    `waktu_kirim` DATETIME(3) NOT NULL,
+
+    INDEX `PesanChatSiaran_pesan_siaran_id_fkey`(`pesan_siaran_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -108,13 +131,10 @@ CREATE TABLE `laporanbimbingan` (
     `semester` VARCHAR(191) NOT NULL,
     `status` VARCHAR(191) NOT NULL,
     `jenis_bimbingan` VARCHAR(191) NOT NULL,
-    `topik_bimbingan` VARCHAR(191) NULL,
     `jumlah_mahasiswa` INTEGER NOT NULL,
     `tahun_ajaran` VARCHAR(191) NOT NULL,
     `tanda_tangan_dosen_pa` VARCHAR(191) NULL,
-    `kendala_mahasiswa` VARCHAR(191) NULL,
-    `solusi` VARCHAR(191) NULL,
-    `dokumentasi` VARCHAR(191) NULL,
+    `dokumentasi` TEXT NULL,
     `jadwal_bimbingan` VARCHAR(191) NOT NULL,
     `feedback_kaprodi` VARCHAR(191) NULL,
 
@@ -173,6 +193,7 @@ CREATE TABLE `mahasiswa` (
     `jurusan` VARCHAR(191) NOT NULL,
     `nama` VARCHAR(191) NOT NULL,
     `profile_image` VARCHAR(191) NULL,
+    `ipk` VARCHAR(191) NULL,
     `dosen_pa_id` INTEGER NULL,
 
     UNIQUE INDEX `Mahasiswa_nim_key`(`nim`),
@@ -272,6 +293,9 @@ CREATE TABLE `pengajuanbimbingan` (
     `no_whatsapp` VARCHAR(191) NOT NULL,
     `jurusan` VARCHAR(191) NOT NULL,
     `jadwal_bimbingan` VARCHAR(191) NOT NULL,
+    `jadwal_bimbingan_reschedule` VARCHAR(191) NULL,
+    `status_reschedule` VARCHAR(191) NULL,
+    `keterangan_reschedule` VARCHAR(191) NULL,
     `jenis_bimbingan` VARCHAR(191) NOT NULL,
     `topik_bimbingan` VARCHAR(191) NULL,
     `sistem_bimbingan` VARCHAR(191) NOT NULL,
@@ -279,6 +303,9 @@ CREATE TABLE `pengajuanbimbingan` (
     `dosen_pa_id` INTEGER NOT NULL,
     `keterangan` VARCHAR(191) NULL,
     `mahasiswa_id` INTEGER NOT NULL,
+    `tahun_ajaran` VARCHAR(191) NOT NULL,
+    `semester` VARCHAR(191) NOT NULL,
+    `periode_pengajuan` VARCHAR(191) NULL,
     `permasalahan` TEXT NULL,
 
     INDEX `PengajuanBimbingan_dosen_pa_id_fkey`(`dosen_pa_id`),
@@ -367,7 +394,7 @@ CREATE TABLE `mastersubbabinformasiakademik` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `bab_informasi_akademik_id` INTEGER NOT NULL,
     `nama` VARCHAR(191) NOT NULL,
-    `isi` VARCHAR(191) NOT NULL,
+    `isi` TEXT NOT NULL,
     `order` INTEGER NOT NULL,
 
     INDEX `mastersubbabinformasiakademik_bab_informasi_akademik_id_fkey`(`bab_informasi_akademik_id`),
@@ -385,6 +412,12 @@ ALTER TABLE `chatpribadi` ADD CONSTRAINT `ChatPribadi_dosen_pa_id_fkey` FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE `chatpribadi` ADD CONSTRAINT `ChatPribadi_mahasiswa_id_fkey` FOREIGN KEY (`mahasiswa_id`) REFERENCES `mahasiswa`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `pesansiaran` ADD CONSTRAINT `PesanSiaran_dosen_pa_id_fkey` FOREIGN KEY (`dosen_pa_id`) REFERENCES `dosenpa`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `pesanchatsiaran` ADD CONSTRAINT `PesanChatSiaran_pesan_siaran_id_fkey` FOREIGN KEY (`pesan_siaran_id`) REFERENCES `pesansiaran`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `jadwaldosenpa` ADD CONSTRAINT `JadwalDosenPA_dosen_pa_id_fkey` FOREIGN KEY (`dosen_pa_id`) REFERENCES `dosenpa`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -8,7 +8,6 @@ export async function PATCH(req: Request): Promise<Response> {
     try {
         const body: PatchRequestBody = await req.json();
         const { id } = body;
-        console.log(body)
 
         if (!id) {
             return new Response(

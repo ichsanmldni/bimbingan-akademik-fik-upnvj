@@ -64,7 +64,7 @@ model pesansiaran {
 
 model statuspembacaanpesansiaran {  
   id                Int            @id @default(autoincrement())  
-  pesan_siaran_id   Int            @unique(map: "PesanSiaran_id_key")
+  pesan_siaran_id   Int            
   mahasiswa_id      Int            @unique(map: "Mahasiswa_id_key")
   is_read           Boolean        @default(false)  
   pesan_siaran      pesansiaran    @relation(fields: [pesan_siaran_id], references: [id])  
@@ -209,6 +209,7 @@ model mahasiswa {
   jurusan              String
   nama                 String
   profile_image        String?
+  ipk                  String?
   dosen_pa_id          Int?
   dosen_pa             dosenpa?               @relation(fields: [dosen_pa_id], references: [id], map: "Mahasiswa_dosen_pa_id_fkey")
   statuspembacaanpesansiaran  statuspembacaanpesansiaran[]
@@ -292,6 +293,9 @@ model pengajuanbimbingan {
   no_whatsapp      String
   jurusan          String
   jadwal_bimbingan String
+  jadwal_bimbingan_reschedule   String? 
+  status_reschedule             String?
+  keterangan_reschedule         String?
   jenis_bimbingan  String
   topik_bimbingan  String?
   sistem_bimbingan String
@@ -299,6 +303,9 @@ model pengajuanbimbingan {
   dosen_pa_id      Int
   keterangan       String?
   mahasiswa_id     Int
+  tahun_ajaran     String
+  semester         String
+  periode_pengajuan String?
   permasalahan     String?     @db.Text
   bimbingan        bimbingan[]
   dosen_pa         dosenpa     @relation(fields: [dosen_pa_id], references: [id], map: "PengajuanBimbingan_dosen_pa_id_fkey")

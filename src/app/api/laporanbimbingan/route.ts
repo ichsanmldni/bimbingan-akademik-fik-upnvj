@@ -57,7 +57,7 @@ export async function POST(req: Request): Promise<Response> {
       jadwal_bimbingan
     } = body;
 
-    if (jenis_bimbingan === "Perwalian") {
+    if (jenis_bimbingan.startsWith("Perwalian")) {
       const jumlahPeserta = parseInt(bimbingan_id.split(",").map((id: any) => id.trim()).length)
       const jumlahKeteranganIPK = jumlah_ipk_a + jumlah_ipk_b + jumlah_ipk_c + jumlah_ipk_d + jumlah_ipk_e
       const jumlahPrestasiBeasiswa = jumlah_beasiswa_bbm + jumlah_beasiswa_pegadaian + jumlah_beasiswa_ppa + jumlah_beasiswa_supersemar + jumlah_beasiswa_ykl + jumlah_beasiswa_dll
@@ -215,7 +215,7 @@ export async function POST(req: Request): Promise<Response> {
     await prisma.notifikasikaprodi.create({ data: notifikasiKaprodi });
 
     let laporanBimbingan: any
-    if (jenis_bimbingan === "Perwalian") {
+    if (jenis_bimbingan.startsWith("Perwalian")) {
       laporanBimbingan = await prisma.laporanbimbingan.create({
         data: {
           jumlah_mahasiswa: parseInt(bimbingan_id.split(",").map((id: any) => id.trim()).length),

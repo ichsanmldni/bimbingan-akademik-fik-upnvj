@@ -261,21 +261,8 @@ export default function Home() {
       </div>
 
       <div className="hidden md:block border">
-        <div className="flex justify-between mx-32 py-8 border-black border-b">
-          <div className="flex gap-5 w-2/5 items-center">
-            <Logo className="size-[100px] min-w-[100px]" />
-            <h1 className="text-start font-semibold text-[30px]">
-              Bimbingan Akademik Mahasiswa FIK
-            </h1>
-          </div>
-          <div className="flex items-end gap-5">
-            <Link href="/informasi-akademik" className="text-[14px]">
-              Informasi Akademik
-            </Link>
-          </div>
-        </div>
         <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2024 Bimbingan Akademik Mahasiswa FIK UPNVJ
+          Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
         </p>
       </div>
     </div>

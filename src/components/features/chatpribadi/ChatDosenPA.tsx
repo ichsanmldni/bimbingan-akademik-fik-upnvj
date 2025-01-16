@@ -445,9 +445,9 @@ export default function ChatDosenPA() {
         {!isDetailChatPribadiClicked && !isDetailPesanSiaranClicked ? (
           <div className="flex flex-col w-full h-[100vh] justify-start">
             <div className="flex gap-4 px-8 py-4 border justify-start items-center">
-              <Link href="/chatbot">
+              <a href="/">
                 <Image alt="back-icon" src={backIcon} />
-              </Link>
+              </a>
               <div className="p-3 rounded-full bg-orange-200">
                 <MessageSquareText />
               </div>

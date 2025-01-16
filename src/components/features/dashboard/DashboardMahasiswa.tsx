@@ -59,6 +59,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
     jurusan: "",
     peminatan: "",
     dosen_pa: "",
+    ipk: "",
   });
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<any[]>([]); // Adjust type as needed
@@ -243,6 +244,122 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
 
   const [openDay, setOpenDay] = useState<string | null>(null);
 
+  const [isModalRescheduleOpen, setIsModalRescheduleOpen] = useState(false);
+  const [statusSelectedReschedule, setStatusSelectedReschedule] = useState("");
+  const [selectedRescheduleData, setSelectedRescheduleData] = useState(null);
+  const [ipk, setIpk] = useState("");
+
+  const handleRescheduleOpenModal = (data, status_reschedule) => {
+    setSelectedRescheduleData(data);
+    setStatusSelectedReschedule(status_reschedule);
+    setIsModalRescheduleOpen(true);
+  };
+
+  const handleRescheduleCloseModal = () => {
+    setIsModalRescheduleOpen(false);
+    setStatusSelectedReschedule("");
+    setSelectedRescheduleData(null);
+  };
+
+  const patchPengajuanBimbingan = async (updatedData: any) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/pengajuanbimbingan`,
+        updatedData
+      );
+      return {
+        success: true,
+        message:
+          response.data.message || "Konfirmasi reschedule bimbingan berhasil!",
+        data: response.data,
+      };
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
+    }
+  };
+
+  const addBimbingan = async (idPengajuan: number, permasalahan) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/bimbingan`, {
+        pengajuan_bimbingan_id: idPengajuan,
+        permasalahan,
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleEditRescheduleKehadiranBimbingan = async (
+    id: number,
+    status_reschedule: string,
+    status: string,
+    keterangan_reschedule: string,
+    jadwal_bimbingan_reschedule: string,
+    mahasiswa_id: number,
+    permasalahan: string
+  ) => {
+    try {
+      let reschedulePengajuanBimbinganValue = {
+        id,
+        status_reschedule,
+        status,
+        keterangan_reschedule,
+        jadwal_bimbingan_reschedule,
+        mahasiswa_id,
+      };
+
+      const result = await patchPengajuanBimbingan(
+        reschedulePengajuanBimbinganValue
+      );
+
+      if (status_reschedule === "Bisa") {
+        await addBimbingan(id, permasalahan);
+      }
+      toast.success(
+        <div className="flex items-center">
+          <span>
+            {result.message || "Konfirmasi reschedule bimbingan berhasil!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+
+      getDataPengajuanBimbinganByIDMahasiswa();
+    } catch (error) {
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message ||
+              "Konfirmasi kehadiran pada reschedule bimbingan gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+    }
+  };
+
   const toggleDay = (day: string) => {
     setOpenDay(openDay === day ? null : day);
   };
@@ -311,6 +428,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
           jurusan: mahasiswa.jurusan,
           peminatan: mahasiswa.peminatan,
           dosen_pa: dosenpa.nama,
+          ipk: mahasiswa.ipk,
         });
 
         setNamaLengkapMahasiswa(mahasiswa.nama);
@@ -318,6 +436,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         setNim(mahasiswa.nim);
         setNoTelpMahasiswa(mahasiswa.hp);
         setSelectedJurusan(mahasiswa.jurusan);
+        setIpk(mahasiswa.ipk);
         setSelectedPeminatan(
           mahasiswa.peminatan === null ? "" : mahasiswa.peminatan
         );
@@ -334,6 +453,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         jurusan: mahasiswa.jurusan,
         peminatan: mahasiswa.peminatan,
         dosen_pa: null,
+        ipk: mahasiswa.ipk,
       });
 
       setNamaLengkapMahasiswa(mahasiswa.nama);
@@ -344,6 +464,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       setSelectedPeminatan(
         mahasiswa.peminatan === null ? "" : mahasiswa.peminatan
       );
+      setIpk(mahasiswa.ipk);
       setSelectedDosenPA(
         mahasiswa.dosen_pa_id === null ? "" : mahasiswa.dosen_pa_id
       );
@@ -490,7 +611,13 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         .filter(
           (data: any) => data.pengajuan_bimbingan.mahasiswa_id === mahasiswa.id
         )
-        .filter((data) => data.pengajuan_bimbingan.status === "Diterima");
+        .filter(
+          (data) =>
+            data.pengajuan_bimbingan.status === "Diterima" ||
+            (data.pengajuan_bimbingan.status === "Reschedule" &&
+              data.pengajuan_bimbingan.status_reschedule === "Bisa")
+        );
+      console.log(bimbingan);
 
       setDataBimbingan(bimbingan);
     } catch (error) {
@@ -525,6 +652,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
           dataDosenPA.find((data: any) => data.nama === selectedDosenPA)?.id ||
           null,
         profile_image: !imagePreview ? null : imagePreview,
+        ipk,
       };
 
       const result = await patchMahasiswa(mahasiswaValue);
@@ -609,7 +737,8 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         userProfile.hp !== noTelpMahasiswa ||
         userProfile.dosen_pa !== selectedDosenPA ||
         userProfile.jurusan !== selectedJurusan ||
-        userProfile.peminatan !== selectedPeminatan;
+        userProfile.peminatan !== selectedPeminatan ||
+        userProfile.ipk !== ipk;
       setIsDataChanged(isDataChanged);
     }
   }, [
@@ -621,6 +750,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
     selectedDosenPA,
     selectedJurusan,
     selectedPeminatan,
+    ipk,
   ]);
 
   useEffect(() => {
@@ -734,26 +864,35 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                 placeholder="Pilih Jurusan"
                 className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
               />
+              <InputField
+                type="text"
+                placeholder={!ipk ? "IPK (contoh: 3.50)" : ipk}
+                onChange={(e) => {
+                  setIpk(e.target.value);
+                }}
+                value={ipk}
+                className="px-3 py-2 text-[15px] outline-none border rounded-lg"
+              />
               <SelectField
                 options={optionsPeminatan}
                 onChange={(e) => setSelectedPeminatan(e.target.value)}
                 value={selectedPeminatan}
                 placeholder="Pilih Peminatan"
-                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
+                className={`px-3 py-2 text-[15px] outline-none cursor-pointer border rounded-lg appearance-none w-full`}
               />
               <SelectField
                 options={optionsDosenPA}
                 onChange={(e) => setSelectedDosenPA(e.target.value)}
                 value={selectedDosenPA}
                 placeholder="Pilih Dosen PA"
-                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
+                className={`px-3 py-2 text-[15px] border cursor-pointer outline-none rounded-lg appearance-none w-full`}
               />
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   handleEditMahasiswa(dataUser.nim);
                 }}
-                className={`text-white bg-orange-500 text-[14px] py-2 font-medium rounded-lg  ${
+                className={`text-white bg-orange-500 hover:bg-orange-600 text-[14px] py-2 font-medium rounded-lg  ${
                   !isDataChanged && !imagePreview ? "hidden" : ""
                 }`}
               >
@@ -854,14 +993,32 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                       key={data.id}
                       className="flex flex-col border rounded-lg p-6 gap-4"
                     >
-                      <div className="flex justify-between text-neutral-600">
-                        <p>
-                          {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
-                        </p>
-                        <p>
-                          {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
-                        </p>
-                      </div>
+                      {data.pengajuan_bimbingan.status === "Reschedule" && (
+                        <div className="flex justify-between text-neutral-600">
+                          <p>
+                            {getDate(
+                              data.pengajuan_bimbingan
+                                .jadwal_bimbingan_reschedule
+                            )}
+                          </p>
+                          <p>
+                            {getTime(
+                              data.pengajuan_bimbingan
+                                .jadwal_bimbingan_reschedule
+                            )}
+                          </p>
+                        </div>
+                      )}
+                      {data.pengajuan_bimbingan.status === "Diterima" && (
+                        <div className="flex justify-between text-neutral-600">
+                          <p>
+                            {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                          </p>
+                          <p>
+                            {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                          </p>
+                        </div>
+                      )}
                       <div>
                         <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
                         <p>{data.pengajuan_bimbingan.topik_bimbingan}</p>
@@ -902,8 +1059,9 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                             Isi Absensi
                           </button>
                           {data.id === selectedBimbinganId &&
-                          data.pengajuan_bimbingan.jenis_bimbingan ===
-                            "Perwalian" ? (
+                          data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
+                            "Perwalian"
+                          ) ? (
                             <Transition appear show={isOpen} as={Fragment}>
                               <Dialog
                                 as="div"
@@ -1286,8 +1444,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
             <h1 className="font-semibold text-[24px]">
               Riwayat Pengajuan Bimbingan Akademik
             </h1>
-
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {dataPengajuanBimbingan.length > 0 ? (
                 dataPengajuanBimbingan
                   .slice()
@@ -1295,7 +1452,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                   .map((data) => (
                     <div
                       key={data.id}
-                      className="flex flex-col border rounded-lg p-6 gap-4"
+                      className="flex flex-col border rounded-lg p-8 gap-4 shadow-md"
                     >
                       <div className="flex justify-between text-neutral-600">
                         <p>{getDate(data.jadwal_bimbingan)}</p>
@@ -1335,20 +1492,108 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                           ></textarea>
                         </div>
                       )}
-                      {data.status === "Diterima" ||
-                      data.status === "Reschedule" ? (
-                        <div className="flex flex-col gap-2">
-                          <p className="text-[14px] font-medium">
-                            Keterangan dari Dosen PA
-                          </p>
-                          <textarea
-                            value={data.keterangan}
-                            disabled
-                            className="border rounded-lg text-sm p-2"
-                          ></textarea>
+                      {data.status === "Diterima" &&
+                        data.jenis_bimbingan === "Pribadi" && (
+                          <div className="flex flex-col gap-2">
+                            <p className="text-[14px] font-medium">
+                              Keterangan dari Dosen PA
+                            </p>
+                            <textarea
+                              value={data.keterangan}
+                              disabled
+                              className="border rounded-lg text-sm p-2"
+                            ></textarea>
+                          </div>
+                        )}
+                      {data.status === "Reschedule" && (
+                        <div className="p-6 flex flex-col gap-4 border rounded-lg">
+                          <div className="flex flex-col gap-2">
+                            <p className="text-[14px] font-semibold">
+                              {`Reschedule: ${data.jadwal_bimbingan_reschedule}`}
+                            </p>
+                            <textarea
+                              value={data.keterangan_reschedule}
+                              disabled
+                              className="border rounded-lg text-sm p-2"
+                            ></textarea>
+                          </div>
+                          {data.status_reschedule === "Belum dikonfirmasi" && (
+                            <div>
+                              <div className="flex flex-col gap-1">
+                                <p className="text-sm font-semibold">
+                                  Konfirmasi Reschedule Bimbingan
+                                </p>
+                                <p className="text-[13px] text-gray-600">
+                                  Apakah Anda bisa menghadiri jadwal bimbingan
+                                  yang baru? Silakan pilih salah satu opsi di
+                                  bawah ini untuk mengonfirmasi.
+                                </p>
+                              </div>
+                              <div className="flex gap-2 mt-3">
+                                <button
+                                  onClick={() =>
+                                    handleRescheduleOpenModal(
+                                      data,
+                                      "Tidak bisa"
+                                    )
+                                  }
+                                  className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                                  aria-label="Konfirmasi Tidak Sah"
+                                >
+                                  Tidak bisa
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleRescheduleOpenModal(data, "Bisa")
+                                  }
+                                  className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                                  aria-label="Konfirmasi Sah"
+                                >
+                                  Bisa
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          {data.status_reschedule !== "Belum dikonfirmasi" && (
+                            <div>
+                              <div className="flex flex-col gap-1">
+                                <p className="text-sm font-semibold">
+                                  Hasil Konfirmasi Reschedule Bimbingan dari
+                                  Mahasiswa
+                                </p>
+                              </div>
+                              <div className="flex gap-2 mt-3">
+                                {data.status_reschedule === "Bisa" && (
+                                  <button
+                                    onClick={() =>
+                                      handleRescheduleOpenModal(data, "Bisa")
+                                    }
+                                    className="w-full bg-green-500 text-white rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                                    aria-label="Konfirmasi Sah"
+                                    disabled
+                                  >
+                                    Bisa
+                                  </button>
+                                )}
+                                {data.status_reschedule === "Tidak bisa" && (
+                                  <button
+                                    onClick={() =>
+                                      handleRescheduleOpenModal(
+                                        data,
+                                        "Tidak bisa"
+                                      )
+                                    }
+                                    className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                                    aria-label="Konfirmasi Tidak Sah"
+                                    disabled
+                                  >
+                                    Tidak bisa
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        ""
                       )}
                     </div>
                   ))
@@ -1377,6 +1622,80 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                   </p>
                 </div>
               )}
+              <Transition appear show={isModalRescheduleOpen} as={Fragment}>
+                <Dialog
+                  onClose={handleRescheduleCloseModal}
+                  className="fixed z-[1000] inset-0 z-10 overflow-y-auto"
+                >
+                  <div className="flex items-center justify-center min-h-screen px-4 text-center">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="opacity-0"
+                      enterTo="opacity-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <div className="fixed inset-0 bg-black opacity-30" />
+                    </Transition.Child>
+
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="transform scale-95"
+                      enterTo="transform scale-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="transform scale-100"
+                      leaveTo="transform scale-95"
+                    >
+                      <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                        <Dialog.Title
+                          as="h3"
+                          className="text-lg font-medium leading-6 text-gray-900"
+                        >
+                          Konfirmasi Reschedule
+                        </Dialog.Title>
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-500">
+                            Apakah Anda yakin ingin{" "}
+                            {statusSelectedReschedule === "Bisa"
+                              ? "menyetujui"
+                              : "menolak"}{" "}
+                            reschedule ?
+                          </p>
+                        </div>
+                        <div className="mt-6 w-1/2 ml-auto flex gap-4">
+                          <button
+                            onClick={() => handleRescheduleCloseModal()}
+                            className="bg-red-500 w-1/2 hover:bg-red-600 text-sm text-white rounded-md px-4 py-1 ml-2"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleEditRescheduleKehadiranBimbingan(
+                                selectedRescheduleData.id,
+                                statusSelectedReschedule,
+                                "Reschedule",
+                                selectedRescheduleData.keterangan_reschedule,
+                                selectedRescheduleData.jadwal_bimbingan_reschedule,
+                                selectedRescheduleData.mahasiswa_id,
+                                selectedRescheduleData.permasalahan
+                              );
+                              handleRescheduleCloseModal();
+                            }}
+                            className="w-1/2 bg-green-500 hover:bg-green-600 text-sm text-white rounded-md px-4 py-2"
+                          >
+                            Ya
+                          </button>
+                        </div>
+                      </div>
+                    </Transition.Child>
+                  </div>
+                </Dialog>
+              </Transition>
+              <ToastContainer />
             </div>
           </div>
         </div>

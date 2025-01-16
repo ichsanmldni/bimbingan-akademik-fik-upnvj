@@ -104,6 +104,26 @@ export async function POST(req: Request): Promise<Response> {
             },
         });
 
+        const mahasiswa = await prisma.mahasiswa.findMany();
+        const datastatuspembacaan = await prisma.statuspembacaanpesansiaran.findMany()
+        const mahasiswaBimbingan = mahasiswa.filter(data => data.dosen_pa_id === dosen_pa_id)
+        mahasiswaBimbingan.map(async data => {
+            const datastatusmahasiswa = datastatuspembacaan.find(stts => stts.mahasiswa_id === data.id)
+            console.log(datastatusmahasiswa)
+            if (!datastatusmahasiswa) {
+                await prisma.statuspembacaanpesansiaran.create({
+                    data: {
+                        pesan_siaran_id: pesanSiaran.id,
+                        mahasiswa_id: data.id,
+                        is_read: false,
+                    },
+                })
+
+            }
+
+        }
+        )
+
         await prisma.statuspembacaanpesansiaran.update({
             where: {
                 pesan_siaran_id: existingRecord.id,

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import ProfileImage from "./ProfileImage";
 import NotificationModal from "./NotificationModal";
 import ProfileModal from "./ProfileModal";
-import { MessageSquareText } from "lucide-react";
+import { MessageSquareText, School } from "lucide-react";
 import axios from "axios";
 import Image from "next/image";
 import notificationIcon from "../../assets/images/bell.png";
@@ -77,9 +77,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           (data: any) => data.kaprodi_id === dataUser.id
         );
       }
-
-      const data = await response.data;
-      setDataNotifikasi(data);
+      setDataNotifikasi(notifikasiUser);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -100,16 +98,20 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   return (
     <>
       {/* Navbar atas untuk layar medium ke atas */}
-      <div className="fixed z-[999] flex justify-between md:justify-start w-full bg-white border py-5 px-[24px] md:px-[128px] md:flex">
+      <div
+        className={`fixed z-[999] flex justify-between md:justify-start w-full bg-white border py-5 px-[24px] md:px-[128px] ${roleUser === "Dosen PA" && "md:px-[40px]"} md:flex`}
+      >
         <LogoBimafik className="md:hidden size-[40px]" />
-        <div className="hidden md:flex md:w-[35%] items-center gap-5">
+        <div
+          className={`hidden md:flex ${roleUser === "Dosen PA" && "md:w-[30%]"} md:w-[35%] items-center gap-5`}
+        >
           <Logo className="size-[40px]" />
           <a href="/" className="font-semibold">
             Bimbingan Akademik Mahasiswa FIK
           </a>
         </div>
         <div
-          className={`hidden md:flex items-center pl-8 w-[45%] ${roleUser === "Kaprodi" ? "gap-10" : "gap-6"} md:flex`}
+          className={`hidden md:flex items-center pl-8 w-[45%] ${roleUser === "Dosen PA" && "md:w-[50%]"} ${roleUser === "Kaprodi" ? "gap-10 pl-[96px]" : "gap-6"} md:flex`}
         >
           <a
             href="/"
@@ -134,6 +136,14 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
             } ${roleUser !== "Mahasiswa" && "hidden"}`}
           >
             Pengajuan Bimbingan
+          </Link>
+          <Link
+            href="/perwalian-wajib"
+            className={`${
+              isActive("/perwalian-wajib") ? "font-bold text-orange-500" : ""
+            } ${roleUser !== "Dosen PA" && "hidden"}`}
+          >
+            Perwalian Wajib
           </Link>
           <Link
             href="/laporan-bimbingan"
@@ -200,14 +210,14 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
         <div className="flex items-center justify-around w-full">
           <a
             href="/"
-            className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/") ? "text-orange-500" : ""}`}
+            className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/") ? "text-orange-500" : ""}`}
           >
             <Home className="size-6" />
             <span className="text-xs">Beranda</span>
           </a>
           <Link
             href="/informasi-akademik"
-            className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/informasi-akademik") ? "text-orange-500" : ""}`}
+            className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/informasi-akademik") ? "text-orange-500" : ""}`}
           >
             <BookOpen className="size-6" />
             <span className="text-xs">Informasi</span>
@@ -215,7 +225,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           {roleUser === "Mahasiswa" && (
             <Link
               href="/pengajuan-bimbingan"
-              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/pengajuan-bimbingan") ? "text-orange-500" : ""}`}
+              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/pengajuan-bimbingan") ? "text-orange-500" : ""}`}
             >
               <FilePlus className="size-6" />
               <span className="text-xs">Pengajuan</span>
@@ -224,14 +234,23 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           {roleUser === "Dosen PA" && (
             <Link
               href="/laporan-bimbingan"
-              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/laporan-bimbingan") ? "text-orange-500" : ""}`}
+              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/laporan-bimbingan") ? "text-orange-500" : ""}`}
             >
               <FileText className="size-6" />
               <span className="text-xs">Laporan</span>
             </Link>
           )}
+          {roleUser === "Dosen PA" && (
+            <Link
+              href="/perwalian-wajib"
+              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/laporan-bimbingan") ? "text-orange-500" : ""}`}
+            >
+              <School className="size-6" />
+              <span className="text-xs">Perwalian</span>
+            </Link>
+          )}
           <div
-            className={`relative flex flex-col items-center ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""}`}
+            className={`relative flex flex-col items-center ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""}`}
             onClick={() => setIsModalNotificationMobileOpen((prev) => !prev)}
           >
             <Bell className="size-6" />
@@ -243,7 +262,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
             <span className="text-xs">Notifikasi</span>
           </div>
           <div
-            className={`flex flex-col items-center ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/5" : roleUser === "Kaprodi" ? "w-1/4" : ""}`}
+            className={`flex flex-col items-center ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""}`}
             onClick={() => setIsModalProfileMobileOpen((prev) => !prev)}
           >
             {dataUser?.profile_image ? (

@@ -1,25 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import upIcon from "../../../assets/images/upIcon.png";
-import upnvjLogo from "../../../assets/images/LOGO-UPNVJ.png";
 import backIconOrange from "../../../assets/images/back-icon-orange.png";
 import downIcon from "../../../assets/images/downIcon.png";
-import addIcon from "../../../assets/images/add-button.png";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import plusIcon from "../../../assets/images/plus.png";
 import negatifIcon from "../../../assets/images/minus-icon.png";
-import deleteIcon from "../../../assets/images/trash-icon.png";
 import line from "../../../assets/images/line.png";
 import InputField from "@/components/ui/InputField";
 import ProfileImage from "@/components/ui/ProfileImage";
 import axios from "axios";
 import TrashButton from "@/components/ui/TrashButton";
-import { format } from "date-fns";
-import { env } from "process";
-import { EyeIcon } from "@heroicons/react/outline";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,6 +21,7 @@ import "jspdf-autotable";
 import "./fonts/times new roman bold-normal";
 import "./fonts/times new roman-normal";
 import { Fragment } from "react";
+
 import {
   Dialog,
   Transition,
@@ -35,6 +29,7 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
+import { EyeIcon } from "lucide-react";
 
 const schedule: Record<string, string[]> = {
   Senin: [],
@@ -73,7 +68,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [dataPengesahanBimbingan, setDataPengesahanBimbingan] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [
     selectedDataPrestasiIlmiahMahasiswa,
     setSelectedDataPrestasiIlmiahMahasiswa,
@@ -92,6 +86,73 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(1);
+  const [dateReschedule, setDateReschedule] = useState("");
+  const [startRescheduleTime, setStartRescheduleTime] = useState("00:00");
+  const [endRescheduleTime, setEndRescheduleTime] = useState("00:00");
+  const [rescheduleData, setRescheduleData] = useState("");
+  const [selectedEntries, setSelectedEntries] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [newSchedule, setNewSchedule] = useState("");
+  const [keterangan, setKeterangan] = useState("");
+  const [selectedPengajuan, setSelectedPengajuan] = useState(null);
+
+  const handleDateChange = (e) => {
+    const selectedDate = e.target.value;
+    const dateObject = new Date(selectedDate);
+
+    // Mendapatkan format tanggal yang diinginkan
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+
+    // Mengonversi tanggal ke format yang diinginkan
+    const formattedDate = dateObject.toLocaleDateString("id-ID", options);
+    console.log(formattedDate);
+
+    setDateReschedule(e.target.value);
+  };
+
+  const handleStartTimeChange = (e) => {
+    const newStartTime = e.target.value;
+    console.log(newStartTime);
+    setStartRescheduleTime(newStartTime);
+  };
+
+  const handleEndTimeChange = (e) => {
+    const newEndTime = e.target.value;
+    console.log(newEndTime);
+    setEndRescheduleTime(newEndTime);
+  };
+  const openModal = (action, pengajuan) => {
+    setSelectedAction(action);
+    console.log(pengajuan);
+    setSelectedPengajuan(pengajuan);
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+    setSelectedAction(null);
+    setSelectedPengajuan(null);
+    setDateReschedule("");
+    setStartRescheduleTime("00:00");
+    setEndRescheduleTime("00:00");
+    setKeterangan("");
+  };
+
+  const handleSelectEntry = (id) => {
+    setSelectedEntries((prevSelected) => {
+      if (prevSelected.includes(id)) {
+        return prevSelected.filter((entryId) => entryId !== id);
+      } else {
+        return [...prevSelected, id];
+      }
+    });
+  };
 
   const formatTime = (time) => {
     return (time < 10 ? "0" : "") + time + ":00";
@@ -111,14 +172,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       setStartTime(newStartTime);
       setEndTime(newStartTime + 1 > 23 ? 23 : newStartTime + 1); // Update endTime
     }
-  };
-
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
   };
 
   const openImageInNewTab = (path: string) => {
@@ -549,63 +602,16 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   };
 
-  const handleEditPengajuanBimbingan = async (
-    id: number,
-    mahasiswa_id: number,
-    statusPengajuan: string,
+  console.log(selectedEntries);
+
+  const handleEditPengajuanBimbingan = (
+    id,
+    mahasiswa_id,
+    action,
+    jadwal_bimbingan,
     permasalahan
   ) => {
-    try {
-      let pengajuanBimbinganValue = {
-        id,
-        status: statusPengajuan,
-        keterangan: keteranganKonfirmasi[id],
-        mahasiswa_id,
-        dosen_pa_id: dataDosenPA?.id,
-      };
-
-      const result = await patchPengajuanBimbingan(pengajuanBimbinganValue);
-
-      toast.success(
-        <div className="flex items-center">
-          <span>
-            {result.message || "Pengajuan bimbingan berhasil dikonfirmasi!"}
-          </span>
-        </div>,
-        {
-          position: "bottom-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        }
-      );
-      await addBimbingan(id, permasalahan);
-      setKeteranganKonfirmasi((prev) => ({ ...prev, [id]: "" }));
-      getDataPengajuanBimbinganByDosenPaId();
-    } catch (error) {
-      toast.error(
-        <div className="flex items-center">
-          <span>
-            {error.message ||
-              "Konfirmasi pengajuan bimbingan gagal. Silahkan coba lagi!"}
-          </span>
-        </div>,
-        {
-          position: "bottom-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        }
-      );
-    }
+    openModal(action, { id, mahasiswa_id, jadwal_bimbingan, permasalahan });
   };
 
   const handleEditPengesahanKehadiranBimbingan = async (
@@ -647,6 +653,181 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
           <span>
             {error.message ||
               "Konfirmasi pengesahan absensi bimbingan gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+    }
+  };
+
+  const handleBunchEditPengesahanKehadiranBimbingan = async (
+    dataSelectedEntries,
+    status_pengesahan_kehadiran: string
+  ) => {
+    try {
+      const promises = dataSelectedEntries.map(async (data) => {
+        let pengesahanKehadiranBimbinganValue = {
+          id: data,
+          status_pengesahan_kehadiran,
+        };
+
+        // Return the result of the patch operation
+        return await patchPengesahanKehadiranBimbingan(
+          pengesahanKehadiranBimbinganValue
+        );
+      });
+
+      // Wait for all promises to resolve
+      const results = await Promise.all(promises);
+
+      // Assuming you want to show a success message for the last result
+      const lastResult = results[results.length - 1];
+      toast.success(
+        <div className="flex items-center">
+          <span>
+            {lastResult.message ||
+              "Pengesahan absensi bimbingan berhasil dikonfirmasi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+      setSelectedEntries([]);
+      getDataPengesahanBimbinganByIDDosenPA();
+    } catch (error) {
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message ||
+              "Konfirmasi pengesahan absensi bimbingan gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+    }
+  };
+
+  const handleSubmitReschedule = async (
+    id,
+    status,
+    keterangan_reschedule,
+    jadwal_bimbingan_reschedule,
+    mahasiswa_id
+  ) => {
+    try {
+      let submitRescheduleValue = {
+        id,
+        status,
+        status_reschedule: "Belum dikonfirmasi",
+        keterangan_reschedule,
+        jadwal_bimbingan_reschedule,
+        mahasiswa_id,
+      };
+
+      const result = await patchPengajuanBimbingan(submitRescheduleValue);
+      toast.success(
+        <div className="flex items-center">
+          <span>{result.message || "Reschedule bimbingan berhasil!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+
+      getDataPengajuanBimbinganByDosenPaId();
+    } catch (error) {
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message || "Reschedule bimbingan gagal. coba lagi!!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+    }
+  };
+  const handleSubmitDiterima = async (
+    id,
+    status,
+    keterangan,
+    mahasiswa_id,
+    permasalahan
+  ) => {
+    try {
+      let submitDiterimaValue = {
+        id,
+        status,
+        keterangan,
+        mahasiswa_id,
+        permasalahan,
+      };
+
+      const result = await patchPengajuanBimbingan(submitDiterimaValue);
+      await addBimbingan(id, permasalahan);
+      toast.success(
+        <div className="flex items-center">
+          <span>{result.message || "Penerimaan bimbingan berhasil!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
+
+      getDataPengajuanBimbinganByDosenPaId();
+    } catch (error) {
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {error.message || "Penerimaan bimbingan gagal. coba lagi!!"}
           </span>
         </div>,
         {
@@ -1690,6 +1871,29 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   }, [userProfile]);
 
   useEffect(() => {
+    if (dateReschedule && startRescheduleTime && endRescheduleTime) {
+      const dateObject = new Date(dateReschedule);
+
+      // Mendapatkan format tanggal yang diinginkan
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+
+      // Mengonversi tanggal ke format yang diinginkan
+      const formattedDate = dateObject.toLocaleDateString("id-ID", options);
+      setRescheduleData(
+        `${formattedDate} ${startRescheduleTime}-${endRescheduleTime}`
+      );
+    }
+  }, [dateReschedule, startRescheduleTime, endRescheduleTime]);
+
+  console.log(rescheduleData);
+  const today = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
     if (userProfile && userProfile.nama !== "") {
       getDataPengajuanBimbinganByDosenPaId();
       getDataLaporanBimbinganByDosenPaId();
@@ -2025,13 +2229,100 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       )}
       {selectedSubMenuDashboard === "Pengesahan Absensi Bimbingan" && (
         <div className="md:w-[75%] px-4 md:pl-[30px] mb-12 md:pr-[128px] py-4 md:py-[30px] md:min-h-[500px]">
-          <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
+          <div className="flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
               Pengesahan Absensi Bimbingan Akademik Mahasiswa
             </h1>
-            <div className="flex flex-col gap-4">
-              {dataPengesahanBimbingan.length > 0 ? (
-                dataPengesahanBimbingan
+
+            {dataPengesahanBimbingan.length > 0 && (
+              <div className="flex flex-col gap-4">
+                {dataPengesahanBimbingan.length > 0 && (
+                  <div className="flex justify-between">
+                    <div>Selected ({selectedEntries.length})</div>
+                    <div className="flex items-center ">
+                      <input
+                        type="checkbox"
+                        id="selectAll"
+                        checked={
+                          selectedEntries.length ===
+                          dataPengesahanBimbingan.length
+                        }
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setSelectedEntries(
+                            isChecked
+                              ? dataPengesahanBimbingan.map((data) => data.id)
+                              : []
+                          );
+                        }}
+                        className="size-4 cursor-pointer outline-none"
+                      />
+                      <label htmlFor="selectAll" className="ml-2">
+                        Select All ({dataPengesahanBimbingan.length})
+                      </label>
+                    </div>
+                  </div>
+                )}
+                {selectedEntries.length > 0 ? (
+                  <div className="p-4 border rounded-lg shadow-md">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-md font-semibold">
+                        Apakah Anda ingin mengonfirmasi pengesahan untuk{" "}
+                        {selectedEntries.length} absensi bimbingan ini?
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Silakan pilih opsi konfirmasi di bawah ini.
+                      </p>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <button
+                        onClick={() =>
+                          handleBunchEditPengesahanKehadiranBimbingan(
+                            selectedEntries,
+                            "Tidak Sah"
+                          )
+                        }
+                        className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                        disabled={keteranganKonfirmasi === ""}
+                        aria-label="Konfirmasi Tidak Sah"
+                      >
+                        Tidak Sah
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleBunchEditPengesahanKehadiranBimbingan(
+                            selectedEntries,
+                            "Sah"
+                          )
+                        }
+                        className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                        disabled={keteranganKonfirmasi === ""}
+                        aria-label="Konfirmasi Sah"
+                      >
+                        Sah
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 border rounded-lg shadow-md">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-md font-semibold">
+                        Saat ini, belum ada absensi yang dapat disahkan karena
+                        dosen belum memilih bimbingan untuk konfirmasi.
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Silakan pilih absensi di bawah ini untuk mengonfirmasi
+                        pengesahannya!
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {dataPengesahanBimbingan.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {dataPengesahanBimbingan
                   .slice()
                   .reverse()
                   .map((data) => (
@@ -2039,6 +2330,14 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                       key={data.id}
                       className="flex flex-col border rounded-lg p-6 gap-4"
                     >
+                      <div className="relative">
+                        <input
+                          className="size-4 cursor-pointer outline-none"
+                          type="checkbox"
+                          checked={selectedEntries.includes(data.id)}
+                          onChange={() => handleSelectEntry(data.id)}
+                        />
+                      </div>
                       <div className="flex justify-between text-neutral-600">
                         <p>
                           {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
@@ -2076,7 +2375,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                             }
                             value={data.permasalahan}
                             disabled
-                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24"
                           />
                           <p className="text-sm font-medium text-gray-700 mt-2">
                             Solusi
@@ -2087,7 +2386,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                             }
                             disabled
                             value={data.solusi}
-                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24"
                           />
                         </div>
                       )}
@@ -2104,7 +2403,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                               className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-200"
                               onClick={() =>
                                 openImageInNewTab(data.dokumentasi_kehadiran)
-                              } // Membuka modal saat ikon diklik
+                              }
                               title="Lihat Gambar"
                             >
                               <EyeIcon className="h-5 w-5 text-gray-700" />
@@ -2120,94 +2419,44 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                           />
                         </div>
                       </div>
-
-                      <div className="flex gap-2">
-                        {/* Status Menunggu */}
-                        {data.status_pengesahan_kehadiran === "Belum Sah" && (
-                          <>
-                            <button
-                              onClick={() =>
-                                handleEditPengesahanKehadiranBimbingan(
-                                  data.id,
-                                  "Tidak Sah"
-                                )
-                              }
-                              className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
-                              disabled={keteranganKonfirmasi === ""}
-                            >
-                              Tidak Sah
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleEditPengesahanKehadiranBimbingan(
-                                  data.id,
-                                  "Sah"
-                                )
-                              }
-                              className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-[14px]"
-                              disabled={keteranganKonfirmasi === ""}
-                            >
-                              Sah
-                            </button>
-                          </>
-                        )}
-
-                        {data.status_pengesahan_kehadiran === "Sah" && (
-                          <button
-                            className="w-full bg-green-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
-                            disabled
-                          >
-                            Sah
-                          </button>
-                        )}
-
-                        {/* Status Reschedule */}
-                        {data.status_pengesahan_kehadiran === "Tidak Sah" && (
-                          <button
-                            className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
-                            disabled
-                          >
-                            Tidak Sah
-                          </button>
-                        )}
-                      </div>
                     </div>
-                  ))
-              ) : (
-                <div className="border rounded-lg p-10 flex flex-col items-center">
-                  <svg
-                    className="h-12 w-12 text-red-500 mb-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  ))}
+              </div>
+            ) : (
+              <div className="border rounded-lg p-10 flex flex-col items-center">
+                <svg
+                  className="h-12 w-12 text-red-500 mb-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
 
-                  <p className="text-center text-red-500">
-                    Saat ini, belum ada absensi bimbingan yang diajukan oleh
-                    mahasiswa.
-                  </p>
-                  <p className="text-center text-gray-600">
-                    Silakan tunggu hingga mahasiswa mengisi absensi bimbingan.
-                  </p>
-                </div>
-              )}
-            </div>
+                <p className="text-center text-red-500">
+                  Saat ini, belum ada absensi bimbingan yang diajukan oleh
+                  mahasiswa.
+                </p>
+                <p className="text-center text-gray-600">
+                  Silakan tunggu hingga mahasiswa mengisi absensi bimbingan.
+                </p>
+              </div>
+            )}
           </div>
           <ToastContainer />
         </div>
       )}
+
       {selectedSubMenuDashboard ===
         "Pengajuan Bimbingan Akademik Mahasiswa" && (
         <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
-          <div className=" flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
+          <div className="flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
               Pengajuan Bimbingan Akademik Mahasiswa
             </h1>
@@ -2236,27 +2485,40 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                           </p>
                         )}
                       </div>
-                      <textarea
-                        placeholder={
-                          data.keterangan === null
-                            ? "Input Keterangan (Misal: Ruang FIK 204 , https://meet.link, atau keterangan lainnya)"
-                            : ""
-                        }
-                        onChange={(e) => {
-                          setKeteranganKonfirmasi((prev) => ({
-                            ...prev,
-                            [data.id]: e.target.value, // Update keterangan untuk pengajuan ini
-                          }));
-                        }}
-                        value={
-                          data.keterangan === null
-                            ? keteranganKonfirmasi[data.id] || ""
-                            : data.keterangan
-                        }
-                        disabled={data.keterangan !== null}
-                        className="px-3 py-2 text-[15px] border rounded-lg resize-none" // Tambahkan 'resize-none' untuk mencegah perubahan ukuran
-                        rows={4} // Menentukan jumlah baris yang ditampilkan
-                      />
+                      {data.status === "Diterima" && (
+                        <textarea
+                          placeholder={
+                            data.keterangan === null
+                              ? "Input Keterangan (Misal: Ruang FIK 204 , https://meet.link, atau keterangan lainnya)"
+                              : ""
+                          }
+                          onChange={(e) => {
+                            setKeteranganKonfirmasi((prev) => ({
+                              ...prev,
+                              [data.id]: e.target.value, // Update keterangan untuk pengajuan ini
+                            }));
+                          }}
+                          value={
+                            data.keterangan === null
+                              ? keteranganKonfirmasi[data.id] || ""
+                              : data.keterangan
+                          }
+                          disabled={data.keterangan !== null}
+                          className="px-3 py-2 text-[15px] border rounded-lg resize-none" // Tambahkan 'resize-none' untuk mencegah perubahan ukuran
+                          rows={4} // Menentukan jumlah baris yang ditampilkan
+                        />
+                      )}
+                      {data.status === "Reschedule" && (
+                        <div className="flex flex-col gap-2">
+                          <p className="font-medium">{`Reschedule: ${data.jadwal_bimbingan_reschedule}`}</p>
+                          <textarea
+                            value={data.keterangan_reschedule}
+                            disabled={true}
+                            className="px-3 py-2 text-[15px] border rounded-lg resize-none" // Tambahkan 'resize-none' untuk mencegah perubahan ukuran
+                            rows={4} // Menentukan jumlah baris yang ditampilkan
+                          />
+                        </div>
+                      )}
                       <div className="flex gap-2">
                         {/* Status Menunggu */}
                         {data.status === "Menunggu Konfirmasi" && (
@@ -2267,6 +2529,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                                   data.id,
                                   data.mahasiswa_id,
                                   "Reschedule",
+                                  data.jadwal_bimbingan,
                                   data.permasalahan
                                 )
                               }
@@ -2281,6 +2544,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                                   data.id,
                                   data.mahasiswa_id,
                                   "Diterima",
+                                  data.jadwal_bimbingan,
                                   data.permasalahan
                                 )
                               }
@@ -2343,9 +2607,136 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
               )}
             </div>
           </div>
+          <Transition appear show={isOpen} as={Fragment}>
+            <Dialog as="div" className="relative z-[1000]" onClose={closeModal}>
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <div className="fixed inset-0 bg-black bg-opacity-25" />
+              </Transition.Child>
+
+              <div className="fixed inset-0 overflow-y-auto">
+                <div className="flex min-h-full items-center justify-center p-4 text-center">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 scale-95"
+                    enterTo="opacity-100 scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 scale-100"
+                    leaveTo="opacity-0 scale-95"
+                  >
+                    <Dialog.Panel className="w-full flex flex-col max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6 text-gray-900"
+                      >
+                        {selectedAction === "Reschedule"
+                          ? "Reschedule Pengajuan"
+                          : "Terima Pengajuan"}
+                      </Dialog.Title>
+                      <div className="mt-2">
+                        {selectedAction === "Reschedule" && (
+                          <div className="flex flex-col gap-2">
+                            <p className="text-sm">{`Jadwal sebelumnya (${selectedPengajuan.jadwal_bimbingan})`}</p>
+                            <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
+                              <input
+                                type="date"
+                                value={dateReschedule}
+                                onChange={handleDateChange}
+                                min={today}
+                                className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
+                              />
+                              <div className="flex md:gap-3 items-center">
+                                <input
+                                  type="time"
+                                  value={startRescheduleTime}
+                                  onChange={handleStartTimeChange}
+                                  className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
+                                />
+                                <p>-</p>
+                                <input
+                                  type="time"
+                                  value={endRescheduleTime}
+                                  onChange={handleEndTimeChange}
+                                  className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
+                                />
+                              </div>
+                            </div>
+                            <textarea
+                              placeholder="Input Keterangan (Misal: Ruang FIK 204 , https://meet.link, atau keterangan lainnya)"
+                              value={keterangan}
+                              onChange={(e) => setKeterangan(e.target.value)}
+                              className="mt-2 px-3 py-2 outline-none text-[15px] border rounded-lg resize-none"
+                              rows={4}
+                            />
+                          </div>
+                        )}
+                        {selectedAction === "Diterima" && (
+                          <div className="flex flex-col gap-2">
+                            <textarea
+                              placeholder="Input Keterangan (Misal: Ruang FIK 204 , https://meet.link, atau keterangan lainnya)"
+                              value={keterangan}
+                              onChange={(e) => setKeterangan(e.target.value)}
+                              className="mt-2 px-3 outline-none py-2 text-[15px] border rounded-lg resize-none"
+                              rows={4}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-4 ml-auto">
+                        <button
+                          type="button"
+                          className="inline-flex justify-center rounded-md border border-transparent bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                          onClick={closeModal}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="ml-2 inline-flex justify-center rounded-md border border-transparent bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                          onClick={() => {
+                            if (selectedAction === "Diterima") {
+                              handleSubmitDiterima(
+                                selectedPengajuan.id,
+                                "Diterima",
+                                keterangan,
+                                selectedPengajuan.mahasiswa_id,
+                                selectedPengajuan.permasalahan
+                              );
+                            } else if (selectedAction === "Reschedule") {
+                              handleSubmitReschedule(
+                                selectedPengajuan.id,
+                                "Reschedule",
+                                keterangan,
+                                rescheduleData,
+                                selectedPengajuan.mahasiswa_id
+                              );
+                            }
+                            closeModal();
+                          }}
+                        >
+                          Simpan
+                        </button>
+                      </div>
+                    </Dialog.Panel>
+                  </Transition.Child>
+                </div>
+              </div>
+            </Dialog>
+          </Transition>
+
           <ToastContainer />
         </div>
       )}
+
       {selectedSubMenuDashboard ===
         "Riwayat Laporan Bimbingan Role Dosen PA" && (
         <div className="md:w-[75%] border md:border-none mt-4 md:mt-0 mx-4 md:mx-0 rounded-lg md:rounded-none px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px] min-h-[500px]">

@@ -107,6 +107,7 @@ export async function POST(req: Request): Promise<Response> {
                   jurusan: user?.nama_program_studi,
                   peminatan: null,
                   dosen_pa_id: null,
+                  ipk: null
                 },
               });
             } catch (prismaError) {

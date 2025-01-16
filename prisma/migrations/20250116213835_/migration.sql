@@ -5,6 +5,7 @@ CREATE TABLE `statuspembacaanpesansiaran` (
     `mahasiswa_id` INTEGER NOT NULL,
     `is_read` BOOLEAN NOT NULL DEFAULT false,
 
+    UNIQUE INDEX `Mahasiswa_id_key`(`mahasiswa_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

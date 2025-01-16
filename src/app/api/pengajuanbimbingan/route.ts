@@ -23,27 +23,25 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request) {
   try {
     const body: any = await req.json();
+    console.log(body)
 
-    const { nama_lengkap, nim, email, no_whatsapp, jurusan, jadwal_bimbingan, jenis_bimbingan, topik_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id, permasalahan, is_selected_permasalahan } = body;
-
-    if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id) {
+    const { nama_lengkap, periode_pengajuan, nim, email, ipk, no_whatsapp, jurusan, jadwal_bimbingan, jenis_bimbingan, topik_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id, permasalahan, semester, tahun_ajaran } = body;
+    console.log(body)
+    if (!dosen_pa_id) {
       return new Response(
-        JSON.stringify({ message: 'Semua kolom harus diisi!' }),
+        JSON.stringify({ message: 'Pilih Dosen PA terlebih dahulu di dashboard profile!' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    if (!ipk) {
+      return new Response(
+        JSON.stringify({ message: 'Input IPK terlebih dahulu di dashboard profile!' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     if (jenis_bimbingan === "Pribadi") {
-      if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id || !permasalahan || !topik_bimbingan) {
-        return new Response(
-          JSON.stringify({ message: 'Semua kolom harus diisi!' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-
-    if (jenis_bimbingan === "Perwalian") {
-      if (!nama_lengkap || !nim || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id || !is_selected_permasalahan) {
+      if (!nama_lengkap || !nim || !periode_pengajuan || !email || !no_whatsapp || !jurusan || !jadwal_bimbingan || !jenis_bimbingan || !sistem_bimbingan || !status || !dosen_pa_id || !mahasiswa_id || !permasalahan || !topik_bimbingan || !tahun_ajaran || !semester) {
         return new Response(
           JSON.stringify({ message: 'Semua kolom harus diisi!' }),
           { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -72,10 +70,13 @@ export async function POST(req: Request) {
           jenis_bimbingan,
           topik_bimbingan,
           sistem_bimbingan,
+          periode_pengajuan,
           status,
           dosen_pa_id,
           mahasiswa_id: mahasiswa.id,
-          permasalahan
+          permasalahan,
+          tahun_ajaran,
+          semester
         },
       });
     }
@@ -112,8 +113,9 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
+    console.log(body)
 
-    const { id, status, keterangan, mahasiswa_id, dosen_pa_id } = body;
+    const { id, jadwal_bimbingan_reschedule, keterangan_reschedule, status_reschedule, status, keterangan, mahasiswa_id, dosen_pa_id } = body;
 
     if (!id || !status) {
       return new Response(
@@ -121,11 +123,27 @@ export async function PATCH(req: Request) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    if (!keterangan) {
-      return new Response(
-        JSON.stringify({ message: 'Input keterangan terlebih dahulu!' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+    if (status === "Diterima") {
+      if (!keterangan) {
+        return new Response(
+          JSON.stringify({ message: 'Input keterangan terlebih dahulu!' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+    } else if (status === "Reschedule") {
+      if (!keterangan_reschedule) {
+        return new Response(
+          JSON.stringify({ message: 'Input keterangan schedule terlebih dahulu!' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      else if (!jadwal_bimbingan_reschedule) {
+        return new Response(
+          JSON.stringify({ message: 'Input jadwal schedule terlebih dahulu!' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     const existingRecord = await prisma.pengajuanbimbingan.findUnique({
@@ -156,10 +174,18 @@ export async function PATCH(req: Request) {
       await prisma.notifikasimahasiswa.create({ data: notifikasiMahasiswa });
     }
 
-    const pengajuanBimbingan = await prisma.pengajuanbimbingan.update({
-      where: { id },
-      data: { status, keterangan },
-    });
+    let pengajuanBimbingan
+    if (status === "Diterima") {
+      pengajuanBimbingan = await prisma.pengajuanbimbingan.update({
+        where: { id },
+        data: { status, keterangan },
+      });
+    } else if (status === "Reschedule") {
+      pengajuanBimbingan = await prisma.pengajuanbimbingan.update({
+        where: { id },
+        data: { status, jadwal_bimbingan_reschedule, keterangan_reschedule, status_reschedule },
+      });
+    }
 
     if (status === "Diterima") {
       const responsePayload = {
@@ -172,15 +198,38 @@ export async function PATCH(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       });
     } else if (status === "Reschedule") {
-      const responsePayload = {
-        status: "success",
-        message: "Pengajuan bimbingan telah berhasil direschedule!",
-        data: pengajuanBimbingan,
-      };
-      return new Response(JSON.stringify(responsePayload), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      if (status_reschedule === "Belum dikonfirmasi") {
+        const responsePayload = {
+          status: "success",
+          message: "Pengajuan bimbingan telah berhasil direschedule!",
+          data: pengajuanBimbingan,
+        };
+        return new Response(JSON.stringify(responsePayload), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } else if (status_reschedule === "Bisa") {
+        const responsePayload = {
+          status: "success",
+          message: "Kehadiran untuk reschedule bimbingan telah berhasil dicatat!",
+          data: pengajuanBimbingan,
+        };
+        return new Response(JSON.stringify(responsePayload), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } else if (status_reschedule === "Tidak Bisa") {
+        const responsePayload = {
+          status: "success",
+          message: "Ketidakhadiran untuk reschedule bimbingan telah berhasil dicatat!",
+          data: pengajuanBimbingan,
+        };
+        return new Response(JSON.stringify(responsePayload), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
     }
 
   } catch (error) {

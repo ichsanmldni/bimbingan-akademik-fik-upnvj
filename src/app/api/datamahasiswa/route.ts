@@ -46,6 +46,7 @@ export async function PATCH(req: Request): Promise<Response> {
       peminatan,
       dosen_pa_id,
       profile_image,
+      ipk
     } = body;
 
     // Validate input
@@ -105,6 +106,7 @@ export async function PATCH(req: Request): Promise<Response> {
         jurusan,
         peminatan,
         dosen_pa_id,
+        ipk,
         profile_image: savedImagePath,
       },
     });
