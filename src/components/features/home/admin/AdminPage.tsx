@@ -8,8 +8,6 @@ import EditButton from "@/components/ui/EditButton";
 import TrashButton from "@/components/ui/TrashButton";
 import ManageParameter from "./ManageParameter";
 import Dashboard from "./Dashboard";
-import ManageLaporanBimbingan from "./ManageLaporanBimbingan";
-import ManageJadwalDosenPA from "./ManageJadwalDosenPA";
 import ManageInformasiAkademik from "./ManageInformasiAkademik";
 
 interface AdminPageProps {
@@ -24,10 +22,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ activeNavbar }) => {
       {activeNavbar === "Manage Parameter" && (
         <ManageParameter activeNavbar={activeNavbar} />
       )}
-      {activeNavbar === "Manage Laporan Bimbingan" && (
-        <ManageLaporanBimbingan />
-      )}
-      {activeNavbar === "Manage Jadwal Dosen PA" && <ManageJadwalDosenPA />}
       {activeNavbar === "Manage Informasi Akademik" && (
         <ManageInformasiAkademik />
       )}

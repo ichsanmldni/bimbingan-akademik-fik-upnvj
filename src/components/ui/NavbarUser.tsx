@@ -23,6 +23,16 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
     useState(false);
   const [dataNotifikasi, setDataNotifikasi] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [isUnreadMahasiswaMessages, setIsUnreadMahasiswaMessages] =
+    useState(false);
+  const [isUnreadDosenPAMessages, setIsUnreadDosenPAMessages] = useState(false);
+  const [isChatPribadiMahasiswaUnread, setIsChatPribadiMahasiswaUnread] =
+    useState(false);
+  const [isPesanSiaranDosenPAUnread, setIsPesanSiaranDosenPAUnread] =
+    useState(false);
+  const [isChatPribadiDosenPAUnread, setIsChatPribadiDosenPAUnread] =
+    useState(false);
+  const [dataPesanSiaran, setDataPesanSiaran] = useState([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -48,6 +58,85 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   };
 
   const isActive = (path: string) => pathname === path;
+
+  const getIsChatPribadiDosenPAReadByUserId = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/chatpribadi`);
+
+      const dataChatPribadi = response.data;
+
+      const chatPribadiUser = dataChatPribadi.find(
+        (data) => data.mahasiswa_id === dataUser.id
+      );
+
+      const isMahasiswaRead = chatPribadiUser.is_mahasiswa_pesan_terakhir_read;
+
+      setIsChatPribadiDosenPAUnread(!isMahasiswaRead);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getIsChatPribadiMahasiswaReadByUserId = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/chatpribadi`);
+
+      const dataChatPribadi = response.data;
+
+      console.log(dataUser);
+
+      const chatPribadiUser = dataChatPribadi.filter(
+        (data) => data.dosen_pa_id === dataUser.id
+      );
+
+      const isDosenPAReadAll = chatPribadiUser.every(
+        (data) => data.is_dosenpa_pesan_terakhir_read === true
+      );
+
+      setIsChatPribadiMahasiswaUnread(!isDosenPAReadAll);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataPesanSiaran = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/pesansiaran`);
+
+      const dataPesanSiaran = response.data;
+
+      setDataPesanSiaran(dataPesanSiaran);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getIsPesanSiaranReadByUserId = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/statuspembacaanpesansiaran`
+      );
+
+      const dataStatusPembacaanPesanSiaran = response.data;
+
+      const pesanSiaranUser = dataPesanSiaran.find(
+        (data) => data.dosen_pa_id === dataUser.dosen_pa_id
+      );
+
+      const dataStatusPembacaanPesanSiaranUser = dataStatusPembacaanPesanSiaran
+        .filter((data) => data.pesan_siaran_id === pesanSiaranUser.id)
+        .find((data) => data.mahasiswa_id === dataUser.id);
+
+      const isPesanSiaranUserRead = dataStatusPembacaanPesanSiaranUser.is_read;
+
+      setIsPesanSiaranDosenPAUnread(!isPesanSiaranUserRead);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
 
   const getDataNotifikasiByUserId = async () => {
     try {
@@ -84,6 +173,8 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
     }
   };
 
+  console.log(dataUser);
+
   useEffect(() => {
     const count = dataNotifikasi?.filter((data) => data.read === false).length;
     setNotificationCount(count);
@@ -91,9 +182,40 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   useEffect(() => {
     if (dataUser && dataUser.id) {
-      getDataNotifikasiByUserId();
+      if (roleUser === "Dosen PA") {
+        getDataNotifikasiByUserId();
+        getIsChatPribadiMahasiswaReadByUserId();
+      } else if (roleUser === "Mahasiswa") {
+        getDataNotifikasiByUserId();
+        getIsChatPribadiDosenPAReadByUserId();
+        getIsPesanSiaranReadByUserId();
+      } else if (roleUser === "Kaprodi") {
+        getDataNotifikasiByUserId();
+      }
     }
   }, [dataUser]);
+
+  useEffect(() => {
+    if (roleUser === "Mahasiswa") {
+      if (isPesanSiaranDosenPAUnread || isChatPribadiDosenPAUnread) {
+        setIsUnreadDosenPAMessages(true);
+      }
+    } else if (roleUser === "Dosen PA") {
+      if (isChatPribadiMahasiswaUnread) {
+        setIsUnreadMahasiswaMessages(true);
+      }
+    }
+  }, [
+    isPesanSiaranDosenPAUnread,
+    isChatPribadiMahasiswaUnread,
+    isChatPribadiDosenPAUnread,
+  ]);
+
+  useEffect(() => {
+    if (roleUser === "Mahasiswa") {
+      getDataPesanSiaran();
+    }
+  }, []);
 
   return (
     <>
@@ -111,7 +233,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           </a>
         </div>
         <div
-          className={`hidden md:flex items-center pl-8 w-[45%] ${roleUser === "Dosen PA" && "md:w-[50%]"} ${roleUser === "Kaprodi" ? "gap-10 pl-[96px]" : "gap-6"} md:flex`}
+          className={`hidden md:flex items-center pl-8 w-[45%] ${roleUser === "Dosen PA" && "md:w-[50%]"} ${roleUser === "Kaprodi" ? "gap-12 pl-[132px]" : "gap-6"} md:flex`}
         >
           <a
             href="/"
@@ -155,9 +277,18 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           </Link>
         </div>
         <div className="flex gap-10 justify-end md:w-[20%] items-center md:flex">
-          <Link href="/chatpribadi">
-            <MessageSquareText className="cursor-pointer" />
-          </Link>
+          {roleUser !== "Kaprodi" && (
+            <Link href="/chatpribadi" className="relative">
+              <MessageSquareText className="hover:text-[#FB923C] cursor-pointer" />
+              {/* Titik merah untuk menandakan chat belum dibalas */}
+              {roleUser === "Mahasiswa" && isUnreadDosenPAMessages && (
+                <span className="absolute top-[-5px] right-[-5px] bg-red-600 rounded-full w-2.5 h-2.5" />
+              )}
+              {roleUser === "Dosen PA" && isUnreadMahasiswaMessages && (
+                <span className="absolute top-[-5px] right-[-5px] bg-red-600 rounded-full w-2.5 h-2.5" />
+              )}
+            </Link>
+          )}
           <div
             className="relative inline-block cursor-pointer hidden md:block"
             onClick={() => setIsModalNotificationOpen((prev) => !prev)}
@@ -192,7 +323,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
         {isModalNotificationOpen && (
           <NotificationModal
             dataNotifikasi={dataNotifikasi}
-            className="fixed inset-0 flex items-start mt-[70px] mr-[180px] justify-end z-50"
+            className={`fixed inset-0 flex items-start ${roleUser === "Dosen PA" ? "mt-[70px] mr-[112px]" : "mt-[70px] mr-[180px]"} justify-end z-50`}
             onClose={closeNotificationModal}
             refreshData={getDataNotifikasiByUserId}
             dataUser={dataUser}

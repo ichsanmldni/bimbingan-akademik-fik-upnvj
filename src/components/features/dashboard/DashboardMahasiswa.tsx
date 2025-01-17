@@ -148,6 +148,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   };
 
+  console.log(userProfile, dataUser);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const signatureData = sigCanvas.current
@@ -165,6 +166,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
             : signatureData,
         solusi: solusi ? solusi : null,
         permasalahan: permasalahan ? permasalahan : null,
+        ipk: userProfile.ipk,
       };
       const result = await addAbsensiBimbingan(absensiBimbinganValue);
       toast.success(
@@ -621,10 +623,17 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         `${API_BASE_URL}/api/datamahasiswa`,
         updatedData
       );
-      return response.data;
+      return {
+        success: true,
+        message: response.data.message || "Edit Profile berhasil!",
+
+        data: response.data,
+      };
     } catch (error) {
-      console.error("Error updating order:", error);
-      throw error;
+      const errorMessage =
+        (error as any).response?.data?.message ||
+        "Terjadi kesalahan. Silakan coba lagi.";
+      throw new Error(errorMessage);
     }
   };
 
@@ -645,10 +654,42 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       };
 
       const result = await patchMahasiswa(mahasiswaValue);
+      toast.success(
+        <div className="flex items-center">
+          <span>{result.message || "Profile berhasil diubah!"}</span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
       getDataMahasiswaById();
       setImagePreview(null);
     } catch (error) {
-      console.error("Failed to save the updated order.");
+      toast.error(
+        <div className="flex items-center">
+          <span>
+            {(error as any).message ||
+              "Edit profile gagal. Silahkan coba lagi!"}
+          </span>
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        }
+      );
     }
   };
 
@@ -889,6 +930,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
               </button>
             </form>
           </div>
+          <ToastContainer />
         </div>
       )}
       {selectedSubMenuDashboard === "Jadwal Kosong Dosen PA Role Mahasiswa" && (
@@ -1428,7 +1470,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       )}
       {selectedSubMenuDashboard === "Riwayat Pengajuan Bimbingan" && (
         <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] md:mb-[200px] py-4 md:py-[30px]">
-          <div className=" flex flex-col gap-6 border px-5 md:px-[30px] py-4 md:pt-[15px] md:pb-[30px] rounded-lg">
+          <div className=" flex flex-col gap-6 border shadow-md px-5 md:px-[30px] py-4 md:pt-[15px] md:pb-[30px] rounded-lg">
             <h1 className="font-semibold text-[24px]">
               Riwayat Pengajuan Bimbingan Akademik
             </h1>
@@ -1482,6 +1524,19 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                       )}
                       {data.status === "Diterima" &&
                         data.jenis_bimbingan === "Pribadi" && (
+                          <div className="flex flex-col gap-2">
+                            <p className="text-[14px] font-medium">
+                              Keterangan dari Dosen PA
+                            </p>
+                            <textarea
+                              value={data.keterangan}
+                              disabled
+                              className="border rounded-lg text-sm p-2"
+                            ></textarea>
+                          </div>
+                        )}
+                      {data.status === "Diterima" &&
+                        data.jenis_bimbingan.startsWith("Perwalian") && (
                           <div className="flex flex-col gap-2">
                             <p className="text-[14px] font-medium">
                               Keterangan dari Dosen PA

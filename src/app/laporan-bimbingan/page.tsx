@@ -680,6 +680,8 @@ export default function Home() {
     }
   };
 
+  console.log(selectedBimbingan);
+
   const handleFileChangeAddPrestasiIlmiahMahasiswaModal = (e: any) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -2154,6 +2156,56 @@ export default function Home() {
   }, [selectedBimbingan]);
 
   useEffect(() => {
+    const perwalianBimbingan = selectedBimbingan.filter((data) =>
+      data.pengajuan_bimbingan.jenis_bimbingan.startsWith("Perwalian")
+    );
+    const mahasiswaIds = perwalianBimbingan.map(
+      (data) => data.pengajuan_bimbingan.mahasiswa_id
+    );
+
+    // Mencari data mahasiswa yang ID-nya ada di mahasiswaIds
+    const dataPesertaBimbingan = dataMahasiswa.filter((data) =>
+      mahasiswaIds.includes(data.id)
+    );
+
+    const ipkCounts = dataPesertaBimbingan.reduce(
+      (acc, mahasiswa) => {
+        const ipk = parseFloat(mahasiswa.ipk);
+
+        // Cek apakah hasil konversi valid (bukan NaN)
+        if (isNaN(ipk)) {
+          console.warn(
+            `IPK tidak valid untuk mahasiswa dengan ID: ${mahasiswa.id}`
+          );
+          return acc; // Lewati mahasiswa ini
+        }
+
+        if (ipk >= 3.5) {
+          acc.A += 1;
+        } else if (ipk >= 3 && ipk < 3.5) {
+          acc.B += 1;
+        } else if (ipk >= 2.5 && ipk < 3) {
+          acc.C += 1;
+        } else if (ipk >= 2 && ipk < 2.5) {
+          acc.D += 1;
+        } else if (ipk < 2) {
+          acc.E += 1;
+        }
+
+        return acc;
+      },
+      { A: 0, B: 0, C: 0, D: 0, E: 0 }
+    );
+
+    // Mengatur state dengan jumlah mahasiswa berdasarkan kategori IPK
+    setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(ipkCounts.A);
+    setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(ipkCounts.B);
+    setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(ipkCounts.C);
+    setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(ipkCounts.D);
+    setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(ipkCounts.E);
+  }, [selectedBimbingan]);
+
+  useEffect(() => {
     setSelectedBimbingan([]);
   }, [jenisBimbinganFilter, jadwalFilter, jurusanFilter]);
 
@@ -2797,7 +2849,7 @@ export default function Home() {
                                           IPK &ge; 3.5
                                         </label>
                                         <InputField
-                                          disabled={false}
+                                          disabled
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
                                           onChange={(e: any) =>
@@ -2816,7 +2868,7 @@ export default function Home() {
                                           3 &le; IPK &lt; 3.5
                                         </label>
                                         <InputField
-                                          disabled={false}
+                                          disabled
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
                                           onChange={(e: any) =>
@@ -2835,7 +2887,7 @@ export default function Home() {
                                           2.5 &le; IPK &lt; 3
                                         </label>
                                         <InputField
-                                          disabled={false}
+                                          disabled
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
                                           onChange={(e: any) =>
@@ -2854,7 +2906,7 @@ export default function Home() {
                                           2 &le; IPK &lt; 2.5
                                         </label>
                                         <InputField
-                                          disabled={false}
+                                          disabled
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
                                           onChange={(e: any) =>
@@ -2873,7 +2925,7 @@ export default function Home() {
                                           IPK &lt; 2
                                         </label>
                                         <InputField
-                                          disabled={false}
+                                          disabled
                                           type="number"
                                           placeholder="Jumlah Mahasiswa"
                                           onChange={(e: any) =>

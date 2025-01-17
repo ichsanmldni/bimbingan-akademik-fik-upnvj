@@ -57,6 +57,15 @@ export async function PATCH(req: Request): Promise<Response> {
       );
     }
 
+    const ipkRegex = /^(0(\.00)?|[0-3](\.\d{2})?|4(\.00)?)$/;
+
+    if (!ipkRegex.test(ipk)) {
+      return new Response(
+        JSON.stringify({ message: 'Format IPK yang Anda input tidak valid. IPK harus berupa string yang mewakili angka antara 0 dan 4 dengan tepat 2 angka di belakang koma.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Check if record exists in the database
     const existingRecord = await prisma.mahasiswa.findUnique({
       where: { nim },

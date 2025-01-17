@@ -121,24 +121,18 @@ export async function POST(req: Request): Promise<Response> {
                     },
                 })
 
+            } else if (datastatusmahasiswa) {
+                await prisma.statuspembacaanpesansiaran.update({
+                    where: {
+                        id: datastatusmahasiswa.id,
+                    },
+                    data: {
+                        is_read: false,
+                    },
+                })
             }
 
         }
-        )
-
-        const statuspembacaanpesansiaran = await prisma.statuspembacaanpesansiaran.findMany()
-        const statuspembacaanpesansiaranchat = statuspembacaanpesansiaran.filter(data => data.id === pesan_siaran_id)
-
-
-        statuspembacaanpesansiaranchat.map(async data =>
-            await prisma.statuspembacaanpesansiaran.update({
-                where: {
-                    id: pesan_siaran_id,
-                },
-                data: {
-                    is_read: false,
-                },
-            })
         )
 
         return new Response(JSON.stringify(pesanSiaran), {

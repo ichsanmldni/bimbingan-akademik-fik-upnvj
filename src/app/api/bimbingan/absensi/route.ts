@@ -6,7 +6,7 @@ import prisma from '../../../../lib/prisma';
 export async function PATCH(req: Request): Promise<Response> {
     try {
         const body: any = await req.json();
-        const { id, dokumentasi_kehadiran, ttd_kehadiran, solusi } = body;
+        const { id, dokumentasi_kehadiran, ttd_kehadiran, solusi, ipk } = body;
 
         if (!id) {
             return new Response(
@@ -62,14 +62,12 @@ export async function PATCH(req: Request): Promise<Response> {
                     { status: 400, headers: { 'Content-Type': 'application/json' } }
                 );
             }
-        } else if (existingRecord?.pengajuan_bimbingan.jenis_bimbingan === "Perwalian") {
-            if (existingRecord.permasalahan) {
-                if (!solusi) {
-                    return new Response(
-                        JSON.stringify({ message: 'Wajib input solusi yang diberikan selama bimbingan!' }),
-                        { status: 400, headers: { 'Content-Type': 'application/json' } }
-                    );
-                }
+        } else if (existingRecord?.pengajuan_bimbingan.jenis_bimbingan.startsWith("Perwalian")) {
+            if (!ipk) {
+                return new Response(
+                    JSON.stringify({ message: 'Sebelum mengisi absensi, input IPK Anda terlebih dahulu pada Profile Mahasiswa di Dashboard' }),
+                    { status: 400, headers: { 'Content-Type': 'application/json' } }
+                );
             }
             if (!dokumentasi_kehadiran && !ttd_kehadiran) {
                 return new Response(

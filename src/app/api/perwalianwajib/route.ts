@@ -35,6 +35,15 @@ export async function POST(req: Request) {
                     pesan_terakhir: pesan_siaran,
                 },
             });
+
+            const pesanChatSiaran = await prisma.pesanchatsiaran.create({
+                data: {
+                    pesan_siaran_id: pesanSiaran.id,
+                    pesan: pesan_siaran,
+                    waktu_kirim,
+                },
+            });
+
             mahasiswa.map(async data =>
                 await prisma.statuspembacaanpesansiaran.create({
                     data: {
@@ -44,14 +53,6 @@ export async function POST(req: Request) {
                     },
                 })
             )
-
-            const pesanChatSiaran = await prisma.pesanchatsiaran.create({
-                data: {
-                    pesan_siaran_id: pesanSiaran.id,
-                    pesan: pesan_siaran,
-                    waktu_kirim,
-                },
-            });
         }
         else if (pesansiaran) {
             const pesanChatSiaran = await prisma.pesanchatsiaran.create({
@@ -72,15 +73,21 @@ export async function POST(req: Request) {
                 },
             });
 
-            await prisma.statuspembacaanpesansiaran.update({
-                where: {
-                    id: pesansiaran.id,
-                },
-                data: {
-                    is_read: false,
-                },
-            })
+            const datastatuspembacaan = await prisma.statuspembacaanpesansiaran.findMany()
 
+            mahasiswa.map(async data => {
+                const datastatusmahasiswa = datastatuspembacaan.find(stts => stts.mahasiswa_id === data.id)
+                await prisma.statuspembacaanpesansiaran.update({
+                    where: {
+                        id: datastatusmahasiswa.id,
+                    },
+                    data: {
+                        is_read: false,
+                    },
+                })
+
+            }
+            )
         }
 
         const dosenpa = await prisma.dosenpa.findFirst({
@@ -105,7 +112,7 @@ export async function POST(req: Request) {
                     tahun_ajaran,
                     semester,
                     keterangan: pesan_siaran,
-                    periode_pengajuan: jenis_bimbingan === "Perwalian (Sebelum Isi KRS)" ? "Sebelum Perwalian KRS" : jenis_bimbingan === "Perwalian (Setelah UTS)" ? "Setelah Perwalian KRS - Sebelum Perwalian UTS" : jenis_bimbingan === "Perwalian (Setelah UAS)" ? "Setelah Perwalian UTS - Sebelum Perwalian UAS" : ""
+                    periode_pengajuan: jenis_bimbingan === "Perwalian KRS" ? "Sebelum Perwalian KRS" : jenis_bimbingan === "Perwalian UTS" ? "Setelah Perwalian KRS - Sebelum Perwalian UTS" : jenis_bimbingan === "Perwalian UAS" ? "Setelah Perwalian UTS - Sebelum Perwalian UAS" : ""
                 },
             });
             await prisma.bimbingan.create({

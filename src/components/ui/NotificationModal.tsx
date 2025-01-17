@@ -107,6 +107,10 @@ const NotificationModal: React.FC<any> = ({
     let submenu;
     if (data.isi === "Pengajuan bimbinganmu berhasil diterima!") {
       submenu = "Riwayat%20Pengajuan%20Bimbingan";
+    } else if (data.isi.startsWith("Pengajuan bimbinganmu direschedule")) {
+      submenu = "Pengajuan%20Bimbingan%20Akademik%20Mahasiswa";
+    } else if (data.isi.startsWith("Jadwal bimbingan ")) {
+      submenu = "Pengajuan%20Bimbingan%20Akademik%20Mahasiswa";
     } else if (data.isi.startsWith("Ada pengajuan bimbingan baru")) {
       submenu = "Pengajuan%20Bimbingan%20Akademik%20Mahasiswa";
     } else if (data.isi.startsWith("Ada absensi bimbingan baru dari")) {

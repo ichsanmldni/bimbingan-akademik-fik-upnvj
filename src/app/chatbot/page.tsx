@@ -15,6 +15,7 @@ export default function Home() {
   const [roleUser, setRoleUser] = useState<string>("");
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState<any[]>([]);
+  const [dataMahasiswa, setDataMahasiswa] = useState<any[]>([]);
   const [dataSesiChatbotMahasiswa, setDataSesiChatbotMahasiswa] = useState<
     any[]
   >([]);
@@ -34,7 +35,6 @@ export default function Home() {
   const [activeSesiChatbotMahasiswa, setActiveSesiChatbotMahasiswa] =
     useState(0);
   const [mahasiswaID, setMahasiswaID] = useState();
-  const [dataAllMahasiswa, setDataAllMahasiswa] = useState([]);
   const [dataInformasiAkademik, setDataInformasiAkademik] = useState([]);
 
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
@@ -50,6 +50,21 @@ export default function Home() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const getDataMahasiswa = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      setDataMahasiswa(response.data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
   };
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
@@ -95,7 +110,12 @@ export default function Home() {
       }
 
       const data = await response.data;
-      setDataInformasiAkademik(data);
+
+      const bab2 = data.filter((data) =>
+        data.bab_informasi_akademik.nama.startsWith("BAB II ")
+      );
+
+      setDataInformasiAkademik(bab2.sort((a, b) => b.id - a.id));
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -177,26 +197,14 @@ export default function Home() {
     }
   };
 
-  const getDataMahasiswa = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
-
-      console.log(response.data);
-
-      setDataAllMahasiswa(response.data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
   useEffect(() => {
     if (dataDosenPA && dataJadwalDosenPA && dataInformasiAkademik) {
       setCustomDataConsumeGPT({
         dosen_pa: dataDosenPA.map((dosen) => ({
-          name: dosen.nama,
+          nama: dosen.nama,
           email: dosen.email,
-          phone: dosen.telepon || "Tidak tersedia",
+          hp: dosen.hp,
+          nip: dosen.nip,
         })),
         jadwal_kosong_semua_dosen_pa: dataJadwalDosenPA.map((jadwal) => ({
           dosen_id: jadwal.dosen_pa_id,
@@ -220,12 +228,12 @@ export default function Home() {
 
     if (!customDataConsumeGPT) throw new Error("Data belum tersedia.");
 
-    const maxInfoCount = 5; // Maksimal jumlah informasi akademik
+    const maxInfoCount = 13; // Maksimal jumlah informasi akademik
 
     const dosenList = customDataConsumeGPT.dosen_pa
       .map(
         (dosen) =>
-          `Dosen: ${dosen.name}, Email: ${dosen.email}, Telepon: ${dosen.phone}`
+          `Dosen: ${dosen.nama}, Email: ${dosen.email}, Telepon: ${dosen.hp}`
       )
       .join("\n");
 
@@ -243,6 +251,8 @@ export default function Home() {
       .map((info) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
       .join("\n");
 
+    console.log(informasiAkademik);
+
     const customContext = `
   Berikut adalah informasi penting untuk pengetahuan kamu sebelum menjawab pertanyaannya:
   
@@ -255,8 +265,6 @@ export default function Home() {
   Informasi Akademik (terbatas ${maxInfoCount} data):
   ${informasiAkademik}
 `;
-
-    console.log(customContext);
 
     const filteredMessages = dataRiwayatPesanChatbot
       .slice(-10)
@@ -393,8 +401,6 @@ export default function Home() {
     }
   }, [sortedChatbotData]); // Mengawasi perubahan pada chatData
 
-  console.log(dataDosenPA, dataJadwalDosenPA);
-
   useEffect(() => {
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
@@ -427,19 +433,13 @@ export default function Home() {
   }, [dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
-    if (
-      dataUser &&
-      dataUser.nim &&
-      dataAllMahasiswa &&
-      dataAllMahasiswa.length > 0
-    ) {
-      const mahasiswa: any = dataAllMahasiswa.find(
+    if (dataUser && dataUser.nim && dataMahasiswa && dataMahasiswa.length > 0) {
+      const mahasiswa: any = dataMahasiswa.find(
         (data: any) => data.nim === dataUser.nim
       );
-      console.log(mahasiswa);
       setMahasiswaID(mahasiswa?.id);
     }
-  }, [dataAllMahasiswa, dataUser]);
+  }, [dataMahasiswa, dataUser]);
 
   useEffect(() => {
     const dataChatbotMahasiswaWithRole = dataChatbotMahasiswa.map(
@@ -471,13 +471,6 @@ export default function Home() {
     getDataInformasiAkademik();
   }, []);
 
-  console.log(
-    dataDosenPA,
-    dataKaprodi,
-    dataJadwalDosenPA,
-    dataInformasiAkademik
-  );
-
   useEffect(() => {
     getDataChatbotMahasiswabySesiChatbotMahasiswaID();
     getDataPesanBotBySesiChatbotMahasiswaID();
@@ -489,11 +482,23 @@ export default function Home() {
 
   return (
     <div className="h-screen md:h-full relative">
-      <NavbarChatbot isPathChatbot={true} />
+      <NavbarChatbot
+        isPathChatbot={true}
+        roleUser={roleUser}
+        dataUser={
+          roleUser === "Mahasiswa"
+            ? dataMahasiswa.find((data) => data.nim === dataUser?.nim)
+            : roleUser === "Dosen PA"
+              ? dataDosenPA.find((data) => data.nip === dataUser?.nip)
+              : roleUser === "Kaprodi"
+                ? dataKaprodi.find((data) => data.nip === dataUser?.nip)
+                : null
+        }
+      />
       <div className="flex">
         {/* Sidebar */}
         <div
-          className={`fixed inset-0 md:relative w-[200px] md:w-[320px] bg-white shadow-md transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 z-10`}
+          className={`fixed max-h-screen inset-0 md:relative w-[200px] md:w-[320px] bg-white shadow-md transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 z-10`}
         >
           <SidebarChatbot
             setActiveSesiChatbotMahasiswa={setActiveSesiChatbotMahasiswa}

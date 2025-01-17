@@ -34,18 +34,6 @@ const NavbarAdmin: React.FC<NavbarAdminProps> = ({
           Manage Parameter
         </button>
         <button
-          onClick={() => setActiveNavbar("Manage Laporan Bimbingan")}
-          className={`text-start px-3 py-2 rounded-xl text-[14px] ${activeNavbar === "Manage Laporan Bimbingan" ? "bg-orange-500 font-medium text-white" : ""}`}
-        >
-          Manage Laporan Bimbingan
-        </button>
-        <button
-          onClick={() => setActiveNavbar("Manage Jadwal Dosen PA")}
-          className={`text-start px-3 py-2 rounded-xl text-[14px] ${activeNavbar === "Manage Jadwal Dosen PA" ? "bg-orange-500 font-medium text-white" : ""}`}
-        >
-          Manage Jadwal Dosen PA
-        </button>
-        <button
           onClick={() => setActiveNavbar("Manage Informasi Akademik")}
           className={`text-start px-3 py-2 rounded-xl text-[14px] ${activeNavbar === "Manage Informasi Akademik" ? "bg-orange-500 font-medium text-white" : ""}`}
         >

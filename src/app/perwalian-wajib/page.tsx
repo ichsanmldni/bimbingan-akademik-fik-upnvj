@@ -439,11 +439,9 @@ export default function Home() {
     if (dataJenisBimbingan.length > 0) {
       const filteredData = dataJenisBimbingan.filter((data) => {
         // Pengecualian untuk data yang tidak ingin ditampilkan
-        return [
-          "Perwalian (Sebelum Isi KRS)",
-          "Perwalian (Setelah UTS)",
-          "Perwalian (Setelah UAS)",
-        ].includes(data.jenis_bimbingan);
+        return ["Perwalian KRS", "Perwalian UTS", "Perwalian UAS"].includes(
+          data.jenis_bimbingan
+        );
       });
 
       const formattedOptions = filteredData.map((data) => {
