@@ -111,25 +111,21 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
     // Mengonversi tanggal ke format yang diinginkan
     const formattedDate = dateObject.toLocaleDateString("id-ID", options);
-    console.log(formattedDate);
 
     setDateReschedule(e.target.value);
   };
 
   const handleStartTimeChange = (e) => {
     const newStartTime = e.target.value;
-    console.log(newStartTime);
     setStartRescheduleTime(newStartTime);
   };
 
   const handleEndTimeChange = (e) => {
     const newEndTime = e.target.value;
-    console.log(newEndTime);
     setEndRescheduleTime(newEndTime);
   };
   const openModal = (action, pengajuan) => {
     setSelectedAction(action);
-    console.log(pengajuan);
     setSelectedPengajuan(pengajuan);
     setIsOpen(true);
   };
@@ -602,8 +598,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   };
 
-  console.log(selectedEntries);
-
   const handleEditPengajuanBimbingan = (
     id,
     mahasiswa_id,
@@ -849,6 +843,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     data
   ) => {
     e.preventDefault();
+    console.log(data);
 
     const formatTanggal = (jadwal) => {
       // Memisahkan string berdasarkan spasi
@@ -1002,7 +997,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       // Membuka PDF di tab baru
       window.open(url, "_blank");
-    } else if (data.jenis_bimbingan === "Perwalian") {
+    } else if (data.jenis_bimbingan.startsWith("Perwalian")) {
       const doc = new jsPDF({
         orientation: "portrait", // or "landscape"
         unit: "mm", // units can be "pt", "mm", "cm", or "in"
@@ -1026,7 +1021,12 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       doc.setFont("times new roman");
       doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 56); // Moved up by 10y
       doc.text(`Semester                   :    ${data.semester}`, 15, 62); // Moved up by 10y
-      doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 68); // Moved up by 10y
+      doc.text(
+        `Periode                     :    ${data.jenis_bimbingan}`,
+        15,
+        68
+      ); // Moved up by 10y
+      doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 74); // Moved up by 10y
 
       doc.setFont("times new roman bold");
 
@@ -1034,7 +1034,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       doc.setFont("times new roman");
 
-      let yPosition = 98;
+      let yPosition = 104;
       const maxWidth = 175;
 
       const maxHeight = 276;
@@ -1372,7 +1372,9 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const selectedBimbingan = dataBimbingan.filter(
         (bimbingan) => bimbingan.laporan_bimbingan_id === data.id
       );
-      const bimbinganData = selectedBimbingan;
+      const bimbinganData = selectedBimbingan.filter((data) =>
+        data.pengajuan_bimbingan.jenis_bimbingan.startsWith("Perwalian")
+      );
 
       const bodyBimbingan =
         bimbinganData.length === 0
@@ -1504,6 +1506,11 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       doc.setFont("times new roman");
       doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 42); // Moved up by 10y
       doc.text(`Semester                   :    ${data.semester}`, 15, 48); // Moved up by 10y
+      doc.text(
+        `Periode                     :    ${data.jenis_bimbingan}`,
+        15,
+        54
+      ); // Moved up by 10y
       (doc as any).autoTable(tableOptions);
 
       doc.addPage("a4", "landscape");
@@ -1519,6 +1526,11 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       doc.setFont("times new roman");
       doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 32); // Moved up by 10y
       doc.text(`Semester                   :    ${data.semester}`, 15, 38); // Moved up by 10y
+      doc.text(
+        `Periode                     :    ${data.jenis_bimbingan}`,
+        15,
+        44
+      ); // Moved up by 10y
 
       const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
         (data) => data.permasalahan !== null
@@ -1555,7 +1567,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         pageBreak: "auto", // Atur pemecahan halaman otomatis
         theme: "plain", // Tema polos
         body: bodyBimbinganLembarKonsultasi,
-        startY: 48,
+        startY: 60,
         headStyles: {
           fontSize: 11, // Ukuran font header
           halign: "center", // Rata tengah
@@ -1890,7 +1902,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   }, [dateReschedule, startRescheduleTime, endRescheduleTime]);
 
-  console.log(rescheduleData);
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
@@ -2771,7 +2782,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                             </p>
                           </div>
                           <div
-                            className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} p-3 self-center rounded-lg`}
+                            className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} text-[10px] md:text-[16px] p-1 md:p-3 self-start md:self-center rounded-lg`}
                           >
                             <p className="text-white text-center">
                               {data.status}
@@ -2869,7 +2880,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         </div>
                       </div>
                       <div
-                        className={`self-start ${dataClickedLaporanBimbingan?.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} p-3 rounded-lg`}
+                        className={`self-start ${dataClickedLaporanBimbingan?.status === "Sudah Diberikan Feedback" ? "bg-green-500" : "bg-red-500"} text-[10px] md:text-[16px] p-1 md:p-3 rounded-lg`}
                       >
                         <p className="text-white text-center">
                           {dataClickedLaporanBimbingan?.status}

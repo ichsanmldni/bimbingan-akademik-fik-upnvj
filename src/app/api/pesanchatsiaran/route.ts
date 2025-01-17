@@ -27,6 +27,7 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
     try {
         const body: any = await req.json();
+        console.log(body)
         const { dosen_pa_id, pesan_siaran_id, pesan, waktu_kirim } = body;
 
 
@@ -111,6 +112,7 @@ export async function POST(req: Request): Promise<Response> {
             const datastatusmahasiswa = datastatuspembacaan.find(stts => stts.mahasiswa_id === data.id)
             console.log(datastatusmahasiswa)
             if (!datastatusmahasiswa) {
+                console.log("masuk")
                 await prisma.statuspembacaanpesansiaran.create({
                     data: {
                         pesan_siaran_id: pesanSiaran.id,
@@ -124,14 +126,20 @@ export async function POST(req: Request): Promise<Response> {
         }
         )
 
-        await prisma.statuspembacaanpesansiaran.update({
-            where: {
-                pesan_siaran_id: existingRecord.id,
-            },
-            data: {
-                is_read: false,
-            },
-        })
+        const statuspembacaanpesansiaran = await prisma.statuspembacaanpesansiaran.findMany()
+        const statuspembacaanpesansiaranchat = statuspembacaanpesansiaran.filter(data => data.id === pesan_siaran_id)
+
+
+        statuspembacaanpesansiaranchat.map(async data =>
+            await prisma.statuspembacaanpesansiaran.update({
+                where: {
+                    id: pesan_siaran_id,
+                },
+                data: {
+                    is_read: false,
+                },
+            })
+        )
 
         return new Response(JSON.stringify(pesanSiaran), {
             status: 201,

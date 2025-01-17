@@ -599,25 +599,14 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
     try {
       const dataBimbingan = await axios.get(`${API_BASE_URL}/api/bimbingan`);
 
-      const dataMahasiswa = await axios.get(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
-
-      const mahasiswa = dataMahasiswa.data.find(
-        (data) => (data.nim = dataUser.nim)
-      );
-
       const bimbingan = dataBimbingan.data
-        .filter(
-          (data: any) => data.pengajuan_bimbingan.mahasiswa_id === mahasiswa.id
-        )
+        .filter((data: any) => data.pengajuan_bimbingan.nim === dataUser.nim)
         .filter(
           (data) =>
             data.pengajuan_bimbingan.status === "Diterima" ||
             (data.pengajuan_bimbingan.status === "Reschedule" &&
               data.pengajuan_bimbingan.status_reschedule === "Bisa")
         );
-      console.log(bimbingan);
 
       setDataBimbingan(bimbingan);
     } catch (error) {
@@ -982,7 +971,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
             <h1 className="font-semibold text-[20px] md:text-[24px]">
               Absensi Bimbingan Akademik
             </h1>
-
             <div className="flex flex-col gap-4">
               {dataBimbingan.length > 0 ? (
                 dataBimbingan

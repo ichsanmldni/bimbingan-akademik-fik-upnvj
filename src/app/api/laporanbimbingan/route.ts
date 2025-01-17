@@ -26,12 +26,14 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
   try {
     const body: any = await req.json();
+    console.log(body)
     const {
       kaprodi_id,
       status,
       dosen_pa_id,
       nama_dosen_pa,
       jenis_bimbingan,
+      jumlah_peserta_perwalian,
       bimbingan_id,
       tahun_ajaran,
       semester,
@@ -58,7 +60,7 @@ export async function POST(req: Request): Promise<Response> {
     } = body;
 
     if (jenis_bimbingan.startsWith("Perwalian")) {
-      const jumlahPeserta = parseInt(bimbingan_id.split(",").map((id: any) => id.trim()).length)
+      const jumlahPeserta = jumlah_peserta_perwalian
       const jumlahKeteranganIPK = jumlah_ipk_a + jumlah_ipk_b + jumlah_ipk_c + jumlah_ipk_d + jumlah_ipk_e
       const jumlahPrestasiBeasiswa = jumlah_beasiswa_bbm + jumlah_beasiswa_pegadaian + jumlah_beasiswa_ppa + jumlah_beasiswa_supersemar + jumlah_beasiswa_ykl + jumlah_beasiswa_dll
 
@@ -218,7 +220,7 @@ export async function POST(req: Request): Promise<Response> {
     if (jenis_bimbingan.startsWith("Perwalian")) {
       laporanBimbingan = await prisma.laporanbimbingan.create({
         data: {
-          jumlah_mahasiswa: parseInt(bimbingan_id.split(",").map((id: any) => id.trim()).length),
+          jumlah_mahasiswa: jumlah_peserta_perwalian,
           status,
           nama_kaprodi,
           kaprodi_id,

@@ -69,14 +69,17 @@ export default function Home() {
   const [selectedPeriodePengajuan, setSelectedPeriodePengajuan] = useState("");
   const [optionsPeriodePengajuan, setoptionsPeriodePengajuan] = useState([
     {
-      value: "Setelah UAS - Sebelum Isi KRS Baru",
-      label: "Setelah UAS - Sebelum Isi KRS Baru",
+      value: "Sebelum Perwalian KRS",
+      label: "Sebelum Perwalian KRS",
     },
     {
-      value: "Setelah Isi KRS Baru - Sebelum UTS",
-      label: "Setelah Isi KRS Baru - Sebelum UTS",
+      value: "Setelah Perwalian KRS - Sebelum Perwalian UTS",
+      label: "Setelah Perwalian KRS - Sebelum Perwalian UTS",
     },
-    { value: "Setelah UTS - Sebelum UAS", label: "Setelah UTS - Sebelum UAS" },
+    {
+      value: "Setelah Perwalian UTS - Sebelum Perwalian UAS",
+      label: "Setelah Perwalian UTS - Sebelum Perwalian UAS",
+    },
   ]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;

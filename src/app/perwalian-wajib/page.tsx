@@ -440,7 +440,7 @@ export default function Home() {
       const filteredData = dataJenisBimbingan.filter((data) => {
         // Pengecualian untuk data yang tidak ingin ditampilkan
         return [
-          "Perwalian (Sebelum Isi KRS Baru)",
+          "Perwalian (Sebelum Isi KRS)",
           "Perwalian (Setelah UTS)",
           "Perwalian (Setelah UAS)",
         ].includes(data.jenis_bimbingan);

@@ -62,11 +62,6 @@ export async function POST(req: Request) {
                 },
             });
 
-            // Check if the chat record exists
-            const existingRecord = await prisma.pesansiaran.findUnique({
-                where: { id: pesansiaran.id },
-            });
-
             // Update the existing chat record
 
             const pesanSiaran = await prisma.pesansiaran.update({
@@ -79,7 +74,7 @@ export async function POST(req: Request) {
 
             await prisma.statuspembacaanpesansiaran.update({
                 where: {
-                    pesan_siaran_id: existingRecord.id,
+                    id: pesansiaran.id,
                 },
                 data: {
                     is_read: false,
@@ -110,7 +105,7 @@ export async function POST(req: Request) {
                     tahun_ajaran,
                     semester,
                     keterangan: pesan_siaran,
-                    periode_pengajuan: jenis_bimbingan === "Perwalian (Sebelum Isi KRS Baru)" ? "Setelah UAS - Sebelum Isi KRS Baru" : jenis_bimbingan === "Perwalian (Setelah UTS)" ? "Setelah Isi KRS Baru - Sebelum UTS" : jenis_bimbingan === "Perwalian (Setelah UAS)" ? "Setelah UAS - Sebelum Isi KRS baru" : ""
+                    periode_pengajuan: jenis_bimbingan === "Perwalian (Sebelum Isi KRS)" ? "Sebelum Perwalian KRS" : jenis_bimbingan === "Perwalian (Setelah UTS)" ? "Setelah Perwalian KRS - Sebelum Perwalian UTS" : jenis_bimbingan === "Perwalian (Setelah UAS)" ? "Setelah Perwalian UTS - Sebelum Perwalian UAS" : ""
                 },
             });
             await prisma.bimbingan.create({

@@ -596,7 +596,11 @@ export default function ChatDosenPA() {
                   >
                     <div className="flex gap-4">
                       <div className="rounded-full flex min-w-[12px] size-12 justify-center items-center bg-orange-200">
-                        <Image src={chatIcon} className="size-6" alt="chat" />
+                        <Image
+                          src={chatIcon}
+                          className="size-6 min-w-[6px]"
+                          alt="chat"
+                        />
                       </div>
                       <div className="flex flex-col gap-2">
                         <p className={`text-[18px] font-medium`}>

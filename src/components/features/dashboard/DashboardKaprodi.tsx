@@ -687,7 +687,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       // Membuka PDF di tab baru
       window.open(url, "_blank");
-    } else if (data.jenis_bimbingan === "Perwalian") {
+    } else if (data.jenis_bimbingan.startsWith("Perwalian")) {
       const doc = new jsPDF({
         orientation: "portrait", // or "landscape"
         unit: "mm", // units can be "pt", "mm", "cm", or "in"
@@ -711,7 +711,12 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       doc.setFont("times new roman");
       doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 56); // Moved up by 10y
       doc.text(`Semester                   :    ${data.semester}`, 15, 62); // Moved up by 10y
-      doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 68); // Moved up by 10y
+      doc.text(
+        `Periode                     :    ${data.jenis_bimbingan}`,
+        15,
+        68
+      ); // Moved up by 10y
+      doc.text(`Nama Dosen PA     :    ${data.nama_dosen_pa}`, 15, 74); // Moved up by 10y
 
       doc.setFont("times new roman bold");
 
@@ -719,7 +724,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       doc.setFont("times new roman");
 
-      let yPosition = 98;
+      let yPosition = 104;
       const maxWidth = 175;
 
       const maxHeight = 276;
@@ -1057,7 +1062,9 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       const selectedBimbingan = dataBimbingan.filter(
         (bimbingan) => bimbingan.laporan_bimbingan_id === data.id
       );
-      const bimbinganData = selectedBimbingan;
+      const bimbinganData = selectedBimbingan.filter((data) =>
+        data.pengajuan_bimbingan.jenis_bimbingan.startsWith("Perwalian")
+      );
 
       const bodyBimbingan =
         bimbinganData.length === 0
@@ -1082,7 +1089,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         head: [["No", "NIM", "Nama", "TTD"]],
         theme: "plain", // Tema polos
         body: bodyBimbingan,
-        startY: 62,
+        startY: 68,
         headStyles: {
           fontSize: 11, // Ukuran font header
           halign: "center", // Rata tengah
@@ -1189,6 +1196,11 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       doc.setFont("times new roman");
       doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 42); // Moved up by 10y
       doc.text(`Semester                   :    ${data.semester}`, 15, 48); // Moved up by 10y
+      doc.text(
+        `Periode                     :    ${data.jenis_bimbingan}`,
+        15,
+        54
+      ); // Moved up by 10y
       (doc as any).autoTable(tableOptions);
 
       doc.addPage("a4", "landscape");
@@ -1204,6 +1216,11 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       doc.setFont("times new roman");
       doc.text(`Tahun Akademik    :    ${data.tahun_ajaran}`, 15, 32); // Moved up by 10y
       doc.text(`Semester                   :    ${data.semester}`, 15, 38); // Moved up by 10y
+      doc.text(
+        `Periode                     :    ${data.jenis_bimbingan}`,
+        15,
+        44
+      ); // Moved up by 10y
 
       const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
         (data) => data.permasalahan !== null
@@ -1240,7 +1257,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         pageBreak: "auto", // Atur pemecahan halaman otomatis
         theme: "plain", // Tema polos
         body: bodyBimbinganLembarKonsultasi,
-        startY: 48,
+        startY: 54,
         headStyles: {
           fontSize: 11, // Ukuran font header
           halign: "center", // Rata tengah
@@ -1552,18 +1569,18 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                 <img
                   src={imagePreview}
                   alt="Profile"
-                  className="size-[80px] min-w-[80px] size-[200px] rounded-full object-cover"
+                  className="size-[80px] min-w-[80px] md:size-[200px] rounded-full object-cover"
                 />
               ) : dataKaprodi && dataKaprodi.profile_image ? (
                 <img
                   src={dataKaprodi.profile_image}
                   alt="Profile"
-                  className="size-[80px] min-w-[80px] size-[200px] rounded-full object-cover"
+                  className="size-[80px] min-w-[80px] md:size-[200px] rounded-full object-cover"
                 />
               ) : (
                 <ProfileImage
                   onClick={() => {}}
-                  className="size-[80px] min-w-[80px] size-[200px] rounded-full"
+                  className="size-[80px] min-w-[80px] md:size-[200px] rounded-full"
                 />
               )}
               <div className="flex flex-col justify-center text-[13px] gap-4">
