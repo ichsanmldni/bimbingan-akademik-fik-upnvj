@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { env } from "process";
 
 export default function Home() {
   const [namaLengkap, setNamaLengkap] = useState<string>("");
@@ -66,6 +67,8 @@ export default function Home() {
   ]);
   const [selectedSemester, setSelectedSemester] = useState("");
   const [isiPesanSiaran, setIsiPesanSiaran] = useState("");
+
+  const STARSENDER_API_KEY = process.env.NEXT_PUBLIC_STARSENDER_API_KEY;
 
   const getDataTahunAJaran = async () => {
     try {
@@ -350,9 +353,21 @@ export default function Home() {
         waktu_kirim: new Date().toISOString(),
       };
 
-      console.log(perwalianWajibValue);
-
       const result = await addPerwalianWajib(perwalianWajibValue);
+
+      const notificationResponse = await axios.post("/api/sendmessage", {
+        to: "085810676264",
+        body: `Kepada Yth. Mahasiswa,\n\nKami informasikan bahwa jadwal bimbingan
+         Perwalian KRS dari Dosen Pembimbing Akademik Anda, *${dataDosenPA[0].nama}*, 
+         baru saja diatur.\n\nJadwal Bimbingan: ${perwalianWajibValue.jadwal_bimbingan}\n\n
+         Buka di dashboard untuk melihat detailnya: https://bimbingan-konseling-fikupnvj.vercel.app/ 
+         // \n\nTerima kasih.`,
+      });
+
+      if (!notificationResponse.data.success) {
+        throw new Error("Gagal mengirim notifikasi");
+      }
+
       toast.success(
         <div className="flex items-center">
           <span>{result.message || "Atur perwalian wajib berhasil!"}</span>
@@ -368,6 +383,7 @@ export default function Home() {
           theme: "colored",
         }
       );
+
       setSelectedTahunAjaran("");
       setSelectedSemester("");
       setSelectedJenisBimbingan("");

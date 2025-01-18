@@ -344,6 +344,16 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       };
 
       const result = await patchLaporanBimbingan(laporanBimbinganValue);
+
+      const notificationResponse = await axios.post("/api/sendmessage", {
+        to: "085810676264",
+        body: `Yth. ${dataDosenPA[0].nama},\nLaporan bimbingan yang Anda ajukan telah diberikan feedback oleh Kaprodi pada ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}. Silakan cek feedback tersebut melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas kerja samanya.`,
+      });
+
+      if (!notificationResponse.data.success) {
+        throw new Error("Gagal mengirim notifikasi");
+      }
+
       toast.success(
         <div className="flex items-center">
           <span>

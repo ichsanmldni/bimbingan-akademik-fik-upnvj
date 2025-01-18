@@ -1141,6 +1141,16 @@ export default function Home() {
       };
 
       const result = await addLaporanBimbingan(laporanData);
+
+      const notificationResponse = await axios.post("/api/sendmessage", {
+        to: "085810676264",
+        body: `Yth Kaprodi. ${dataSelectedKaprodi?.nama},\nAnda memiliki laporan bimbingan baru dari Dosen Pembimbing Akademik (${dataUser.nama}) yang diajukan pada ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}. Mohon untuk meninjau dan memberikan feedback melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas perhatian Anda.`,
+      });
+
+      if (!notificationResponse.data.success) {
+        throw new Error("Gagal mengirim notifikasi");
+      }
+
       toast.success(
         <div className="flex items-center">
           <span>{result.message || "Laporan bimbingan berhasil dibuat!"}</span>

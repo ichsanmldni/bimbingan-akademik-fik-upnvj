@@ -292,6 +292,16 @@ export default function Home() {
       };
 
       const result = await addPengajuanBimbingan(pengajuanBimbinganValue);
+
+      const notificationResponse = await axios.post("/api/sendmessage", {
+        to: "085810676264",
+        body: `Yth. ${dataDosenPA[0].nama},\nAnda memiliki pengajuan bimbingan baru dari mahasiswa (${namaLengkap}) pada ${formattedDate} ${selectedJam}. Mohon untuk memeriksa dan memproses pengajuan tersebut melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas perhatian Anda.`,
+      });
+
+      if (!notificationResponse.data.success) {
+        throw new Error("Gagal mengirim notifikasi");
+      }
+
       toast.success(
         <div className="flex items-center">
           <span>{result.message || "Pengajuan bimbingan berhasil!"}</span>

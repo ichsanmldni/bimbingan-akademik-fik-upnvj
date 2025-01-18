@@ -745,6 +745,16 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       };
 
       const result = await patchPengajuanBimbingan(submitRescheduleValue);
+
+      const notificationResponse = await axios.post("/api/sendmessage", {
+        to: "085810676264",
+        body: `Yth Mahasiswa,\n\nPengajuan bimbingan Anda telah direschedule oleh Dosen Pembimbing Akademik (${dataDosenPA[0].nama}). Jadwal baru telah ditetapkan oleh Dosen Pembimbing Akademik Anda, silahkan konfirmasi ulang.\n\nMohon untuk mengecek detailnya melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\n\nTerima kasih atas pengertiannya.`,
+      });
+
+      if (!notificationResponse.data.success) {
+        throw new Error("Gagal mengirim notifikasi");
+      }
+
       toast.success(
         <div className="flex items-center">
           <span>{result.message || "Reschedule bimbingan berhasil!"}</span>
@@ -782,6 +792,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       );
     }
   };
+
   const handleSubmitDiterima = async (
     id,
     status,
@@ -800,6 +811,15 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       const result = await patchPengajuanBimbingan(submitDiterimaValue);
       await addBimbingan(id, permasalahan);
+
+      const notificationResponse = await axios.post("/api/sendmessage", {
+        to: "085810676264",
+        body: `Yth Mahasiswa,\n\nPengajuan bimbingan Anda telah diterima oleh Dosen Pembimbing Akademik (${dataDosenPA[0].nama}).\n\nSilakan cek jadwal bimbingan melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\n\nTerima kasih telah mengajukan bimbingan.`,
+      });
+
+      if (!notificationResponse.data.success) {
+        throw new Error("Gagal mengirim notifikasi");
+      }
       toast.success(
         <div className="flex items-center">
           <span>{result.message || "Penerimaan bimbingan berhasil!"}</span>
