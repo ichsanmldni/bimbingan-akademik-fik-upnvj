@@ -23,10 +23,8 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request) {
   try {
     const body: any = await req.json();
-    console.log(body)
 
     const { nama_lengkap, periode_pengajuan, nim, email, ipk, no_whatsapp, jurusan, jadwal_bimbingan, jenis_bimbingan, topik_bimbingan, sistem_bimbingan, status, dosen_pa_id, mahasiswa_id, permasalahan, semester, tahun_ajaran } = body;
-    console.log(body)
     if (!dosen_pa_id) {
       return new Response(
         JSON.stringify({ message: 'Pilih Dosen PA terlebih dahulu di dashboard profile!' }),
@@ -113,8 +111,6 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
-    console.log(body)
-
     const { id, jadwal_bimbingan_reschedule, keterangan_reschedule, status_reschedule, status, keterangan, mahasiswa_id, dosen_pa_id } = body;
 
     if (!id || !status) {

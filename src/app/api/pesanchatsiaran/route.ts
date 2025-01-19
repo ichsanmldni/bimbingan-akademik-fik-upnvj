@@ -27,7 +27,6 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
     try {
         const body: any = await req.json();
-        console.log(body)
         const { dosen_pa_id, pesan_siaran_id, pesan, waktu_kirim } = body;
 
 
@@ -110,9 +109,7 @@ export async function POST(req: Request): Promise<Response> {
         const mahasiswaBimbingan = mahasiswa.filter(data => data.dosen_pa_id === dosen_pa_id)
         mahasiswaBimbingan.map(async data => {
             const datastatusmahasiswa = datastatuspembacaan.find(stts => stts.mahasiswa_id === data.id)
-            console.log(datastatusmahasiswa)
             if (!datastatusmahasiswa) {
-                console.log("masuk")
                 await prisma.statuspembacaanpesansiaran.create({
                     data: {
                         pesan_siaran_id: pesanSiaran.id,

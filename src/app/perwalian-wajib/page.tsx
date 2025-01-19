@@ -98,13 +98,11 @@ export default function Home() {
 
   const handleEndTimeChange = (e) => {
     const newEndTime = e.target.value;
-    console.log(newEndTime);
     setEndPerwalianWajibTime(newEndTime);
   };
 
   const handleStartTimeChange = (e) => {
     const newStartTime = e.target.value;
-    console.log(newStartTime);
     setStartPerwalianWajibTime(newStartTime);
   };
 
@@ -114,8 +112,6 @@ export default function Home() {
     const selectedDate = e.target.value;
     setDatePerwalianWajib(selectedDate);
   };
-
-  console.log(datePerwalianWajib);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -505,7 +501,6 @@ export default function Home() {
       const token = authTokenCookie.split("=")[1];
       try {
         const decodedToken = jwtDecode<any>(token);
-        console.log(decodedToken);
         setDataUser(decodedToken);
       } catch (error) {
         console.error("Invalid token:", error);

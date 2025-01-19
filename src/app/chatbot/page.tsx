@@ -251,8 +251,6 @@ export default function Home() {
       .map((info) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
       .join("\n");
 
-    console.log(informasiAkademik);
-
     const customContext = `
   Berikut adalah informasi penting untuk pengetahuan kamu sebelum menjawab pertanyaannya:
   

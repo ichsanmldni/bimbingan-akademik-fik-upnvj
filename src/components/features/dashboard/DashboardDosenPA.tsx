@@ -30,6 +30,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { EyeIcon } from "lucide-react";
+import PDFModal from "@/components/ui/PDFModal";
 
 const schedule: Record<string, string[]> = {
   Senin: [],
@@ -96,6 +97,118 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   const [newSchedule, setNewSchedule] = useState("");
   const [keterangan, setKeterangan] = useState("");
   const [selectedPengajuan, setSelectedPengajuan] = useState(null);
+  const [selectedTahunAjaran, setSelectedTahunAjaran] =
+    useState<string>("Semua Tahun Ajaran");
+  const [selectedSemester, setSelectedSemester] =
+    useState<string>("Semua Semester");
+  const [selectedPeriode, setSelectedPeriode] =
+    useState<string>("Semua Periode");
+  const [filteredDataBimbingan, setFilteredDataBimbingan] = useState([]);
+  const [filteredDataLaporanBimbingan, setFilteredDataLaporanBimbingan] =
+    useState([]);
+  const [optionsTahunAjaran, setOptionsTahunAjaran] = useState([]);
+  const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const getDataTahunAJaran = async () => {
+    try {
+      const response = await axios.post<any>(
+        `${API_BASE_URL}/api/datatahunajaran`
+      );
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+      const data = await response.data.data;
+
+      // Memfilter dan memformat data tahun ajaran
+      const tahunAjaran = data.map((item: any) => {
+        return `${item.tahun_periode}/${item.tahun_periode + 1}`;
+      });
+
+      // Menghilangkan duplikat dengan menggunakan Set
+      const uniqueTahunAjaran = [...new Set(tahunAjaran)];
+
+      // Menyimpan data tahun ajaran yang sudah difilter
+      setDataTahunAjaran(uniqueTahunAjaran);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataBimbinganFilteredByTahunAjaranSemesterAndPeriode = () => {
+    if (selectedTahunAjaran === "Semua Tahun Ajaran") {
+      setFilteredDataBimbingan(dataBimbingan);
+      return;
+    }
+    const filteredDataBimbinganByTahunAjaran = dataBimbingan
+      .filter((data) => data.laporan_bimbingan_id !== null)
+      .filter(
+        (data) => data.laporan_bimbingan.tahun_ajaran === selectedTahunAjaran
+      );
+    if (selectedSemester === "Semua Semester") {
+      setFilteredDataBimbingan(filteredDataBimbinganByTahunAjaran);
+      return;
+    }
+    const filteredDataBimbinganBySemester = filteredDataBimbinganByTahunAjaran
+      .filter((data) => data.laporan_bimbingan_id !== null)
+      .filter((data) => data.laporan_bimbingan.semester === selectedSemester);
+
+    if (selectedPeriode === "Semua Periode") {
+      setFilteredDataBimbingan(filteredDataBimbinganBySemester);
+      return;
+    }
+    const periodeMapping = {
+      "Perwalian KRS": "Sebelum Perwalian KRS",
+      "Perwalian UTS": "Setelah Perwalian KRS - Sebelum Perwalian UTS",
+      "Perwalian UAS": "Setelah Perwalian UTS - Sebelum Perwalian UAS",
+    };
+
+    const mappedSelectedPeriode =
+      periodeMapping[selectedPeriode] || selectedPeriode;
+
+    const filteredDataBimbinganByPeriode = filteredDataBimbinganBySemester
+      .filter((data) => data.laporan_bimbingan_id !== null)
+      .filter(
+        (data) =>
+          data.pengajuan_bimbingan.periode_pengajuan === mappedSelectedPeriode
+      );
+
+    setFilteredDataBimbingan(filteredDataBimbinganByPeriode);
+    return;
+  };
+
+  const getDataLaporanBimbinganFilteredByTahunAjaranSemesterAndPeriode = () => {
+    if (selectedTahunAjaran === "Semua Tahun Ajaran") {
+      setFilteredDataLaporanBimbingan(dataLaporanBimbingan);
+      return;
+    }
+    const filteredDataLaporanBimbinganByTahunAjaran =
+      dataLaporanBimbingan.filter(
+        (data) => data.tahun_ajaran === selectedTahunAjaran
+      );
+    if (selectedSemester === "Semua Semester") {
+      setFilteredDataLaporanBimbingan(
+        filteredDataLaporanBimbinganByTahunAjaran
+      );
+      return;
+    }
+    const filteredDataLaporanBimbinganBySemester =
+      filteredDataLaporanBimbinganByTahunAjaran.filter(
+        (data) => data.semester === selectedSemester
+      );
+    if (selectedPeriode === "Semua Periode") {
+      setFilteredDataLaporanBimbingan(filteredDataLaporanBimbinganBySemester);
+      return;
+    }
+    const filteredDataLaporanBimbinganByPeriode =
+      filteredDataLaporanBimbinganBySemester.filter(
+        (data) => data.jenis_bimbingan === selectedPeriode
+      );
+    setFilteredDataLaporanBimbingan(filteredDataLaporanBimbinganByPeriode);
+    return;
+  };
 
   const handleDateChange = (e) => {
     const selectedDate = e.target.value;
@@ -138,6 +251,12 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     setStartRescheduleTime("00:00");
     setEndRescheduleTime("00:00");
     setKeterangan("");
+  };
+
+  const closePDFModal = () => {
+    setIsModalOpen(false);
+    setPdfUrl(""); // Clear the URL when closing
+    URL.revokeObjectURL(pdfUrl); // Clean up the Blob URL
   };
 
   const handleSelectEntry = (id) => {
@@ -863,7 +982,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     data
   ) => {
     e.preventDefault();
-    console.log(data);
 
     const formatTanggal = (jadwal) => {
       // Memisahkan string berdasarkan spasi
@@ -1552,22 +1670,22 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         44
       ); // Moved up by 10y
 
-      const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
-        (data) => data.permasalahan !== null
-      );
+      console.log(data);
+
+      const bimbinganDataLembarKonsultasi = data.konsultasi_mahasiswa;
 
       const bodyBimbinganLembarKonsultasi =
         bimbinganDataLembarKonsultasi.length === 0
           ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
           : bimbinganDataLembarKonsultasi.map((item, index) => [
               index + 1,
-              formatTanggal(item.pengajuan_bimbingan.jadwal_bimbingan),
-              item.pengajuan_bimbingan.nim,
-              item.pengajuan_bimbingan.nama_lengkap,
+              item.tanggal,
+              item.nim,
+              item.nama,
               item.permasalahan,
               item.solusi,
               data.tanda_tangan_dosen_pa,
-              item.ttd_kehadiran,
+              item.ttd_mhs,
             ]);
 
       (doc as any).autoTable({
@@ -1788,6 +1906,9 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const pdfOutput = doc.output("blob");
       const url = URL.createObjectURL(pdfOutput);
 
+      // Set the URL and open the modal
+      setPdfUrl(url);
+      setIsModalOpen(true);
       // Membuka PDF di tab baru
       window.open(url, "_blank");
     }
@@ -1869,7 +1990,21 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
   useEffect(() => {
     getDataBimbingan();
+    getDataTahunAJaran();
   }, []);
+
+  useEffect(() => {
+    if (dataTahunAjaran.length > 0) {
+      const formattedOptions = dataTahunAjaran.map((data: any) => {
+        return {
+          value: data,
+          label: `${data}`,
+        };
+      });
+
+      setOptionsTahunAjaran(formattedOptions);
+    }
+  }, [dataTahunAjaran]);
 
   useEffect(() => {
     getDataPrestasiIlmiahMahasiswaByIdLaporan();
@@ -1923,6 +2058,38 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   }, [dateReschedule, startRescheduleTime, endRescheduleTime]);
 
   const today = new Date().toISOString().split("T")[0];
+  useEffect(() => {
+    if (
+      dataBimbingan &&
+      dataBimbingan.length > 0 &&
+      dataLaporanBimbingan &&
+      dataLaporanBimbingan.length > 0
+    ) {
+      getDataBimbinganFilteredByTahunAjaranSemesterAndPeriode();
+      getDataLaporanBimbinganFilteredByTahunAjaranSemesterAndPeriode();
+    }
+  }, [selectedTahunAjaran, selectedSemester, selectedPeriode]);
+
+  useEffect(() => {
+    setSelectedSemester("Semua Semester");
+    setSelectedPeriode("Semua Periode");
+  }, [selectedTahunAjaran]);
+
+  useEffect(() => {
+    setSelectedPeriode("Semua Periode");
+  }, [selectedSemester]);
+
+  useEffect(() => {
+    if (
+      dataBimbingan &&
+      dataBimbingan.length > 0 &&
+      dataLaporanBimbingan &&
+      dataLaporanBimbingan.length > 0
+    ) {
+      getDataBimbinganFilteredByTahunAjaranSemesterAndPeriode();
+      getDataLaporanBimbinganFilteredByTahunAjaranSemesterAndPeriode();
+    }
+  }, [dataLaporanBimbingan, dataBimbingan]);
 
   useEffect(() => {
     if (userProfile && userProfile.nama !== "") {
@@ -2777,8 +2944,132 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                 <h1 className="font-semibold text-[18px] md:text-[24px]">
                   Riwayat Laporan Bimbingan Akademik
                 </h1>
-                {dataLaporanBimbingan.length > 0 ? (
-                  dataLaporanBimbingan
+                <div className="flex gap-5">
+                  <div className="relative w-1/3">
+                    <select
+                      className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
+                      value={selectedTahunAjaran}
+                      onChange={(e) => setSelectedTahunAjaran(e.target.value)}
+                    >
+                      <option value="Semua Tahun Ajaran">
+                        Semua Tahun Ajaran
+                      </option>
+                      {optionsTahunAjaran.map((option: any) => (
+                        <option
+                          className="text-black"
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div
+                      className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                    >
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="relative w-1/3">
+                    <select
+                      disabled={selectedTahunAjaran === "Semua Tahun Ajaran"}
+                      className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
+                      value={selectedSemester}
+                      onChange={(e) => setSelectedSemester(e.target.value)}
+                    >
+                      <option value="Semua Semester">Semua Semester</option>
+                      {[
+                        { value: "Ganjil", label: "Ganjil" },
+                        { value: "Genap", label: "Genap" },
+                      ].map((option: any) => (
+                        <option
+                          className="text-black"
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div
+                      className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                    >
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="relative w-1/3">
+                    <select
+                      disabled={
+                        selectedTahunAjaran === "Semua Tahun Ajaran" ||
+                        selectedSemester === "Semua Semester"
+                      }
+                      className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedPeriode === "Semua Periode" ? "text-gray-400" : "text-black"}`}
+                      value={selectedPeriode}
+                      onChange={(e) => setSelectedPeriode(e.target.value)}
+                    >
+                      <option value="Semua Periode">Semua Periode</option>
+                      {[
+                        { value: "Perwalian KRS", label: "Perwalian KRS" },
+                        { value: "Perwalian UTS", label: "Perwalian UTS" },
+                        { value: "Perwalian UAS", label: "Perwalian UAS" },
+                      ].map((option: any) => (
+                        <option
+                          className="text-black"
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div
+                      className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                    >
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {filteredDataLaporanBimbingan.length > 0 ? (
+                  filteredDataLaporanBimbingan
                     .slice()
                     .reverse()
                     .map((data, index) => (
@@ -2949,6 +3240,11 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                     </div>
                   </div>
                 </div>
+                <PDFModal
+                  isOpen={isModalOpen}
+                  closeModal={closePDFModal}
+                  pdfUrl={pdfUrl}
+                />
               </div>
             )}
           </div>

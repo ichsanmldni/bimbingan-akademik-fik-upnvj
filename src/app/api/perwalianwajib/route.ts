@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 export async function POST(req: Request) {
     try {
         const body: any = await req.json();
-        console.log(body)
 
         const { dosen_pa_id, waktu_kirim, tahun_ajaran, semester, jenis_bimbingan, sistem_bimbingan, jadwal_bimbingan, pesan_siaran } = body;
 

@@ -7,8 +7,6 @@ export async function POST(request) {
     const { to, body, schedule } = await request.json();
     const starsenderApiKey = process.env.STARSENDER_API_KEY
 
-    console.log(body)
-    console.log(starsenderApiKey)
 
     try {
         const response = await axios.post('https://api.starsender.online/api/send', {

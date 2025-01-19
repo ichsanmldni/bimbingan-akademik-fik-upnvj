@@ -141,6 +141,7 @@ model laporanbimbingan {
   dosen_pa_id                  Int?
   nama_dosen_pa                String
   pendahuluan                  Json?
+  konsultasi_mahasiswa         Json?
   semester                     String
   status                       String
   jenis_bimbingan              String

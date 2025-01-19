@@ -148,7 +148,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   };
 
-  console.log(userProfile, dataUser);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const signatureData = sigCanvas.current

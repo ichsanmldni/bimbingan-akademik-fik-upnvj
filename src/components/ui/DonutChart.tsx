@@ -48,8 +48,6 @@ const DonutChart = ({ dataBimbingan }) => {
         (count) => ((count / totalPribadi) * 100).toFixed(1) // Tetap 1 desimal
       );
 
-      console.log(labels);
-
       // Siapkan data untuk chart
       setChartData({
         labels,

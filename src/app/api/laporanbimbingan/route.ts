@@ -26,7 +26,6 @@ export async function GET(req: Request): Promise<Response> {
 export async function POST(req: Request): Promise<Response> {
   try {
     const body: any = await req.json();
-    console.log(body)
     const {
       kaprodi_id,
       status,
@@ -56,7 +55,9 @@ export async function POST(req: Request): Promise<Response> {
       dokumentasi,
       tanda_tangan_dosen_pa,
       nama_kaprodi,
-      jadwal_bimbingan
+      jadwal_bimbingan,
+      konsultasi_mahasiswa
+
     } = body;
 
     if (jenis_bimbingan.startsWith("Perwalian")) {
@@ -244,7 +245,8 @@ export async function POST(req: Request): Promise<Response> {
           kesimpulan: kesimpulan || null,
           dokumentasi,
           tanda_tangan_dosen_pa: savedTtdImagePathsString,
-          jadwal_bimbingan
+          jadwal_bimbingan,
+          konsultasi_mahasiswa
         },
       });
       prestasi_ilmiah_mahasiswa?.map(async (data: any) =>
@@ -308,7 +310,8 @@ export async function POST(req: Request): Promise<Response> {
           kesimpulan: kesimpulan || null,
           dokumentasi,
           tanda_tangan_dosen_pa: savedTtdImagePathsString,
-          jadwal_bimbingan
+          jadwal_bimbingan,
+          konsultasi_mahasiswa
         },
       });
     }

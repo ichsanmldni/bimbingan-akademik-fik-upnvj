@@ -84,8 +84,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
       const dataChatPribadi = response.data;
 
-      console.log(dataUser);
-
       const chatPribadiUser = dataChatPribadi.filter(
         (data) => data.dosen_pa_id === dataUser.id
       );
@@ -172,8 +170,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
       throw error;
     }
   };
-
-  console.log(dataUser);
 
   useEffect(() => {
     const count = dataNotifikasi?.filter((data) => data.read === false).length;
@@ -374,7 +370,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           {roleUser === "Dosen PA" && (
             <Link
               href="/perwalian-wajib"
-              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/laporan-bimbingan") ? "text-orange-500" : ""}`}
+              className={`flex flex-col ${roleUser === "Mahasiswa" ? "w-1/5" : roleUser === "Dosen PA" ? "w-1/6" : roleUser === "Kaprodi" ? "w-1/4" : ""} items-center ${isActive("/perwalian-wajib") ? "text-orange-500" : ""}`}
             >
               <School className="size-6" />
               <span className="text-xs">Perwalian</span>

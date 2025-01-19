@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 // components/MentoringTable.js
 const TabelStatistikLaporan = ({ dataBimbingan, dataLaporanBimbingan }) => {
-  console.log(dataBimbingan, dataLaporanBimbingan);
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataMahasiswa, setDataMahasiswa] = useState([]);
   const [dataDosenPaBimbingan, setdataDosenPaBimbingan] = useState([]);
@@ -37,7 +36,6 @@ const TabelStatistikLaporan = ({ dataBimbingan, dataLaporanBimbingan }) => {
       throw error;
     }
   };
-  console.log(dataLaporanBimbingan);
 
   const jumlahMahasiswaPerDosen = dataMahasiswa.reduce((acc, mahasiswa) => {
     acc[mahasiswa.dosen_pa_id] = (acc[mahasiswa.dosen_pa_id] || 0) + 1;

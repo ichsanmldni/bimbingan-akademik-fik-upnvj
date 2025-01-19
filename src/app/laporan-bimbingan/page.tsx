@@ -48,9 +48,9 @@ import Modal from "@/components/features/home/Modal";
 import EditButton from "@/components/ui/EditButton";
 import TrashButton from "@/components/ui/TrashButton";
 import FileButton from "@/components/ui/FileButton";
-import PDFModal from "./pdfModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PDFModal from "@/components/ui/PDFModal";
 
 const HOTKEYS: { [key: string]: string } = {
   "mod+b": "bold",
@@ -90,6 +90,10 @@ export default function Home() {
   const [selectedBimbingan, setSelectedBimbingan] = useState<any>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<any>([]); // Adjust type as needed
   const [imagePreviews, setImagePreviews] = useState<any>([]);
+  const [
+    dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal,
+    setDataSelectedNamaMahasiswaAddKonsultasiBimbinganModal,
+  ] = useState("");
 
   const [jurusanFilter, setJurusanFilter] = useState<any>("");
   const [jadwalFilter, setJadwalFilter] = useState<any>("");
@@ -170,6 +174,10 @@ export default function Home() {
     setIsModalAddDataStatusMahasiswaOpen,
   ] = useState<any>(false);
   const [
+    isModalAddDataKonsultasiMahasiswaOpen,
+    setIsModalAddDataKonsultasiMahasiswaOpen,
+  ] = useState<any>(false);
+  const [
     isModalEditPrestasiIlmiahMahasiswaOpen,
     setIsModalEditPrestasiIlmiahMahasiswaOpen,
   ] = useState<any>(false);
@@ -180,6 +188,10 @@ export default function Home() {
   const [
     isModalEditDataStatusMahasiswaOpen,
     setIsModalEditDataStatusMahasiswaOpen,
+  ] = useState<any>(false);
+  const [
+    isModalEditDataKonsultasiMahasiswaOpen,
+    setIsModalEditDataKonsultasiMahasiswaOpen,
   ] = useState<any>(false);
   const [
     isModalDeletePrestasiIlmiahMahasiswaOpen,
@@ -194,6 +206,10 @@ export default function Home() {
     setIsModalDeleteDataStatusMahasiswaOpen,
   ] = useState<any>(false);
   const [
+    isModalDeleteDataKonsultasiMahasiswaOpen,
+    setIsModalDeleteDataKonsultasiMahasiswaOpen,
+  ] = useState<any>(false);
+  const [
     dataSelectedPrestasiIlmiahMahasiswaEditModal,
     setDataSelectedPrestasiIlmiahMahasiswaEditModal,
   ] = useState<any>({});
@@ -206,6 +222,10 @@ export default function Home() {
     setDataSelectedDataStatusMahasiswaEditModal,
   ] = useState<any>({});
   const [
+    dataSelectedDataKonsultasiMahasiswaEditModal,
+    setDataSelectedDataKonsultasiMahasiswaEditModal,
+  ] = useState<any>({});
+  const [
     idSelectedPrestasiIlmiahMahasiswaDeleteModal,
     setIdSelectedPrestasiIlmiahMahasiswaDeleteModal,
   ] = useState<any>(null);
@@ -216,6 +236,10 @@ export default function Home() {
   const [
     idSelectedDataStatusMahasiswaDeleteModal,
     setIdSelectedDataStatusMahasiswaDeleteModal,
+  ] = useState<any>(null);
+  const [
+    idSelectedDataKonsultasiMahasiswaDeleteModal,
+    setIdSelectedDataKonsultasiMahasiswaDeleteModal,
   ] = useState<any>(null);
   const [
     bidangPrestasiAddPrestasiIlmiahMahasiswaModal,
@@ -246,6 +270,18 @@ export default function Home() {
   const [
     namaLengkapAddDataStatusMahasiswaModal,
     setNamaLengkapAddDataStatusMahasiswaModal,
+  ] = useState<any>("");
+  const [
+    selectedDataBimbinganAddDataKonsultasiMahasiswaModal,
+    setSelectedDataBimbinganAddDataKonsultasiMahasiswaModal,
+  ] = useState<any>({});
+  const [
+    permasalahanAddDataKonsultasiMahasiswaModal,
+    setPermasalahanAddDataKonsultasiMahasiswaModal,
+  ] = useState<any>("");
+  const [
+    solusiAddDataKonsultasiMahasiswaModal,
+    setSolusiAddDataKonsultasiMahasiswaModal,
   ] = useState<any>("");
   const [
     tingkatPrestasiAddPrestasiIlmiahMahasiswaModal,
@@ -325,6 +361,10 @@ export default function Home() {
     e.preventDefault();
     setIsModalAddDataStatusMahasiswaOpen(true);
   };
+  const openAddDataKonsultasiMahasiswaModal = (e: any) => {
+    e.preventDefault();
+    setIsModalAddDataKonsultasiMahasiswaOpen(true);
+  };
 
   const openEditPrestasiIlmiahMahasiswaModal = (e: any) => {
     e.preventDefault();
@@ -338,6 +378,10 @@ export default function Home() {
     e.preventDefault();
     setIsModalEditDataStatusMahasiswaOpen(true);
   };
+  const openEditDataKonsultasiMahasiswaModal = (e: any) => {
+    e.preventDefault();
+    setIsModalEditDataKonsultasiMahasiswaOpen(true);
+  };
 
   const openDeletePrestasiIlmiahMahasiswaModal = (e: any) => {
     e.preventDefault();
@@ -350,6 +394,10 @@ export default function Home() {
   const openDeleteDataStatusMahasiswaModal = (e: any) => {
     e.preventDefault();
     setIsModalDeleteDataStatusMahasiswaOpen(true);
+  };
+  const openDeleteDataKonsultasiMahasiswaModal = (e: any) => {
+    e.preventDefault();
+    setIsModalDeleteDataKonsultasiMahasiswaOpen(true);
   };
   const closeAddPrestasiIlmiahMahasiswaModal = () => {
     setBidangPrestasiAddPrestasiIlmiahMahasiswaModal("");
@@ -375,6 +423,12 @@ export default function Home() {
     setStatusAddDataStatusMahasiswaModal("");
     setIsModalAddDataStatusMahasiswaOpen(false);
   };
+  const closeAddDataKonsultasiMahasiswaModal = () => {
+    setIsModalAddDataKonsultasiMahasiswaOpen(false);
+    setDataSelectedNamaMahasiswaAddKonsultasiBimbinganModal("");
+    setPermasalahanAddDataKonsultasiMahasiswaModal("");
+    setSolusiAddDataKonsultasiMahasiswaModal("");
+  };
 
   const closeEditPrestasiIlmiahMahasiswaModal = () => {
     setDataSelectedPrestasiIlmiahMahasiswaEditModal({});
@@ -388,6 +442,10 @@ export default function Home() {
     setDataSelectedDataStatusMahasiswaEditModal({});
     setIsModalEditDataStatusMahasiswaOpen(false);
   };
+  const closeEditDataKonsultasiMahasiswaModal = () => {
+    setDataSelectedDataKonsultasiMahasiswaEditModal({});
+    setIsModalEditDataKonsultasiMahasiswaOpen(false);
+  };
 
   const closeDeletePrestasiIlmiahMahasiswaModal = () => {
     setIdSelectedPrestasiIlmiahMahasiswaDeleteModal(null);
@@ -400,6 +458,10 @@ export default function Home() {
   const closeDeleteDataStatusMahasiswaModal = () => {
     setIdSelectedDataStatusMahasiswaDeleteModal(null);
     setIsModalDeleteDataStatusMahasiswaOpen(false);
+  };
+  const closeDeleteDataKonsultasiMahasiswaModal = () => {
+    setIdSelectedDataKonsultasiMahasiswaDeleteModal(null);
+    setIsModalDeleteDataKonsultasiMahasiswaOpen(false);
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -494,6 +556,25 @@ export default function Home() {
             className="size-[48px] mx-auto p-1"
           />
         </td>
+        <td className="border-b align-top border-gray-200 px-4 py-4">
+          <div className="flex gap-2 items-center justify-center">
+            <EditButton
+              className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+              onClick={(e: any) => {
+                console.log(data);
+                setDataSelectedDataKonsultasiMahasiswaEditModal(data);
+                openEditDataKonsultasiMahasiswaModal(e);
+              }}
+            />
+            <TrashButton
+              className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+              onClick={(e: any) => {
+                setIdSelectedDataKonsultasiMahasiswaDeleteModal(data.id);
+                openDeleteDataKonsultasiMahasiswaModal(e);
+              }}
+            />
+          </div>
+        </td>
       </tr>
     );
   };
@@ -552,6 +633,28 @@ export default function Home() {
       },
     ]);
     closeAddDataStatusMahasiswaModal();
+  };
+  const handleAddDataKonsultasiMahasiswa = async (e: any) => {
+    e.preventDefault();
+    setDataKonsultasiMahasiswa((prevValues: any) => [
+      ...prevValues,
+      {
+        id: generateUniqueId(),
+        tanggal: formatTanggal(
+          selectedDataBimbinganAddDataKonsultasiMahasiswaModal
+            .pengajuan_bimbingan.jadwal_bimbingan
+        ),
+        nim: selectedDataBimbinganAddDataKonsultasiMahasiswaModal
+          .pengajuan_bimbingan.nim,
+        nama: selectedDataBimbinganAddDataKonsultasiMahasiswaModal
+          .pengajuan_bimbingan.nama_lengkap,
+        permasalahan: permasalahanAddDataKonsultasiMahasiswaModal,
+        solusi: solusiAddDataKonsultasiMahasiswaModal,
+        ttd_mhs:
+          selectedDataBimbinganAddDataKonsultasiMahasiswaModal.ttd_kehadiran,
+      },
+    ]);
+    closeAddDataKonsultasiMahasiswaModal();
   };
   const handleAddPrestasiIlmiahMahasiswa = async (e: any) => {
     e.preventDefault();
@@ -627,6 +730,26 @@ export default function Home() {
     closeEditDataStatusMahasiswaModal();
   };
 
+  const handleEditDataKonsultasiMahasiswa = async () => {
+    console.log(
+      dataKonsultasiMahasiswa,
+      dataSelectedDataKonsultasiMahasiswaEditModal
+    );
+    setDataKonsultasiMahasiswa((prevValues: any) => {
+      return prevValues.map((item: any) =>
+        item.id === dataSelectedDataKonsultasiMahasiswaEditModal.id
+          ? {
+              ...item,
+              permasalahan:
+                dataSelectedDataKonsultasiMahasiswaEditModal.permasalahan,
+              solusi: dataSelectedDataKonsultasiMahasiswaEditModal.solusi,
+            }
+          : item
+      );
+    });
+    closeEditDataKonsultasiMahasiswaModal();
+  };
+
   const handleDeletePrestasiIlmiahMahasiswa = async () => {
     setPrestasiIlmiahMahasiswaFormValue((prevValues: any) =>
       prevValues.filter(
@@ -651,6 +774,14 @@ export default function Home() {
       )
     );
     closeDeleteDataStatusMahasiswaModal();
+  };
+  const handleDeleteDataKonsultasiMahasiswa = async () => {
+    setDataKonsultasiMahasiswa((prevValues: any) =>
+      prevValues.filter(
+        (item: any) => item.id !== idSelectedDataKonsultasiMahasiswaDeleteModal
+      )
+    );
+    closeDeleteDataKonsultasiMahasiswaModal();
   };
 
   const handleFileChangeEditPrestasiIlmiahMahasiswaModal = (e: any) => {
@@ -679,8 +810,6 @@ export default function Home() {
       );
     }
   };
-
-  console.log(selectedBimbingan);
 
   const handleFileChangeAddPrestasiIlmiahMahasiswaModal = (e: any) => {
     const selectedFile = e.target.files[0];
@@ -1138,6 +1267,7 @@ export default function Home() {
             ? [...new Set(imagePreviews.map((data: any) => data))].join(", ")
             : null,
         tanda_tangan_dosen_pa: isSignatureValid ? signatureData : null,
+        konsultasi_mahasiswa: dataKonsultasiMahasiswa,
       };
 
       const result = await addLaporanBimbingan(laporanData);
@@ -1251,6 +1381,7 @@ export default function Home() {
       kesimpulan,
       dokumentasi: imagePreviews,
       tanda_tangan_dosen_pa: signatureData,
+      konsultasi_mahasiswa: dataKonsultasiMahasiswa,
     };
 
     const doc = new jsPDF({
@@ -1770,22 +1901,20 @@ export default function Home() {
     doc.text(`Semester                   :    ${laporanData.semester}`, 15, 38); // Moved up by 10y
     doc.text(`Periode                     :    ${laporanData.periode}`, 15, 44); // Moved up by 10y
 
-    const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
-      (data: any) => data.permasalahan !== null
-    );
+    const bimbinganDataLembarKonsultasi = laporanData.konsultasi_mahasiswa;
 
     const bodyBimbinganLembarKonsultasi =
       bimbinganDataLembarKonsultasi.length === 0
         ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
         : bimbinganDataLembarKonsultasi.map((item: any, index: any) => [
             index + 1,
-            formatTanggal(item.pengajuan_bimbingan.jadwal_bimbingan),
-            item.pengajuan_bimbingan.nim,
-            item.pengajuan_bimbingan.nama_lengkap,
+            item.tanggal,
+            item.nim,
+            item.nama,
             item.permasalahan,
             item.solusi,
             laporanData.tanda_tangan_dosen_pa,
-            item.ttd_kehadiran,
+            item.ttd_mhs,
           ]);
 
     (doc as any).autoTable({
@@ -2134,6 +2263,7 @@ export default function Home() {
     );
 
     const formattedData = filteredSelectedBimbingan.map((data: any) => ({
+      id: generateUniqueId(),
       tanggal: formatTanggal(data.pengajuan_bimbingan.jadwal_bimbingan),
       nim: data.pengajuan_bimbingan.nim,
       nama: data.pengajuan_bimbingan.nama_lengkap,
@@ -2164,6 +2294,20 @@ export default function Home() {
 
     setDataKonsultasiMahasiswa(newData);
   }, [selectedBimbingan]);
+
+  useEffect(() => {
+    const selectedData = selectedBimbingan
+      .filter((data) =>
+        data.pengajuan_bimbingan.jenis_bimbingan.startsWith("Perwalian")
+      )
+      .find(
+        (data) =>
+          data.pengajuan_bimbingan.nama_lengkap ===
+          dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal
+      );
+
+    setSelectedDataBimbinganAddDataKonsultasiMahasiswaModal(selectedData);
+  }, [selectedBimbingan, dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal]);
 
   useEffect(() => {
     const perwalianBimbingan = selectedBimbingan.filter((data) =>
@@ -3949,6 +4093,7 @@ export default function Home() {
                                                             onClick={(
                                                               e: any
                                                             ) => {
+                                                              console.log(data);
                                                               setDataSelectedDataStatusMahasiswaEditModal(
                                                                 data
                                                               );
@@ -4140,6 +4285,17 @@ export default function Home() {
                                   <p className="font-bold mx-auto mt-8">
                                     Data Konsultasi Mahasiswa
                                   </p>
+                                  <button
+                                    className="flex mr-8 px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                                    onClick={(e) => {
+                                      openAddDataKonsultasiMahasiswaModal(e);
+                                    }}
+                                  >
+                                    <Image src={plusIcon} alt="Plus Icon" />
+                                    <p className="text-white text-[10px] md:text-[14px]">
+                                      Tambah Data Konsultasi Mahasiswa
+                                    </p>
+                                  </button>
                                   <div className="flex flex-col px-8 mb-10">
                                     <div className="overflow-x-auto">
                                       <table className="min-w-full text-[14px] border-collapse table-fixed">
@@ -4157,14 +4313,17 @@ export default function Home() {
                                             <th className="px-2 py-2 w-[10%]">
                                               Nama
                                             </th>
-                                            <th className="px-2 py-2 w-[30%]">
+                                            <th className="px-2 py-2 w-[20%]">
                                               Permasalahan
                                             </th>
-                                            <th className="px-2 py-2 w-[30%]">
+                                            <th className="px-2 py-2 w-[25%]">
                                               Solusi
                                             </th>
-                                            <th className="px-2 py-2 w-[10%] rounded-tr-lg rounded-br-lg">
+                                            <th className="px-2 py-2 w-[10%]">
                                               TTD MHS
+                                            </th>
+                                            <th className="px-4 py-2 w-[15%] rounded-tr-lg rounded-br-lg">
+                                              Action
                                             </th>
                                           </tr>
                                         </thead>
@@ -4173,7 +4332,7 @@ export default function Home() {
                                           0 ? (
                                             <tr>
                                               <td
-                                                colSpan={7}
+                                                colSpan={8}
                                                 className="text-center py-4"
                                               >
                                                 <div className="bg-gray-50 p-4 rounded-lg shadow-md">
@@ -4198,6 +4357,222 @@ export default function Home() {
                                         </tbody>
                                       </table>
                                     </div>
+                                    <Modal
+                                      isOpen={
+                                        isModalAddDataKonsultasiMahasiswaOpen
+                                      }
+                                      onClose={
+                                        closeAddDataKonsultasiMahasiswaModal
+                                      }
+                                      onAdd={handleAddDataKonsultasiMahasiswa}
+                                      modalType="Tambah"
+                                      title="Tambah Data Konsultasi Mahasiswa"
+                                    >
+                                      <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                        <select
+                                          value={
+                                            dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal
+                                          }
+                                          onChange={(e) =>
+                                            setDataSelectedNamaMahasiswaAddKonsultasiBimbinganModal(
+                                              e.target.value
+                                            )
+                                          }
+                                          className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                        >
+                                          <option value="">
+                                            Pilih Peserta Perwalian
+                                          </option>
+                                          {selectedBimbingan
+                                            .filter((data) =>
+                                              data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
+                                                "Perwalian"
+                                              )
+                                            )
+                                            .map((data, index) => (
+                                              <option
+                                                key={index}
+                                                value={
+                                                  data.pengajuan_bimbingan
+                                                    .nama_lengkap
+                                                }
+                                              >
+                                                {
+                                                  data.pengajuan_bimbingan
+                                                    .nama_lengkap
+                                                }
+                                              </option>
+                                            ))}
+                                        </select>
+                                        {dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal !==
+                                          "" &&
+                                        selectedDataBimbinganAddDataKonsultasiMahasiswaModal ? (
+                                          <div>
+                                            <InputField
+                                              type="text"
+                                              disabled
+                                              placeholder="Masukkan NIM"
+                                              value={
+                                                selectedDataBimbinganAddDataKonsultasiMahasiswaModal
+                                                  .pengajuan_bimbingan.nim
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              disabled
+                                              placeholder="Masukkan Tanggal Bimbingan"
+                                              value={formatTanggal(
+                                                selectedDataBimbinganAddDataKonsultasiMahasiswaModal
+                                                  .pengajuan_bimbingan
+                                                  .jadwal_bimbingan
+                                              )}
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <p className="text-sm font-medium text-gray-700 mt-2">
+                                              Permasalahan
+                                            </p>
+                                            <textarea
+                                              placeholder="Permasalahan"
+                                              value={
+                                                permasalahanAddDataKonsultasiMahasiswaModal
+                                              }
+                                              onChange={(e) => {
+                                                setPermasalahanAddDataKonsultasiMahasiswaModal(
+                                                  e.target.value
+                                                );
+                                              }}
+                                              className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
+                                            />
+                                            <p className="text-sm font-medium text-gray-700 mt-2">
+                                              Solusi
+                                            </p>
+                                            <textarea
+                                              placeholder="Solusi"
+                                              value={
+                                                solusiAddDataKonsultasiMahasiswaModal
+                                              }
+                                              onChange={(e) => {
+                                                setSolusiAddDataKonsultasiMahasiswaModal(
+                                                  e.target.value
+                                                );
+                                              }}
+                                              className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
+                                            />
+                                            <p className="text-sm font-medium text-gray-700 mt-2">
+                                              Ttd Mahasiswa
+                                            </p>
+                                            <img
+                                              alt="ttd absensi"
+                                              className="border rounded-lg mt-2 p-4 w-[100px]"
+                                              src={
+                                                selectedDataBimbinganAddDataKonsultasiMahasiswaModal.ttd_kehadiran
+                                              }
+                                            />
+                                          </div>
+                                        ) : (
+                                          ""
+                                        )}
+                                      </form>
+                                    </Modal>
+                                    <Modal
+                                      isOpen={
+                                        isModalEditDataKonsultasiMahasiswaOpen
+                                      }
+                                      onClose={
+                                        closeEditDataKonsultasiMahasiswaModal
+                                      }
+                                      onEdit={handleEditDataKonsultasiMahasiswa}
+                                      modalType="Edit"
+                                      title="Edit Data Konsultasi Mahasiswa"
+                                    >
+                                      <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                        <div>
+                                          <InputField
+                                            type="text"
+                                            disabled
+                                            placeholder="Masukkan NIM"
+                                            value={
+                                              dataSelectedDataKonsultasiMahasiswaEditModal.nim
+                                            }
+                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                          />
+                                          <InputField
+                                            type="text"
+                                            disabled
+                                            placeholder="Masukkan Tanggal Bimbingan"
+                                            value={
+                                              dataSelectedDataKonsultasiMahasiswaEditModal.tanggal
+                                            }
+                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                          />
+                                          <p className="text-sm font-medium text-gray-700 mt-2">
+                                            Permasalahan
+                                          </p>
+                                          <textarea
+                                            placeholder="Permasalahan"
+                                            value={
+                                              dataSelectedDataKonsultasiMahasiswaEditModal.permasalahan
+                                            }
+                                            onChange={(e) => {
+                                              setDataSelectedDataKonsultasiMahasiswaEditModal(
+                                                {
+                                                  ...dataSelectedDataKonsultasiMahasiswaEditModal,
+                                                  permasalahan: e.target.value,
+                                                }
+                                              );
+                                            }}
+                                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
+                                          />
+                                          <p className="text-sm font-medium text-gray-700 mt-2">
+                                            Solusi
+                                          </p>
+                                          <textarea
+                                            placeholder="Solusi"
+                                            value={
+                                              dataSelectedDataKonsultasiMahasiswaEditModal.solusi
+                                            }
+                                            onChange={(e) => {
+                                              setDataSelectedDataKonsultasiMahasiswaEditModal(
+                                                {
+                                                  ...dataSelectedDataKonsultasiMahasiswaEditModal,
+                                                  solusi: e.target.value,
+                                                }
+                                              );
+                                            }}
+                                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
+                                          />
+                                          <p className="text-sm font-medium text-gray-700 mt-2">
+                                            Ttd Mahasiswa
+                                          </p>
+                                        </div>
+                                        <img
+                                          alt="ttd absensi"
+                                          className="border rounded-lg mt-2 p-4 w-[100px]"
+                                          src={
+                                            dataSelectedDataKonsultasiMahasiswaEditModal.ttd_mhs
+                                          }
+                                        />
+                                      </form>
+                                    </Modal>
+                                    <Modal
+                                      isOpen={
+                                        isModalDeleteDataKonsultasiMahasiswaOpen
+                                      }
+                                      onClose={
+                                        closeDeleteDataKonsultasiMahasiswaModal
+                                      }
+                                      onDelete={
+                                        handleDeleteDataKonsultasiMahasiswa
+                                      }
+                                      modalType="Delete"
+                                      title="Hapus Data Konsultasi Mahasiswa"
+                                    >
+                                      <p>
+                                        Apakah Anda yakin ingin menghapus Data
+                                        Konsultasi Mahasiswa ini?
+                                      </p>
+                                    </Modal>
                                   </div>
                                 </div>
                               </div>

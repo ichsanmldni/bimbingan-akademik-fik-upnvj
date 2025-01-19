@@ -22,6 +22,7 @@ import { Provider } from "react-redux";
 import store from "@/components/store/store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PDFModal from "@/components/ui/PDFModal";
 
 const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState<string>("");
@@ -37,6 +38,8 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     useState<string>("Semua Tahun Ajaran");
   const [selectedSemester, setSelectedSemester] =
     useState<string>("Semua Semester");
+  const [selectedPeriode, setSelectedPeriode] =
+    useState<string>("Semua Periode");
   const [isDetailLaporanKaprodiClicked, setIsDetailLaporanKaprodiClicked] =
     useState<boolean>(false);
   const [isDetailDosenPAClicked, setIsDetailDosenPAClicked] =
@@ -68,6 +71,14 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     useState([]);
   const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
   const [optionsTahunAjaran, setOptionsTahunAjaran] = useState([]);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setPdfUrl(""); // Clear the URL when closing
+    URL.revokeObjectURL(pdfUrl); // Clean up the Blob URL
+  };
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -476,8 +487,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   };
 
-  const getDataBimbinganFilteredByTahunAjaranAndSemester = () => {
-    console.log(selectedTahunAjaran);
+  const getDataBimbinganFilteredByTahunAjaranSemesterAndPeriode = () => {
     if (selectedTahunAjaran === "Semua Tahun Ajaran") {
       setFilteredDataBimbingan(dataBimbingan);
       return;
@@ -494,11 +504,32 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     const filteredDataBimbinganBySemester = filteredDataBimbinganByTahunAjaran
       .filter((data) => data.laporan_bimbingan_id !== null)
       .filter((data) => data.laporan_bimbingan.semester === selectedSemester);
-    setFilteredDataBimbingan(filteredDataBimbinganBySemester);
+
+    if (selectedPeriode === "Semua Periode") {
+      setFilteredDataBimbingan(filteredDataBimbinganBySemester);
+      return;
+    }
+    const periodeMapping = {
+      "Perwalian KRS": "Sebelum Perwalian KRS",
+      "Perwalian UTS": "Setelah Perwalian KRS - Sebelum Perwalian UTS",
+      "Perwalian UAS": "Setelah Perwalian UTS - Sebelum Perwalian UAS",
+    };
+
+    const mappedSelectedPeriode =
+      periodeMapping[selectedPeriode] || selectedPeriode;
+
+    const filteredDataBimbinganByPeriode = filteredDataBimbinganBySemester
+      .filter((data) => data.laporan_bimbingan_id !== null)
+      .filter(
+        (data) =>
+          data.pengajuan_bimbingan.periode_pengajuan === mappedSelectedPeriode
+      );
+
+    setFilteredDataBimbingan(filteredDataBimbinganByPeriode);
     return;
   };
 
-  const getDataLaporanBimbinganFilteredByTahunAjaranAndSemester = () => {
+  const getDataLaporanBimbinganFilteredByTahunAjaranSemesterAndPeriode = () => {
     if (selectedTahunAjaran === "Semua Tahun Ajaran") {
       setFilteredDataLaporanBimbingan(dataLaporanBimbingan);
       return;
@@ -517,7 +548,15 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       filteredDataLaporanBimbinganByTahunAjaran.filter(
         (data) => data.semester === selectedSemester
       );
-    setFilteredDataLaporanBimbingan(filteredDataLaporanBimbinganBySemester);
+    if (selectedPeriode === "Semua Periode") {
+      setFilteredDataLaporanBimbingan(filteredDataLaporanBimbinganBySemester);
+      return;
+    }
+    const filteredDataLaporanBimbinganByPeriode =
+      filteredDataLaporanBimbinganBySemester.filter(
+        (data) => data.jenis_bimbingan === selectedPeriode
+      );
+    setFilteredDataLaporanBimbingan(filteredDataLaporanBimbinganByPeriode);
     return;
   };
 
@@ -1232,22 +1271,20 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         44
       ); // Moved up by 10y
 
-      const bimbinganDataLembarKonsultasi = selectedBimbingan.filter(
-        (data) => data.permasalahan !== null
-      );
+      const bimbinganDataLembarKonsultasi = data.konsultasi_mahasiswa;
 
       const bodyBimbinganLembarKonsultasi =
         bimbinganDataLembarKonsultasi.length === 0
           ? [["-", "-", "-", "-", "-", "-", "-", "-"]] // Baris default untuk data kosong
           : bimbinganDataLembarKonsultasi.map((item, index) => [
               index + 1,
-              formatTanggal(item.pengajuan_bimbingan.jadwal_bimbingan),
-              item.pengajuan_bimbingan.nim,
-              item.pengajuan_bimbingan.nama_lengkap,
+              item.tanggal,
+              item.nim,
+              item.nama,
               item.permasalahan,
               item.solusi,
               data.tanda_tangan_dosen_pa,
-              item.ttd_kehadiran,
+              item.ttd_mhs,
             ]);
 
       (doc as any).autoTable({
@@ -1468,6 +1505,9 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       const pdfOutput = doc.output("blob");
       const url = URL.createObjectURL(pdfOutput);
 
+      // Set the URL and open the modal
+      setPdfUrl(url);
+      setIsModalOpen(true);
       // Membuka PDF di tab baru
       window.open(url, "_blank");
     }
@@ -1485,6 +1525,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     setIsDetailLaporanKaprodiClicked(false);
     setSelectedTahunAjaran("Semua Tahun Ajaran");
     setSelectedSemester("Semua Semester");
+    setSelectedPeriode("Semua Periode");
   }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
@@ -1552,10 +1593,19 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       dataLaporanBimbingan &&
       dataLaporanBimbingan.length > 0
     ) {
-      getDataBimbinganFilteredByTahunAjaranAndSemester();
-      getDataLaporanBimbinganFilteredByTahunAjaranAndSemester();
+      getDataBimbinganFilteredByTahunAjaranSemesterAndPeriode();
+      getDataLaporanBimbinganFilteredByTahunAjaranSemesterAndPeriode();
     }
-  }, [selectedTahunAjaran, selectedSemester]);
+  }, [selectedTahunAjaran, selectedSemester, selectedPeriode]);
+
+  useEffect(() => {
+    setSelectedSemester("Semua Semester");
+    setSelectedPeriode("Semua Periode");
+  }, [selectedTahunAjaran]);
+
+  useEffect(() => {
+    setSelectedPeriode("Semua Periode");
+  }, [selectedSemester]);
 
   useEffect(() => {
     if (
@@ -1564,8 +1614,8 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       dataLaporanBimbingan &&
       dataLaporanBimbingan.length > 0
     ) {
-      getDataBimbinganFilteredByTahunAjaranAndSemester();
-      getDataLaporanBimbinganFilteredByTahunAjaranAndSemester();
+      getDataBimbinganFilteredByTahunAjaranSemesterAndPeriode();
+      getDataLaporanBimbinganFilteredByTahunAjaranSemesterAndPeriode();
     }
   }, [dataLaporanBimbingan, dataBimbingan]);
 
@@ -1679,9 +1729,9 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
           <div className="border px-[30px] py-[30px] rounded-lg">
             <div className="flex flex-col gap-4">
               <div className="flex gap-5">
-                <div className="relative">
+                <div className="relative w-1/3">
                   <select
-                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px] ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
+                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
                     value={selectedTahunAjaran}
                     onChange={(e) => setSelectedTahunAjaran(e.target.value)}
                   >
@@ -1717,9 +1767,10 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                     </svg>
                   </div>
                 </div>
-                <div className="relative">
+                <div className="relative w-1/3">
                   <select
-                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px] ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
+                    disabled={selectedTahunAjaran === "Semua Tahun Ajaran"}
+                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
                     value={selectedSemester}
                     onChange={(e) => setSelectedSemester(e.target.value)}
                   >
@@ -1727,6 +1778,50 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                     {[
                       { value: "Ganjil", label: "Ganjil" },
                       { value: "Genap", label: "Genap" },
+                    ].map((option: any) => (
+                      <option
+                        className="text-black"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div
+                    className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                  >
+                    <svg
+                      className="w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </div>
+                </div>
+                <div className="relative w-1/3">
+                  <select
+                    disabled={
+                      selectedTahunAjaran === "Semua Tahun Ajaran" ||
+                      selectedSemester === "Semua Semester"
+                    }
+                    className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedPeriode === "Semua Periode" ? "text-gray-400" : "text-black"}`}
+                    value={selectedPeriode}
+                    onChange={(e) => setSelectedPeriode(e.target.value)}
+                  >
+                    <option value="Semua Periode">Semua Periode</option>
+                    {[
+                      { value: "Perwalian KRS", label: "Perwalian KRS" },
+                      { value: "Perwalian UTS", label: "Perwalian UTS" },
+                      { value: "Perwalian UAS", label: "Perwalian UAS" },
                     ].map((option: any) => (
                       <option
                         className="text-black"
@@ -1919,7 +2014,129 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
             <h1 className="font-semibold text-[24px]">
               Riwayat Laporan Bimbingan
             </h1>
-            {dataLaporanBimbingan.length > 0 ? (
+            <div className="flex gap-5">
+              <div className="relative w-1/3">
+                <select
+                  className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
+                  value={selectedTahunAjaran}
+                  onChange={(e) => setSelectedTahunAjaran(e.target.value)}
+                >
+                  <option value="Semua Tahun Ajaran">Semua Tahun Ajaran</option>
+                  {optionsTahunAjaran.map((option: any) => (
+                    <option
+                      className="text-black"
+                      key={option.value}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <div
+                  className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                >
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <div className="relative w-1/3">
+                <select
+                  disabled={selectedTahunAjaran === "Semua Tahun Ajaran"}
+                  className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
+                  value={selectedSemester}
+                  onChange={(e) => setSelectedSemester(e.target.value)}
+                >
+                  <option value="Semua Semester">Semua Semester</option>
+                  {[
+                    { value: "Ganjil", label: "Ganjil" },
+                    { value: "Genap", label: "Genap" },
+                  ].map((option: any) => (
+                    <option
+                      className="text-black"
+                      key={option.value}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <div
+                  className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                >
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              <div className="relative w-1/3">
+                <select
+                  disabled={
+                    selectedTahunAjaran === "Semua Tahun Ajaran" ||
+                    selectedSemester === "Semua Semester"
+                  }
+                  className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedPeriode === "Semua Periode" ? "text-gray-400" : "text-black"}`}
+                  value={selectedPeriode}
+                  onChange={(e) => setSelectedPeriode(e.target.value)}
+                >
+                  <option value="Semua Periode">Semua Periode</option>
+                  {[
+                    { value: "Perwalian KRS", label: "Perwalian KRS" },
+                    { value: "Perwalian UTS", label: "Perwalian UTS" },
+                    { value: "Perwalian UAS", label: "Perwalian UAS" },
+                  ].map((option: any) => (
+                    <option
+                      className="text-black"
+                      key={option.value}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <div
+                  className={`${"px-3 py-2 text-[15px] border rounded-lg appearance-none md:w-[200px]".includes("hidden") ? "hidden" : "block"} ${"px-3 py-2 text-[15px] border rounded-lg appearance-none w-[200px]".match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
+                >
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            {filteredDataLaporanBimbingan.length > 0 ? (
               !isDetailLaporanKaprodiClicked ? (
                 <div className="flex flex-col gap-6">
                   {dataLaporanBimbingan
@@ -2106,6 +2323,11 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                       </div>
                     </div>
                   </div>
+                  <PDFModal
+                    isOpen={isModalOpen}
+                    closeModal={closeModal}
+                    pdfUrl={pdfUrl}
+                  />
                 </div>
               )
             ) : (
