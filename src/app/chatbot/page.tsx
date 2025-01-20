@@ -25,11 +25,13 @@ export default function Home() {
   const [chatbotData, setChatbotData] = useState<any>([]);
   const [sortedChatbotData, setSortedChatbotData] = useState([]);
   const [dataUser, setDataUser] = useState<any>(null);
+  const [dataDBCustomContext, setDataDBCustomContext] = useState([]);
 
   const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState({
     dosen_pa: [],
     jadwal_kosong_semua_dosen_pa: [],
     informasi_akademik: [],
+    custom_context: [],
   });
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
   const [activeSesiChatbotMahasiswa, setActiveSesiChatbotMahasiswa] =
@@ -61,6 +63,21 @@ export default function Home() {
       }
 
       setDataMahasiswa(response.data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  const getDataDBCustomContext = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/datacustomcontext`);
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      setDataDBCustomContext(response.data);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -198,7 +215,17 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (dataDosenPA && dataJadwalDosenPA && dataInformasiAkademik) {
+    if (
+      dataDosenPA &&
+      dataJadwalDosenPA &&
+      dataInformasiAkademik &&
+      dataDBCustomContext
+    ) {
+      const customContext = dataDBCustomContext.reduce((acc, curr) => {
+        acc[curr.judul] = curr.isi; // Set `judul` sebagai key dan `isi` sebagai value
+        return acc;
+      }, {});
+
       setCustomDataConsumeGPT({
         dosen_pa: dataDosenPA.map((dosen) => ({
           nama: dosen.nama,
@@ -219,9 +246,15 @@ export default function Home() {
           judul: info.nama,
           deskripsi: info.isi,
         })),
+        custom_context: customContext, // Masukkan hasil konversi ke properti baru
       });
     }
-  }, [dataDosenPA, dataJadwalDosenPA, dataInformasiAkademik]);
+  }, [
+    dataDosenPA,
+    dataJadwalDosenPA,
+    dataInformasiAkademik,
+    dataDBCustomContext,
+  ]);
 
   const getChatGPTResponse = async (sesiId, userMessage) => {
     if (!userMessage) throw new Error("Pesan pengguna tidak boleh kosong.");
@@ -246,6 +279,10 @@ export default function Home() {
       )
       .join("\n");
 
+    const dbCustomContext = Object.entries(customDataConsumeGPT.custom_context)
+      .map(([judul, isi]) => `${judul}: ${isi}`)
+      .join("\n");
+
     const informasiAkademik = customDataConsumeGPT.informasi_akademik
       .slice(0, maxInfoCount) // Batasi jumlah elemen
       .map((info) => `Judul: ${info.judul}, Deskripsi: ${info.deskripsi}`)
@@ -260,9 +297,13 @@ export default function Home() {
   Jadwal Kosong Dosen:
   ${jadwalKosong}
 
+${dbCustomContext}
+
   Informasi Akademik (terbatas ${maxInfoCount} data):
   ${informasiAkademik}
 `;
+
+    console.log(customContext);
 
     const filteredMessages = dataRiwayatPesanChatbot
       .slice(-10)
@@ -467,7 +508,10 @@ export default function Home() {
     getDataSesiChatbotMahasiswa();
     getDataJadwalDosenPA();
     getDataInformasiAkademik();
+    getDataDBCustomContext();
   }, []);
+
+  console.log(dataDBCustomContext);
 
   useEffect(() => {
     getDataChatbotMahasiswabySesiChatbotMahasiswaID();

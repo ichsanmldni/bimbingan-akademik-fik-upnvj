@@ -1673,6 +1673,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       console.log(data);
 
       const bimbinganDataLembarKonsultasi = data.konsultasi_mahasiswa;
+      console.log(bimbinganDataLembarKonsultasi);
 
       const bodyBimbinganLembarKonsultasi =
         bimbinganDataLembarKonsultasi.length === 0
@@ -1731,7 +1732,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
             data.section === "body"
           ) {
             const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
-            if (imgSrc) {
+            if (imgSrc && imgSrc !== "-") {
               const imgWidth = 8;
               const imgHeight = 8;
               const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
@@ -1743,8 +1744,10 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
             data.column.index === 6 &&
             data.section === "body"
           ) {
+            console.log(data);
             const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
-            if (imgSrc) {
+            console.log(data.cell.raw);
+            if (imgSrc && imgSrc !== "-") {
               const imgWidth = 8;
               const imgHeight = 8;
               const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
@@ -1760,7 +1763,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
             data.section === "body"
           ) {
             const imgSrc = data.row.raw[7];
-            if (imgSrc) {
+            if (imgSrc && imgSrc !== "-") {
               data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
               data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
             }
@@ -1770,13 +1773,15 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
             data.section === "body"
           ) {
             const imgSrc = data.row.raw[6];
-            if (imgSrc) {
+            if (imgSrc && imgSrc !== "-") {
               data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
               data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
             }
           }
           if (data.row.index >= 0 && data.section === "body") {
-            if (data.column.index === 4 || data.column.index === 5) {
+            if (data.column.index === 4 && data.cell.raw !== "-") {
+              data.cell.styles.halign = "justify"; // Justify alignment
+            } else if (data.column.index === 5 && data.cell.raw !== "-") {
               data.cell.styles.halign = "justify"; // Justify alignment
             }
           }

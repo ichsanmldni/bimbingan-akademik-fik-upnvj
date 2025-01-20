@@ -7,8 +7,8 @@ import Image from "next/image";
 import EditButton from "@/components/ui/EditButton";
 import TrashButton from "@/components/ui/TrashButton";
 import ManageParameter from "./ManageParameter";
-import Dashboard from "./Dashboard";
 import ManageInformasiAkademik from "./ManageInformasiAkademik";
+import ManageCustomContexChatbot from "./ManageCustomContextChatbot.";
 
 interface AdminPageProps {
   activeNavbar: string;
@@ -18,12 +18,14 @@ const AdminPage: React.FC<AdminPageProps> = ({ activeNavbar }) => {
   return (
     <div className="w-[80%] h-screen">
       <HeaderAdmin activeNavbar={activeNavbar} />
-      {activeNavbar === "Dashboard" && <Dashboard />}
       {activeNavbar === "Manage Parameter" && (
         <ManageParameter activeNavbar={activeNavbar} />
       )}
       {activeNavbar === "Manage Informasi Akademik" && (
         <ManageInformasiAkademik />
+      )}
+      {activeNavbar === "Manage Custom Context Chatbot" && (
+        <ManageCustomContexChatbot />
       )}
     </div>
   );

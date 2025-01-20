@@ -20,7 +20,7 @@ export default function Home() {
   const cards = Array(9).fill(null);
 
   const [roleUser, setRoleUser] = useState<any>("");
-  const [activeNavbar, setActiveNavbar] = useState<any>("Dashboard");
+  const [activeNavbar, setActiveNavbar] = useState<any>("Manage Parameter");
   const [dataDosenPA, setDataDosenPA] = useState<any>([]);
   const [dataKaprodi, setDataKaprodi] = useState<any>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<any>([]);

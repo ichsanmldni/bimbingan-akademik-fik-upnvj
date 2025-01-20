@@ -397,3 +397,10 @@ model mastersubbabinformasiakademik {
 
   @@index([bab_informasi_akademik_id], map: "mastersubbabinformasiakademik_bab_informasi_akademik_id_fkey")
 }
+
+model mastercustomcontextchatbot {
+  id                         Int                        @id @default(autoincrement())
+  judul                      String
+  isi                        String                     @db.Text()
+  order                      Int
+}

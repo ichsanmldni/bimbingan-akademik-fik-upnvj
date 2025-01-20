@@ -22,12 +22,6 @@ const NavbarAdmin: React.FC<NavbarAdminProps> = ({
       </div>
       <div className="flex flex-col py-6 gap-1">
         <button
-          onClick={() => setActiveNavbar("Dashboard")}
-          className={`text-start px-3 py-2 rounded-xl text-[14px] ${activeNavbar === "Dashboard" ? "bg-orange-500 font-medium text-white" : ""}`}
-        >
-          Dashboard
-        </button>
-        <button
           onClick={() => setActiveNavbar("Manage Parameter")}
           className={`text-start px-3 py-2 rounded-xl text-[14px] ${activeNavbar === "Manage Parameter" ? "bg-orange-500 font-medium text-white" : ""}`}
         >
@@ -38,6 +32,12 @@ const NavbarAdmin: React.FC<NavbarAdminProps> = ({
           className={`text-start px-3 py-2 rounded-xl text-[14px] ${activeNavbar === "Manage Informasi Akademik" ? "bg-orange-500 font-medium text-white" : ""}`}
         >
           Manage Informasi Akademik
+        </button>
+        <button
+          onClick={() => setActiveNavbar("Manage Custom Context Chatbot")}
+          className={`text-start px-3 py-2 rounded-xl text-[14px] ${activeNavbar === "Manage Custom Context Chatbot" ? "bg-orange-500 font-medium text-white" : ""}`}
+        >
+          Manage Custom Context Chatbot
         </button>
       </div>
     </div>
