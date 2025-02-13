@@ -523,7 +523,7 @@ ${dbCustomContext}
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="h-screen md:h-full relative">
+    <div className="h-screen relative">
       <NavbarChatbot
         isPathChatbot={true}
         roleUser={roleUser}
@@ -537,28 +537,35 @@ ${dbCustomContext}
                 : null
         }
       />
-      <div className="flex">
+      <div className="flex h-screen">
         {/* Sidebar */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 md:hidden z-[100]"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
         <div
-          className={`fixed max-h-screen inset-0 md:relative w-[200px] md:w-[320px] bg-white shadow-md transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 z-10`}
+          className={`fixed h-screen inset-0 md:relative w-[200px] md:w-[320px] bg-white shadow-md transition-transform duration-300 
+    ${isOpen ? "translate-x-0 z-[999]" : "-translate-x-full"} md:translate-x-0`}
         >
           <SidebarChatbot
             setActiveSesiChatbotMahasiswa={setActiveSesiChatbotMahasiswa}
             activeSesiChatbotMahasiswa={activeSesiChatbotMahasiswa}
             data={dataSesiChatbotMahasiswa}
+            setIsOpen={setIsOpen}
           />
         </div>
 
         {/* Main Chat Area */}
         <div
-          className={`flex flex-col h-screen w-full pt-[72px] ${!isOpen ? "ml-0" : "ml-[200px]"} transition-all duration-300`}
+          className={`flex flex-col flex-1 min-h-screen w-full pt-[72px] ${isOpen ? "md:pl-[200px]" : "ml-0"} transition-all duration-300`}
         >
           <div className="flex justify-between items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="md:hidden p-2 text-gray-700 focus:outline-none"
             >
-              {/* Hamburger Icon */}
               <svg
                 className={`w-6 h-6 ${isOpen ? "hidden" : "block"}`}
                 fill="none"
@@ -591,11 +598,11 @@ ${dbCustomContext}
           </div>
 
           {sortedChatbotData.length === 0 ? (
-            <div className="h-full px-20 md:px-[120px] flex items-center">
+            <div className="flex-1 px-20 md:px-[120px] flex items-center">
               <ChatbotHeader />
             </div>
           ) : (
-            <div className="h-full overflow-y-scroll px-[40px] flex flex-col w-full justify-between gap-8">
+            <div className="flex-1 overflow-y-auto px-[40px] flex flex-col w-full justify-between gap-8">
               <div
                 id="message-container"
                 className="flex-1 w-full flex flex-col"
@@ -613,6 +620,7 @@ ${dbCustomContext}
               </div>
             </div>
           )}
+
           <div className="px-10 py-4">
             <TextInputPesanChatbot
               handleAddChatChatbotMahasiswa={handleAddChatChatbotMahasiswa}

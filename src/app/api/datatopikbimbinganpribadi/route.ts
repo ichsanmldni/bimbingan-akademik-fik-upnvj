@@ -29,9 +29,6 @@ export async function POST(req: Request): Promise<Response> {
     try {
         const body: TopikBimbinganPribadiRequestBody = await req.json();
         const { topik_bimbingan, order } = body;
-
-        console.log(topik_bimbingan, order)
-
         // Validate required fields
         if (!topik_bimbingan || order === undefined) {
             return new Response(
