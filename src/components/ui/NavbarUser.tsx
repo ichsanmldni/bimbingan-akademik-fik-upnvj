@@ -217,7 +217,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
     <>
       {/* Navbar atas untuk layar medium ke atas */}
       <div
-        className={`fixed z-[999] flex justify-between md:justify-start w-full bg-white border py-5 px-[24px] md:px-[128px] ${roleUser === "Dosen PA" && "md:px-[40px]"} md:flex`}
+        className={`fixed z-[999] flex justify-between md:justify-start w-full bg-white border py-5 px-[24px] md:px-[72px] ${roleUser === "Dosen PA" && "md:px-[40px]"} md:flex`}
       >
         <LogoBimafik className="md:hidden size-[40px]" />
         <div

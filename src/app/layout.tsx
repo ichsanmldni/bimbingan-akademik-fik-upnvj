@@ -25,6 +25,7 @@ export default function RootLayout({
           <title>{metadata.title}</title>
           <meta name="description" content={metadata.description} />
           <link rel="manifest" href={metadata.manifest} />
+          <link rel="icon" href="/bimafiklogo.png" />
         </head>
         <body>{children}</body>
       </html>

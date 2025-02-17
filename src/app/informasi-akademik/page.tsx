@@ -155,6 +155,22 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (dataBab && dataBab.length > 0) {
+      setOpenMenu(dataBab[0].nama);
+      getDataSubBabByBab(dataBab[0].nama);
+    }
+  }, [dataBab]);
+
+  useEffect(() => {
+    if (dataSubBab && dataSubBab.length > 0) {
+      setSelectedSubBabData(dataSubBab[0]);
+    }
+  }, [dataSubBab]);
+
+  console.log(dataSubBab);
+  console.log(selectedSubBabData);
+
+  useEffect(() => {
     getDataDosenPA();
     getDataKaprodi();
     getDataMahasiswa();
