@@ -10,8 +10,8 @@ import DashboardMahasiswa from "@/components/features/dashboard/DashboardMahasis
 import DashboardKaprodi from "@/components/features/dashboard/DashboardKaprodi";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedSubMenu } from "@/components/store/selectedSubMenuSlice";
-import { RootState } from "@/components/store/store";
+import { setSelectedSubMenu } from "@/lib/features/selectedSubMenuSlice";
+import { RootState } from "../../lib/store";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const Dashboard = () => {
@@ -96,7 +96,7 @@ const Dashboard = () => {
     getDataKaprodi();
     getDataMahasiswa();
     const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
+    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
 
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];

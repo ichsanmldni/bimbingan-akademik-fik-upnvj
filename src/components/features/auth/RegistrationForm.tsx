@@ -179,7 +179,7 @@ const RegistrationForm = () => {
   };
 
   useEffect(() => {
-    document.cookie = "authToken=; max-age=0; path=/;";
+    document.cookie = "authBMFK=; max-age=0; path=/;";
     getDataDosenPA();
     getDataJurusan();
   }, []);

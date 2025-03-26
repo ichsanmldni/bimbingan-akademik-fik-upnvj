@@ -7,215 +7,135 @@ import Image from "next/image";
 import searchIcon from "../../assets/images/search.png";
 import dropdownIcon from "../../assets/images/dropdown.png";
 import dropupIcon from "../../assets/images/upIcon.png";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { env } from "process";
+import { useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store";
+import { useSelector } from "react-redux";
+import {
+  fetchDataBab,
+  fetchDataBabByNama,
+  fetchDataSubBabByBab,
+  fetchDataSubBabByNama,
+} from "@/lib/features/babSlice";
 
 export default function Home() {
-  const [openMenu, setOpenMenu] = useState("");
-  const [roleUser, setRoleUser] = useState("");
-  const [dataUser, setDataUser] = useState<any>(null);
-  const [dataBab, setDataBab] = useState([]);
-  const [dataSubBab, setDataSubBab] = useState([]);
-  const [dataDosenPA, setDataDosenPA] = useState([]);
-  const [dataKaprodi, setDataKaprodi] = useState([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState([]);
-  const [selectedSubBabData, setSelectedSubBabData] = useState<any>(null);
-
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+
+  const dispatch = useDispatch<AppDispatch>();
+  const [openMenu, setOpenMenu] = useState("");
+
+  const roleUser =
+    useSelector((state: RootState) => state.auth?.roleUser) || "";
+  const dataUser = useSelector((state: RootState) => state.auth?.dataUser);
+  const statusAuthUser = useSelector((state: RootState) => state.auth?.status);
+
+  // Data states
+  const dataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.data
+  );
+  const dataDosenPA = useSelector((state: RootState) => state.dosenPA?.data);
+  const dataKaprodi = useSelector((state: RootState) => state.kaprodi?.data);
+  const dataBab = useSelector((state: RootState) => state.bab?.dataBab);
+  const dataSubBab = useSelector((state: RootState) => state.bab?.dataSubBab);
+  const selectedSubBabData = useSelector(
+    (state: RootState) => state.bab?.selectedSubBab
+  );
+  const selectedBabData = useSelector(
+    (state: RootState) => state.bab?.selectedBab
+  );
+
+  // Status states
+  const statusDataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.status
+  );
+  const statusDataDosenPA = useSelector(
+    (state: RootState) => state.dosenPA?.status
+  );
+  const statusDataKaprodi = useSelector(
+    (state: RootState) => state.kaprodi?.status
+  );
+  const statusDataUser = useSelector((state: RootState) => state.user?.status);
 
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? "" : menuName);
   };
 
-  const getDataBab = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/databab`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const sortedDataBab = response.data.sort(
-        (a: any, b: any) => a.order - b.order
-      );
-      setDataBab(sortedDataBab);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
+  const handleSelectBab = (babName) => {
+    dispatch(fetchDataSubBabByBab(babName));
+    dispatch(
+      fetchDataBabByNama({
+        selectedBab: babName,
+      })
+    );
   };
 
-  const getDataSubBabByBab = async (selectedBab: string) => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/databab`);
-
-      const bab = response.data.find((data: any) => data.nama === selectedBab);
-
-      if (!bab) {
-        throw new Error("Bab tidak ditemukan");
-      }
-
-      const babid = bab.id;
-
-      const subBabResponse = await axios.get(
-        `${API_BASE_URL}/api/datasubbab/${babid}`
-      );
-
-      if (subBabResponse.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const sortedDataSubBab = subBabResponse.data.sort(
-        (a: any, b: any) => a.order - b.order
-      );
-      setDataSubBab(sortedDataSubBab);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
+  const handleSelectSubBab = (babName, subBabName) => {
+    console.log(babName, subBabName);
+    dispatch(
+      fetchDataSubBabByNama({
+        selectedBab: babName,
+        selectedSubBab: subBabName,
+      })
+    );
   };
 
-  const getDataSubBabBySubBabNama = async (
-    selectedBab: string,
-    selectedSubBab: string
-  ) => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/databab`);
+  const userData = useMemo(() => {
+    if (!dataUser) return null;
 
-      const bab = response.data.find((data: any) => data.nama === selectedBab);
-
-      if (!bab) {
-        throw new Error("Bab tidak ditemukan");
-      }
-
-      const babid = bab.id;
-
-      const subBabResponse = await axios.get(
-        `${API_BASE_URL}/api/datasubbab/${babid}`
-      );
-      const subbab = subBabResponse.data.find(
-        (data: any) => data.nama === selectedSubBab
-      );
-
-      setSelectedSubBabData(subbab || null);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
+    if (roleUser === "Mahasiswa" && statusDataMahasiswa === "succeeded") {
+      return dataMahasiswa.find((data) => data.nim === dataUser?.nim) || null;
     }
-  };
-
-  const getDataDosenPA = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = response.data;
-      setDataDosenPA(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
+    if (roleUser === "Dosen PA" && statusDataDosenPA === "succeeded") {
+      return dataDosenPA.find((data) => data.nip === dataUser?.nip) || null;
     }
-  };
-
-  const getDataKaprodi = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = response.data;
-      setDataKaprodi(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
+    if (roleUser === "Kaprodi" && statusDataKaprodi === "succeeded") {
+      return dataKaprodi.find((data) => data.nip === dataUser?.nip) || null;
     }
-  };
-
-  const getDataMahasiswa = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = response.data;
-      setDataMahasiswa(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
+    return null;
+  }, [
+    roleUser,
+    dataUser,
+    dataMahasiswa,
+    dataDosenPA,
+    dataKaprodi,
+    statusDataMahasiswa,
+    statusDataDosenPA,
+    statusDataKaprodi,
+  ]);
+  useEffect(() => {
+    dispatch(fetchDataBab());
+  }, [dispatch]);
 
   useEffect(() => {
-    if (dataBab && dataBab.length > 0) {
-      setOpenMenu(dataBab[0].nama);
-      getDataSubBabByBab(dataBab[0].nama);
+    if (selectedBabData) {
+      setOpenMenu(selectedBabData.nama);
+      dispatch(fetchDataSubBabByBab(selectedBabData.nama));
     }
-  }, [dataBab]);
+  }, [dispatch, selectedBabData]);
 
-  useEffect(() => {
-    if (dataSubBab && dataSubBab.length > 0) {
-      setSelectedSubBabData(dataSubBab[0]);
-    }
-  }, [dataSubBab]);
+  // useEffect(() => {
+  //   if (dataBab && dataBab.length > 0) {
+  //     setOpenMenu(dataBab[0].nama);
+  //     getDataSubBabByBab(dataBab[0].nama);
+  //   }
+  // }, [dataBab]);
 
-  console.log(dataSubBab);
-  console.log(selectedSubBabData);
+  // useEffect(() => {
+  //   if (dataSubBab && dataSubBab.length > 0) {
+  //     setSelectedSubBabData(dataSubBab[0]);
+  //   }
+  // }, [dataSubBab]);
 
-  useEffect(() => {
-    getDataDosenPA();
-    getDataKaprodi();
-    getDataMahasiswa();
-    getDataBab();
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
-
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken: any = jwtDecode(token);
-        setDataUser(decodedToken);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (dataUser?.role === "Mahasiswa") {
-      setRoleUser("Mahasiswa");
-    } else if (dataUser?.role === "Dosen PA") {
-      setRoleUser("Dosen PA");
-    } else if (dataUser?.role === "Kaprodi") {
-      setRoleUser("Kaprodi");
-    }
-  }, [dataUser, dataDosenPA, dataKaprodi]);
+  // useEffect(() => {
+  //   getDataBab();
+  // }, []);
 
   return (
     <div>
-      <NavbarUser
-        roleUser={roleUser}
-        dataUser={
-          roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data: any) => data.nim === dataUser?.nim) ||
-              {}
-            : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data: any) => data.nip === dataUser?.nip) ||
-                {}
-              : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data: any) => data.nip === dataUser?.nip) ||
-                  {}
-                : {}
-        }
-      />
+      <NavbarUser roleUser={roleUser} dataUser={userData} />
       <div className="flex w-full overflow-y-auto min-h-screen pt-[80px]">
         <div className="flex flex-col w-[40%] md:w-[25%] border md:ml-32 gap-6 pt-10 pb-6 px-8">
           <h1 className="md:text-[18px] font-semibold">Informasi Akademik</h1>
@@ -227,7 +147,7 @@ export default function Home() {
                     className="flex items-center justify-between cursor-pointer"
                     onClick={() => {
                       toggleMenu(data.nama);
-                      getDataSubBabByBab(data.nama);
+                      handleSelectBab(data.nama);
                     }}
                   >
                     <h1 className="font-semibold text-[14px]">{data.nama}</h1>
@@ -253,7 +173,7 @@ export default function Home() {
                         <p
                           key={data.id}
                           onClick={() =>
-                            getDataSubBabBySubBabNama(openMenu, data.nama)
+                            handleSelectSubBab(openMenu, data.nama)
                           }
                           className="mt-2 cursor-pointer"
                         >

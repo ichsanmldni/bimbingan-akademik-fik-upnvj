@@ -14,8 +14,15 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AppDispatch, RootState } from "@/lib/store";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { fetchMahasiswa } from "@/lib/features/mahasiswaSlice";
+import { fetchDosenPA } from "@/lib/features/dosenPASlice";
+import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
 
 export default function Home() {
+  const dispatch = useDispatch<AppDispatch>();
   const [namaLengkap, setNamaLengkap] = useState<string>("");
   const [nim, setNim] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -23,8 +30,6 @@ export default function Home() {
   const [jurusan, setJurusan] = useState<string>("");
   const [ipk, setIpk] = useState<string>("");
   const [roleUser, setRoleUser] = useState<string>("");
-  const [dataDosenPA, setDataDosenPA] = useState<any>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<any>([]); // Adjust type as needed
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
   const [selectedHari, setSelectedHari] = useState<string>("");
   const [selectedJam, setSelectedJam] = useState<string>("");
@@ -60,7 +65,6 @@ export default function Home() {
   >([]);
   const [userDosenPa, setuserDosenPa] = useState<any>(null);
   const [dataMahasiswaUser, setDataMahasiswaUser] = useState<any>(null);
-  const [dataMahasiswa, setDataMahasiswa] = useState<any>([]);
   const [permasalahan, setPermasalahan] = useState("");
   const [selectedIsPermasalahan, setSelectedIsPermasalahan] = useState("");
   const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
@@ -81,16 +85,19 @@ export default function Home() {
       label: "Setelah Perwalian UTS - Sebelum Perwalian UAS",
     },
   ]);
+  const dataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.data
+  );
+  const dataDosenPA = useSelector((state: RootState) => state.dosenPA?.data);
+  console.log(dataMahasiswa);
+  console.log(dataDosenPA);
+  const dataKaprodi = useSelector((state: RootState) => state.kaprodi?.data);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const getDataJadwalDosenPaByDosenPa = async () => {
     try {
-      const dataDosenPa = await axios.get<any>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
-
-      const dosenPa = dataDosenPa.data.find(
+      const dosenPa = dataDosenPA.find(
         (data) => data.nama === userDosenPa?.nama
       );
 
@@ -118,13 +125,12 @@ export default function Home() {
 
   const getDataDosenPaByMahasiswa = async () => {
     try {
-      const dataDosenPa = await axios.get<any>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
-
-      const dosenPa = dataDosenPa.data.find(
+      console.log(dataMahasiswaUser);
+      console.log(dataDosenPA);
+      const dosenPa = dataDosenPA.find(
         (data) => data.id === dataMahasiswaUser?.dosen_pa_id
       );
+      console.log(dosenPa);
 
       if (!dosenPa) {
         console.error("Dosen PA tidak ditemukan");
@@ -140,13 +146,7 @@ export default function Home() {
 
   const getDataMahasiswaByUser = async () => {
     try {
-      const dataMahasiswa = await axios.get<any>(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
-
-      const mahasiswa = dataMahasiswa.data.find(
-        (data) => data.nim === dataUser.nim
-      );
+      const mahasiswa = dataMahasiswa.find((data) => data.nim === dataUser.nim);
 
       if (!mahasiswa) {
         throw new Error("Mahasiswa tidak ditemukan");
@@ -293,14 +293,14 @@ export default function Home() {
 
       const result = await addPengajuanBimbingan(pengajuanBimbinganValue);
 
-      const notificationResponse = await axios.post("/api/sendmessage", {
-        to: "085810676264",
-        body: `Yth. ${dataDosenPA[0].nama},\nAnda memiliki pengajuan bimbingan baru dari mahasiswa (${namaLengkap}) pada ${formattedDate} ${selectedJam}. Mohon untuk memeriksa dan memproses pengajuan tersebut melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas perhatian Anda.`,
-      });
+      // const notificationResponse = await axios.post("/api/sendmessage", {
+      //   to: "085810676264",
+      //   body: `Yth. ${dataDosenPA[0].nama},\nAnda memiliki pengajuan bimbingan baru dari mahasiswa (${namaLengkap}) pada ${formattedDate} ${selectedJam}. Mohon untuk memeriksa dan memproses pengajuan tersebut melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas perhatian Anda.`,
+      // });
 
-      if (!notificationResponse.data.success) {
-        throw new Error("Gagal mengirim notifikasi");
-      }
+      // if (!notificationResponse.data.success) {
+      //   throw new Error("Gagal mengirim notifikasi");
+      // }
 
       toast.success(
         <div className="flex items-center">
@@ -359,58 +359,6 @@ export default function Home() {
           theme: "colored",
         }
       );
-    }
-  };
-
-  const getDataDosenPA = async () => {
-    try {
-      const response = await axios.get<any>(`${API_BASE_URL}/api/datadosenpa`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataDosenPA(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataKaprodi = async () => {
-    try {
-      const response = await axios.get<any[]>(
-        `${API_BASE_URL}/api/datakaprodi`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataKaprodi(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataMahasiswa = async () => {
-    try {
-      const response = await axios.get<any>(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataMahasiswa(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
     }
   };
 
@@ -475,8 +423,11 @@ export default function Home() {
   }, [dataSistemBimbingan]);
 
   useEffect(() => {
+    dispatch(fetchMahasiswa());
+    dispatch(fetchDosenPA());
+    dispatch(fetchKaprodi());
     const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
+    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
 
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
@@ -492,9 +443,6 @@ export default function Home() {
     getDataJenisBimbingan();
     getDataTopikBimbinganPribadi();
     getDataSistemBimbingan();
-    getDataKaprodi();
-    getDataMahasiswa();
-    getDataDosenPA();
   }, []);
 
   useEffect(() => {

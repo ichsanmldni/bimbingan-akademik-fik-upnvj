@@ -169,14 +169,14 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       };
       const result = await addAbsensiBimbingan(absensiBimbinganValue);
 
-      const notificationResponse = await axios.post("/api/sendmessage", {
-        to: "085810676264",
-        body: `Yth Dosen Pembimbing Akademik. ${dataDosenPA[0].nama},\nAda absensi bimbingan baru dari mahasiswa perwalian Anda. Mohon untuk mengecek detail absensi melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas kerja samanya.`,
-      });
+      // const notificationResponse = await axios.post("/api/sendmessage", {
+      //   to: "085810676264",
+      //   body: `Yth Dosen Pembimbing Akademik. ${dataDosenPA[0].nama},\nAda absensi bimbingan baru dari mahasiswa perwalian Anda. Mohon untuk mengecek detail absensi melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas kerja samanya.`,
+      // });
 
-      if (!notificationResponse.data.success) {
-        throw new Error("Gagal mengirim notifikasi");
-      }
+      // if (!notificationResponse.data.success) {
+      //   throw new Error("Gagal mengirim notifikasi");
+      // }
 
       toast.success(
         <div className="flex items-center">

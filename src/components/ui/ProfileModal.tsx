@@ -3,6 +3,17 @@ import dashboardIcon from "@/assets/images/dashboard.png";
 import logoutIcon from "@/assets/images/logout.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { resetState as resetUser } from "@/lib/features/authSlice";
+import { resetState as resetBab } from "@/lib/features/babSlice";
+import { resetState as resetDosenPA } from "@/lib/features/dosenPASlice";
+import { resetState as resetKaprodi } from "@/lib/features/kaprodiSlice";
+import { resetState as resetSelectedSubMenu } from "@/lib/features/selectedSubMenuSlice";
+import { resetState as resetPesanSiaran } from "@/lib/features/pesanSiaranSlice";
+import { resetState as resetPesanPribadi } from "@/lib/features/pesanPribadiSlice";
+import { resetState as resetNotification } from "@/lib/features/notificationSlice";
+import { resetState as resetMahasiswa } from "@/lib/features/mahasiswaSlice";
+import { resetState as resetAuth } from "@/lib/features/authSlice";
+import { useDispatch } from "react-redux";
 
 interface ModalProps {
   onClose: () => void;
@@ -17,13 +28,24 @@ const ProfileModal: React.FC<ModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const dashboardHandle = () => {
     router.push("/dashboard");
   };
 
   const logoutHandle = () => {
-    document.cookie = "authToken=; max-age=0; path=/;";
+    document.cookie = "authBMFK=; max-age=0; path=/;";
+    dispatch(resetUser());
+    dispatch(resetBab());
+    dispatch(resetDosenPA());
+    dispatch(resetKaprodi());
+    dispatch(resetAuth());
+    dispatch(resetSelectedSubMenu());
+    dispatch(resetPesanSiaran());
+    dispatch(resetPesanPribadi());
+    dispatch(resetNotification());
+    dispatch(resetMahasiswa());
     window.location.reload();
   };
 

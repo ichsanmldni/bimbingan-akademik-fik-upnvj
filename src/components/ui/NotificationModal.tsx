@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 const NotificationModal: React.FC<any> = ({
-  refreshData,
   dataUser,
   onClose,
   className,
@@ -71,7 +70,6 @@ const NotificationModal: React.FC<any> = ({
           patchReadNotififikasiMahasiswa(data);
         }
       });
-      refreshData(dataUser.id);
     }
     if (roleUser === "Dosen PA") {
       dataNotifikasi.map((data) => {
@@ -79,14 +77,12 @@ const NotificationModal: React.FC<any> = ({
           patchReadNotififikasiDosenPA(data);
         }
       });
-      refreshData(dataUser.id);
     } else if (roleUser === "Kaprodi") {
       dataNotifikasi.map((data) => {
         if (data.read === false) {
           patchReadNotififikasiKaprodi(data);
         }
       });
-      refreshData(dataUser.id);
     }
   };
 
@@ -108,9 +104,9 @@ const NotificationModal: React.FC<any> = ({
     if (data.isi === "Pengajuan bimbinganmu berhasil diterima!") {
       submenu = "Riwayat%20Pengajuan%20Bimbingan";
     } else if (data.isi.startsWith("Pengajuan bimbinganmu direschedule")) {
-      submenu = "Pengajuan%20Bimbingan%20Akademik%20Mahasiswa";
+      submenu = "Riwayat%20Pengajuan%20Bimbingan";
     } else if (data.isi.startsWith("Jadwal bimbingan ")) {
-      submenu = "Pengajuan%20Bimbingan%20Akademik%20Mahasiswa";
+      submenu = "Riwayat%20Pengajuan%20Bimbingan";
     } else if (data.isi.startsWith("Ada pengajuan bimbingan baru")) {
       submenu = "Pengajuan%20Bimbingan%20Akademik%20Mahasiswa";
     } else if (data.isi.startsWith("Ada absensi bimbingan baru dari")) {

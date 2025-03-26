@@ -865,14 +865,14 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       const result = await patchPengajuanBimbingan(submitRescheduleValue);
 
-      const notificationResponse = await axios.post("/api/sendmessage", {
-        to: "085810676264",
-        body: `Yth Mahasiswa,\n\nPengajuan bimbingan Anda telah direschedule oleh Dosen Pembimbing Akademik (${dataDosenPA[0].nama}). Jadwal baru telah ditetapkan oleh Dosen Pembimbing Akademik Anda, silahkan konfirmasi ulang.\n\nMohon untuk mengecek detailnya melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\n\nTerima kasih atas pengertiannya.`,
-      });
+      // const notificationResponse = await axios.post("/api/sendmessage", {
+      //   to: "085810676264",
+      //   body: `Yth Mahasiswa,\n\nPengajuan bimbingan Anda telah direschedule oleh Dosen Pembimbing Akademik (${dataDosenPA[0].nama}). Jadwal baru telah ditetapkan oleh Dosen Pembimbing Akademik Anda, silahkan konfirmasi ulang.\n\nMohon untuk mengecek detailnya melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\n\nTerima kasih atas pengertiannya.`,
+      // });
 
-      if (!notificationResponse.data.success) {
-        throw new Error("Gagal mengirim notifikasi");
-      }
+      // if (!notificationResponse.data.success) {
+      //   throw new Error("Gagal mengirim notifikasi");
+      // }
 
       toast.success(
         <div className="flex items-center">
@@ -931,14 +931,14 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const result = await patchPengajuanBimbingan(submitDiterimaValue);
       await addBimbingan(id, permasalahan);
 
-      const notificationResponse = await axios.post("/api/sendmessage", {
-        to: "085810676264",
-        body: `Yth Mahasiswa,\n\nPengajuan bimbingan Anda telah diterima oleh Dosen Pembimbing Akademik (${dataDosenPA[0].nama}).\n\nSilakan cek jadwal bimbingan melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\n\nTerima kasih telah mengajukan bimbingan.`,
-      });
+      // const notificationResponse = await axios.post("/api/sendmessage", {
+      //   to: "085810676264",
+      //   body: `Yth Mahasiswa,\n\nPengajuan bimbingan Anda telah diterima oleh Dosen Pembimbing Akademik (${dataDosenPA[0].nama}).\n\nSilakan cek jadwal bimbingan melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\n\nTerima kasih telah mengajukan bimbingan.`,
+      // });
 
-      if (!notificationResponse.data.success) {
-        throw new Error("Gagal mengirim notifikasi");
-      }
+      // if (!notificationResponse.data.success) {
+      //   throw new Error("Gagal mengirim notifikasi");
+      // }
       toast.success(
         <div className="flex items-center">
           <span>{result.message || "Penerimaan bimbingan berhasil!"}</span>
@@ -2771,12 +2771,18 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
                         {/* Status Reschedule */}
                         {data.status === "Reschedule" && (
-                          <button
-                            className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
-                            disabled
-                          >
-                            Reschedule
-                          </button>
+                          <div className="flex flex-col w-full gap-4">
+                            <button
+                              className="w-full bg-red-500 text-white rounded-md py-2 font-medium text-[14px] cursor-not-allowed"
+                              disabled
+                            >
+                              Reschedule
+                            </button>
+                            <p className="font-medium text-sm">
+                              *Status Reschedule oleh mahasiswa :{" "}
+                              {data.status_reschedule}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>

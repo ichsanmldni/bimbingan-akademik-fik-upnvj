@@ -19,10 +19,10 @@ import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import DonutChart from "@/components/ui/DonutChart";
 import TabelStatistikLaporan from "@/components/ui/TabelStatistikLaporan";
 import { Provider } from "react-redux";
-import store from "@/components/store/store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PDFModal from "@/components/ui/PDFModal";
+import StoreProvider from "@/app/StoreProvider";
 
 const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState<string>("");
@@ -356,14 +356,14 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       const result = await patchLaporanBimbingan(laporanBimbinganValue);
 
-      const notificationResponse = await axios.post("/api/sendmessage", {
-        to: "085810676264",
-        body: `Yth. ${dataDosenPA[0].nama},\nLaporan bimbingan yang Anda ajukan telah diberikan feedback oleh Kaprodi pada ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}. Silakan cek feedback tersebut melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas kerja samanya.`,
-      });
+      // const notificationResponse = await axios.post("/api/sendmessage", {
+      //   to: "085810676264",
+      //   body: `Yth. ${dataDosenPA[0].nama},\nLaporan bimbingan yang Anda ajukan telah diberikan feedback oleh Kaprodi pada ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}. Silakan cek feedback tersebut melalui tautan berikut:\nhttps://bimbingan-konseling-fikupnvj.vercel.app/\nTerima kasih atas kerja samanya.`,
+      // });
 
-      if (!notificationResponse.data.success) {
-        throw new Error("Gagal mengirim notifikasi");
-      }
+      // if (!notificationResponse.data.success) {
+      //   throw new Error("Gagal mengirim notifikasi");
+      // }
 
       toast.success(
         <div className="flex items-center">
@@ -1622,7 +1622,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   }, [dataLaporanBimbingan, dataBimbingan]);
 
   return (
-    <Provider store={store}>
+    <StoreProvider>
       {selectedSubMenuDashboard === "Profile Kaprodi" && (
         <div className="md:w-[75%] p-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
           <div className="border px-6 md:px-[70px] py-6 md:py-[30px] rounded-lg">
@@ -2361,7 +2361,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
           <ToastContainer />
         </div>
       )}
-    </Provider>
+    </StoreProvider>
   );
 };
 

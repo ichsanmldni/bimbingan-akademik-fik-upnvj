@@ -24,7 +24,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
   }, [selectedRole]);
 
   useEffect(() => {
-    document.cookie = "authToken=; max-age=0; path=/;";
+    document.cookie = "authBMFK=; max-age=0; path=/;";
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -60,7 +60,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
       });
 
       if (response.status === 200) {
-        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("authBMFK", response.data.token);
         toast.success(response?.data.message || "Login berhasil!", {
           position: "bottom-right",
           autoClose: 3000,
@@ -117,11 +117,11 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
           onChange={(e) => setSelectedRole(e.target.value)}
           value={selectedRole}
           placeholder="Pilih Role"
-          className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${isAdmin && "hidden"}`}
+          className={`px-3 py-2 text-[15px] border rounded-lg appearance-none focus:outline-none w-full ${isAdmin && "hidden"}`}
         />
         <input
           type="text"
-          className={`px-3 py-2 text-[15px] mt-4 border rounded-lg ${isAdmin || selectedRole !== "" ? "hidden" : ""}`}
+          className={`px-3 py-2 text-[15px] mt-4 border focus:outline-none rounded-lg ${isAdmin || selectedRole !== "" ? "hidden" : ""}`}
           placeholder="NIM / NIP"
           value={nim}
           disabled={!isAdmin && selectedRole === ""}
@@ -129,7 +129,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         />
         <input
           type="text"
-          className={`px-3 py-2 text-[15px] border rounded-lg ${!isAdmin && "hidden"}`}
+          className={`px-3 py-2 text-[15px] border focus:outline-none rounded-lg ${!isAdmin && "hidden"}`}
           placeholder="Email"
           value={email}
           disabled={!isAdmin && selectedRole === ""}
@@ -137,7 +137,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         />
         <input
           type="text"
-          className={`px-3 py-2 text-[15px] mt-4 border rounded-lg ${selectedRole !== "Mahasiswa" && "hidden"}`}
+          className={`px-3 py-2 text-[15px] mt-4 border focus:outline-none rounded-lg ${selectedRole !== "Mahasiswa" && "hidden"}`}
           placeholder="NIM"
           value={nim}
           disabled={!isAdmin && selectedRole === ""}
@@ -145,7 +145,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         />
         <input
           type="text"
-          className={`px-3 py-2 text-[15px] mt-4 border rounded-lg ${selectedRole !== "Dosen PA" && selectedRole !== "Kaprodi" && "hidden"}`}
+          className={`px-3 py-2 text-[15px] mt-4 focus:outline-none border rounded-lg ${selectedRole !== "Dosen PA" && selectedRole !== "Kaprodi" && "hidden"}`}
           placeholder="NIP"
           value={nip}
           disabled={!isAdmin && selectedRole === ""}
@@ -153,16 +153,33 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         />
         <PasswordInput
           value={password}
-          className="px-3 py-2 mt-4 text-[15px] border rounded-lg w-full appearance-none"
+          className="px-3 py-2 mt-4 text-[15px] focus:outline-none border rounded-lg w-full appearance-none"
           onChange={(e) => setPassword(e.target.value)}
           disabled={!isAdmin && selectedRole === ""}
         />
-        <button
-          type="submit"
-          className="p-2 mb-4 rounded-lg text-[14px] bg-orange-500 text-white mt-4"
-        >
-          Masuk
-        </button>
+        {selectedRole === "Dosen PA" || selectedRole === "Kaprodi" ? (
+          <div className="flex flex-col">
+            <Link
+              href="lupa-password"
+              className="text-[14px] text-blue-500 hover:underline cursor-pointer text-end my-3"
+            >
+              Lupa Kata Sandi?
+            </Link>
+            <button
+              type="submit"
+              className="p-2 mb-4 rounded-lg text-[14px] bg-orange-500 text-white"
+            >
+              Masuk
+            </button>
+          </div>
+        ) : (
+          <button
+            type="submit"
+            className="p-2 mb-4 rounded-lg text-[14px] hover:bg-orange-600 mt-4 bg-orange-500 text-white"
+          >
+            Masuk
+          </button>
+        )}
         <ToastContainer />
       </form>
     </div>

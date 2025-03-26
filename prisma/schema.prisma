@@ -89,6 +89,8 @@ model dosenpa {
   nama                 String
   profile_image        String?
   hp                   String
+  reset_token          String?
+  reset_token_expires  DateTime?
   chatpribadi          chatpribadi[]
   jadwaldosenpa        jadwaldosenpa[]
   laporanbimbingan     laporanbimbingan[]
@@ -107,6 +109,8 @@ model kaprodi {
   profile_image   String?
   kaprodi_jurusan String?
   hp              String
+  reset_token          String?
+  reset_token_expires  DateTime?
   laporanbimbingan   laporanbimbingan[]
   notifikasikaprodi  notifikasikaprodi[]
 }

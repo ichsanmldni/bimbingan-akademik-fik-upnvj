@@ -254,7 +254,7 @@ export default function ChatDosenPA() {
 
   useEffect(() => {
     const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
+    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
