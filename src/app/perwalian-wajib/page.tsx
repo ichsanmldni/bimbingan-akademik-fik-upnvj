@@ -554,9 +554,9 @@ export default function Home() {
           roleUser === "Mahasiswa"
             ? dataMahasiswa.find((data) => data.nim === dataUser.nim)
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.nip === dataUser.nip)
+              ? dataDosenPA.find((data) => data.email === dataUser.email)
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.nip === dataUser.nip)
+                ? dataKaprodi.find((data) => data.email === dataUser.email)
                 : undefined
         }
       />

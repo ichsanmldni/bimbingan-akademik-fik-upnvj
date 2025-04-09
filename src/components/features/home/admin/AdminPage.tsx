@@ -9,6 +9,7 @@ import TrashButton from "@/components/ui/TrashButton";
 import ManageParameter from "./ManageParameter";
 import ManageInformasiAkademik from "./ManageInformasiAkademik";
 import ManageCustomContexChatbot from "./ManageCustomContextChatbot.";
+import ManageDataDosenTetap from "./ManageDataDosenTetap";
 
 interface AdminPageProps {
   activeNavbar: string;
@@ -27,6 +28,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ activeNavbar }) => {
       {activeNavbar === "Manage Custom Context Chatbot" && (
         <ManageCustomContexChatbot />
       )}
+      {activeNavbar === "Manage Data Dosen Tetap" && <ManageDataDosenTetap />}
     </div>
   );
 };

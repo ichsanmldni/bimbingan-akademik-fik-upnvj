@@ -89,10 +89,10 @@ export default function Home() {
       return dataMahasiswa.find((data) => data.nim === dataUser?.nim) || null;
     }
     if (roleUser === "Dosen PA" && statusDataDosenPA === "succeeded") {
-      return dataDosenPA.find((data) => data.nip === dataUser?.nip) || null;
+      return dataDosenPA.find((data) => data.email === dataUser?.email) || null;
     }
     if (roleUser === "Kaprodi" && statusDataKaprodi === "succeeded") {
-      return dataKaprodi.find((data) => data.nip === dataUser?.nip) || null;
+      return dataKaprodi.find((data) => data.email === dataUser?.email) || null;
     }
     return null;
   }, [

@@ -231,7 +231,6 @@ export default function Home() {
           nama: dosen.nama,
           email: dosen.email,
           hp: dosen.hp,
-          nip: dosen.nip,
         })),
         jadwal_kosong_semua_dosen_pa: dataJadwalDosenPA.map((jadwal) => ({
           dosen_id: jadwal.dosen_pa_id,
@@ -531,9 +530,9 @@ ${dbCustomContext}
           roleUser === "Mahasiswa"
             ? dataMahasiswa.find((data) => data.nim === dataUser?.nim)
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.nip === dataUser?.nip)
+              ? dataDosenPA.find((data) => data.email === dataUser?.email)
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.nip === dataUser?.nip)
+                ? dataKaprodi.find((data) => data.email === dataUser?.email)
                 : null
         }
       />

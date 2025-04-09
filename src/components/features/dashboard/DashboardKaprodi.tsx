@@ -27,7 +27,7 @@ import StoreProvider from "@/app/StoreProvider";
 const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState<string>("");
   const [emailKaprodi, setEmailKaprodi] = useState<string>("");
-  const [nip, setNip] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [noTelpKaprodi, setNoTelpKaprodi] = useState<string>("");
   const [userProfile, setUserProfile] = useState(null);
   const [selectedDataLaporanBimbingan, setSelectedDataLaporanBimbingan] =
@@ -195,25 +195,24 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       let jurusanValue = {
         nama: namaLengkapKaprodi,
         email: emailKaprodi,
-        nip,
         hp: noTelpKaprodi,
         profile_image: !imagePreview ? null : imagePreview,
       };
 
       await patchKaprodi(jurusanValue);
-      getDataKaprodiByNip();
+      getDataKaprodiByEmail();
       setImagePreview(null);
     } catch (error) {
       console.error("Failed to save the updated order.");
     }
   };
 
-  const getDataKaprodiByNip = async () => {
+  const getDataKaprodiByEmail = async () => {
     try {
       const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       const kaprodi = dataKaprodi.data.find(
-        (data: any) => data.nip === dataUser.nip
+        (data: any) => data.email === dataUser.email
       );
 
       if (!kaprodi) {
@@ -224,7 +223,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       setUserProfile({
         nama: kaprodi.nama,
         email: kaprodi.email,
-        nip: kaprodi.nip,
         hp: kaprodi.hp,
       });
 
@@ -232,7 +230,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setNamaLengkapKaprodi(kaprodi.nama);
       setEmailKaprodi(kaprodi.email);
-      setNip(kaprodi.nip);
+      setEmail(kaprodi.email);
       setNoTelpKaprodi(kaprodi.hp);
     } catch (error) {
       console.error("Error:", error);
@@ -240,12 +238,12 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   };
 
-  const getDataKaprodiByKaprodiNip = async () => {
+  const getDataKaprodiByKaprodiEmail = async () => {
     try {
       const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       const kaprodi = dataKaprodi.data.find(
-        (data: any) => data.nip == dataUser.nip
+        (data: any) => data.email == dataUser.email
       );
 
       if (!kaprodi) {
@@ -265,7 +263,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       const dataKaprodi = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
 
       const kaprodi = dataKaprodi.data.find(
-        (data: any) => data.nip === dataUser.nip
+        (data: any) => data.email === dataUser.email
       );
 
       if (!kaprodi) {
@@ -293,7 +291,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       const dosenPA = dataDosenPA.data.find(
-        (data: any) => data.nip === selectedDataDosenPA.nip
+        (data: any) => data.email === selectedDataDosenPA.email
       );
 
       if (!dosenPA) {
@@ -1523,7 +1521,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
   useEffect(() => {
     setImagePreview(null);
-    getDataKaprodiByNip();
+    getDataKaprodiByEmail();
     setIsDetailLaporanKaprodiClicked(false);
     setSelectedTahunAjaran("Semua Tahun Ajaran");
     setSelectedSemester("Semua Semester");
@@ -1531,16 +1529,16 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
-    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.nip) {
-      getDataKaprodiByNip();
-      getDataKaprodiByKaprodiNip();
+    if (dataUser && Object.keys(dataUser).length > 0 && dataUser.email) {
+      getDataKaprodiByEmail();
+      getDataKaprodiByKaprodiEmail();
     }
   }, [dataUser]);
 
   useEffect(() => {
     if (
       selectedDataDosenPA &&
-      selectedDataDosenPA.nip &&
+      selectedDataDosenPA.email &&
       selectedDataDosenPA.id
     ) {
       getDataBimbinganByDosenPaId();
@@ -1563,11 +1561,11 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       const isDataChanged =
         userProfile.nama !== namaLengkapKaprodi ||
         userProfile.email !== emailKaprodi ||
-        userProfile.nip !== nip ||
+        userProfile.email !== email ||
         userProfile.hp !== noTelpKaprodi;
       setIsDataChanged(isDataChanged);
     }
-  }, [userProfile, namaLengkapKaprodi, emailKaprodi, nip, noTelpKaprodi]);
+  }, [userProfile, namaLengkapKaprodi, emailKaprodi, email, noTelpKaprodi]);
 
   useEffect(() => {
     getDataDosenPA();
@@ -1689,16 +1687,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                   setEmailKaprodi(e.target.value);
                 }}
                 value={emailKaprodi}
-                className="px-3 py-2 text-[15px] border rounded-lg"
-              />
-              <InputField
-                disabled
-                type="text"
-                placeholder={nip === "" ? "NIP" : nip}
-                onChange={(e) => {
-                  setNip(e.target.value);
-                }}
-                value={nip}
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
@@ -1901,7 +1889,9 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                     />
                     <div className="font-medium mt-2">
                       <p className="self-center">{selectedDataDosenPA?.nama}</p>
-                      <p className="self-center">{selectedDataDosenPA?.nip}</p>
+                      <p className="self-center">
+                        {selectedDataDosenPA?.email}
+                      </p>
                       <p className="self-center">
                         {selectedDataDosenPA?.email}
                       </p>

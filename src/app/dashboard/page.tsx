@@ -135,11 +135,13 @@ const Dashboard = () => {
             ? dataMahasiswa.find((data: any) => data.nim === dataUser?.nim) ||
               {}
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data: any) => data.nip === dataUser?.nip) ||
-                {}
+              ? dataDosenPA.find(
+                  (data: any) => data.email === dataUser?.email
+                ) || {}
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data: any) => data.nip === dataUser?.nip) ||
-                  {}
+                ? dataKaprodi.find(
+                    (data: any) => data.email === dataUser?.email
+                  ) || {}
                 : {}
         }
       />

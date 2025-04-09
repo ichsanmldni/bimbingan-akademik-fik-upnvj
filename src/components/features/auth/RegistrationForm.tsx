@@ -14,6 +14,13 @@ interface DosenPA {
     nama_lengkap: string;
   };
 }
+interface DosenTetap {
+  id: number;
+  nama_lengkap: string;
+  jurusan: string;
+  email: string;
+  order: number;
+}
 
 interface Jurusan {
   id: number;
@@ -28,101 +35,14 @@ interface Peminatan {
 }
 
 const RegistrationForm = () => {
-  const [namaLengkap, setNamaLengkap] = useState<string>("");
+  const [selectedNamaLengkapDosen, setSelectedNamaLengkapDosen] =
+    useState<string>("");
+  const [selectedDataDosen, setSelectedDataDosen] = useState<DosenTetap>(null);
   const [email, setEmail] = useState<string>("");
-  const [nim, setNim] = useState<string>("");
-  const [nip, setNip] = useState<string>("");
-  const [noWa, setNoWa] = useState<string>("");
-  const [dataDosenPA, setDataDosenPA] = useState<DosenPA[]>([]);
-  const [dataJurusan, setDataJurusan] = useState<Jurusan[]>([]);
-  const [dataPeminatan, setDataPeminatan] = useState<Peminatan[]>([]);
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [selectedDosen, setSelectedDosen] = useState<string>("");
-  const [selectedJurusan, setSelectedJurusan] = useState<string>("");
-  const [selectedPeminatan, setSelectedPeminatan] = useState<string>("");
+  const [dataDosenTetap, setDataDosenTetap] = useState<DosenTetap[]>([]);
   const [selectedRole, setSelectedRole] = useState<string>("");
-  const [optionsDosenPA, setOptionsDosenPA] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [optionsJurusan, setOptionsJurusan] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [optionsPeminatan, setOptionsPeminatan] = useState<
-    { value: string; label: string }[]
-  >([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
-
-  const getDataJurusan = async () => {
-    try {
-      const response = await axios.post<Jurusan[]>(
-        `${API_BASE_URL}/api/datajurusan`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      const sortedDataJurusan = data.sort((a, b) => a.order - b.order);
-      setDataJurusan(sortedDataJurusan);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataPeminatanByJurusan = async (selectedJurusan: string) => {
-    try {
-      const dataJurusan = await axios.post<Jurusan[]>(
-        `${API_BASE_URL}/api/datajurusan`
-      );
-
-      const jurusan = dataJurusan.data.find(
-        (data) => data.jurusan === selectedJurusan
-      );
-
-      if (!jurusan) {
-        throw new Error("Jurusan tidak ditemukan");
-      }
-
-      const jurusanid = jurusan.id;
-
-      const response = await axios.get<Peminatan[]>(
-        `${API_BASE_URL}/api/datapeminatan/${jurusanid}`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      const sortedDataPeminatan = data.sort((a, b) => a.order - b.order);
-      setDataPeminatan(sortedDataPeminatan);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataDosenPA = async () => {
-    try {
-      const response = await axios.get<DosenPA[]>(
-        `${API_BASE_URL}/api/datadosenpa`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataDosenPA(data);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
 
   const registerUser = async (userData: any) => {
     try {
@@ -139,35 +59,12 @@ const RegistrationForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (confirmPassword !== password) {
-      alert("Konfirmasi password tidak cocok.");
-      return;
-    }
-
     try {
       let userData: any = {
         role: selectedRole,
         email,
-        password,
-        no_whatsapp: noWa,
-        nama_lengkap: namaLengkap,
-        nama_dosen_PA: selectedDosen,
+        nama_lengkap: selectedNamaLengkapDosen,
       };
-
-      // Tambahkan data spesifik berdasarkan role
-      if (selectedRole === "Mahasiswa") {
-        userData = {
-          ...userData,
-          nim,
-          peminatan: selectedPeminatan,
-          jurusan: selectedJurusan,
-        };
-      } else if (selectedRole === "Dosen") {
-        userData = {
-          ...userData,
-          nip,
-        };
-      }
 
       // Panggil fungsi registerUser dengan data yang sudah disesuaikan
       const result = await registerUser(userData);
@@ -177,71 +74,62 @@ const RegistrationForm = () => {
       console.error("Registration error:", (error as Error).message);
     }
   };
+  const getDataDosenTetap = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/datadosentetap`);
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+
+      setDataDosenTetap(data);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+  const getDataDosenTetapByNamaDosen = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/datadosentetap`);
+
+      if (response.status !== 200) {
+        throw new Error("Gagal mengambil data");
+      }
+
+      const data = await response.data;
+
+      const dataDosen = data.find(
+        (data) => data.nama_lengkap === selectedNamaLengkapDosen
+      );
+      console.log(dataDosen);
+
+      setSelectedDataDosen(dataDosen);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    getDataDosenTetapByNamaDosen();
+  }, [selectedNamaLengkapDosen]);
 
   useEffect(() => {
     document.cookie = "authBMFK=; max-age=0; path=/;";
-    getDataDosenPA();
-    getDataJurusan();
+    getDataDosenTetap();
   }, []);
 
   useEffect(() => {
-    setOptionsPeminatan([]);
-    if (selectedJurusan) {
-      getDataPeminatanByJurusan(selectedJurusan);
-    }
-  }, [selectedJurusan]);
-
-  useEffect(() => {
-    if (dataDosenPA.length > 0) {
-      const formattedOptions = dataDosenPA.map((data) => {
-        return {
-          value: data.dosen.nama_lengkap,
-          label: data.dosen.nama_lengkap,
-        };
-      });
-
-      setOptionsDosenPA(formattedOptions);
-    }
-  }, [dataDosenPA]);
-
-  useEffect(() => {
-    if (dataJurusan.length > 0) {
-      const formattedOptions = dataJurusan.map((data) => {
-        return {
-          value: data.jurusan,
-          label: data.jurusan,
-        };
-      });
-
-      setOptionsJurusan(formattedOptions);
-    }
-  }, [dataJurusan]);
-
-  useEffect(() => {
-    if (dataPeminatan.length > 0) {
-      const formattedOptions = dataPeminatan.map((data) => {
-        return {
-          value: data.peminatan,
-          label: data.peminatan,
-        };
-      });
-
-      setOptionsPeminatan(formattedOptions);
-    }
-  }, [dataPeminatan]);
-
-  useEffect(() => {
     setEmail("");
-    setNoWa("");
-    setNamaLengkap("");
-    setSelectedDosen("");
-    setNim("");
-    setNip("");
-    setSelectedPeminatan("");
-    setSelectedJurusan("");
-    setPassword("");
-    setConfirmPassword("");
+    setSelectedNamaLengkapDosen("");
   }, [selectedRole]);
+
+  const isValidEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
 
   return (
     <div className="border rounded-lg w-1/2 self-center">
@@ -255,93 +143,49 @@ const RegistrationForm = () => {
         <div className="pr-8 flex flex-col overflow-y-auto max-h-[200px]">
           <SelectField
             options={[
-              { value: "Mahasiswa", label: "Mahasiswa" },
-              { value: "Dosen", label: "Dosen" },
+              { value: "Dosen PA", label: "Dosen PA" },
+              { value: "Kaprodi", label: "Kaprodi" },
             ]}
             onChange={(e) => setSelectedRole(e.target.value)}
             value={selectedRole}
             placeholder="Pilih Role"
-            className={`px-3 py-2 mt-4 text-[15px] border rounded-lg appearance-none w-full`}
+            className={`px-3 py-2 mt-4 text-[15px] border focus:outline-none rounded-lg appearance-none w-full`}
           />
-          <InputField
-            type="text"
-            placeholder="Nama Lengkap"
-            onChange={(e) => setNamaLengkap(e.target.value)}
-            value={namaLengkap}
-            disabled={selectedRole === ""}
-            className="px-3 py-2 mt-4 text-[15px] border rounded-lg"
+          <SelectField
+            options={dataDosenTetap.map((dosen) => ({
+              value: dosen.nama_lengkap, // atau sesuaikan dengan key nama lengkapnya
+              label: dosen.nama_lengkap,
+            }))}
+            onChange={(e) => setSelectedNamaLengkapDosen(e.target.value)}
+            value={selectedNamaLengkapDosen}
+            placeholder="Nama Dosen"
+            className="px-3 py-2 mt-4 text-[15px] border focus:outline-none rounded-lg appearance-none w-full"
           />
           <InputField
             type="text"
             placeholder="Email"
             onChange={(e) => setEmail(e.target.value)}
             value={email}
-            disabled={selectedRole === ""}
-            className="px-3 py-2 mt-4 text-[15px] border rounded-lg"
+            disabled={selectedRole === "" || selectedNamaLengkapDosen === ""}
+            className="px-3 py-2 mt-4 text-[15px] focus:outline-none border rounded-lg"
           />
-          <InputField
-            type="text"
-            placeholder="NIM"
-            onChange={(e) => setNim(e.target.value)}
-            value={nim}
-            disabled={selectedRole === ""}
-            className={`${selectedRole === "Mahasiswa" ? "block" : "hidden"} px-3 py-2 mt-4 text-[15px] border rounded-lg`}
-          />
-          <InputField
-            type="text"
-            placeholder="NIP"
-            onChange={(e) => setNip(e.target.value)}
-            value={nip}
-            disabled={selectedRole === ""}
-            className={`${selectedRole === "Dosen" ? "block" : "hidden"} px-3 py-2 mt-4 text-[15px] border rounded-lg`}
-          />
-          <InputField
-            type="text"
-            placeholder="No Whatsapp"
-            onChange={(e) => setNoWa(e.target.value)}
-            value={noWa}
-            disabled={selectedRole === ""}
-            className="px-3 py-2 mt-4 text-[15px] border rounded-lg"
-          />
-          <SelectField
-            options={optionsJurusan}
-            onChange={(e) => setSelectedJurusan(e.target.value)}
-            value={selectedJurusan}
-            placeholder="Pilih Jurusan"
-            className={`${selectedRole === "Mahasiswa" ? "block" : "hidden"} px-3 py-2 mt-4 text-[15px] border rounded-lg appearance-none w-full`}
-          />
-          <SelectField
-            options={optionsPeminatan}
-            onChange={(e) => setSelectedPeminatan(e.target.value)}
-            value={selectedPeminatan}
-            placeholder="Pilih Peminatan"
-            disabled={selectedJurusan === ""}
-            className={`${selectedRole === "Mahasiswa" ? "block" : "hidden"} px-3 py-2 mt-4 text-[15px] border rounded-lg appearance-none w-full`}
-          />
-          <SelectField
-            options={optionsDosenPA}
-            onChange={(e) => setSelectedDosen(e.target.value)}
-            value={selectedDosen}
-            placeholder="Pilih Dosen Pembimbing Akademik"
-            className={`${selectedRole === "Mahasiswa" ? "block" : "hidden"} px-3 py-2 mt-4 text-[15px] border rounded-lg appearance-none w-full`}
-          />
-          <PasswordInput
-            onChange={(e) => setPassword(e.target.value)}
-            className="px-3 py-2 text-[15px] mt-4 border rounded-lg w-full"
-            disabled={selectedRole === ""}
-            value={password}
-          />
-          <PasswordInput
-            className="px-3 py-2 text-[15px] mt-4 border rounded-lg w-full"
-            disabled={selectedRole === ""}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Konfirmasi Kata Sandi"
-            value={confirmPassword}
-          />
+          {isValidEmail(email) && email !== selectedDataDosen?.email && (
+            <p className="mt-2 ml-2 text-sm text-red-500">
+              *email tidak sesuai dengan data dosen.
+            </p>
+          )}
         </div>
         <button
           type="submit"
-          className="p-2 mt-2 rounded-lg text-[14px] bg-orange-500 text-white"
+          className="p-2 mt-2 rounded-lg text-[14px] text-white 
+             bg-orange-500 disabled:bg-orange-300 
+             disabled:cursor-not-allowed disabled:opacity-70"
+          disabled={
+            selectedRole === "" ||
+            selectedNamaLengkapDosen === "" ||
+            !isValidEmail(email) ||
+            email !== selectedDataDosen?.email
+          }
         >
           Daftar
         </button>

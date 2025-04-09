@@ -1,10 +1,10 @@
 "use client";
 
-import "../../globals.css";
+import "../globals.css";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Provider } from "react-redux";
-import StoreProvider from "../../StoreProvider";
-import { metadata } from "../../metadata";
+import { metadata } from "../metadata";
+import StoreProvider from "../StoreProvider";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -25,7 +25,9 @@ export default function RootLayout({
         <link rel="manifest" href={metadata.manifest} />
         <link rel="icon" href="/bimafiklogo.png" />
       </head>
-      <StoreProvider>{children}</StoreProvider>
+      <body>
+        <StoreProvider>{children}</StoreProvider>
+      </body>
     </html>
   );
 }

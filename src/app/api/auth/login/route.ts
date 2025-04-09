@@ -43,18 +43,18 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const body: any = await req.json();
 
-    const { nim, nip, email, password, role } = body;
+    const { nim, email, password, role } = body;
 
     if (
       !role ||
       !password ||
       (role === "Mahasiswa" && !nim) ||
-      (role === "Dosen PA" && !nip) ||
-      (role === "Kaprodi" && !nip)
+      (role === "Dosen PA" && !email) ||
+      (role === "Kaprodi" && !email)
     ) {
       return new Response(
         JSON.stringify({
-          message: "Role, NIM/NIP, dan Password tidak boleh kosong!",
+          message: "Role, NIM/Email, dan Password tidak boleh kosong!",
         }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
@@ -196,7 +196,7 @@ export async function POST(req: Request): Promise<Response> {
         }
       }
     } else if (role === "Dosen PA") {
-      user = await prisma.dosenpa.findUnique({ where: { nip } });
+      user = await prisma.dosenpa.findUnique({ where: { email } });
 
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
@@ -208,7 +208,7 @@ export async function POST(req: Request): Promise<Response> {
 
       if (!user) {
         return new Response(
-          JSON.stringify({ message: "Masukkan NIP dengan benar!" }),
+          JSON.stringify({ message: "Masukkan Email dengan benar!" }),
           { status: 404, headers: { "Content-Type": "application/json" } }
         );
       }
@@ -219,7 +219,6 @@ export async function POST(req: Request): Promise<Response> {
           email: user.email,
           hp: user.hp,
           nama: user.nama,
-          nip: user.nip,
         },
         SECRET_KEY,
         { expiresIn: EXPIRED_TIME }
@@ -242,11 +241,11 @@ export async function POST(req: Request): Promise<Response> {
         }
       );
     } else if (role === "Kaprodi") {
-      user = await prisma.kaprodi.findUnique({ where: { nip } });
+      user = await prisma.kaprodi.findUnique({ where: { email } });
 
       if (!user) {
         return new Response(
-          JSON.stringify({ message: "Masukkan NIP dengan benar!" }),
+          JSON.stringify({ message: "Masukkan Email dengan benar!" }),
           { status: 404, headers: { "Content-Type": "application/json" } }
         );
       }
@@ -293,12 +292,12 @@ export async function POST(req: Request): Promise<Response> {
           (data: any) => data.nama_fakultas === "Fakultas Ilmu Komputer"
         );
         const matchingJurusan = filteredJurusan.find(
-          (data: any) => data.nidn_dosen_ketua_prodi === user.nip
+          (data: any) => data.nidn_dosen_ketua_prodi === user.email
         );
         const namaJurusan = matchingJurusan.nama_program_studi;
 
         await prisma.kaprodi.update({
-          where: { nip: user.nip },
+          where: { email: user.email },
           data: { kaprodi_jurusan: namaJurusan },
         });
 
@@ -309,7 +308,6 @@ export async function POST(req: Request): Promise<Response> {
               email: user.email,
               hp: user.hp,
               nama: user.nama,
-              nip: user.nip,
               kaprodi_jurusan: namaJurusan,
             },
             SECRET_KEY,
@@ -346,7 +344,6 @@ export async function POST(req: Request): Promise<Response> {
             email: user.email,
             hp: user.hp,
             nama: user.nama,
-            nip: user.nip,
             kaprodi_jurusan: user.kaprodi_jurusan,
           },
           SECRET_KEY,

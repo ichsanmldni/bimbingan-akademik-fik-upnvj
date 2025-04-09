@@ -12,14 +12,12 @@ interface LoginProps {
 
 const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
   const [nim, setNim] = useState<string>("");
-  const [nip, setNip] = useState<string>("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
 
   useEffect(() => {
     setNim("");
-    setNip("");
     setPassword("");
   }, [selectedRole]);
 
@@ -32,9 +30,8 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
     const role = selectedRole === "" ? "Admin" : selectedRole;
 
     const requestBody: {
-      nip?: string;
-      nim?: string;
       email?: string;
+      nim?: string;
       password: string;
       role: string;
     } = {
@@ -45,9 +42,9 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
     if (requestBody.role === "Mahasiswa") {
       requestBody.nim = nim;
     } else if (requestBody.role === "Dosen PA") {
-      requestBody.nip = nip;
+      requestBody.email = email;
     } else if (requestBody.role === "Kaprodi") {
-      requestBody.nip = nip;
+      requestBody.email = email;
     } else if (requestBody.role === "Admin") {
       requestBody.email = email;
     }
@@ -122,7 +119,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         <input
           type="text"
           className={`px-3 py-2 text-[15px] mt-4 border focus:outline-none rounded-lg ${isAdmin || selectedRole !== "" ? "hidden" : ""}`}
-          placeholder="NIM / NIP"
+          placeholder="NIM"
           value={nim}
           disabled={!isAdmin && selectedRole === ""}
           onChange={(e) => setNim(e.target.value)}
@@ -146,10 +143,10 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         <input
           type="text"
           className={`px-3 py-2 text-[15px] mt-4 focus:outline-none border rounded-lg ${selectedRole !== "Dosen PA" && selectedRole !== "Kaprodi" && "hidden"}`}
-          placeholder="NIP"
-          value={nip}
+          placeholder="Email"
+          value={email}
           disabled={!isAdmin && selectedRole === ""}
-          onChange={(e) => setNip(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <PasswordInput
           value={password}
@@ -167,10 +164,19 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
             </Link>
             <button
               type="submit"
-              className="p-2 mb-4 rounded-lg text-[14px] bg-orange-500 text-white"
+              className="p-2 rounded-lg text-[14px] bg-orange-500 text-white"
             >
               Masuk
             </button>
+            <div className="flex gap-2 mt-2 text-[14px] justify-center">
+              <p>Belum memiliki akun?</p>
+              <Link
+                href="/registration"
+                className="text-orange-500 hover:underline cursor-pointer"
+              >
+                Daftar
+              </Link>
+            </div>
           </div>
         ) : (
           <button

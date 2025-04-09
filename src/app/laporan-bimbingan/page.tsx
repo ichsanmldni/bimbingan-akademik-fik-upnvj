@@ -1210,8 +1210,9 @@ export default function Home() {
               ][0],
         nama_kaprodi: selectedKaprodi,
         status: "Menunggu Feedback Kaprodi",
-        dosen_pa_id: dataDosenPA.find((data: any) => data.nip === dataUser.nip)
-          ?.id,
+        dosen_pa_id: dataDosenPA.find(
+          (data: any) => data.email === dataUser.email
+        )?.id,
         nama_dosen_pa: dataUser.nama,
         jenis_bimbingan: [
           ...new Set(
@@ -2153,7 +2154,7 @@ export default function Home() {
     try {
       const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
       const dosen = dataDosenPA.data.find(
-        (data: any) => data.nip === dataUser.nip
+        (data: any) => data.email === dataUser.email
       );
 
       if (!dosen) {
@@ -2164,7 +2165,6 @@ export default function Home() {
       setUserProfile({
         nama: dosen.nama,
         email: dosen.email,
-        nip: dosen.nip,
         hp: dosen.hp,
       });
     } catch (error) {
@@ -2396,7 +2396,7 @@ export default function Home() {
   }, [dataKaprodi]);
 
   useEffect(() => {
-    if (dataUser && dataUser.nip) {
+    if (dataUser && dataUser.email) {
       getDataDosenPAById();
     }
   }, [dataUser]);
@@ -2443,9 +2443,9 @@ export default function Home() {
           roleUser === "Mahasiswa"
             ? dataMahasiswa.find((data: any) => data.nim === dataUser.nim)
             : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data: any) => data.nip === dataUser.nip)
+              ? dataDosenPA.find((data: any) => data.email === dataUser.email)
               : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data: any) => data.nip === dataUser.nip)
+                ? dataKaprodi.find((data: any) => data.email === dataUser.email)
                 : undefined
         }
       />

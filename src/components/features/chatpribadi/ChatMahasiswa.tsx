@@ -51,10 +51,12 @@ export default function ChatMahasiswa() {
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  const getDataDosenIDByNIP = async () => {
+  const getDataDosenIDByEmail = async () => {
     const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
-    const dosenPA = dataDosenPA.data.find((data) => data.nip === dataUser.nip);
+    const dosenPA = dataDosenPA.data.find(
+      (data) => data.email === dataUser.email
+    );
     setDosenPAID(dosenPA.id);
   };
 
@@ -384,8 +386,8 @@ export default function ChatMahasiswa() {
   ]);
 
   useEffect(() => {
-    if (dataUser && dataUser.nip) {
-      getDataDosenIDByNIP();
+    if (dataUser && dataUser.email) {
+      getDataDosenIDByEmail();
     }
   }, [dataUser]);
 

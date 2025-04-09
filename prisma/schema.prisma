@@ -84,11 +84,10 @@ model pesanchatsiaran {
 model dosenpa {
   id                   Int                      @id @default(autoincrement())
   email                String                   @unique(map: "Dosen_email_key")
-  nip                  String                   @unique(map: "Dosen_nip_key")
-  password             String
+  password             String?
   nama                 String
   profile_image        String?
-  hp                   String
+  hp                   String?
   reset_token          String?
   reset_token_expires  DateTime?
   chatpribadi          chatpribadi[]
@@ -100,15 +99,25 @@ model dosenpa {
   pesansiaran          pesansiaran[]
 }
 
+model dosentetapfik {
+  id            Int     @id @default(autoincrement())
+  nama_lengkap  String
+  jurusan       String
+  email         String?
+  isKaprodi     Boolean @default(false)
+  order         Int
+}
+
+
+
 model kaprodi {
   id              Int       @id @default(autoincrement())
   email           String    @unique(map: "Dosen_email_key")
-  nip             String    @unique(map: "Dosen_nip_key")
-  password        String
+  password        String?
   nama            String
   profile_image   String?
   kaprodi_jurusan String?
-  hp              String
+  hp              String?
   reset_token          String?
   reset_token_expires  DateTime?
   laporanbimbingan   laporanbimbingan[]

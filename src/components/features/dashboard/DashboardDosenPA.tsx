@@ -44,7 +44,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   const [userProfile, setUserProfile] = useState({
     nama: "",
     email: "",
-    nip: "",
     hp: "",
   });
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
@@ -52,7 +51,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
   const [namaLengkapDosen, setNamaLengkapDosen] = useState<string>("");
   const [emailDosen, setEmailDosen] = useState<string>("");
-  const [nip, setNip] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [noTelpDosen, setNoTelpDosen] = useState<string>("");
   const [keteranganKonfirmasi, setKeteranganKonfirmasi] = useState<
     Record<number, string>
@@ -318,7 +317,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
 
       const dosenPA = dataDosenPA.data.find(
-        (data) => data.nip === dataUser.nip
+        (data) => data.email === dataUser.email
       );
 
       const bimbinganUser = dataBimbingan.data.filter(
@@ -413,10 +412,12 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   };
 
-  const getDataDosenPAByDosenNip = async () => {
+  const getDataDosenPAByDosenEmail = async () => {
     try {
       const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
-      const dosen = dataDosenPA.data.find((data) => data.nip === dataUser.nip);
+      const dosen = dataDosenPA.data.find(
+        (data) => data.email === dataUser.email
+      );
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -433,7 +434,9 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   const getDataDosenById = async () => {
     try {
       const dataDosen = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
-      const dosen = dataDosen.data.find((data) => data.nip === dataUser.nip);
+      const dosen = dataDosen.data.find(
+        (data) => data.email === dataUser.email
+      );
 
       if (!dosen) {
         console.error("Dosen tidak ditemukan");
@@ -443,14 +446,13 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       setUserProfile({
         nama: dosen.nama,
         email: dosen.email,
-        nip: dosen.nip,
         hp: dosen.hp,
       });
 
       setDataDosen(dosen);
       setNamaLengkapDosen(dosen.nama);
       setEmailDosen(dosen.email);
-      setNip(dosen.nip);
+      setEmail(dosen.email);
       setNoTelpDosen(dosen.hp);
     } catch (error) {
       console.error("Error:", error);
@@ -596,7 +598,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       let dosenPAValue: any = {
         nama: namaLengkapDosen,
         email: emailDosen,
-        nip,
         hp: noTelpDosen,
         profile_image: imagePreview ? imagePreview : undefined,
       };
@@ -2018,10 +2019,10 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   }, [dataClickedLaporanBimbingan]);
 
   useEffect(() => {
-    if (dataUser && dataUser.nip) {
+    if (dataUser && dataUser.email) {
       getDataDosenById();
       getDataPengesahanBimbinganByIDDosenPA();
-      getDataDosenPAByDosenNip();
+      getDataDosenPAByDosenEmail();
     }
   }, [dataUser]);
 
@@ -2103,11 +2104,11 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const isDataChanged =
         userProfile.nama !== namaLengkapDosen ||
         userProfile.email !== emailDosen ||
-        userProfile.nip !== nip ||
+        userProfile.email !== email ||
         userProfile.hp !== noTelpDosen;
       setIsDataChanged(isDataChanged);
     }
-  }, [userProfile, namaLengkapDosen, emailDosen, nip, noTelpDosen]);
+  }, [userProfile, namaLengkapDosen, emailDosen, email, noTelpDosen]);
 
   return (
     <>
@@ -2180,22 +2181,12 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
               <InputField
                 disabled
                 type="text"
-                placeholder={nip === "" ? "NIP" : nip}
-                onChange={(e) => {
-                  setNip(e.target.value);
-                }}
-                value={nip}
-                className="px-3 py-2 text-[15px] border rounded-lg"
-              />
-              <InputField
-                disabled
-                type="text"
                 placeholder={noTelpDosen === "" ? "No Telp" : noTelpDosen}
                 onChange={(e) => {
                   setNoTelpDosen(e.target.value);
                 }}
-                value={noTelpDosen}
-                className="px-3 py-2 text-[15px] border rounded-lg"
+                value={noTelpDosen ?? ""} // Kalau null atau undefined, jadi empty string
+                className="px-3 py-2 text-[15px] focus: border rounded-lg"
               />
               <button
                 onClick={(e) => {
