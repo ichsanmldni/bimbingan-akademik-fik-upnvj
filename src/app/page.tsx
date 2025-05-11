@@ -52,7 +52,14 @@ export default function Home() {
     dispatch(fetchAuthUser());
   }, []);
 
-  // Once authentication succeeds, fetch other data if needed
+  // Handle navigation animation
+  useEffect(() => {
+    if (isNavigating) {
+      const timer = setTimeout(() => setIsNavigating(false), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isNavigating]);
+
   useEffect(() => {
     if (statusAuthUser === "succeeded") {
       // Only fetch data relevant to the user's role
@@ -101,13 +108,21 @@ export default function Home() {
     dispatch,
   ]);
 
-  // Handle navigation animation
   useEffect(() => {
-    if (isNavigating) {
-      const timer = setTimeout(() => setIsNavigating(false), 1000);
-      return () => clearTimeout(timer);
+    const cookies = document.cookie.split("; ");
+    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
+    if (authTokenCookie) {
+      const token = authTokenCookie.split("=")[1];
+      try {
+        const decodedToken: any = jwtDecode(token);
+        console.log("Decoded token:", decodedToken);
+
+        // Ambil data mahasiswa dan cocokan nim
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
     }
-  }, [isNavigating]);
+  }, []);
 
   // Get user data based on role
   const userData = useMemo(() => {
@@ -140,6 +155,18 @@ export default function Home() {
     dispatch(fetchKaprodi());
   }, []);
 
+  console.log(userData);
+
+  useEffect(() => {
+    const requestPermission = async () => {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        console.log("Notification permission granted");
+      }
+    };
+    requestPermission();
+  }, []);
+
   return (
     <div>
       {["Mahasiswa", "Dosen PA", "Kaprodi"].includes(roleUser) && (
@@ -147,19 +174,38 @@ export default function Home() {
           <NavbarUser roleUser={roleUser} dataUser={userData} />
           <div className="bg-slate-100 h-screen">
             <div className="flex flex-col md:flex-row h-full justify-center md:items-center gap-[80px] mx-[28px] md:mx-[128px]">
-              {roleUser === "Mahasiswa" && (
+              {roleUser === "Mahasiswa" && !userData?.status_lulus && (
                 <div className="flex flex-col gap-5 md:w-2/5">
                   <h1 className="font-[800] text-[24px] md:text-[40px]">
                     Ajukan bimbingan akademik sekarang dan raih sukses akademik!
                   </h1>
                   <Link
-                    className="bg-orange-500 hover:bg-orange-600 md:w-1/3 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
                     href="/pengajuan-bimbingan"
+                    className="bg-orange-500 hover:bg-orange-600 md:w-1/3 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
                   >
                     Ajukan Bimbingan
                   </Link>
                 </div>
               )}
+              {roleUser === "Mahasiswa" && userData?.status_lulus && (
+                <div className="flex flex-col gap-5 md:w-2/5">
+                  <h1 className="font-[800] text-[24px] md:text-[40px]">
+                    Akses Riwayat Bimbingan Anda!
+                  </h1>
+                  <p className="text-[16px] leading-relaxed">
+                    Layanan pengajuan bimbingan tidak tersedia untuk alumni.
+                    Namun, Anda tetap dapat melihat riwayat bimbingan akademik
+                    selama masa studi.
+                  </p>
+                  <Link
+                    href="/dashboard?submenu=Riwayat%20Pengajuan%20Bimbingan"
+                    className="bg-orange-500 hover:bg-orange-600 md:w-1/2 rounded-lg py-2.5 text-white text-[14px] font-[500] text-center"
+                  >
+                    Lihat Riwayat Bimbingan
+                  </Link>
+                </div>
+              )}
+
               {roleUser === "Dosen PA" && (
                 <div className="flex flex-col gap-5">
                   <h1 className="font-[800] text-[24px] md:text-[40px]">

@@ -20,6 +20,8 @@ import { useDispatch } from "react-redux";
 import { fetchMahasiswa } from "@/lib/features/mahasiswaSlice";
 import { fetchDosenPA } from "@/lib/features/dosenPASlice";
 import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
+import AlumniRestrictionModal from "@/components/ui/AlumniRestrictionModal";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -85,6 +87,8 @@ export default function Home() {
       label: "Setelah Perwalian UTS - Sebelum Perwalian UAS",
     },
   ]);
+  const [isOpenModalAlumni, setIsOpenModalAlumni] = useState(true);
+  const router = useRouter();
   const dataMahasiswa = useSelector(
     (state: RootState) => state.mahasiswa?.data
   );
@@ -363,13 +367,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (dataUser.role === "Mahasiswa") {
-      setRoleUser("Mahasiswa");
-    } else if (dataUser.role === "Dosen PA") {
-      setRoleUser("Dosen PA");
-    } else if (dataUser.role === "Kaprodi") {
-      setRoleUser("Kaprodi");
-    }
+    setRoleUser("Mahasiswa");
   }, [dataUser, dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
@@ -429,12 +427,38 @@ export default function Home() {
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
 
+    // if (authTokenCookie) {
+    //   const token = authTokenCookie.split("=")[1];
+    //   try {
+    //     const decodedToken = jwtDecode<any>(token);
+    //     console.log(decodedToken);
+    //     setDataUser(decodedToken);
+    //   } catch (error) {
+    //     console.error("Invalid token:", error);
+    //   }
+    // }
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode<any>(token);
-        console.log(decodedToken);
-        setDataUser(decodedToken);
+        const decodedToken: any = jwtDecode(token);
+        console.log("Decoded token:", decodedToken);
+
+        // Ambil data mahasiswa dan cocokan nim
+        fetch(`${API_BASE_URL}/api/datamahasiswa`)
+          .then((res) => res.json())
+          .then((data) => {
+            const matchedUser = data.find(
+              (mahasiswa) => mahasiswa.nim === decodedToken.nim
+            );
+            if (matchedUser) {
+              setDataUser(matchedUser);
+            } else {
+              console.warn("Mahasiswa dengan NIM tersebut tidak ditemukan.");
+            }
+          })
+          .catch((err) => {
+            console.error("Gagal fetch /datamahasiswa:", err);
+          });
       } catch (error) {
         console.error("Invalid token:", error);
       }
@@ -469,6 +493,14 @@ export default function Home() {
   const getDayName = (date: Date) => {
     return format(date, "EEEE", { locale: id });
   };
+
+  const closeModalAlumni = () => {
+    setIsOpenModalAlumni(false);
+    const targetUrl = `/`;
+    window.location.href = targetUrl;
+  };
+  console.log(roleUser);
+  console.log("ini data user", dataUser);
   return (
     <div>
       <NavbarUser
@@ -662,6 +694,12 @@ export default function Home() {
           <ToastContainer />
         </div>
       </div>
+      {dataUser.status_lulus && (
+        <AlumniRestrictionModal
+          onClose={closeModalAlumni}
+          isOpen={isOpenModalAlumni}
+        />
+      )}
 
       <div className="border hidden md:block">
         <div className="flex justify-between mx-32 py-8 border-black border-b">

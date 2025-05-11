@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { id } = decoded as { id: string };
+    const { id } = decoded as { id: number };
 
     // Cek apakah user dengan token ini ada & belum expired
     let user = await prisma.dosenpa.findFirst({

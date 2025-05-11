@@ -11,13 +11,14 @@ const NotificationModal: React.FC<any> = ({
   className,
   dataNotifikasi,
   roleUser,
+  onRead,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
-  const patchReadNotififikasiMahasiswa = async (selectedNotification) => {
+  const patchReadNotifikasiMahasiswa = async (selectedNotification) => {
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/api/datanotifikasimahasiswa`,
@@ -32,7 +33,7 @@ const NotificationModal: React.FC<any> = ({
       throw error;
     }
   };
-  const patchReadNotififikasiDosenPA = async (selectedNotification) => {
+  const patchReadNotifikasiDosenPA = async (selectedNotification) => {
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/api/datanotifikasidosenpa`,
@@ -47,7 +48,7 @@ const NotificationModal: React.FC<any> = ({
       throw error;
     }
   };
-  const patchReadNotififikasiKaprodi = async (selectedNotification) => {
+  const patchReadNotifikasiKaprodi = async (selectedNotification) => {
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/api/datanotifikasikaprodi`,
@@ -62,52 +63,48 @@ const NotificationModal: React.FC<any> = ({
       throw error;
     }
   };
-
   const handleMarkAllAsRead = () => {
-    if (roleUser === "Mahasiswa") {
-      dataNotifikasi.map((data) => {
-        if (data.read === false) {
-          patchReadNotififikasiMahasiswa(data);
+    const patchTasks = dataNotifikasi
+      .filter((data) => data.read === false)
+      .map((data) => {
+        if (roleUser === "Mahasiswa") {
+          return patchReadNotifikasiMahasiswa(data);
+        } else if (roleUser === "Dosen PA") {
+          return patchReadNotifikasiDosenPA(data);
+        } else if (roleUser === "Kaprodi") {
+          return patchReadNotifikasiKaprodi(data);
         }
       });
-    }
-    if (roleUser === "Dosen PA") {
-      dataNotifikasi.map((data) => {
-        if (data.read === false) {
-          patchReadNotififikasiDosenPA(data);
-        }
-      });
-    } else if (roleUser === "Kaprodi") {
-      dataNotifikasi.map((data) => {
-        if (data.read === false) {
-          patchReadNotififikasiKaprodi(data);
-        }
-      });
-    }
+
+    Promise.all(patchTasks).then(() => {
+      if (onRead) {
+        onRead(); // Refresh notifikasi kalau fungsi tersedia
+      }
+    });
   };
 
   const handleNotificationClick = (data) => {
-    if (roleUser === "Mahasiswa") {
-      if (data.read === false) {
-        patchReadNotififikasiMahasiswa(data);
-      }
-    } else if (roleUser === "Dosen PA") {
-      if (data.read === false) {
-        patchReadNotififikasiDosenPA(data);
-      }
-    } else if (roleUser === "Kaprodi") {
-      if (data.read === false) {
-        patchReadNotififikasiKaprodi(data);
+    if (!data.read) {
+      if (roleUser === "Mahasiswa") {
+        patchReadNotifikasiMahasiswa(data);
+      } else if (roleUser === "Dosen PA") {
+        patchReadNotifikasiDosenPA(data);
+      } else if (roleUser === "Kaprodi") {
+        patchReadNotifikasiKaprodi(data);
       }
     }
-    let submenu;
-    if (data.isi === "Pengajuan bimbinganmu berhasil diterima!") {
+
+    let submenu = "";
+    if (
+      data.isi === "Pengajuan bimbinganmu berhasil diterima!" ||
+      data.isi.startsWith("Pengajuan bimbinganmu direschedule") ||
+      data.isi.startsWith("Jadwal bimbingan ")
+    ) {
       submenu = "Riwayat%20Pengajuan%20Bimbingan";
-    } else if (data.isi.startsWith("Pengajuan bimbinganmu direschedule")) {
-      submenu = "Riwayat%20Pengajuan%20Bimbingan";
-    } else if (data.isi.startsWith("Jadwal bimbingan ")) {
-      submenu = "Riwayat%20Pengajuan%20Bimbingan";
-    } else if (data.isi.startsWith("Ada pengajuan bimbingan baru")) {
+    } else if (
+      data.isi.startsWith("Ada pengajuan bimbingan baru") ||
+      data.isi.startsWith("Mahasiswa bimbingan Anda ")
+    ) {
       submenu = "Pengajuan%20Bimbingan%20Akademik%20Mahasiswa";
     } else if (data.isi.startsWith("Ada absensi bimbingan baru dari")) {
       submenu = "Pengesahan%20Absensi%20Bimbingan";
@@ -120,8 +117,8 @@ const NotificationModal: React.FC<any> = ({
     ) {
       submenu = "Riwayat%20Laporan%20Bimbingan%20Role%20Dosen%20PA";
     }
-    const targetUrl = `/dashboard?submenu=${submenu}`;
-    router.push(targetUrl);
+
+    router.push(`/dashboard?submenu=${submenu}`);
   };
 
   useEffect(() => {

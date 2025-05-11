@@ -7,6 +7,7 @@ import SelectField from "@/components/ui/SelectField";
 import Link from "next/link";
 import PasswordInput from "../../ui/PasswordInput";
 import { env } from "process";
+import { toast, ToastContainer } from "react-toastify";
 
 interface DosenPA {
   id: number;
@@ -37,8 +38,8 @@ interface Peminatan {
 const RegistrationForm = () => {
   const [selectedNamaLengkapDosen, setSelectedNamaLengkapDosen] =
     useState<string>("");
+  const [selectedEmailDosen, setSelectedEmailDosen] = useState<string>("");
   const [selectedDataDosen, setSelectedDataDosen] = useState<DosenTetap>(null);
-  const [email, setEmail] = useState<string>("");
   const [dataDosenTetap, setDataDosenTetap] = useState<DosenTetap[]>([]);
   const [selectedRole, setSelectedRole] = useState<string>("");
 
@@ -50,7 +51,7 @@ const RegistrationForm = () => {
         `${API_BASE_URL}/api/auth/registration`,
         userData
       );
-      return response.data;
+      return response;
     } catch (error) {
       throw error;
     }
@@ -62,19 +63,60 @@ const RegistrationForm = () => {
     try {
       let userData: any = {
         role: selectedRole,
-        email,
+        email: selectedEmailDosen,
         nama_lengkap: selectedNamaLengkapDosen,
       };
 
-      // Panggil fungsi registerUser dengan data yang sudah disesuaikan
-      const result = await registerUser(userData);
+      try {
+        const response = await registerUser(userData);
 
-      window.location.href = "/login";
+        if (response.status === 200) {
+          toast.success(
+            response?.data.message ||
+              "Pengajuan pembuatan akun berhasil, silahkan cek email anda!",
+            {
+              position: "bottom-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            }
+          );
+          window.location.href = "/login";
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast.error(error.response?.data.message || "Registrasi gagal!", {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+        } else {
+          toast.error("Registrasi gagal!", {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+        }
+      }
     } catch (error) {
       console.error("Registration error:", (error as Error).message);
     }
   };
-  const getDataDosenTetap = async () => {
+  const getDataDosenTetapByRole = async (role) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/datadosentetap`);
 
@@ -82,9 +124,17 @@ const RegistrationForm = () => {
         throw new Error("Gagal mengambil data");
       }
 
-      const data = await response.data;
+      const responseData = await response.data;
 
-      setDataDosenTetap(data);
+      let dataByRole;
+
+      if (role === "Kaprodi") {
+        dataByRole = responseData.filter((data) => data.isKaprodi === true);
+      } else {
+        dataByRole = responseData.filter((data) => data.isKaprodi === false);
+      }
+
+      setDataDosenTetap(dataByRole);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -118,18 +168,23 @@ const RegistrationForm = () => {
 
   useEffect(() => {
     document.cookie = "authBMFK=; max-age=0; path=/;";
-    getDataDosenTetap();
+    getDataDosenTetapByRole("Dosen PA");
   }, []);
 
   useEffect(() => {
-    setEmail("");
+    setSelectedDataDosen(null);
+    setSelectedEmailDosen("");
     setSelectedNamaLengkapDosen("");
+    getDataDosenTetapByRole(selectedRole);
   }, [selectedRole]);
 
-  const isValidEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
+  useEffect(() => {
+    if (selectedDataDosen) {
+      setSelectedEmailDosen(selectedDataDosen.email);
+    }
+  }, [selectedDataDosen]);
+
+  console.log(selectedEmailDosen);
 
   return (
     <div className="border rounded-lg w-1/2 self-center">
@@ -140,7 +195,7 @@ const RegistrationForm = () => {
         className="pl-8 pr-2 pb-4 flex flex-col gap-4"
         onSubmit={handleSubmit}
       >
-        <div className="pr-8 flex flex-col overflow-y-auto max-h-[200px]">
+        <div className="pr-8 flex flex-col overflow-y-auto max-h-[300px]">
           <SelectField
             options={[
               { value: "Dosen PA", label: "Dosen PA" },
@@ -153,25 +208,32 @@ const RegistrationForm = () => {
           />
           <SelectField
             options={dataDosenTetap.map((dosen) => ({
-              value: dosen.nama_lengkap, // atau sesuaikan dengan key nama lengkapnya
+              value: dosen.nama_lengkap,
               label: dosen.nama_lengkap,
             }))}
-            onChange={(e) => setSelectedNamaLengkapDosen(e.target.value)}
+            onChange={(e) => {
+              setSelectedNamaLengkapDosen(e.target.value);
+            }}
             value={selectedNamaLengkapDosen}
-            placeholder="Nama Dosen"
+            j
+            placeholder={`${selectedRole === "Kaprodi" ? "Nama Kaprodi" : "Nama Dosen"}`}
             className="px-3 py-2 mt-4 text-[15px] border focus:outline-none rounded-lg appearance-none w-full"
           />
           <InputField
             type="text"
             placeholder="Email"
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-            disabled={selectedRole === "" || selectedNamaLengkapDosen === ""}
-            className="px-3 py-2 mt-4 text-[15px] focus:outline-none border rounded-lg"
+            value={
+              selectedEmailDosen === null
+                ? "Belum ada email terdaftar."
+                : selectedEmailDosen
+            }
+            disabled={true}
+            className="px-3 py-2 mt-4 text-[15px] border rounded-lg focus:outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
           />
-          {isValidEmail(email) && email !== selectedDataDosen?.email && (
+          {selectedEmailDosen === null && (
             <p className="mt-2 ml-2 text-sm text-red-500">
-              *email tidak sesuai dengan data dosen.
+              *Email belum tersedia. Silakan hubungi admin untuk memperbarui
+              data Anda.
             </p>
           )}
         </div>
@@ -183,8 +245,7 @@ const RegistrationForm = () => {
           disabled={
             selectedRole === "" ||
             selectedNamaLengkapDosen === "" ||
-            !isValidEmail(email) ||
-            email !== selectedDataDosen?.email
+            selectedEmailDosen === null
           }
         >
           Daftar
@@ -196,6 +257,7 @@ const RegistrationForm = () => {
           </Link>
         </div>
       </form>
+      <ToastContainer />
     </div>
   );
 };

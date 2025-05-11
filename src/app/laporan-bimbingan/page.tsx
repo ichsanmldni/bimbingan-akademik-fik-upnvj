@@ -86,6 +86,7 @@ export default function Home() {
   const [dataSelectedKaprodi, setDataSelectedKaprodi] = useState<any>(null);
   const [dataTahunAjaran, setDataTahunAjaran] = useState<any>([]);
   const [dataBimbingan, setDataBimbingan] = useState<any>([]);
+  const [filteredBimbingan, setFilteredBimbingan] = useState<any>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedBimbingan, setSelectedBimbingan] = useState<any>([]);
   const [dataMahasiswa, setDataMahasiswa] = useState<any>([]); // Adjust type as needed
@@ -861,6 +862,11 @@ export default function Home() {
   };
 
   useEffect(() => {
+    setFilteredBimbingan(
+      dataBimbingan.filter(
+        (data) => data.pengajuan_bimbingan.tahun_ajaran === tahunAjaranFilter
+      )
+    );
     const opsiSemester = [
       ...new Set(
         dataBimbingan
@@ -894,6 +900,13 @@ export default function Home() {
   }, [tahunAjaranFilter]);
 
   useEffect(() => {
+    setFilteredBimbingan(
+      dataBimbingan
+        .filter(
+          (data) => data.pengajuan_bimbingan.tahun_ajaran === tahunAjaranFilter
+        )
+        .filter((data) => data.pengajuan_bimbingan.semester === semesterFilter)
+    );
     const optionsPeriodePengajuan = [
       ...new Set(
         dataBimbingan
@@ -929,6 +942,22 @@ export default function Home() {
   }, [semesterFilter]);
 
   useEffect(() => {
+    setFilteredBimbingan(
+      dataBimbingan
+        .filter(
+          (data: any) =>
+            data.pengajuan_bimbingan.tahun_ajaran === tahunAjaranFilter
+        )
+        .filter(
+          (data: any) => data.pengajuan_bimbingan.semester === semesterFilter
+        )
+        .filter(
+          (data: any) =>
+            data.pengajuan_bimbingan.periode_pengajuan ===
+            periodePengajuanFilter
+        )
+        .filter((data) => data.pengajuan_bimbingan.jurusan === jurusanFilter)
+    );
     const opsiJadwal = [
       ...new Set(
         dataBimbingan
@@ -981,6 +1010,21 @@ export default function Home() {
   }, [jurusanFilter]);
 
   useEffect(() => {
+    setFilteredBimbingan(
+      dataBimbingan
+        .filter(
+          (data: any) =>
+            data.pengajuan_bimbingan.tahun_ajaran === tahunAjaranFilter
+        )
+        .filter(
+          (data: any) => data.pengajuan_bimbingan.semester === semesterFilter
+        )
+        .filter(
+          (data: any) =>
+            data.pengajuan_bimbingan.periode_pengajuan ===
+            periodePengajuanFilter
+        )
+    );
     const opsiJurusan = [
       ...new Set(
         dataBimbingan
@@ -1029,20 +1073,22 @@ export default function Home() {
     ),
   ];
 
-  const filteredBimbingan = dataBimbingan
-    .filter((data: any) => data.laporan_bimbingan_id === null)
-    .filter((data: any) => {
-      const matchesJurusan = jurusanFilter
-        ? data.pengajuan_bimbingan.jurusan === jurusanFilter
-        : true;
-      const matchesJadwal = jadwalFilter
-        ? data.pengajuan_bimbingan.jadwal_bimbingan === jadwalFilter
-        : true;
-      const matchesJenisBimbingan = jenisBimbinganFilter
-        ? data.pengajuan_bimbingan.jenis_bimbingan === jenisBimbinganFilter
-        : true;
-      return matchesJurusan && matchesJadwal && matchesJenisBimbingan;
-    });
+  // const filteredBimbingan = dataBimbingan
+  //   .filter((data: any) => data.laporan_bimbingan_id === null)
+  //   .filter((data: any) => {
+  //     const matchesJurusan = jurusanFilter
+  //       ? data.pengajuan_bimbingan.jurusan === jurusanFilter
+  //       : true;
+  //     const matchesJadwal = jadwalFilter
+  //       ? data.pengajuan_bimbingan.jadwal_bimbingan === jadwalFilter
+  //       : true;
+  //     const matchesJenisBimbingan = jenisBimbinganFilter
+  //       ? data.pengajuan_bimbingan.jenis_bimbingan === jenisBimbinganFilter
+  //       : true;
+  //     return matchesJurusan && matchesJadwal && matchesJenisBimbingan;
+  //   });
+
+  console.log(filteredBimbingan);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -1349,8 +1395,13 @@ export default function Home() {
       data.pengajuan_bimbingan.jenis_bimbingan.startsWith("Perwalian")
     );
 
-    const periode =
-      selectedJenisBimbingan[0].pengajuan_bimbingan.jenis_bimbingan;
+    let periode = null;
+
+    if (selectedJenisBimbingan.length > 0) {
+      periode = selectedJenisBimbingan[0].pengajuan_bimbingan.jenis_bimbingan;
+    } else {
+      periode = filteredBimbingan[0].pengajuan_bimbingan.periode_pengajuan;
+    }
 
     const laporanData = {
       nama_dosen_pa: userProfile?.nama,
@@ -1384,6 +1435,8 @@ export default function Home() {
       tanda_tangan_dosen_pa: signatureData,
       konsultasi_mahasiswa: dataKonsultasiMahasiswa,
     };
+
+    console.log(laporanData);
 
     const doc = new jsPDF({
       orientation: "portrait", // or "landscape"
@@ -2195,6 +2248,7 @@ export default function Home() {
       );
 
       setDataBimbingan(bimbingan);
+      setFilteredBimbingan(bimbingan);
     } catch (error) {
       console.error("Error:", error);
       throw error;

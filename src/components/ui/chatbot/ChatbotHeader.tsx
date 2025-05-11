@@ -13,16 +13,21 @@ const ChatbotHeader = () => {
         </p>
       </div>
       <div className="flex gap-[24px] md:gap-[48px]">
-        <Link href="/chatpribadi" className="w-full">
+        <Link href="/chatpribadi" className="w-1/2">
           <Menu
             icon={MessageSquareText}
             content="Kirim pesan langsung kepada dosen pembimbing akademik"
           />
         </Link>
-        <Menu
-          icon={Info}
-          content="Informasi jadwal kosong dosen pembimbing akademik"
-        />
+        <Link
+          href={`/dashboard?submenu=${encodeURIComponent("Jadwal Kosong Dosen PA Role Mahasiswa")}`}
+          className="w-1/2"
+        >
+          <Menu
+            icon={Info}
+            content="Informasi jadwal kosong dosen pembimbing akademik"
+          />
+        </Link>
       </div>
     </div>
   );

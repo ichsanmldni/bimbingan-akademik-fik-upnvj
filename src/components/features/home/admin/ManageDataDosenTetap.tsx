@@ -31,6 +31,7 @@ interface DataDosenTetap {
   jurusan: string;
   order: number;
   email: string;
+  isKaprodi: boolean;
 }
 
 const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
@@ -66,7 +67,7 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
   >([]);
 
   const [isEditKaprodiOpen, setIsEditKaprodiOpen] = useState(false);
-  const [selectedKaprodi, setSelectedKaprodi] = useState(""); // ID dosen
+  const [selectedKaprodi, setSelectedKaprodi] = useState<any>(""); // ID dosen
 
   const handleOpenEditKaprodi = () => {
     setIsEditKaprodiOpen(true);

@@ -37,6 +37,8 @@ export const fetchStatusPesanSiaran = createAsyncThunk(
     const response = await axios.get(
       `${API_BASE_URL}/api/statuspembacaanpesansiaran`
     );
+
+    const dataMahasiswa = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
     const dataStatus = response.data;
     console.log(dataStatus);
 
@@ -45,15 +47,24 @@ export const fetchStatusPesanSiaran = createAsyncThunk(
       (data) => data.dosen_pa_id === dosenPaId
     );
 
+    console.log(pesanSiaranUser);
     if (!pesanSiaranUser) {
       return true; // Default dianggap belum dibaca jika tidak ditemukan
     }
+
+    const mahasiswa = dataMahasiswa.data.find((data) => data.id === userId);
 
     // Temukan status pembacaan untuk mahasiswa
     const userStatus = dataStatus
       .filter((data) => data.pesan_siaran_id === pesanSiaranUser.id)
       .find((data) => data.mahasiswa_id === userId);
 
+    // Jika mahasiswa sudah lulus, anggap sudah membaca (return false)
+    if (mahasiswa?.status_lulus === true) {
+      return false;
+    }
+
+    // Jika belum lulus, kembalikan berdasarkan status is_read
     return userStatus ? !userStatus.is_read : true;
   }
 );

@@ -10,6 +10,16 @@ import LogoBimafik from "../LogoBimafik";
 import notificationIcon from "../../../assets/images/bell.png";
 import NotificationModal from "../NotificationModal";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { fetchNotifikasi } from "@/lib/features/notificationSlice";
+import { useSelector } from "react-redux";
+import { fetchPesanPribadi } from "@/lib/features/pesanPribadiSlice";
+import {
+  fetchPesanSiaran,
+  fetchStatusPesanSiaran,
+} from "@/lib/features/pesanSiaranSlice";
 
 export default function NavbarChatbot({
   isPathChatbot,
@@ -18,51 +28,31 @@ export default function NavbarChatbot({
 }: any) {
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [dataNotifikasi, setDataNotifikasi] = useState([]);
   const [isUnreadMessages, setIsUnreadMessages] = useState(false);
   const [isChatPribadiUnread, setIsChatPribadiUnread] = useState(false);
   const [isPesanSiaranUnread, setIsPesanSiaranUnread] = useState(false);
-  const [dataPesanSiaran, setDataPesanSiaran] = useState([]);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
+  const dispatch = useDispatch<AppDispatch>();
+
+  const dataNotifikasi = useSelector(
+    (state: RootState) => state.notifikasi?.data
+  );
+  const dataPesanSiaran = useSelector(
+    (state: RootState) => state.pesanSiaran?.data
+  );
+  const dataPesanPribadi = useSelector(
+    (state: RootState) => state.pesanPribadi?.data
+  );
+
+  const isPesanSiaranDosenPAUnread = useSelector(
+    (state: RootState) => state.pesanSiaran?.isPesanSiaranDosenPAUnread
+  );
+  const userId: number = dataUser?.id;
+
   const closeNotificationModal = () => {
     setIsModalNotificationOpen(false);
-  };
-
-  const getDataNotifikasiByUserId = async () => {
-    try {
-      let response;
-      if (roleUser === "Mahasiswa") {
-        response = await axios.get(
-          `${API_BASE_URL}/api/datanotifikasimahasiswa`
-        );
-      } else if (roleUser === "Dosen PA") {
-        response = await axios.get(`${API_BASE_URL}/api/datanotifikasidosenpa`);
-      } else if (roleUser === "Kaprodi") {
-        response = await axios.get(`${API_BASE_URL}/api/datanotifikasikaprodi`);
-      }
-
-      let notifikasiUser;
-
-      if (roleUser === "Mahasiswa") {
-        notifikasiUser = response.data.filter(
-          (data: any) => data.mahasiswa_id === dataUser.id
-        );
-      } else if (roleUser === "Dosen PA") {
-        notifikasiUser = response.data.filter(
-          (data: any) => data.dosen_pa_id === dataUser.id
-        );
-      } else if (roleUser === "Kaprodi") {
-        notifikasiUser = response.data.filter(
-          (data: any) => data.kaprodi_id === dataUser.id
-        );
-      }
-      setDataNotifikasi(notifikasiUser);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
   };
 
   const getIsChatPribadiReadByUserId = async () => {
@@ -78,19 +68,6 @@ export default function NavbarChatbot({
       const isMahasiswaRead = chatPribadiUser.is_mahasiswa_pesan_terakhir_read;
 
       setIsChatPribadiUnread(!isMahasiswaRead);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getDataPesanSiaran = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/pesansiaran`);
-
-      const dataPesanSiaran = response.data;
-
-      setDataPesanSiaran(dataPesanSiaran);
     } catch (error) {
       console.error("Error:", error);
       throw error;
@@ -128,7 +105,6 @@ export default function NavbarChatbot({
 
   useEffect(() => {
     if (dataUser && dataUser.id && dataUser.dosen_pa_id) {
-      getDataNotifikasiByUserId();
       getIsChatPribadiReadByUserId();
       getIsPesanSiaranReadByUserId();
     }
@@ -141,8 +117,27 @@ export default function NavbarChatbot({
   }, [isPesanSiaranUnread, isChatPribadiUnread]);
 
   useEffect(() => {
-    getDataPesanSiaran();
-  }, []);
+    console.log(roleUser, dataUser);
+    if (roleUser && dataUser?.id) {
+      dispatch(fetchNotifikasi({ roleUser, userId }));
+    }
+    if (["Mahasiswa", "Dosen PA"].includes(roleUser) && dataUser?.id) {
+      dispatch(fetchPesanPribadi({ userId, roleUser }));
+    }
+    if (
+      ["Mahasiswa"].includes(roleUser) &&
+      dataUser?.id &&
+      dataUser?.dosen_pa_id
+    ) {
+      dispatch(fetchPesanSiaran());
+      dispatch(
+        fetchStatusPesanSiaran({
+          userId: dataUser.id,
+          dosenPaId: dataUser.dosen_pa_id,
+        })
+      );
+    }
+  }, [dispatch, roleUser, dataUser?.id]);
 
   return (
     <div
@@ -195,7 +190,7 @@ export default function NavbarChatbot({
             dataNotifikasi={dataNotifikasi}
             className="fixed inset-0 flex items-start mt-[60px] mr-[50px] justify-end z-50"
             onClose={closeNotificationModal}
-            refreshData={getDataNotifikasiByUserId}
+            onRead={() => dispatch(fetchNotifikasi({ roleUser, userId }))}
             dataUser={dataUser}
             roleUser={roleUser}
           />

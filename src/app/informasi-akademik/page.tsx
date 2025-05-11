@@ -191,7 +191,32 @@ export default function Home() {
         <div className="md:w-[75%] w-[70%] h-[500px] py-10 px-4 md:px-[100px]">
           <h1 className="font-bold text-[18px]">{selectedSubBabData?.nama}</h1>
           <p className="mt-5 leading-[26px] overflow-y-auto text-justify">
-            {selectedSubBabData?.isi}
+            {(() => {
+              try {
+                const isi = JSON.parse(selectedSubBabData?.isi);
+
+                // Kalau hasil parsing array -> render per paragraph
+                if (Array.isArray(isi)) {
+                  return isi
+                    .filter((item) =>
+                      item.children.some((child) => child.text.trim() !== "")
+                    )
+                    .map((item, index) => (
+                      <p key={index} className="mb-2">
+                        {item.children.map((child, childIndex) => (
+                          <span key={childIndex}>{child.text}</span>
+                        ))}
+                      </p>
+                    ));
+                }
+
+                // Kalau hasil parsing bukan array (aneh), fallback tampilkan
+                return <p>{selectedSubBabData?.isi}</p>;
+              } catch (error) {
+                // Kalau gagal parsing (memang string biasa), langsung tampilkan
+                return <p>{selectedSubBabData?.isi}</p>;
+              }
+            })()}
           </p>
         </div>
       </div>

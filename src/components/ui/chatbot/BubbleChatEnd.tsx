@@ -8,12 +8,18 @@ const BubbleChatEnd = ({ data }: any) => {
     timeZone: "Asia/Jakarta",
   });
 
+  const gradientBubbleChatUserStyle = {
+    background: "linear-gradient(200deg, #FFCFB0 0%,  #FF9D5C 66%)",
+  };
+
   return (
-    <div className="w-full flex mt-4 justify-end">
-      <div className="px-4 py-2 rounded-lg max-w[200px] md:max-w-[800px] border bg-white">
-        <p className="pr-4">{data.pesan}</p>
-        <p className="text-[10px] mt-[2px] text-end">{formattedTime}</p>
-      </div>
+    <div className="self-end mt-4 max-w-[75%]">
+      <p
+        className="px-4 py-3 rounded-xl rounded-br-none whitespace-pre-wrap break-words"
+        style={gradientBubbleChatUserStyle}
+      >
+        {data.pesan}
+      </p>
     </div>
   );
 };

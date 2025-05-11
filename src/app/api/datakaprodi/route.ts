@@ -6,7 +6,17 @@ import prisma from "../../../lib/prisma";
 export async function GET(req: Request): Promise<Response> {
   try {
     // Fetching data from the database
-    const kaprodi = await prisma.kaprodi.findMany();
+    const kaprodi = await prisma.kaprodi.findMany({
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        hp: true,
+        profile_image: true,
+        kaprodi_jurusan: true,
+        isDeleted: true,
+      },
+    });
 
     // Returning data as JSON
     return new Response(JSON.stringify(kaprodi), {
@@ -30,8 +40,8 @@ export async function PATCH(req: Request): Promise<Response> {
     const body: any = await req.json();
     const { nama, email, hp, profile_image } = body;
 
-    // Validate required fields
-    if (!nama || !email || !email || !hp) {
+    // Validasi field
+    if (!nama || !email || !hp) {
       return new Response(JSON.stringify({ message: "Invalid data" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -49,52 +59,32 @@ export async function PATCH(req: Request): Promise<Response> {
       });
     }
 
-    // Create directory if it doesn't exist
-    const uploadDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "profile_pictures"
-    );
-    await fs.mkdir(uploadDir, { recursive: true }); // Create folder recursively
-
-    // Save image if provided
-    let savedImagePath = existingRecord.profile_image; // Use old image if not updated
-    if (profile_image) {
-      const base64Data = profile_image.replace(/^data:image\/\w+;base64,/, "");
-      const imageBuffer = Buffer.from(base64Data, "base64");
-
-      const filename = `profile_${email}_${Date.now()}.jpg`;
-      savedImagePath = path.join("uploads", "profile_pictures", filename); // Relative path
-
-      if (existingRecord.profile_image) {
-        const oldImagePath = path.join(
-          process.cwd(),
-          "public",
-          existingRecord.profile_image
-        );
-        try {
-          await fs.unlink(oldImagePath); // Delete old image
-        } catch (err) {
-          console.error("Failed to delete old image:", err);
-        }
-      }
-
-      await fs.writeFile(
-        path.join(process.cwd(), "public", savedImagePath),
-        imageBuffer
-      ); // Save image in public folder
-    }
-
-    const kaprodi = await prisma.kaprodi.update({
+    // Simpan base64 langsung ke DB (tanpa decode)
+    const updatedKaprodi = await prisma.kaprodi.update({
       where: { email },
-      data: { nama, email, hp, profile_image: savedImagePath },
+      data: {
+        nama,
+        email,
+        hp,
+        profile_image: profile_image ?? existingRecord.profile_image,
+      },
     });
 
-    return new Response(JSON.stringify(kaprodi), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        message: "Update berhasil",
+        kaprodi: {
+          nama,
+          email,
+          hp,
+          profile_image: updatedKaprodi.profile_image,
+        },
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     return new Response(
       JSON.stringify({

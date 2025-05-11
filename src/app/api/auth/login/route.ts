@@ -101,8 +101,10 @@ export async function POST(req: Request): Promise<Response> {
         const response = await axios.post(url, formData, {
           headers: combinedHeaders,
         });
+
         if (response.data.data.nim) {
           user = response.data.data;
+
           const mahasiswa = await prisma.mahasiswa.findUnique({
             where: { nim: user.nim },
           });
@@ -119,6 +121,7 @@ export async function POST(req: Request): Promise<Response> {
                   jurusan: user?.nama_program_studi,
                   peminatan: null,
                   dosen_pa_id: null,
+                  status_lulus: user?.status == "Lulus" ? true : false,
                   ipk: null,
                 },
               });
@@ -137,6 +140,20 @@ export async function POST(req: Request): Promise<Response> {
             }
           }
 
+          if (
+            response.data.data.status === "Lulus" &&
+            mahasiswa.status_lulus === false
+          ) {
+            await prisma.mahasiswa.update({
+              where: {
+                nim: user.nim,
+              },
+              data: {
+                status_lulus: true,
+              },
+            });
+          }
+
           const token = jwt.sign(
             {
               nim: user.nim,
@@ -145,6 +162,7 @@ export async function POST(req: Request): Promise<Response> {
               status: user.status,
               nama_program_studi: user.nama_program_studi,
               email: user.email,
+              status_lulus: user?.status == "Lulus" ? true : false,
               hp: user.hp,
               role,
             },
@@ -159,7 +177,17 @@ export async function POST(req: Request): Promise<Response> {
           });
 
           return new Response(
-            JSON.stringify({ message: "Login berhasil!", user }),
+            JSON.stringify({
+              message: "Login berhasil!",
+              user: {
+                id: user.id,
+                email: user.email,
+                nama: user.nama,
+                hp: user.hp,
+                profile_image: user.profile_image,
+                role: "Mahasiswa", // atau sesuai role
+              },
+            }),
             {
               status: 200,
               headers: {
@@ -231,7 +259,17 @@ export async function POST(req: Request): Promise<Response> {
       });
 
       return new Response(
-        JSON.stringify({ message: "Login berhasil!", user }),
+        JSON.stringify({
+          message: "Login berhasil!",
+          user: {
+            id: user.id,
+            email: user.email,
+            nama: user.nama,
+            hp: user.hp,
+            profile_image: user.profile_image,
+            role: "Dosen PA", // atau sesuai role
+          },
+        }),
         {
           status: 200,
           headers: {
@@ -405,7 +443,16 @@ export async function POST(req: Request): Promise<Response> {
       });
 
       return new Response(
-        JSON.stringify({ message: "Login berhasil!", user }),
+        JSON.stringify({
+          message: "Login berhasil!",
+          user: {
+            id: user.id,
+            email: user.email,
+            nickname: user.nickname,
+            profile_image: user.profile_image,
+            role: "Admin", // atau sesuai role
+          },
+        }),
         {
           status: 200,
           headers: {

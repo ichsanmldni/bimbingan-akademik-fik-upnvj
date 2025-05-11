@@ -23,6 +23,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PDFModal from "@/components/ui/PDFModal";
 import StoreProvider from "@/app/StoreProvider";
+import { Catamaran } from "next/font/google";
 
 const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState<string>("");
@@ -1324,59 +1325,63 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         tableWidth: "auto", // Lebar tabel otomatis
         margin: { bottom: 30 },
         didDrawCell: (data) => {
-          if (
+          const isImgColumn =
+            data.section === "body" &&
             data.row.index >= 0 &&
-            data.column.index === 7 &&
-            data.section === "body"
-          ) {
-            const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
-            if (imgSrc) {
+            (data.column.index === 6 || data.column.index === 7);
+
+          if (!isImgColumn) return;
+
+          const imgSrc = data.cell.raw;
+
+          const isValidImage =
+            typeof imgSrc === "string" &&
+            imgSrc.startsWith("data:image/png;base64,");
+
+          // Hanya render gambar jika valid base64 PNG
+          if (isValidImage) {
+            try {
               const imgWidth = 8;
               const imgHeight = 8;
               const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
               const y = data.cell.y + 2;
               doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
-            }
-          } else if (
-            data.row.index >= 0 &&
-            data.column.index === 6 &&
-            data.section === "body"
-          ) {
-            const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
-            if (imgSrc) {
-              const imgWidth = 8;
-              const imgHeight = 8;
-              const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
-              const y = data.cell.y + 2;
-              doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
+            } catch (error) {
+              console.error("Gagal menambahkan gambar:", error);
             }
           }
+
+          // Kalau bukan gambar valid, biarkan autoTable render nilai default ("-" atau lainnya)
         },
+
         didParseCell: (data) => {
-          if (
-            data.row.index >= 0 &&
-            data.column.index === 7 &&
-            data.section === "body"
-          ) {
-            const imgSrc = data.row.raw[7];
-            if (imgSrc) {
-              data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
-              data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
-            }
-          } else if (
-            data.row.index >= 0 &&
-            data.column.index === 6 &&
-            data.section === "body"
-          ) {
-            const imgSrc = data.row.raw[6];
-            if (imgSrc) {
-              data.cell.raw = imgSrc; // Menyimpan sumber gambar di properti raw
-              data.cell.text = ""; // Mengosongkan teks sel jika ada gambar
-            }
-          }
           if (data.row.index >= 0 && data.section === "body") {
+            // Kolom 6 (index 6)
+            if (data.column.index === 6) {
+              const imgSrc = data.row.raw[6];
+              if (imgSrc && imgSrc !== "-") {
+                data.cell.raw = imgSrc;
+                data.cell.text = "";
+              } else {
+                data.cell.text = "-";
+              }
+            }
+
+            // Kolom 7 (index 7)
+            if (data.column.index === 7) {
+              const imgSrc = data.row.raw[7];
+              if (imgSrc && imgSrc !== "-") {
+                data.cell.raw = imgSrc;
+                data.cell.text = "";
+              } else {
+                data.cell.text = "-";
+              }
+            }
+
+            // Penyesuaian alignment untuk kolom 4 dan 5
             if (data.column.index === 4 || data.column.index === 5) {
-              data.cell.styles.halign = "justify"; // Justify alignment
+              const cellText = data.cell.text?.[0];
+              data.cell.styles.halign = cellText !== "-" ? "justify" : "center";
             }
           }
         },
@@ -1716,7 +1721,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       )}
       {selectedSubMenuDashboard === "Statistik Bimbingan Akademik" && (
         <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] mb-12 md:mb-0 py-[30px]">
-          <div className="border px-[30px] py-[30px] rounded-lg">
+          <div className="border px-[30px] py-[30px] rounded-lg max-h-[calc(100vh-140px)] overflow-y-scroll">
             <div className="flex flex-col gap-4">
               <div className="flex gap-5">
                 <div className="relative w-1/3">
@@ -1958,11 +1963,13 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                           <p className="font-semibold text-orange-500">
                             {`
                         ${
-                          dataAllMahasiswa.filter(
-                            (dataMahasiswa) =>
-                              dataMahasiswa.dosen_pa_id === data.id
-                          ).length
-                        } mahasiswa bimbingan
+                          dataAllMahasiswa
+                            .filter(
+                              (dataMahasiswa) =>
+                                dataMahasiswa.dosen_pa_id === data.id
+                            )
+                            .filter((data) => !data.status_lulus).length
+                        } mahasiswa bimbingan aktif
                       `}
                           </p>
                         </div>
@@ -2131,7 +2138,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
             {filteredDataLaporanBimbingan.length > 0 ? (
               !isDetailLaporanKaprodiClicked ? (
                 <div className="flex flex-col gap-6">
-                  {dataLaporanBimbingan
+                  {filteredDataLaporanBimbingan
                     .slice()
                     .reverse()
                     .map((data) => (
@@ -2181,7 +2188,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                     />
                     <p className="text-orange-600 font-medium">Kembali</p>
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-4 max-h-[calc(100vh-312px)] overflow-y-scroll pr-4">
                     <div className="flex flex-col border rounded-lg p-6 gap-4">
                       <div className="flex justify-between text-neutral-600">
                         <p>{selectedDataLaporanBimbingan?.jadwal_bimbingan}</p>

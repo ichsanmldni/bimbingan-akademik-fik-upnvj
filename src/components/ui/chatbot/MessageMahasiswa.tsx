@@ -25,45 +25,67 @@ export default function MessageMahasiswa({ data, onClick }: any) {
   return (
     <div
       onClick={() => onClick(data.id)}
-      className={`flex px-4 md:px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
+      className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
     >
       <div className="flex gap-4">
-        <div className="rounded-full min-w-[12px] size-12 bg-orange-200">
+        <div className="rounded-full size-10 md:size-12 bg-orange-200">
           {data.mahasiswa?.profile_image ? (
             <img
               src={`../${data.mahasiswa.profile_image}`}
               alt="Profile"
-              className="rounded-full min-w-[12px] size-12 cursor-pointer"
+              className="rounded-full size-10 md:size-12 cursor-pointer"
             />
           ) : (
             <ProfileImage
               onClick={() => {}}
-              className="size-12 cursor-pointer"
+              className="size-10 md:size-12 cursor-pointer"
             />
           )}
         </div>
-        <div className="flex flex-col gap-2">
-          <p className={`${data.isRead ? "" : ""} text-[14px] md:text-[18px]`}>
-            {data.mahasiswa.nama}
-          </p>
-          <p
-            className={`text-[14px] md:text-[16px] ${data.is_dosenpa_pesan_terakhir_read || data.pengirim_pesan_terakhir === "Dosen PA" ? "" : "font-semibold"}`}
-          >
-            {data.pengirim_pesan_terakhir === "Dosen PA" && <span>Anda: </span>}
-            {data.pesan_terakhir}
-          </p>
+        <div className="flex flex-col gap-2 text-[12px] md:text-[16px]">
+          <p>{data.mahasiswa.nama}</p>
+          <div className="md:max-h-[40px] max-w-[160px] md:max-w-[400px] lg:max-w-[700px] xl:max-w-[900px] overflow-hidden">
+            <p
+              className={`${
+                data.is_dosenpa_pesan_terakhir_read ||
+                data.pengirim_pesan_terakhir === "Dosen PA"
+                  ? "whitespace-nowrap overflow-ellipsis overflow-hidden"
+                  : "font-semibold whitespace-nowrap overflow-ellipsis overflow-hidden"
+              }`}
+            >
+              {data.pengirim_pesan_terakhir === "Dosen PA" && (
+                <span>Anda: </span>
+              )}
+              {data.pesan_terakhir}
+            </p>
+          </div>
         </div>
       </div>
       <div
-        className={`${data.is_dosenpa_pesan_terakhir_read || data.pengirim_pesan_terakhir === "Dosen PA" ? "text-[14px] md:text-[16px]  pb-8" : "text-[14px] md:text-[16px]  flex flex-col gap-2"}`}
+        className={`${
+          data.is_dosenpa_pesan_terakhir_read ||
+          data.pengirim_pesan_terakhir === "Dosen PA"
+            ? "text-[12px] md:text-[16px] pb-6 md:pb-8"
+            : "text-[12px] md:text-[16px] flex flex-col gap-2"
+        }`}
       >
         <p
-          className={`${data.is_dosenpa_pesan_terakhir_read || data.pengirim_pesan_terakhir === "Dosen PA" ? "text-[14px] md:text-[16px] " : "text-[14px] md:text-[16px] font-semibold text-orange-500"}`}
+          className={`${
+            data.is_dosenpa_pesan_terakhir_read ||
+            data.pengirim_pesan_terakhir === "Dosen PA"
+              ? "text-[12px] md:text-[14px]"
+              : "text-[12px] md:text-[14px] font-semibold text-orange-500"
+          }`}
         >
           {formattedDateTime}
         </p>
         <p
-          className={`${data.is_dosenpa_pesan_terakhir_read || data.pengirim_pesan_terakhir === "Dosen PA" ? "hidden" : "text-[14px] md:text-[16px] font-semibold"}`}
+          className={`${
+            data.is_dosenpa_pesan_terakhir_read ||
+            data.pengirim_pesan_terakhir === "Dosen PA"
+              ? "hidden"
+              : "text-[12px] md:text-[16px] font-semibold"
+          }`}
         >
           Belum Dibaca!
         </p>

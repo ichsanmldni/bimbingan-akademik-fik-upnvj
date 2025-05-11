@@ -8,12 +8,14 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { email, nama_lengkap, role } = body;
 
+  console.log(email, nama_lengkap, role);
+
   try {
     // Cek apakah user sudah ada
     const existingUser =
       role === "Dosen PA"
-        ? await prisma.dosenpa.findUnique({ where: { email } })
-        : await prisma.kaprodi.findUnique({ where: { email } });
+        ? await prisma.dosenpa.findFirst({ where: { nama: nama_lengkap } })
+        : await prisma.kaprodi.findFirst({ where: { nama: nama_lengkap } });
 
     if (existingUser) {
       return NextResponse.json(

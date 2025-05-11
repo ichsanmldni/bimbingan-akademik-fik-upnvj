@@ -24,6 +24,7 @@ import { AppDispatch, RootState } from "@/lib/store";
 import { useSelector } from "react-redux";
 
 const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
+  console.log(dataUser);
   const dispatch = useDispatch<AppDispatch>();
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
   const [isModalProfileOpen, setIsModalProfileOpen] = useState(false);
@@ -35,10 +36,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const [isUnreadMahasiswaMessages, setIsUnreadMahasiswaMessages] =
     useState(false);
   const [isUnreadDosenPAMessages, setIsUnreadDosenPAMessages] = useState(false);
-  const [isChatPribadiMahasiswaUnread, setIsChatPribadiMahasiswaUnread] =
-    useState(false);
-  const [isChatPribadiDosenPAUnread, setIsChatPribadiDosenPAUnread] =
-    useState(false);
   const dataNotifikasi = useSelector(
     (state: RootState) => state.notifikasi?.data
   );
@@ -51,6 +48,12 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   const isPesanSiaranDosenPAUnread = useSelector(
     (state: RootState) => state.pesanSiaran?.isPesanSiaranDosenPAUnread
+  );
+  const isChatPribadiMahasiswaUnread = useSelector(
+    (state: RootState) => state.pesanPribadi?.isPesanPribadiMahasiswaUnread
+  );
+  const isChatPribadiDosenPAUnread = useSelector(
+    (state: RootState) => state.pesanPribadi?.isPesanPribadiDosenPAUnread
   );
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
@@ -80,32 +83,8 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   const isActive = (path: string) => pathname === path;
 
-  const getIsChatPribadiDosenPAReadByUserId = async () => {
-    try {
-      const isMahasiswaRead =
-        dataPesanPribadi[0]?.is_dosenpa_pesan_terakhir_read;
-      setIsChatPribadiDosenPAUnread(!isMahasiswaRead);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
-  const getIsChatPribadiMahasiswaReadByUserId = async () => {
-    try {
-      const isDosenPAReadAll = dataPesanPribadi.every(
-        (data) => data.is_dosenpa_pesan_terakhir_read === true
-      );
-
-      setIsChatPribadiMahasiswaUnread(!isDosenPAReadAll);
-    } catch (error) {
-      console.error("Error:", error);
-      throw error;
-    }
-  };
-
   useEffect(() => {
-    console.log(roleUser, dataUser);
+    console.log(dataUser, roleUser);
     if (roleUser && dataUser?.id) {
       dispatch(fetchNotifikasi({ roleUser, userId }));
     }
@@ -117,34 +96,26 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
       dataUser?.id &&
       dataUser?.dosen_pa_id
     ) {
-      dispatch(fetchPesanSiaran());
-      dispatch(
-        fetchStatusPesanSiaran({
-          userId: dataUser.id,
-          dosenPaId: dataUser.dosen_pa_id,
-        })
-      );
+      dispatch(fetchPesanSiaran()).then(() => {
+        dispatch(
+          fetchStatusPesanSiaran({
+            userId: dataUser.id,
+            dosenPaId: dataUser.dosen_pa_id,
+          })
+        );
+      });
     }
   }, [dispatch, roleUser, dataUser?.id]);
 
   useEffect(() => {
     const count = dataNotifikasi?.filter((data) => data.read === false).length;
+    console.log("jalan");
     setNotificationCount(count);
   }, [dataNotifikasi]);
 
   useEffect(() => {
-    if (dataUser && dataUser.id) {
-      if (roleUser === "Dosen PA") {
-        getIsChatPribadiMahasiswaReadByUserId();
-      } else if (roleUser === "Mahasiswa") {
-        getIsChatPribadiDosenPAReadByUserId();
-      }
-    }
-  }, [dataUser]);
-
-  useEffect(() => {
     if (roleUser === "Mahasiswa") {
-      if (isPesanSiaranDosenPAUnread || isChatPribadiDosenPAUnread) {
+      if (isPesanSiaranDosenPAUnread) {
         setIsUnreadDosenPAMessages(true);
       }
     } else if (roleUser === "Dosen PA") {
@@ -157,6 +128,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
     isChatPribadiMahasiswaUnread,
     isChatPribadiDosenPAUnread,
   ]);
+  console.log(dataUser);
 
   return (
     <>
@@ -174,7 +146,12 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           </a>
         </div>
         <div
-          className={`hidden md:flex items-center pl-8 w-[45%] ${roleUser === "Dosen PA" && "md:w-[60%]"} ${roleUser === "Kaprodi" ? "gap-12 pl-[132px]" : "gap-6"} md:flex`}
+          className={`hidden md:flex items-center pl-8 ${
+            roleUser !== "Mahasiswa" ||
+            (roleUser === "Mahasiswa" && !dataUser?.status_lulus)
+              ? ""
+              : "gap-[40px]"
+          } w-[45%] ${roleUser === "Dosen PA" && "md:w-[60%]"} ${roleUser === "Kaprodi" ? "gap-12 pl-[132px]" : "gap-6"} md:flex`}
         >
           <a
             href="/"
@@ -192,14 +169,19 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
           </Link>
           <Link
             href="/pengajuan-bimbingan"
-            className={`${
-              isActive("/pengajuan-bimbingan")
-                ? "font-bold text-orange-500"
-                : ""
-            } ${roleUser !== "Mahasiswa" && "hidden"}`}
+            className={`
+    ${isActive("/pengajuan-bimbingan") ? "font-bold text-orange-500" : ""}
+    ${
+      roleUser !== "Mahasiswa" ||
+      (roleUser === "Mahasiswa" && dataUser?.status_lulus)
+        ? "hidden"
+        : ""
+    }
+  `}
           >
             Pengajuan Bimbingan
           </Link>
+
           <Link
             href="/perwalian-wajib"
             className={`${
@@ -260,6 +242,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
             dataNotifikasi={dataNotifikasi}
             className={`fixed inset-0 flex items-start ${roleUser === "Dosen PA" ? "mt-[70px] mr-[112px]" : "mt-[70px] mr-[110px]"} justify-end z-50`}
             onClose={closeNotificationModal}
+            onRead={() => dispatch(fetchNotifikasi({ roleUser, userId }))}
             dataUser={dataUser}
             roleUser={roleUser}
           />
@@ -347,6 +330,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
         {isModalNotificationMobileOpen && (
           <NotificationModal
             dataNotifikasi={dataNotifikasi}
+            onRead={() => dispatch(fetchNotifikasi({ roleUser, userId }))}
             className="fixed inset-0 flex items-end mb-[90px] mr-3 justify-end z-50"
             onClose={closeNotificationMobileModal}
             dataUser={dataUser}

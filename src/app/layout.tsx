@@ -1,5 +1,5 @@
 // RootLayout.tsx
-"use client";
+// "use client";
 
 import "./globals.css";
 import { Plus_Jakarta_Sans } from "next/font/google";
