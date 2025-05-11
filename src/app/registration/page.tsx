@@ -5,9 +5,9 @@ import RegistrationForm from "@/components/features/auth/RegistrationForm";
 
 export default function Home() {
   return (
-    <div className="h-screen flex flex-col items-center">
+    <div className="w-full h-screen flex flex-col items-center">
       <Logo className="mt-8 mx-auto size-[72px]" />
-      <div className="flex gap-20 justify-center">
+      <div className="w-full px-[150px] flex gap-[120px] justify-center">
         <LoginImage />
         <RegistrationForm />
       </div>

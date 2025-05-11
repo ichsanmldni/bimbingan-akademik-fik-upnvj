@@ -1,45 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
+import Image from "next/image";
+import sendIcon from "../../../assets/images/send-icon.png";
 
 export default function TextInputPesanChatbot({
   handleAddChatChatbotMahasiswa = (newMessage: any) => {},
 }) {
-  const [text, setText] = useState("");
+  const [message, setMessage] = useState("");
+  const textAreaRef = useRef(null); // Referensi untuk textarea
+
+  useEffect(() => {
+    textAreaRef.current?.focus(); // Fokuskan ke textarea saat komponen dimuat
+  }, []);
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" && !event.shiftKey && message.trim() !== "") {
+      event.preventDefault(); // Mencegah newline pada textarea
+      if (message.trim() !== "") {
+        handleAddChatChatbotMahasiswa({
+          pesan: message.trim(), // Menghilangkan spasi di awal & akhir
+          waktu_kirim: new Date().toISOString(),
+        });
+        setMessage(""); // Reset input setelah mengirim
+      }
+    }
+  };
 
   return (
-    <div className="flex gap-4 w-full">
-      <input
-        autoFocus
-        type="text"
-        id="textInput"
-        placeholder="Ketik pesan atau pertanyaan Anda di sini..."
-        className="flex-grow outline-none text-black placeholder:text-textField-2 p-4 rounded stroke-textField-1 border border-gray-300"
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault(); // Mencegah perilaku default (misalnya, submit form)
-            handleAddChatChatbotMahasiswa({
-              pesan: text,
-              waktu_kirim: new Date().toISOString(),
-            });
-            setText(""); // Reset input setelah mengirim pesan
-          }
-        }}
+    <div className="relative flex flex-col border rounded-lg">
+      <textarea
+        ref={textAreaRef}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={handleKeyPress}
+        placeholder="Kirim pesan ke DeepLib..."
+        className="p-4 pb-14 focus:outline-none resize-none rounded-lg w-full h-32"
       />
+
+      {/* Tombol kirim melayang */}
       <button
         onClick={() => {
           handleAddChatChatbotMahasiswa({
-            pesan: text,
+            pesan: message,
             waktu_kirim: new Date().toISOString(),
           });
-          setText("");
+          setMessage("");
+          textAreaRef.current?.focus();
         }}
-        className="p-4 bg-orange-400 rounded hover:bg-orange-300"
+        className="absolute bottom-4 right-4 p-2 rounded-full transition duration-200"
       >
-        <SendHorizontal />
+        <Image
+          src={sendIcon}
+          alt="Send Icon"
+          width={24}
+          height={24}
+          className="inline-block"
+        />
       </button>
     </div>
   );

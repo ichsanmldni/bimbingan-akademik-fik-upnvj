@@ -47,10 +47,14 @@ export async function POST(req: Request) {
 
   const resetLink = `${process.env.NEXT_PUBLIC_API_BASE_URL}/reset-password?token=${token}`;
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"Admin BIMAFIK" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Reset Password",
-    text: `Klik link berikut untuk reset password: ${resetLink}`,
+    html: `
+      <p>Klik link berikut untuk reset password: </p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>Link ini akan kedaluwarsa dalam 1 jam.</p>
+    `,
   });
 
   return NextResponse.json({ message: "Cek email untuk reset password" });

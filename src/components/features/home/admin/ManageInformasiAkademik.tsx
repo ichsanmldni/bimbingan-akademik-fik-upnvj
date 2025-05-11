@@ -9,7 +9,7 @@ import searchIcon from "../../../../assets/images/search-icon.png";
 import dragIcon from "../../../../assets/images/drag-table-icon.png";
 import TrashButton from "@/components/ui/TrashButton";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import EditButton from "@/components/ui/EditButton";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
@@ -22,6 +22,63 @@ import Modal from "../Modal";
 import InputField from "@/components/ui/InputField";
 import { CSS } from "@dnd-kit/utilities";
 import { env } from "process";
+
+import Logo from "@/components/ui/LogoUPNVJ";
+import NavbarUser from "@/components/ui/NavbarUser";
+import Link from "next/link";
+import ImagePlus from "../../assets/images/image-plus.png";
+import { jwtDecode } from "jwt-decode";
+import "react-datepicker/dist/react-datepicker.css";
+import isHotkey from "is-hotkey";
+import SignatureCanvas from "react-signature-canvas";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { Editable, withReact, useSlate, Slate } from "slate-react";
+import {
+  Editor,
+  Transforms,
+  createEditor,
+  Descendant,
+  Element as SlateElement,
+} from "slate";
+import { withHistory } from "slate-history";
+import FormatBoldIcon from "@mui/icons-material/FormatBold";
+import FormatItalicIcon from "@mui/icons-material/FormatItalic";
+import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
+import CodeIcon from "@mui/icons-material/Code";
+import LooksOneIcon from "@mui/icons-material/LooksOne";
+import LooksTwoIcon from "@mui/icons-material/LooksTwo";
+import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
+import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
+import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
+import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import FileButton from "@/components/ui/FileButton";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import PDFModal from "@/components/ui/PDFModal";
+import { Button, Toolbar } from "./components";
+
+const HOTKEYS: { [key: string]: string } = {
+  "mod+b": "bold",
+  "mod+i": "italic",
+  "mod+u": "underline",
+  "mod+`": "code",
+};
+
+const LIST_TYPES = ["numbered-list", "bulleted-list"];
+const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
+
+const initialValue: any = [
+  {
+    type: "paragraph",
+    children: [{ text: "" }],
+  },
+];
 
 interface ManageInformasiAkademikProps {}
 
@@ -61,10 +118,10 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
   const [dataSubBab, setDataSubBab] = useState<SubBab[]>([]);
   const [valueSubBabAddModal, setValueSubBabAddModal] = useState<string>("");
   const [valueSubBabEditModal, setValueSubBabEditModal] = useState<string>("");
-  const [valueIsiSubBabAddModal, setValueIsiSubBabAddModal] =
-    useState<string>("");
-  const [valueIsiSubBabEditModal, setValueIsiSubBabEditModal] =
-    useState<string>("");
+  const [valueIsiSubBabAddModal, setValueIsiSubBabAddModal] = useState<any>([]);
+  const [valueIsiSubBabEditModal, setValueIsiSubBabEditModal] = useState<any>(
+    []
+  );
   const [selectedSubBabEditModal, setSelectedSubBabEditModal] =
     useState<SubBab | null>(null);
   const [selectedSubBabDeleteModal, setSelectedSubBabDeleteModal] =
@@ -72,8 +129,26 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
   const [optionsBab, setOptionsBab] = useState<
     { value: string; label: string }[]
   >([]);
+  const [isShowDetailIsiSubBab, setIsShowDetailIsiSubBab] = useState(false);
+  const [selectedDetailIsiSubBab, setSelectedDetailIsiSubBab] = useState([]);
+  const [selectedDetailNamaSubBab, setSelectedDetailNamaSubBab] = useState("");
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+
+  function showDetailIsiSubBab(nama, isi) {
+    try {
+      setSelectedDetailNamaSubBab(nama);
+      const parsed = JSON.parse(isi);
+      if (Array.isArray(parsed)) {
+        setSelectedDetailIsiSubBab(parsed);
+      } else {
+        setSelectedDetailIsiSubBab([]);
+      }
+    } catch (error) {
+      setSelectedDetailIsiSubBab([]);
+    }
+    setIsShowDetailIsiSubBab(true);
+  }
 
   const areArraysEqual = (arr1: any[], arr2: any[]) => {
     if (arr1.length !== arr2.length) return false;
@@ -88,8 +163,8 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
     setValueBabEditModal("");
     setValueSubBabAddModal("");
     setValueSubBabEditModal("");
-    setValueIsiSubBabAddModal("");
-    setValueIsiSubBabEditModal("");
+    setValueIsiSubBabAddModal([]);
+    setValueIsiSubBabEditModal([]);
   };
 
   function DraggableRow({
@@ -155,13 +230,35 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
           </td>
         ) : (
           <>
-            <td className="border-b border-gray-200 px-4 py-2">{data.isi}</td>
+            {tab === "Sub Bab" && (
+              <td className="px-4 py-2 w-1/4">
+                <button
+                  onClick={() => showDetailIsiSubBab(data.nama, data.isi)}
+                >
+                  <p className="text-blue-600 underline hover:text-blue-800">
+                    Lihat isi...
+                  </p>
+                </button>
+              </td>
+            )}
+
             <td className="border-b border-gray-200 px-4 py-4">
               <div className="flex gap-2 items-center justify-center">
                 <EditButton
                   onClick={() => {
                     setValueSubBabEditModal(data.nama);
-                    setValueIsiSubBabEditModal(data.isi);
+                    try {
+                      const parsedIsi = JSON.parse(data.isi);
+                      if (Array.isArray(parsedIsi)) {
+                        setValueIsiSubBabEditModal(parsedIsi);
+                      } else {
+                        setValueIsiSubBabEditModal([]);
+                      }
+                    } catch (error) {
+                      // Kalau error parsing (berarti string biasa / invalid json), fallback kosong
+                      setValueIsiSubBabEditModal([]);
+                    }
+
                     setSelectedSubBabEditModal(data as SubBab);
                     openModal("Edit");
                   }}
@@ -213,8 +310,17 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
                     {data.nama}
                   </td>
                   {tab === "Sub Bab" && (
-                    <td className="px-4 py-2 w-1/4">{data.isi}</td>
+                    <td className="px-4 py-2 w-1/4">
+                      <button
+                        onClick={() => showDetailIsiSubBab(data.nama, data.isi)}
+                      >
+                        <p className="text-blue-600 underline hover:text-blue-800">
+                          Lihat isi...
+                        </p>
+                      </button>
+                    </td>
                   )}
+
                   <td className="px-4 py-4 w-1/4">
                     <div className="flex gap-2 items-center justify-center">
                       <EditButton
@@ -509,7 +615,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
     try {
       let subBabValue: any = {
         nama: valueSubBabAddModal,
-        isi: valueIsiSubBabAddModal,
+        isi: JSON.stringify(valueIsiSubBabAddModal),
         order: dataSubBab.length + 1,
       };
 
@@ -527,7 +633,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       let subBabValue: any = {
         id,
         nama: valueSubBabEditModal,
-        isi: valueIsiSubBabEditModal,
+        isi: JSON.stringify(valueIsiSubBabEditModal),
       };
 
       const result = await patchSubBab(subBabValue);
@@ -995,6 +1101,52 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
               </div>
             </>
           )}
+          {isShowDetailIsiSubBab && (
+            <div
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-25 z-50"
+              onClick={() => setIsShowDetailIsiSubBab(false)}
+            >
+              <div
+                className="bg-white rounded-xl pl-8 py-8 pr-4 w-[90%] md:w-[700px] shadow-lg my-10 max-h-[90vh] flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="text-lg font-semibold mb-4 text-center">
+                  {selectedDetailNamaSubBab}
+                </h2>
+
+                <div className="overflow-y-auto flex-1 pr-4">
+                  {selectedDetailIsiSubBab.length > 0 ? (
+                    selectedDetailIsiSubBab
+                      .filter((item) =>
+                        item.children.some((child) => child.text.trim() !== "")
+                      )
+                      .map((item, index) => (
+                        <p
+                          key={index}
+                          className="mb-4 text-justify leading-relaxed"
+                        >
+                          {item.children.map((child, childIndex) => (
+                            <span key={childIndex}>{child.text}</span>
+                          ))}
+                        </p>
+                      ))
+                  ) : (
+                    <p className="text-center">Tidak ada isi.</p>
+                  )}
+                </div>
+
+                <div className="mt-6 text-right">
+                  <button
+                    onClick={() => setIsShowDetailIsiSubBab(false)}
+                    className="px-4 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Modal
             isOpen={isModalOpen}
             onClose={closeModal}
@@ -1024,14 +1176,12 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
                     value={valueSubBabAddModal}
                     className="px-3 py-2 text-[15px] focus:outline-none border rounded-lg"
                   />
-                  <textarea
-                    placeholder="Masukkan isi"
-                    className="px-3 py-2 text-[15px] h-[300px] focus:outline-none border rounded-lg"
-                    onChange={(e) => {
-                      setValueIsiSubBabAddModal(e.target.value);
-                    }}
-                    value={valueIsiSubBabAddModal}
-                  />
+                  <div className="p-6 border rounded-lg ">
+                    <RichTextSubBabAddModal
+                      value={valueIsiSubBabAddModal}
+                      onChange={setValueIsiSubBabAddModal}
+                    />
+                  </div>
                 </div>
               </form>
             )}
@@ -1048,14 +1198,20 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
                     value={valueSubBabEditModal}
                     className="px-3 py-2 text-[15px] focus:outline-none border rounded-lg"
                   />
-                  <textarea
+                  {/* <textarea
                     placeholder="Masukkan isi"
                     className="px-3 py-2 text-[15px] h-[300px] focus:outline-none border rounded-lg"
                     onChange={(e) => {
                       setValueIsiSubBabEditModal(e.target.value);
                     }}
                     value={valueIsiSubBabEditModal}
-                  />
+                  /> */}
+                  <div className="p-6 border rounded-lg ">
+                    <RichTextSubBabEditModal
+                      value={valueIsiSubBabEditModal}
+                      onChange={setValueIsiSubBabEditModal}
+                    />
+                  </div>
                 </div>
               </form>
             )}
@@ -1069,6 +1225,289 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const RichTextSubBabAddModal: React.FC<{ value: any; onChange: any }> = ({
+  value,
+  onChange,
+}) => {
+  const renderElement = useCallback((props: any) => <Element {...props} />, []);
+  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+
+  const handleChange = (newValue: Descendant[]) => {
+    onChange(newValue); // Call the onChange prop to notify parent
+  };
+  return (
+    <Slate editor={editor} onChange={handleChange} initialValue={initialValue}>
+      <Toolbar>
+        <MarkButton format="bold" />
+        <MarkButton format="italic" />
+        <MarkButton format="underline" />
+        <BlockButton format="left" />
+        <BlockButton format="center" />
+        <BlockButton format="right" />
+        <BlockButton format="justify" />
+      </Toolbar>
+      <Editable
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        placeholder="Masukkan Isi Sub Bab…"
+        spellCheck
+        style={{ outline: "none", fontSize: "14px" }}
+        onKeyDown={(event) => {
+          for (const hotkey in HOTKEYS) {
+            if (isHotkey(hotkey, event as any)) {
+              event.preventDefault();
+              const mark = HOTKEYS[hotkey];
+              toggleMark(editor, mark);
+            }
+          }
+        }}
+      />
+    </Slate>
+  );
+};
+
+const RichTextSubBabEditModal: React.FC<{ value: any; onChange: any }> = ({
+  value,
+  onChange,
+}) => {
+  const renderElement = useCallback((props: any) => <Element {...props} />, []);
+  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+
+  const handleChange = (newValue: Descendant[]) => {
+    onChange(newValue); // Call the onChange prop to notify parent
+  };
+  return (
+    <Slate editor={editor} onChange={handleChange} initialValue={value}>
+      <Toolbar>
+        <MarkButton format="bold" />
+        <MarkButton format="italic" />
+        <MarkButton format="underline" />
+        <BlockButton format="left" />
+        <BlockButton format="center" />
+        <BlockButton format="right" />
+        <BlockButton format="justify" />
+      </Toolbar>
+      <Editable
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        placeholder="Masukkan Isi Sub Bab…"
+        spellCheck
+        style={{ outline: "none", fontSize: "14px" }}
+        onKeyDown={(event) => {
+          for (const hotkey in HOTKEYS) {
+            if (isHotkey(hotkey, event as any)) {
+              event.preventDefault();
+              const mark = HOTKEYS[hotkey];
+              toggleMark(editor, mark);
+            }
+          }
+        }}
+      />
+    </Slate>
+  );
+};
+
+const toggleBlock = (editor: any, format: any) => {
+  const isActive = isBlockActive(
+    editor,
+    format,
+    TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
+  );
+
+  Transforms.unwrapNodes(editor, {
+    match: (n: any) =>
+      !Editor.isEditor(n) &&
+      SlateElement.isElement(n) &&
+      !TEXT_ALIGN_TYPES.includes(format),
+    split: true,
+  });
+  let newProperties: any;
+  if (TEXT_ALIGN_TYPES.includes(format)) {
+    newProperties = {
+      align: isActive ? undefined : format,
+    };
+  } else {
+    newProperties = {
+      type: isActive ? "paragraph" : format,
+    };
+  }
+  Transforms.setNodes<SlateElement>(editor, newProperties);
+};
+
+const toggleMark = (editor: any, format: any) => {
+  const isActive = isMarkActive(editor, format);
+
+  if (isActive) {
+    Editor.removeMark(editor, format);
+  } else {
+    Editor.addMark(editor, format, true);
+  }
+};
+
+const isBlockActive = (editor: any, format: any, blockType: any = "type") => {
+  const { selection } = editor;
+  if (!selection) return false;
+
+  const [match] = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: (n) =>
+        !Editor.isEditor(n) &&
+        SlateElement.isElement(n) &&
+        n[blockType] === format,
+    })
+  );
+
+  return !!match;
+};
+
+const isMarkActive = (editor, format) => {
+  const marks = Editor.marks(editor);
+  return marks ? marks[format] === true : false;
+};
+
+const Element = ({ attributes, children, element }) => {
+  const style = { textAlign: element.align };
+  switch (element.type) {
+    case "block-quote":
+      return (
+        <blockquote style={style} {...attributes}>
+          {children}
+        </blockquote>
+      );
+    case "bulleted-list":
+      return (
+        <ul style={style} {...attributes}>
+          {children}
+        </ul>
+      );
+    case "heading-one":
+      return (
+        <h1 style={style} {...attributes}>
+          {children}
+        </h1>
+      );
+    case "heading-two":
+      return (
+        <h2 style={style} {...attributes}>
+          {children}
+        </h2>
+      );
+    case "list-item":
+      return (
+        <li style={style} {...attributes}>
+          {children}
+        </li>
+      );
+    case "numbered-list":
+      return (
+        <ol style={style} {...attributes}>
+          {children}
+        </ol>
+      );
+    default:
+      return (
+        <p style={style} {...attributes}>
+          {children}
+        </p>
+      );
+  }
+};
+
+const Leaf = ({ attributes, children, leaf }) => {
+  if (leaf.bold) {
+    children = <strong>{children}</strong>;
+  }
+
+  if (leaf.code) {
+    children = <code>{children}</code>;
+  }
+
+  if (leaf.italic) {
+    children = <em>{children}</em>;
+  }
+
+  if (leaf.underline) {
+    children = <u>{children}</u>;
+  }
+
+  return <span {...attributes}>{children}</span>;
+};
+
+const BlockButton = ({ format }) => {
+  const editor = useSlate();
+
+  const renderIcon = () => {
+    switch (format) {
+      case "heading-one":
+        return <LooksOneIcon />;
+      case "heading-two":
+        return <LooksTwoIcon />;
+      case "block-quote":
+        return <FormatQuoteIcon />;
+      case "numbered-list":
+        return <FormatListNumberedIcon />;
+      case "bulleted-list":
+        return <FormatListBulletedIcon />;
+      case "left":
+        return <FormatAlignLeftIcon />;
+      case "center":
+        return <FormatAlignCenterIcon />;
+      case "right":
+        return <FormatAlignRightIcon />;
+      case "justify":
+        return <FormatAlignJustifyIcon />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Button
+      active={isBlockActive(editor, format)}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        toggleBlock(editor, format);
+      }}
+    >
+      {renderIcon()}
+    </Button>
+  );
+};
+
+const MarkButton = ({ format }) => {
+  const editor = useSlate();
+
+  const renderIcon = () => {
+    switch (format) {
+      case "bold":
+        return <FormatBoldIcon />;
+      case "italic":
+        return <FormatItalicIcon />;
+      case "underline":
+        return <FormatUnderlinedIcon />;
+      case "code":
+        return <CodeIcon />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Button
+      active={isMarkActive(editor, format)}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        toggleMark(editor, format);
+      }}
+    >
+      {renderIcon()}
+    </Button>
   );
 };
 

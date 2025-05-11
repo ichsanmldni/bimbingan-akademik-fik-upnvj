@@ -10,11 +10,58 @@ interface LoginProps {
   isAdmin?: boolean;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
+
 const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
   const [nim, setNim] = useState<string>("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
+
+  const subscribeUser = async () => {
+    try {
+      // ⬇️ Registrasi SW custom push
+      const registration = await navigator.serviceWorker.register(
+        "/push/custom-sw.js?v=2",
+        { scope: "/push/" }
+      );
+      console.log("✅ Service Worker registered:", registration);
+
+      // ⬇️ Tunggu registrasi khusus scope "/push/"
+      const pushReg = await navigator.serviceWorker.getRegistration("/push/");
+      if (!pushReg) throw new Error("Custom SW belum terdaftar!");
+
+      console.log("🔧 SW Push Scope Ready:", pushReg);
+
+      // ⬇️ Subscribe ke PushManager
+      const subscription = await pushReg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+        ),
+      });
+
+      console.log("✅ Berhasil dapat subscription:", subscription);
+
+      // ⬇️ Kirim ke backend
+      await axios.post(
+        `${API_BASE_URL}/api/notifications/subscribe`,
+        subscription
+      );
+      console.log("📬 Berhasil kirim ke backend");
+    } catch (error) {
+      console.error("❌ Gagal subscribe:", error);
+    }
+  };
+
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const rawData = atob(base64);
+    return new Uint8Array([...rawData].map((char) => char.charCodeAt(0)));
+  }
 
   useEffect(() => {
     setNim("");
@@ -55,6 +102,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
           "Content-Type": "application/json",
         },
       });
+      await subscribeUser();
 
       if (response.status === 200) {
         localStorage.setItem("authBMFK", response.data.token);

@@ -37,10 +37,12 @@ const TabelStatistikLaporan = ({ dataBimbingan, dataLaporanBimbingan }) => {
     }
   };
 
-  const jumlahMahasiswaPerDosen = dataMahasiswa.reduce((acc, mahasiswa) => {
-    acc[mahasiswa.dosen_pa_id] = (acc[mahasiswa.dosen_pa_id] || 0) + 1;
-    return acc;
-  }, {});
+  const jumlahMahasiswaPerDosen = dataMahasiswa
+    .filter((data) => !data.status_lulus)
+    .reduce((acc, mahasiswa) => {
+      acc[mahasiswa.dosen_pa_id] = (acc[mahasiswa.dosen_pa_id] || 0) + 1;
+      return acc;
+    }, {});
   const jumlahLaporanBimbinganPerDosen = dataLaporanBimbingan.reduce(
     (acc, mahasiswa) => {
       acc[mahasiswa.dosen_pa_id] = (acc[mahasiswa.dosen_pa_id] || 0) + 1;
@@ -104,7 +106,7 @@ const TabelStatistikLaporan = ({ dataBimbingan, dataLaporanBimbingan }) => {
               Nama Dosen
             </th>
             <th className="px-1 md:px-4 py-2 md:w-[28%] text-center font-medium">
-              Jumlah Mahasiswa Bimbingan
+              Jumlah Mahasiswa Bimbingan (Aktif)
             </th>
             <th className="px-1 md:px-4 py-2 md:w-[28%] font-medium text-center rounded-br-xl rounded-tr-xl">
               Total Laporan Bimbingan

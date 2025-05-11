@@ -2,7 +2,7 @@
 
 import HeaderChatbot from "@/components/ui/chatbot/ChatDosenHeader";
 import NavbarChatbot from "@/components/ui/chatbot/NavbarChatbot";
-import TextInputPesanMahasiswa from "@/components/ui/chatbot/TextInputPesanMahasiswa";
+import TextInputPesanMahasiswa from "@/components/ui/TextInputPesanMahasiswa";
 import backIcon from "../../../assets/images/back-icon-black.png";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -46,6 +46,8 @@ export default function ChatDosenPA() {
     useState<any>({});
 
   const [allPesanChatMahasiswa, setAllPesanChatMahasiswa] = useState([]);
+
+  console.log(dataUser);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -157,9 +159,9 @@ export default function ChatDosenPA() {
         `${API_BASE_URL}/api/datamahasiswa`
       );
 
-      const mahasiswa = dataMahasiswa.data.find(
-        (data) => data.id === mahasiswaID
-      );
+      const mahasiswa = dataMahasiswa.data
+        .filter((data) => data.status_lulus === false)
+        .find((data) => data.id === mahasiswaID);
 
       const dataSiaran = dataPesanSiaran.data.filter(
         (data) => data.dosen_pa_id === mahasiswa.dosen_pa_id
@@ -255,11 +257,38 @@ export default function ChatDosenPA() {
   useEffect(() => {
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
+    // if (authTokenCookie) {
+    //   const token = authTokenCookie.split("=")[1];
+    //   try {
+    //     const decodedToken = jwtDecode(token);
+    //     console.log(decodedToken);
+    //     setDataUser(decodedToken);
+    //   } catch (error) {
+    //     console.error("Invalid token:", error);
+    //   }
+    // }
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
-        const decodedToken = jwtDecode(token);
-        setDataUser(decodedToken);
+        const decodedToken: any = jwtDecode(token);
+        console.log("Decoded token:", decodedToken);
+
+        // Ambil data mahasiswa dan cocokan nim
+        fetch(`${API_BASE_URL}/api/datamahasiswa`)
+          .then((res) => res.json())
+          .then((data) => {
+            const matchedUser = data.find(
+              (mahasiswa) => mahasiswa.nim === decodedToken.nim
+            );
+            if (matchedUser) {
+              setDataUser(matchedUser);
+            } else {
+              console.warn("Mahasiswa dengan NIM tersebut tidak ditemukan.");
+            }
+          })
+          .catch((err) => {
+            console.error("Gagal fetch /datamahasiswa:", err);
+          });
       } catch (error) {
         console.error("Invalid token:", error);
       }
@@ -453,174 +482,185 @@ export default function ChatDosenPA() {
               </div>
               <p className="text-[20px] font-semibold">Pesan</p>
             </div>
-            <div className="flex flex-col mb-4 overflow-y-auto h-[200%]">
-              {dataPesanSiaran?.map((data, index) => {
-                return (
-                  <div key={index} className="flex flex-col mt-4 md:mt-6">
-                    <p className="mx-auto mb-2 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
-                      Pesan Siaran
-                    </p>
+            {dataUser.status_lulus === false ? (
+              <div className="flex flex-col mb-4 overflow-y-auto h-[200%]">
+                {dataPesanSiaran?.map((data, index) => {
+                  return (
+                    <div key={index} className="flex flex-col mt-4 md:mt-6">
+                      <p className="mx-auto mb-2 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
+                        Pesan Siaran
+                      </p>
+                      <div
+                        onClick={() =>
+                          handleClickDetailPesanSiaran(
+                            data,
+                            statusPembacaanPesanSiaran
+                          )
+                        }
+                        className={`flex gap-2 md:gap-0 px-4 md:pl-[32px] md:pr-2 rounded-xl mx-4 md:mx-8 py-4 border justify-between cursor-pointer`}
+                      >
+                        <div className="flex gap-4">
+                          <div className="min-w-[40px] rounded-full size-10 justify-center items-center bg-orange-200">
+                            <Image
+                              src={broadcastIcon}
+                              className="size-10"
+                              alt="broadcast"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2 max-w-[160px] md:max-w-[900px] ">
+                            <p
+                              className={`text-[12px] md:text-[16px] font-medium`}
+                            >
+                              Pesan Siaran Mahasiswa Bimbingan{" "}
+                              <span>{data.dosen_pa.nama.split(",")[0]}</span>
+                            </p>
+                            <div className="md:max-h-[40px] max-w-[160px] md:max-w-[400px] lg:max-w-[700px] xl:max-w-[900px] overflow-hidden">
+                              <p className="text-[12px] md:text-[16px] whitespace-nowrap overflow-ellipsis overflow-hidden">
+                                <span>
+                                  {data.dosen_pa.nama.split(",")[0]}:{" "}
+                                </span>
+                                {data.pesan_terakhir}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "pb-8" : "flex flex-col gap-2"}`}
+                        >
+                          <p
+                            className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "" : "font-semibold text-orange-500"} text-[12px] md:text-[14px] align-top md:min-w-[170px]`}
+                          >
+                            {(() => {
+                              const date = new Date(data.waktu_pesan_terakhir);
+                              const formattedDate = date.toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                }
+                              );
+
+                              // Format waktu dalam UTC+7
+                              const formattedTime = date.toLocaleTimeString(
+                                "en-US",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true, // Format AM/PM
+                                  timeZone: "Asia/Jakarta", // Menggunakan zona waktu UTC+7
+                                }
+                              );
+
+                              // Gabungkan tanggal dan waktu
+                              const formattedDateTime = `${formattedDate} ${formattedTime}`;
+                              return formattedDateTime;
+                            })()}
+                          </p>
+
+                          <p
+                            className={`${statusPembacaanPesanSiaran?.is_read ? "hidden" : "font-semibold text-[12px] md:text-[16px]"}`}
+                          >
+                            Belum Dibaca!
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="flex flex-col mt-4 md:mt-6">
+                  <p className="mx-auto mb-2 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
+                    Pesan Pribadi
+                  </p>
+                  {selectedDataChatPribadi.id && (
                     <div
                       onClick={() =>
-                        handleClickDetailPesanSiaran(
-                          data,
-                          statusPembacaanPesanSiaran
-                        )
+                        handleClickDetailChatPribadi(selectedDataChatPribadi)
                       }
-                      className={`flex gap-2 md:gap-0 px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between cursor-pointer`}
+                      className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
                     >
                       <div className="flex gap-4">
-                        <div className="min-w-[40px] rounded-full size-10 justify-center items-center bg-orange-200">
-                          <Image
-                            src={broadcastIcon}
-                            className="size-10"
-                            alt="broadcast"
-                          />
+                        <div className="rounded-full size-10 md:size-12 bg-orange-200">
+                          {selectedDataChatPribadi.dosen_pa?.profile_image ? (
+                            <img
+                              src={`../${selectedDataChatPribadi.dosen_pa.profile_image}`}
+                              alt="Profile"
+                              className="rounded-full size-10 md:size-12 cursor-pointer"
+                            />
+                          ) : (
+                            <ProfileImage
+                              onClick={() => {}}
+                              className="size-10 md:size-12 cursor-pointer"
+                            />
+                          )}
                         </div>
-                        <div className="flex flex-col gap-2">
-                          <p
-                            className={`text-[12px] md:text-[18px] font-medium`}
-                          >
-                            Pesan Siaran Mahasiswa Bimbingan{" "}
-                            <span>{data.dosen_pa.nama.split(",")[0]}</span>
-                          </p>
-                          <div className="md:max-h-[40px] md:max-w-[900px] overflow-hidden">
-                            <p className="text-[12px] md:text-[16px] whitespace-nowrap overflow-ellipsis overflow-hidden">
-                              <span>{data.dosen_pa.nama.split(",")[0]}: </span>
-                              {data.pesan_terakhir}
+                        <div className="flex flex-col gap-2 text-[12px] md:text-[16px]">
+                          <p>{selectedDataChatPribadi.dosen_pa?.nama}</p>
+                          <div className="md:max-h-[40px] max-w-[160px] md:max-w-[400px] lg:max-w-[700px] xl:max-w-[900px] overflow-hidden">
+                            <p
+                              className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "whitespace-nowrap overflow-ellipsis overflow-hidden" : "font-semibold whitespace-nowrap overflow-ellipsis overflow-hidden"}`}
+                            >
+                              {selectedDataChatPribadi.pengirim_pesan_terakhir ===
+                                "Mahasiswa" && <span>Anda: </span>}
+                              {selectedDataChatPribadi.pesan_terakhir}
                             </p>
                           </div>
                         </div>
                       </div>
                       <div
-                        className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "pb-8" : "flex flex-col gap-2"}`}
+                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "text-[12px] md:text-[16px] pb-6 md:pb-8" : "text-[12px] md:text-[16px] flex flex-col gap-2"}`}
                       >
                         <p
-                          className={`${statusPembacaanPesanSiaran && statusPembacaanPesanSiaran?.is_read ? "" : "font-semibold text-orange-500"} text-[12px] md:text-[14px] align-top md:min-w-[170px]`}
+                          className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "text-[12px] md:text-[14px]" : "text-[12px] md:text-[14px] font-semibold text-orange-500"}`}
                         >
-                          {(() => {
-                            const date = new Date(data.waktu_pesan_terakhir);
-                            const formattedDate = date.toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                              }
-                            );
-
-                            // Format waktu dalam UTC+7
-                            const formattedTime = date.toLocaleTimeString(
-                              "en-US",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true, // Format AM/PM
-                                timeZone: "Asia/Jakarta", // Menggunakan zona waktu UTC+7
-                              }
-                            );
-
-                            // Gabungkan tanggal dan waktu
-                            const formattedDateTime = `${formattedDate} ${formattedTime}`;
-                            return formattedDateTime;
-                          })()}
+                          {formattedDateTime}
                         </p>
-
                         <p
-                          className={`${statusPembacaanPesanSiaran?.is_read ? "hidden" : "font-semibold text-[12px] md:text-[16px]"}`}
+                          className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "hidden" : " text-[12px] md:text-[16px] font-semibold"}`}
                         >
                           Belum Dibaca!
                         </p>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-              <div className="flex flex-col mt-4 md:mt-6">
-                <p className="mx-auto mb-2 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
-                  Pesan Pribadi
-                </p>
-                {selectedDataChatPribadi.id && (
-                  <div
-                    onClick={() =>
-                      handleClickDetailChatPribadi(selectedDataChatPribadi)
-                    }
-                    className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
-                  >
-                    <div className="flex gap-4">
-                      <div className="rounded-full size-10 md:size-12 bg-orange-200">
-                        {selectedDataChatPribadi.dosen_pa?.profile_image ? (
-                          <img
-                            src={`../${selectedDataChatPribadi.dosen_pa.profile_image}`}
-                            alt="Profile"
-                            className="rounded-full size-10 md:size-12 cursor-pointer"
-                          />
-                        ) : (
-                          <ProfileImage
-                            onClick={() => {}}
-                            className="size-10 md:size-12 cursor-pointer"
-                          />
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-2 text-[12px] md:text-[16px]">
-                        <p>{selectedDataChatPribadi.dosen_pa?.nama}</p>
-                        <p
-                          className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "" : "font-semibold"}`}
-                        >
-                          {selectedDataChatPribadi.pengirim_pesan_terakhir ===
-                            "Mahasiswa" && <span>Anda: </span>}
-                          {selectedDataChatPribadi.pesan_terakhir}
-                        </p>
-                      </div>
-                    </div>
+                  )}
+                  {!selectedDataChatPribadi.id && (
                     <div
-                      className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "text-[12px] md:text-[16px] pb-6 md:pb-8" : "text-[12px] md:text-[16px]  flex flex-col gap-2"}`}
+                      className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
+                      onClick={() => setIsDetailChatPribadiClicked(true)}
                     >
-                      <p
-                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "text-[12px] md:text-[16px]" : "text-[12px] md:text-[16px] font-semibold text-orange-500"}`}
-                      >
-                        {formattedDateTime}
-                      </p>
-                      <p
-                        className={`${selectedDataChatPribadi.is_mahasiswa_pesan_terakhir_read || selectedDataChatPribadi.pengirim_pesan_terakhir === "Mahasiswa" ? "hidden" : " text-[12px] md:text-[16px] font-semibold"}`}
-                      >
-                        Belum Dibaca!
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {!selectedDataChatPribadi.id && (
-                  <div
-                    className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
-                    onClick={() => setIsDetailChatPribadiClicked(true)}
-                  >
-                    <div className="flex gap-4">
-                      <div className="rounded-full flex min-w-[12px] size-12 justify-center items-center bg-orange-200">
-                        <Image
-                          src={chatIcon}
-                          className="size-6 min-w-[6px]"
-                          alt="chat"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <p className={`text-[18px] font-medium`}>
-                          Pesan Pribadi dengan Dosen Pembimbing Akademik
-                        </p>
-                        {selectedDataChatPribadi.id && (
-                          <p>Anda: {selectedDataChatPribadi.pesan_terakhir}</p>
-                        )}
-                        {!selectedDataChatPribadi.id && (
-                          <p>
+                      <div className="flex gap-4">
+                        <div className="flex items-center justify-center min-w-10 h-10 rounded-full bg-orange-200">
+                          <Image
+                            src={chatIcon}
+                            alt="chat"
+                            className="w-6 h-6"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <p
+                            className={`text-[12px] md:text-[16px] font-medium`}
+                          >
+                            Pesan Pribadi dengan Dosen Pembimbing Akademik
+                          </p>
+                          <p className="text-[12px] md:text-[16px]">
                             Anda belum memiliki pesan kepada dosen pembimbing
                             akademik! silahkan ketuk untuk mulai percakapan
                           </p>
-                        )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-md px-4 py-3 mx-4 md:mx-8 mt-4 md:mt-8 mb-4 text-sm md:text-base">
+                Anda telah lulus dan tidak lagi terdaftar sebagai mahasiswa
+                bimbingan. Oleh karena itu, fitur <strong>Pesan Siaran</strong>{" "}
+                dan <strong>Pesan Pribadi</strong> dengan dosen pembimbing tidak
+                tersedia.
+              </div>
+            )}
           </div>
         ) : isDetailChatPribadiClicked ? (
           <div className="flex flex-col h-screen w-full">

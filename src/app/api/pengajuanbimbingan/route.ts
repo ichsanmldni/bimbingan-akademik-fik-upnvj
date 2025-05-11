@@ -1,5 +1,6 @@
 import prisma from "../../../lib/prisma";
 import { format } from "date-fns";
+import { sendPushNotification } from "@/lib/sendPushNotification";
 
 export async function GET(req: Request): Promise<Response> {
   try {
@@ -130,6 +131,14 @@ export async function POST(req: Request) {
 
     await prisma.notifikasidosenpa.create({ data: notifikasiDosenPA });
 
+    await sendPushNotification({
+      role: "dosen pa",
+      userId: dosen_pa_id,
+      title: "Pengajuan Bimbingan Baru",
+      body: `Ada pengajuan bimbingan dari ${nama_lengkap}.`,
+      url: "/dashboard?submenu=Pengajuan%20Bimbingan%20Akademik%20Mahasiswa", // atau rute detail pengajuan
+    });
+
     const responsePayload = {
       status: "success",
       message: "Pengajuan bimbingan Anda telah berhasil!",
@@ -219,6 +228,14 @@ export async function PATCH(req: Request) {
       };
 
       await prisma.notifikasimahasiswa.create({ data: notifikasiMahasiswa });
+
+      await sendPushNotification({
+        role: "mahasiswa",
+        userId: mahasiswa_id,
+        title: "Bimbingan Siap Dimulai!",
+        body: `Pengajuan bimbinganmu berhasil diterima!`,
+        url: "/dashboard?submenu=Riwayat%20Pengajuan%20Bimbingan", // atau rute detail pengajuan
+      });
     }
 
     let pengajuanBimbingan;
@@ -259,6 +276,15 @@ export async function PATCH(req: Request) {
         };
 
         await prisma.notifikasimahasiswa.create({ data: notifikasiMahasiswa });
+
+        await sendPushNotification({
+          role: "mahasiswa",
+          userId: mahasiswa_id,
+          title: "Perubahan Jadwal Bimbingan",
+          body: `Pengajuan bimbinganmu direschedule!`,
+          url: "/dashboard?submenu=Riwayat%20Pengajuan%20Bimbingan", // atau rute detail pengajuan
+        });
+
         const responsePayload = {
           status: "success",
           message: "Pengajuan bimbingan telah berhasil direschedule!",
@@ -271,12 +297,21 @@ export async function PATCH(req: Request) {
       } else if (status_reschedule === "Bisa") {
         const notifikasiDosenPA: any = {
           dosen_pa_id,
-          isi: `${nama_lengkap} telah menyatakan bisa pada jadwal reschedule bimbingan yang diberikan!. Klik di sini untuk melihat detailnya.`,
+          isi: `Mahasiswa bimbingan Anda ${nama_lengkap} telah menyatakan bisa pada jadwal reschedule bimbingan yang diberikan!. Klik di sini untuk melihat detailnya.`,
           read: false,
           waktu: new Date(),
         };
 
         await prisma.notifikasidosenpa.create({ data: notifikasiDosenPA });
+
+        await sendPushNotification({
+          role: "dosen pa",
+          userId: dosen_pa_id,
+          title: "Ketersediaan Jadwal Reschedule Bimbingan Oleh Mahasiswa",
+          body: `Mahasiswa bimbingan Anda ${nama_lengkap} telah menyatakan bisa pada jadwal reschedule bimbingan yang diberikan!. Klik di sini untuk melihat detailnya.`,
+          url: "/dashboard?submenu=Pengajuan%20Bimbingan%20Akademik%20Mahasiswa", // atau rute detail pengajuan
+        });
+
         const responsePayload = {
           status: "success",
           message:
@@ -290,12 +325,21 @@ export async function PATCH(req: Request) {
       } else if (status_reschedule === "Tidak bisa") {
         const notifikasiDosenPA: any = {
           dosen_pa_id,
-          isi: `${nama_lengkap} telah menyatakan tidak bisa pada jadwal reschedule bimbingan yang diberikan!. Klik di sini untuk melihat detailnya.`,
+          isi: `Mahasiswa bimbingan Anda ${nama_lengkap} telah menyatakan tidak bisa pada jadwal reschedule bimbingan yang diberikan!. Klik di sini untuk melihat detailnya.`,
           read: false,
           waktu: new Date(),
         };
 
         await prisma.notifikasidosenpa.create({ data: notifikasiDosenPA });
+
+        await sendPushNotification({
+          role: "dosen pa",
+          userId: dosen_pa_id,
+          title: "Ketidaksediaan Jadwal Reschedule Bimbingan Oleh Mahasiswa",
+          body: `Mahasiswa bimbingan Anda ${nama_lengkap} telah menyatakan tidak bisa pada jadwal reschedule bimbingan yang diberikan!. Klik di sini untuk melihat detailnya.`,
+          url: "/dashboard?submenu=Pengajuan%20Bimbingan%20Akademik%20Mahasiswa", // atau rute detail pengajuan
+        });
+
         const responsePayload = {
           status: "success",
           message:

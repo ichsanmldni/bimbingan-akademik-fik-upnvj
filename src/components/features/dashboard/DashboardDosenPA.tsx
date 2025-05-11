@@ -2113,8 +2113,8 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   return (
     <>
       {selectedSubMenuDashboard === "Profile Dosen PA" && (
-        <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
-          <div className="border px-4 md:px-[70px] py-[30px] rounded-lg">
+        <div className="md:w-[75%] px-4 md:px-0 py-4 md:py-0">
+          <div className="px-4 md:px-[70px] py-[30px] rounded-lg">
             <div className="flex gap-10">
               {imagePreview ? (
                 <img
@@ -2204,9 +2204,9 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         </div>
       )}
       {selectedSubMenuDashboard === "Jadwal Kosong Dosen Role Dosen PA" && (
-        <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
-          <div className=" flex flex-col gap-6 border px-[25px] pt-[15px] pb-[30px] rounded-lg">
-            <h1 className="font-semibold text-[24px]">
+        <div className="md:w-[75%] px-4 py-4 md:p-0">
+          <div className=" flex flex-col gap-6 px-[25px] pt-[15px] pb-[30px] md:pt-6 md:px-[30px] rounded-lg">
+            <h1 className="font-semibold text-[20px]">
               Jadwal Kosong Dosen Pembimbing Akademik
             </h1>
             <div className="flex flex-col gap-4">
@@ -2422,226 +2422,228 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         </div>
       )}
       {selectedSubMenuDashboard === "Pengesahan Absensi Bimbingan" && (
-        <div className="md:w-[75%] px-4 md:pl-[30px] mb-12 md:pr-[128px] py-4 md:py-[30px] md:min-h-[500px]">
-          <div className="flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
-            <h1 className="font-semibold text-[24px]">
+        <div className="md:w-[75%] px-4 md:px-0 py-4 md:py-0">
+          <div className="flex flex-col gap-6 px-[30px] pt-[15px] md:pt-6 pb-[30px] rounded-lg">
+            <h1 className="font-semibold text-[20px]">
               Pengesahan Absensi Bimbingan Akademik Mahasiswa
             </h1>
 
-            {dataPengesahanBimbingan.length > 0 && (
-              <div className="flex flex-col gap-4">
-                {dataPengesahanBimbingan.length > 0 && (
-                  <div className="flex justify-between">
-                    <div>Selected ({selectedEntries.length})</div>
-                    <div className="flex items-center ">
-                      <input
-                        type="checkbox"
-                        id="selectAll"
-                        checked={
-                          selectedEntries.length ===
-                          dataPengesahanBimbingan.length
-                        }
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          setSelectedEntries(
-                            isChecked
-                              ? dataPengesahanBimbingan.map((data) => data.id)
-                              : []
-                          );
-                        }}
-                        className="size-4 cursor-pointer outline-none"
-                      />
-                      <label htmlFor="selectAll" className="ml-2">
-                        Select All ({dataPengesahanBimbingan.length})
-                      </label>
-                    </div>
-                  </div>
-                )}
-                {selectedEntries.length > 0 ? (
-                  <div className="p-4 border rounded-lg shadow-md">
-                    <div className="flex flex-col gap-2">
-                      <p className="text-md font-semibold">
-                        Apakah Anda ingin mengonfirmasi pengesahan untuk{" "}
-                        {selectedEntries.length} absensi bimbingan ini?
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Silakan pilih opsi konfirmasi di bawah ini.
-                      </p>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <button
-                        onClick={() =>
-                          handleBunchEditPengesahanKehadiranBimbingan(
-                            selectedEntries,
-                            "Tidak Sah"
-                          )
-                        }
-                        className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
-                        disabled={keteranganKonfirmasi === ""}
-                        aria-label="Konfirmasi Tidak Sah"
-                      >
-                        Tidak Sah
-                      </button>
-                      <button
-                        onClick={() =>
-                          handleBunchEditPengesahanKehadiranBimbingan(
-                            selectedEntries,
-                            "Sah"
-                          )
-                        }
-                        className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
-                        disabled={keteranganKonfirmasi === ""}
-                        aria-label="Konfirmasi Sah"
-                      >
-                        Sah
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 border rounded-lg shadow-md">
-                    <div className="flex flex-col gap-2">
-                      <p className="text-md font-semibold">
-                        Saat ini, belum ada absensi yang dapat disahkan karena
-                        dosen belum memilih bimbingan untuk konfirmasi.
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Silakan pilih absensi di bawah ini untuk mengonfirmasi
-                        pengesahannya!
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {dataPengesahanBimbingan.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {dataPengesahanBimbingan
-                  .slice()
-                  .reverse()
-                  .map((data) => (
-                    <div
-                      key={data.id}
-                      className="flex flex-col border rounded-lg p-6 gap-4"
-                    >
-                      <div className="relative">
+            <div className="flex flex-col gap-4 max-h-[calc(100vh-188px)] overflow-y-auto pr-4">
+              {dataPengesahanBimbingan.length > 0 && (
+                <div className="flex flex-col gap-4">
+                  {dataPengesahanBimbingan.length > 0 && (
+                    <div className="flex justify-between text-[14px]">
+                      <div>Selected ({selectedEntries.length})</div>
+                      <div className="flex items-center ">
                         <input
-                          className="size-4 cursor-pointer outline-none"
                           type="checkbox"
-                          checked={selectedEntries.includes(data.id)}
-                          onChange={() => handleSelectEntry(data.id)}
+                          id="selectAll"
+                          checked={
+                            selectedEntries.length ===
+                            dataPengesahanBimbingan.length
+                          }
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            setSelectedEntries(
+                              isChecked
+                                ? dataPengesahanBimbingan.map((data) => data.id)
+                                : []
+                            );
+                          }}
+                          className="size-4 cursor-pointer outline-none"
                         />
+                        <label htmlFor="selectAll" className="ml-2">
+                          Select All ({dataPengesahanBimbingan.length})
+                        </label>
                       </div>
-                      <div className="flex justify-between text-neutral-600">
-                        <p>
-                          {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                    </div>
+                  )}
+                  {selectedEntries.length > 0 ? (
+                    <div className="p-4 border rounded-lg text-[14px] shadow-md">
+                      <div className="flex flex-col gap-1">
+                        <p className="font-semibold">
+                          Apakah Anda ingin mengonfirmasi pengesahan untuk{" "}
+                          {selectedEntries.length} absensi bimbingan ini?
                         </p>
-                        <p>
-                          {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-medium">
-                          {data.pengajuan_bimbingan.nama_lengkap}
-                        </p>
-                        <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
-                        <p className="font-medium">
-                          {data.pengajuan_bimbingan.sistem_bimbingan}
+                        <p className="text-sm text-gray-600">
+                          Silakan pilih opsi konfirmasi di bawah ini.
                         </p>
                       </div>
-                      {data.permasalahan && (
-                        <div>
-                          <p className="text-sm font-medium text-gray-700 mt-2">
-                            Permasalahan{" "}
-                            {data.pengajuan_bimbingan.jenis_bimbingan ===
-                              "Pribadi" && (
-                              <span>
-                                (Topik bimbingan :{" "}
-                                {data.pengajuan_bimbingan.topik_bimbingan})
-                              </span>
-                            )}
-                          </p>
-                          <textarea
-                            placeholder={
-                              data.permasalahan === ""
-                                ? "Permasalahan"
-                                : data.permasalahan
-                            }
-                            value={data.permasalahan}
-                            disabled
-                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24"
-                          />
-                          <p className="text-sm font-medium text-gray-700 mt-2">
-                            Solusi
-                          </p>
-                          <textarea
-                            placeholder={
-                              data.solusi === "" ? "Solusi" : data.solusi
-                            }
-                            disabled
-                            value={data.solusi}
-                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24"
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() =>
+                            handleBunchEditPengesahanKehadiranBimbingan(
+                              selectedEntries,
+                              "Tidak Sah"
+                            )
+                          }
+                          className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium transition duration-200 ease-in-out"
+                          disabled={keteranganKonfirmasi === ""}
+                          aria-label="Konfirmasi Tidak Sah"
+                        >
+                          <p className="text-sm">Tidak Sah</p>
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleBunchEditPengesahanKehadiranBimbingan(
+                              selectedEntries,
+                              "Sah"
+                            )
+                          }
+                          className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                          disabled={keteranganKonfirmasi === ""}
+                          aria-label="Konfirmasi Sah"
+                        >
+                          Sah
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 border rounded-lg shadow-md">
+                      <div className="flex flex-col gap-2">
+                        <p className="text-md font-semibold">
+                          Saat ini, belum ada absensi yang dapat disahkan karena
+                          dosen belum memilih bimbingan untuk konfirmasi.
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Silakan pilih absensi di bawah ini untuk mengonfirmasi
+                          pengesahannya!
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {dataPengesahanBimbingan.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                  {dataPengesahanBimbingan
+                    .slice()
+                    .reverse()
+                    .map((data) => (
+                      <div
+                        key={data.id}
+                        className="flex flex-col border rounded-lg p-6 gap-4"
+                      >
+                        <div className="relative">
+                          <input
+                            className="size-4 cursor-pointer outline-none"
+                            type="checkbox"
+                            checked={selectedEntries.includes(data.id)}
+                            onChange={() => handleSelectEntry(data.id)}
                           />
                         </div>
-                      )}
-                      <div className="flex gap-10">
-                        <div className="flex flex-col gap-2">
-                          <p>Dokumentasi :</p>
-                          <div className="relative">
-                            <img
-                              className="w-[200px] cursor-pointer"
-                              src={data.dokumentasi_kehadiran}
-                              alt="Dokumentasi Kehadiran"
-                            />
-                            <button
-                              className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-200"
-                              onClick={() =>
-                                openImageInNewTab(data.dokumentasi_kehadiran)
+                        <div className="flex justify-between text-neutral-600">
+                          <p>
+                            {getDate(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                          </p>
+                          <p>
+                            {getTime(data.pengajuan_bimbingan.jadwal_bimbingan)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="font-medium">
+                            {data.pengajuan_bimbingan.nama_lengkap}
+                          </p>
+                          <p>{data.pengajuan_bimbingan.jenis_bimbingan}</p>
+                          <p className="font-medium">
+                            {data.pengajuan_bimbingan.sistem_bimbingan}
+                          </p>
+                        </div>
+                        {data.permasalahan && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mt-2">
+                              Permasalahan{" "}
+                              {data.pengajuan_bimbingan.jenis_bimbingan ===
+                                "Pribadi" && (
+                                <span>
+                                  (Topik bimbingan :{" "}
+                                  {data.pengajuan_bimbingan.topik_bimbingan})
+                                </span>
+                              )}
+                            </p>
+                            <textarea
+                              placeholder={
+                                data.permasalahan === ""
+                                  ? "Permasalahan"
+                                  : data.permasalahan
                               }
-                              title="Lihat Gambar"
-                            >
-                              <EyeIcon className="h-5 w-5 text-gray-700" />
-                            </button>
+                              value={data.permasalahan}
+                              disabled
+                              className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24"
+                            />
+                            <p className="text-sm font-medium text-gray-700 mt-2">
+                              Solusi
+                            </p>
+                            <textarea
+                              placeholder={
+                                data.solusi === "" ? "Solusi" : data.solusi
+                              }
+                              disabled
+                              value={data.solusi}
+                              className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full max-h-24"
+                            />
+                          </div>
+                        )}
+                        <div className="flex gap-10">
+                          <div className="flex flex-col gap-2">
+                            <p>Dokumentasi :</p>
+                            <div className="relative">
+                              <img
+                                className="w-[200px] cursor-pointer"
+                                src={data.dokumentasi_kehadiran}
+                                alt="Dokumentasi Kehadiran"
+                              />
+                              <button
+                                className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-200"
+                                onClick={() =>
+                                  openImageInNewTab(data.dokumentasi_kehadiran)
+                                }
+                                title="Lihat Gambar"
+                              >
+                                <EyeIcon className="h-5 w-5 text-gray-700" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <p>Tanda Tangan Kehadiran :</p>
+                            <img
+                              alt="ttd absensi"
+                              className="self-center p-4 w-[100px]"
+                              src={data.ttd_kehadiran}
+                            />
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2">
-                          <p>Tanda Tangan Kehadiran :</p>
-                          <img
-                            alt="ttd absensi"
-                            className="self-center p-4 w-[100px]"
-                            src={data.ttd_kehadiran}
-                          />
-                        </div>
                       </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              <div className="border rounded-lg p-10 flex flex-col items-center">
-                <svg
-                  className="h-12 w-12 text-red-500 mb-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                    ))}
+                </div>
+              ) : (
+                <div className="border rounded-lg p-10 flex flex-col items-center">
+                  <svg
+                    className="h-12 w-12 text-red-500 mb-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
 
-                <p className="text-center text-red-500">
-                  Saat ini, belum ada absensi bimbingan yang diajukan oleh
-                  mahasiswa.
-                </p>
-                <p className="text-center text-gray-600">
-                  Silakan tunggu hingga mahasiswa mengisi absensi bimbingan.
-                </p>
-              </div>
-            )}
+                  <p className="text-center text-red-500">
+                    Saat ini, belum ada absensi bimbingan yang diajukan oleh
+                    mahasiswa.
+                  </p>
+                  <p className="text-center text-gray-600">
+                    Silakan tunggu hingga mahasiswa mengisi absensi bimbingan.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
           <ToastContainer />
         </div>
@@ -2649,12 +2651,12 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       {selectedSubMenuDashboard ===
         "Pengajuan Bimbingan Akademik Mahasiswa" && (
-        <div className="md:w-[75%] px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
-          <div className="flex flex-col gap-6 border px-[30px] pt-[15px] pb-[30px] rounded-lg">
-            <h1 className="font-semibold text-[24px]">
+        <div className="md:w-[75%] px-4 md:px-0 py-4 md:py-0">
+          <div className="flex flex-col gap-6 px-[30px] pt-[15px] md:pt-6 pb-[30px] rounded-lg">
+            <h1 className="font-semibold text-[20px]">
               Pengajuan Bimbingan Akademik Mahasiswa
             </h1>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 max-h-[calc(100vh-188px)] overflow-y-auto">
               {dataPengajuanBimbingan.length > 0 ? (
                 dataPengajuanBimbingan
                   .slice()
@@ -2664,11 +2666,16 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                       key={data.id}
                       className="flex flex-col border rounded-lg p-6 gap-4"
                     >
-                      <div className="flex justify-between text-neutral-600">
-                        <p>{getDate(data.jadwal_bimbingan)}</p>
-                        <p>{getTime(data.jadwal_bimbingan)}</p>
+                      <div className="flex justify-between text-sm font-semibold text-neutral-600">
+                        <div className="flex gap-2">
+                          <p>{getDate(data.jadwal_bimbingan)}</p>
+                          <p>{getTime(data.jadwal_bimbingan)}</p>
+                        </div>
+                        <p>
+                          {data.tahun_ajaran} ({data.semester})
+                        </p>
                       </div>
-                      <div>
+                      <div className="text-sm">
                         <p className="font-medium">{data.nama_lengkap}</p>
                         <p>{data.jenis_bimbingan}</p>
                         <p className="font-medium">{data.sistem_bimbingan}</p>
@@ -2939,17 +2946,17 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       {selectedSubMenuDashboard ===
         "Riwayat Laporan Bimbingan Role Dosen PA" && (
-        <div className="md:w-[75%] border md:border-none mt-4 md:mt-0 mx-4 md:mx-0 rounded-lg md:rounded-none px-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px] min-h-[500px]">
+        <div className="md:w-[75%] border md:border-none mt-4 md:mt-0 mx-4 md:mx-0 rounded-lg md:rounded-none px-4 md:px-[30px] py-4 md:py-6 min-h-[500px]">
           <div className=" flex flex-col gap-6 rounded-lg">
             {!isDetailLaporanDosenClicked ? (
               <div className="flex flex-col gap-4">
-                <h1 className="font-semibold text-[18px] md:text-[24px]">
+                <h1 className="font-semibold text-[18px] md:text-[20px]">
                   Riwayat Laporan Bimbingan Akademik
                 </h1>
-                <div className="flex gap-5">
+                <div className="flex gap-5 pr-8">
                   <div className="relative w-1/3">
                     <select
-                      className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
+                      className={`px-3 py-2 text-sm border rounded-lg appearance-none w-full ${selectedTahunAjaran === "Semua Tahun Ajaran" ? "text-gray-400" : "text-black"}`}
                       value={selectedTahunAjaran}
                       onChange={(e) => setSelectedTahunAjaran(e.target.value)}
                     >
@@ -2988,7 +2995,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                   <div className="relative w-1/3">
                     <select
                       disabled={selectedTahunAjaran === "Semua Tahun Ajaran"}
-                      className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
+                      className={`px-3 py-2 text-sm border rounded-lg appearance-none w-full ${selectedSemester === "Semua Semester" ? "text-gray-400" : "text-black"}`}
                       value={selectedSemester}
                       onChange={(e) => setSelectedSemester(e.target.value)}
                     >
@@ -3031,7 +3038,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                         selectedTahunAjaran === "Semua Tahun Ajaran" ||
                         selectedSemester === "Semua Semester"
                       }
-                      className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full ${selectedPeriode === "Semua Periode" ? "text-gray-400" : "text-black"}`}
+                      className={`px-3 py-2 text-sm border rounded-lg appearance-none w-full ${selectedPeriode === "Semua Periode" ? "text-gray-400" : "text-black"}`}
                       value={selectedPeriode}
                       onChange={(e) => setSelectedPeriode(e.target.value)}
                     >
@@ -3070,69 +3077,79 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                     </div>
                   </div>
                 </div>
-                {filteredDataLaporanBimbingan.length > 0 ? (
-                  filteredDataLaporanBimbingan
-                    .slice()
-                    .reverse()
-                    .map((data, index) => (
-                      <div
-                        key={data.id}
-                        className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
-                        onClick={() => handleDetailLaporanDosen(data)}
+                <div className="flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-236px)] px-5 md:pr-4 md:pl-0 py-4 md:pt-1 md:pb-0 rounded-lg">
+                  {filteredDataLaporanBimbingan.length > 0 ? (
+                    filteredDataLaporanBimbingan
+                      .slice()
+                      .reverse()
+                      .map((data, index) => (
+                        <div
+                          key={data.id}
+                          className="flex flex-col border rounded-lg p-6 gap-4 cursor-pointer"
+                          onClick={() => handleDetailLaporanDosen(data)}
+                        >
+                          <div className="flex justify-between text-sm font-semibold text-neutral-600">
+                            <div className="flex gap-2">
+                              <p>{getDate(data.jadwal_bimbingan)}</p>
+                              <p>{getTime(data.jadwal_bimbingan)}</p>
+                            </div>
+                            <p>
+                              {data.tahun_ajaran} ({data.semester})
+                            </p>
+                          </div>
+                          <div className="flex text-sm justify-between">
+                            <div>
+                              <p className="font-medium">
+                                {data.nama_dosen_pa}
+                              </p>
+                              <p>{data.jumlah_mahasiswa} Mahasiswa</p>
+                              <p className="font-medium">
+                                {data.jenis_bimbingan}
+                              </p>
+                              <p className="font-medium">
+                                {data.sistem_bimbingan}
+                              </p>
+                            </div>
+                            <div
+                              className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} text-[10px] md:text-sm p-1 md:p-2 self-start md:self-center rounded-lg`}
+                            >
+                              <p className="text-white font-semibold text-center">
+                                {data.status}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="border rounded-lg p-10 flex flex-col items-center">
+                      <svg
+                        className="h-12 w-12 text-red-500 mb-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
                       >
-                        <div className="flex justify-between text-neutral-600">
-                          <p>{data.jadwal_bimbingan}</p>
-                        </div>
-                        <div className="flex justify-between">
-                          <div>
-                            <p className="font-medium">{data.nama_dosen_pa}</p>
-                            <p>{data.jumlah_mahasiswa} Mahasiswa</p>
-                            <p className="font-medium">
-                              {data.jenis_bimbingan}
-                            </p>
-                            <p className="font-medium">
-                              {data.sistem_bimbingan}
-                            </p>
-                          </div>
-                          <div
-                            className={`${data.status === "Menunggu Feedback Kaprodi" ? "bg-red-500" : "bg-green-500"} text-[10px] md:text-[16px] p-1 md:p-3 self-start md:self-center rounded-lg`}
-                          >
-                            <p className="text-white text-center">
-                              {data.status}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                ) : (
-                  <div className="border rounded-lg p-10 flex flex-col items-center">
-                    <svg
-                      className="h-12 w-12 text-red-500 mb-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
 
-                    <p className="text-center text-red-500">
-                      Saat ini, belum ada laporan bimbingan yang dibuat.
-                    </p>
-                    <p className="text-center text-gray-600">
-                      Silahkan buat laporan bimbingan terlebih dahulu.
-                    </p>
-                  </div>
-                )}
+                      <p className="text-center text-red-500">
+                        Saat ini, belum ada laporan bimbingan yang dibuat.
+                      </p>
+                      <p className="text-center text-gray-600">
+                        Silahkan buat laporan bimbingan terlebih dahulu.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="mb-20">
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-2">
                   <Image
                     src={backIconOrange}
                     alt="backIconOrange"
@@ -3147,20 +3164,28 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                   <p className="text-orange-600 font-medium">Kembali</p>
                 </div>
                 <div className="mt-4">
-                  <div className="flex flex-col border rounded-lg p-6 gap-4">
-                    <div className="flex justify-between text-neutral-600">
-                      <p>{dataClickedLaporanBimbingan?.jadwal_bimbingan}</p>
+                  <div className="flex flex-col border rounded-lg p-6 gap-4 max-h-[calc(100vh-188px)] overflow-y-scroll">
+                    <div className="flex justify-between text-sm font-semibold text-neutral-600">
+                      <div className="flex gap-2">
+                        <p>
+                          {getDate(
+                            dataClickedLaporanBimbingan?.jadwal_bimbingan
+                          )}
+                        </p>
+                        <p>
+                          {getTime(
+                            dataClickedLaporanBimbingan?.jadwal_bimbingan
+                          )}
+                        </p>
+                      </div>
+                      <p>
+                        {dataClickedLaporanBimbingan?.tahun_ajaran} (
+                        {dataClickedLaporanBimbingan?.semester})
+                      </p>
                     </div>
                     <div className="flex justify-between">
                       <div className="flex flex-col gap-4 w-[55%]">
                         <div className="flex flex-col gap-2">
-                          <div className="flex items-center">
-                            <p className="font-medium w-1/3">Tahun Akademik</p>
-                            <span className="font-medium">:</span>
-                            <p className="flex-1 ml-4">
-                              {dataClickedLaporanBimbingan.tahun_ajaran}
-                            </p>
-                          </div>
                           <div className="flex items-center">
                             <p className="font-medium w-1/3">Semester</p>
                             <span className="font-medium">:</span>

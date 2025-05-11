@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { id } = decoded as { id: string };
+  const { id } = decoded as { id: number };
 
   // Cek user berdasarkan token
   let user = await prisma.dosenpa.findFirst({

@@ -1,7 +1,7 @@
 "use client";
 
 import ChatMahasiswaHeader from "@/components/ui/chatbot/ChatMahasiswaHeader";
-import TextInputPesanDosenPA from "@/components/ui/chatbot/TextInputPesanDosenPA";
+import TextInputPesanDosenPA from "@/components/ui/TextInputPesanDosenPA";
 import backIcon from "../../../assets/images/back-icon-black.png";
 import broadcastIcon from "../../../assets/images/broadcast-icon.png";
 import axios from "axios";
@@ -14,7 +14,7 @@ import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
 import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
 import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
 import { env } from "process";
-import TextInputPesanSiaran from "@/components/ui/chatbot/TextInputPesanSiaran";
+import TextInputPesanSiaran from "@/components/ui/TextInputPesanSiaran";
 import PesanSiaranHeader from "@/components/ui/chatbot/PesanSiaranHeader";
 
 export default function ChatMahasiswa() {
@@ -217,9 +217,9 @@ export default function ChatMahasiswa() {
         `${API_BASE_URL}/api/chatpribadi`
       );
 
-      const dataChat = dataChatPribadi.data.filter(
-        (data) => data.dosen_pa_id === dosenPAID
-      );
+      const dataChat = dataChatPribadi.data
+        .filter((data) => data.dosen_pa_id === dosenPAID)
+        .filter((data) => data.mahasiswa.status_lulus === false);
 
       if (!dataChat) {
         return; // Hentikan eksekusi jika dosen PA tidak ditemukan
@@ -366,7 +366,7 @@ export default function ChatMahasiswa() {
         (data) => data.dosen_pa_id === userDosenPA.id
       );
       const selectedDataPesanChatSiaran = allPesanChatSiaran.find(
-        (data) => data.pesan_siaran_id === selectedDataPesanSiaran.id
+        (data) => data.pesan_siaran_id === selectedDataPesanSiaran?.id
       );
 
       if (selectedDataPesanChatSiaran) {
@@ -471,28 +471,32 @@ export default function ChatMahasiswa() {
               <p className="text-[20px] font-semibold">Pesan</p>
             </div>
             <div className="flex flex-col mb-4 overflow-y-auto h-[200%]">
-              <div className="flex flex-col mt-6">
-                <p className="mx-auto mb-6 text-sm text-gray-500 font-medium">
+              <div className="flex flex-col mt-4 md:mt-6">
+                <p className="mx-auto mb-2 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
                   Pesan Siaran
                 </p>
                 <div
-                  className={`flex px-4 md:px-[32px] rounded-xl mx-8 py-4 border justify-between items-center cursor-pointer`}
+                  className={`flex px-4 md:px-[32px] rounded-xl mx-4 md:mx-8 py-4 border justify-between items-center cursor-pointer`}
                   onClick={() => handleClickDetailPesanSiaran()}
                 >
                   <div className="flex gap-4">
-                    <div className="rounded-full flex size-12 justify-center items-center bg-orange-200">
-                      <Image src={broadcastIcon} className="size-10" alt="" />
+                    <div className="min-w-[40px] rounded-full size-10 justify-center items-center bg-orange-200">
+                      <Image
+                        src={broadcastIcon}
+                        className="size-10"
+                        alt="broadcast"
+                      />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <p className={`text-[14px] md:text-[18px] font-medium`}>
+                      <p className={`text-[12px] md:text-[16px] font-medium`}>
                         Pesan Siaran Mahasiswa Bimbingan
                       </p>
-                      {selectedDataPesanSiaran.id && (
-                        <p className="text-[14px] md:text-[16px]">
+
+                      {selectedDataPesanSiaran.id ? (
+                        <p className="text-[12px] md:text-[16px] max-w-[160px] md:max-w-[400px] lg:max-w-[700px] xl:max-w-[900px] whitespace-nowrap overflow-ellipsis overflow-hidden">
                           Anda: {selectedDataPesanSiaran.pesan_terakhir}
                         </p>
-                      )}
-                      {!selectedDataPesanSiaran.id && (
+                      ) : (
                         <p>
                           Anda belum memiliki pesan siaran satupun! silahkan
                           siarkan pesan.
@@ -500,11 +504,43 @@ export default function ChatMahasiswa() {
                       )}
                     </div>
                   </div>
+
+                  {selectedDataPesanSiaran.id && (
+                    <div className="text-right h-full">
+                      <p className="text-[12px] md:text-[14px]">
+                        {(() => {
+                          const date = new Date(
+                            selectedDataPesanSiaran.waktu_pesan_terakhir
+                          );
+                          const formattedDate = date.toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          );
+
+                          const formattedTime = date.toLocaleTimeString(
+                            "en-US",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                              timeZone: "Asia/Jakarta",
+                            }
+                          );
+
+                          return `${formattedDate} ${formattedTime}`;
+                        })()}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
               {dataChatPribadi.length > 0 ? (
-                <div className="flex flex-col mt-6">
-                  <p className="mx-auto mb-6 text-sm text-gray-500 font-medium">
+                <div className="flex flex-col mt-4 md:mt-6">
+                  <p className="mx-auto mb-4 md:mb-6 text-[12px] md:text-sm text-gray-500 font-medium">
                     Pesan Pribadi
                   </p>
                   {dataChatPribadi.map((data) => (
