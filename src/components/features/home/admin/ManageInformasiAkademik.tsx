@@ -461,9 +461,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       getDataBab();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditBab = async (id: number) => {
@@ -477,9 +475,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       getDataBab();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeleteBab = async (id: number) => {
@@ -491,9 +487,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       const result = await deleteBab(babValue);
       closeModal();
       getDataBab();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const patchBabOrder = async (updatedOrder: Bab[]) => {
@@ -515,9 +509,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
   const handleSaveBabOrder = async () => {
     try {
       const result = await patchBabOrder(afterOrderEditDataBab);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const getDataBab = async () => {
@@ -535,7 +527,6 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
         setAfterOrderEditDataBab([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -623,9 +614,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       getDataSubBabByBab(selectedBab);
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditSubBab = async (id: number) => {
@@ -640,9 +629,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       getDataSubBabByBab(selectedBab);
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeleteSubBab = async (id: number) => {
@@ -654,9 +641,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
       const result = await deleteSubBab(subBabValue);
       getDataSubBabByBab(selectedBab);
       closeModal();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const patchSubBabOrder = async (updatedOrder: SubBab[]) => {
@@ -689,9 +674,7 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
   const handleSaveSubBabOrder = async () => {
     try {
       const result = await patchSubBabOrder(afterOrderEditDataSubBab);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const getDataSubBabByBab = async (selectedBab: string) => {
@@ -724,7 +707,6 @@ const ManageInformasiAkademik: React.FC<ManageInformasiAkademikProps> = () => {
         setAfterOrderEditDataSubBab([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };

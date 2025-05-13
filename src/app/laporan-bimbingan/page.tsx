@@ -562,7 +562,6 @@ export default function Home() {
             <EditButton
               className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
               onClick={(e: any) => {
-                console.log(data);
                 setDataSelectedDataKonsultasiMahasiswaEditModal(data);
                 openEditDataKonsultasiMahasiswaModal(e);
               }}
@@ -732,10 +731,6 @@ export default function Home() {
   };
 
   const handleEditDataKonsultasiMahasiswa = async () => {
-    console.log(
-      dataKonsultasiMahasiswa,
-      dataSelectedDataKonsultasiMahasiswaEditModal
-    );
     setDataKonsultasiMahasiswa((prevValues: any) => {
       return prevValues.map((item: any) =>
         item.id === dataSelectedDataKonsultasiMahasiswaEditModal.id
@@ -1073,23 +1068,6 @@ export default function Home() {
     ),
   ];
 
-  // const filteredBimbingan = dataBimbingan
-  //   .filter((data: any) => data.laporan_bimbingan_id === null)
-  //   .filter((data: any) => {
-  //     const matchesJurusan = jurusanFilter
-  //       ? data.pengajuan_bimbingan.jurusan === jurusanFilter
-  //       : true;
-  //     const matchesJadwal = jadwalFilter
-  //       ? data.pengajuan_bimbingan.jadwal_bimbingan === jadwalFilter
-  //       : true;
-  //     const matchesJenisBimbingan = jenisBimbinganFilter
-  //       ? data.pengajuan_bimbingan.jenis_bimbingan === jenisBimbinganFilter
-  //       : true;
-  //     return matchesJurusan && matchesJadwal && matchesJenisBimbingan;
-  //   });
-
-  console.log(filteredBimbingan);
-
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const toggleBimbingan = (data: any) => {
@@ -1121,7 +1099,6 @@ export default function Home() {
       }
       setDataMahasiswa(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1134,7 +1111,6 @@ export default function Home() {
       }
       setDataDosenPA(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1148,7 +1124,6 @@ export default function Home() {
 
       setDataKaprodi(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1174,7 +1149,6 @@ export default function Home() {
       // Menyimpan data tahun ajaran yang sudah difilter
       setDataTahunAjaran(uniqueTahunAjaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1435,8 +1409,6 @@ export default function Home() {
       tanda_tangan_dosen_pa: signatureData,
       konsultasi_mahasiswa: dataKonsultasiMahasiswa,
     };
-
-    console.log(laporanData);
 
     const doc = new jsPDF({
       orientation: "portrait", // or "landscape"
@@ -2211,7 +2183,6 @@ export default function Home() {
       );
 
       if (!dosen) {
-        console.error("Dosen tidak ditemukan");
         return;
       }
 
@@ -2221,7 +2192,6 @@ export default function Home() {
         hp: dosen.hp,
       });
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -2250,7 +2220,6 @@ export default function Home() {
       setDataBimbingan(bimbingan);
       setFilteredBimbingan(bimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -2430,9 +2399,7 @@ export default function Home() {
       try {
         const decodedToken = jwtDecode(token);
         setDataUser(decodedToken);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+      } catch (error) {}
     }
   }, []);
 
@@ -4147,7 +4114,6 @@ export default function Home() {
                                                             onClick={(
                                                               e: any
                                                             ) => {
-                                                              console.log(data);
                                                               setDataSelectedDataStatusMahasiswaEditModal(
                                                                 data
                                                               );

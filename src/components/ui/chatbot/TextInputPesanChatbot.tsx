@@ -33,7 +33,7 @@ export default function TextInputPesanChatbot({
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyPress}
-        placeholder="Kirim pesan ke DeepLib..."
+        placeholder="Kirim pesan ke Chatbot BIMAFIK..."
         className="p-4 pb-14 focus:outline-none resize-none rounded-lg w-full h-32"
       />
 

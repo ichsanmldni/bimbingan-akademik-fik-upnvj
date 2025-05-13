@@ -24,7 +24,6 @@ import { AppDispatch, RootState } from "@/lib/store";
 import { useSelector } from "react-redux";
 
 const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
-  console.log(dataUser);
   const dispatch = useDispatch<AppDispatch>();
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
   const [isModalProfileOpen, setIsModalProfileOpen] = useState(false);
@@ -84,7 +83,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const isActive = (path: string) => pathname === path;
 
   useEffect(() => {
-    console.log(dataUser, roleUser);
     if (roleUser && dataUser?.id) {
       dispatch(fetchNotifikasi({ roleUser, userId }));
     }
@@ -109,7 +107,7 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   useEffect(() => {
     const count = dataNotifikasi?.filter((data) => data.read === false).length;
-    console.log("jalan");
+
     setNotificationCount(count);
   }, [dataNotifikasi]);
 
@@ -128,7 +126,6 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
     isChatPribadiMahasiswaUnread,
     isChatPribadiDosenPAUnread,
   ]);
-  console.log(dataUser);
 
   return (
     <>

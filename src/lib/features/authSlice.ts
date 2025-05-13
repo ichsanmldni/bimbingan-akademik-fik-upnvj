@@ -17,7 +17,6 @@ export const fetchAuthUser = createAsyncThunk(
           roleUser: decodedToken.role,
         };
       } catch (error) {
-        console.error("Invalid token:", error);
         throw error;
       }
     } else {

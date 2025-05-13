@@ -26,7 +26,6 @@ export default function ChatPribadi() {
       const data = await response.data;
       setDataDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -42,7 +41,6 @@ export default function ChatPribadi() {
       const data = await response.data;
       setDataKaprodi(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -55,9 +53,7 @@ export default function ChatPribadi() {
       try {
         const decodedToken: any = jwtDecode(token);
         setDataUser(decodedToken);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+      } catch (error) {}
     }
     getDataDosenPA();
     getDataKaprodi();

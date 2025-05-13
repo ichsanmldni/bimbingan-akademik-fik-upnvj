@@ -83,9 +83,6 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
       const currentKaprodi = afterOrderEditDataDosenTetap.find(
         (d) => d.isKaprodi
       );
-
-      // Cari dosen yang dipilih sebagai kaprodi baru
-      console.log(afterOrderEditDataDosenTetap, selectedKaprodi);
       const newKaprodi = afterOrderEditDataDosenTetap.find(
         (d) => d.id === parseInt(selectedKaprodi)
       );
@@ -125,7 +122,6 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
       setAfterOrderEditDataDosenTetap(updatedList);
       setIsEditKaprodiOpen(false);
     } catch (error) {
-      console.error("Gagal mengubah Kaprodi:", error);
       // optional: tampilkan notifikasi error ke user
     }
   };
@@ -362,9 +358,7 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
       getDataDosenTetap();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditDosenTetap = async (id: number) => {
@@ -380,9 +374,7 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
       getDataDosenTetap();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeleteDosenTetap = async (id: number) => {
@@ -394,9 +386,7 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
       const result = await deleteDosenTetap(dosenTetapValue);
       closeModal();
       getDataDosenTetap();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const patchDosenTetapOrder = async (updatedOrder: DataDosenTetap[]) => {
@@ -418,9 +408,7 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
   const handleSaveDosenTetapOrder = async () => {
     try {
       const result = await patchDosenTetapOrder(afterOrderEditDataDosenTetap);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const getDataDosenTetap = async () => {
@@ -441,7 +429,6 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
         setAfterOrderEditDataDosenTetap([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };

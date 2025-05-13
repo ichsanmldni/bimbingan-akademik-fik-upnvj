@@ -72,7 +72,6 @@ const pesanPribadiSlice = createSlice({
       .addCase(fetchPesanPribadi.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
-        console.log("ini dari redux", state, action);
 
         if (action.payload.length > 0) {
           const pesanPribadiUser = action.payload.find(

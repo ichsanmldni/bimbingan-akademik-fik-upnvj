@@ -29,7 +29,6 @@ const NotificationModal: React.FC<any> = ({
       );
       return response.data;
     } catch (error) {
-      console.error("Error read notification :", error);
       throw error;
     }
   };
@@ -44,7 +43,6 @@ const NotificationModal: React.FC<any> = ({
       );
       return response.data;
     } catch (error) {
-      console.error("Error read notification :", error);
       throw error;
     }
   };
@@ -59,7 +57,6 @@ const NotificationModal: React.FC<any> = ({
       );
       return response.data;
     } catch (error) {
-      console.error("Error read notification :", error);
       throw error;
     }
   };

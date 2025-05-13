@@ -11,8 +11,8 @@ import broadcastIcon from "../../../assets/images/broadcast-icon.png";
 import chatIcon from "../../../assets/images/userpa-icon.png";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
-import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
+import BubbleChatStart from "@/components/ui/BubbleChatStart";
+import BubbleChatEnd from "@/components/ui/BubbleChatEnd";
 import { env } from "process";
 import { MessageSquareText } from "lucide-react";
 import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
@@ -46,8 +46,6 @@ export default function ChatDosenPA() {
     useState<any>({});
 
   const [allPesanChatMahasiswa, setAllPesanChatMahasiswa] = useState([]);
-
-  console.log(dataUser);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -95,9 +93,7 @@ export default function ChatDosenPA() {
     try {
       await addChatMahasiswa(newChat);
       getDataChatPribadiByMahasiswaId();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const messageEndRef = useRef<HTMLDivElement | null>(null);
@@ -118,12 +114,10 @@ export default function ChatDosenPA() {
       );
 
       if (!dosenPa) {
-        console.error("Dosen PA tidak ditemukan");
         return; // Hentikan eksekusi jika dosen PA tidak ditemukan
       }
       setUserDosenPA(dosenPa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -146,7 +140,6 @@ export default function ChatDosenPA() {
       setIsMahasiswaChatting(true);
       setSelectedDataChatPribadi(dataChat);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -172,7 +165,6 @@ export default function ChatDosenPA() {
       }
       setDataPesanSiaran(dataSiaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -193,7 +185,6 @@ export default function ChatDosenPA() {
       }
       setChatDosenPAData(dataChat);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -205,7 +196,6 @@ export default function ChatDosenPA() {
       );
       setAllPesanChatMahasiswa(dataChatMahasiswa.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -226,7 +216,6 @@ export default function ChatDosenPA() {
       setChatMahasiswaData(dataChat);
       setIsMahasiswaChatting(true);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -249,7 +238,6 @@ export default function ChatDosenPA() {
       }
       setDataPesanChatSiaran(dataChatSiaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -257,21 +245,10 @@ export default function ChatDosenPA() {
   useEffect(() => {
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
-    // if (authTokenCookie) {
-    //   const token = authTokenCookie.split("=")[1];
-    //   try {
-    //     const decodedToken = jwtDecode(token);
-    //     console.log(decodedToken);
-    //     setDataUser(decodedToken);
-    //   } catch (error) {
-    //     console.error("Invalid token:", error);
-    //   }
-    // }
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
         const decodedToken: any = jwtDecode(token);
-        console.log("Decoded token:", decodedToken);
 
         // Ambil data mahasiswa dan cocokan nim
         fetch(`${API_BASE_URL}/api/datamahasiswa`)
@@ -286,12 +263,8 @@ export default function ChatDosenPA() {
               console.warn("Mahasiswa dengan NIM tersebut tidak ditemukan.");
             }
           })
-          .catch((err) => {
-            console.error("Gagal fetch /datamahasiswa:", err);
-          });
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+          .catch((err) => {});
+      } catch (error) {}
     }
     getDataChatMahasiswa();
   }, []);
@@ -397,9 +370,7 @@ export default function ChatDosenPA() {
 
     try {
       const result = await patchStatusPembacaanPesanSiaran(updatedData);
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const patchStatusPembacaanPesanSiaran = async (updatedData: any) => {
@@ -410,7 +381,6 @@ export default function ChatDosenPA() {
       );
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -428,9 +398,7 @@ export default function ChatDosenPA() {
 
     try {
       const result = await patchChatPribadi(updatedData);
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const patchChatPribadi = async (updatedData: any) => {
@@ -441,7 +409,6 @@ export default function ChatDosenPA() {
       );
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };

@@ -1,4 +1,5 @@
 // /app/api/datadosen/route.ts
+import { sendPushNotification } from "@/lib/sendPushNotification";
 import prisma from "../../../lib/prisma";
 
 export async function GET(req: Request): Promise<Response> {
@@ -32,6 +33,10 @@ export async function POST(req: Request): Promise<Response> {
     const body: any = await req.json();
     const { dosen_pa_id, pesan_siaran_id, pesan, waktu_kirim } = body;
 
+    const dosenPA = await prisma.dosenpa.findUnique({
+      where: { id: dosen_pa_id },
+    });
+
     if (!pesan_siaran_id) {
       const pesanSiaran = await prisma.pesansiaran.create({
         data: {
@@ -44,16 +49,22 @@ export async function POST(req: Request): Promise<Response> {
       const mahasiswaBimbingan = mahasiswa
         .filter((data) => data.dosen_pa_id === dosen_pa_id)
         .filter((data) => data.status_lulus === false);
-      mahasiswaBimbingan.map(
-        async (data) =>
-          await prisma.statuspembacaanpesansiaran.create({
-            data: {
-              pesan_siaran_id: pesanSiaran.id,
-              mahasiswa_id: data.id,
-              is_read: false,
-            },
-          })
-      );
+      mahasiswaBimbingan.map(async (data) => {
+        await prisma.statuspembacaanpesansiaran.create({
+          data: {
+            pesan_siaran_id: pesanSiaran.id,
+            mahasiswa_id: data.id,
+            is_read: false,
+          },
+        });
+        await sendPushNotification({
+          role: "mahasiswa",
+          userId: data.id,
+          title: "Anda Memiliki Pesan Siaran Baru",
+          body: `${dosenPA.nama} : ${pesan}`,
+          url: "/chatpribadi",
+        });
+      });
 
       const pesanChatSiaran = await prisma.pesanchatsiaran.create({
         data: {
@@ -136,6 +147,13 @@ export async function POST(req: Request): Promise<Response> {
           },
         });
       }
+      await sendPushNotification({
+        role: "mahasiswa",
+        userId: data.id,
+        title: "Anda Memiliki Pesan Siaran Baru",
+        body: `${dosenPA.nama} : ${pesan}`,
+        url: "/chatpribadi",
+      });
     });
 
     return new Response(JSON.stringify(pesanSiaran), {

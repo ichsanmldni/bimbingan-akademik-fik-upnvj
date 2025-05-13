@@ -64,7 +64,6 @@ export default function Home() {
 
       setDataMahasiswa(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -79,7 +78,6 @@ export default function Home() {
 
       setDataDBCustomContext(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -97,7 +95,6 @@ export default function Home() {
       const data = await response.data;
       setDataDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -113,7 +110,6 @@ export default function Home() {
       const data = await response.data;
       setDataJadwalDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -128,11 +124,8 @@ export default function Home() {
 
       const data = await response.data;
 
-      console.log(data);
-
       setDataInformasiAkademik(data.sort((a, b) => b.id - a.id));
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -148,7 +141,6 @@ export default function Home() {
       const data = await response.data;
       setDataKaprodi(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -160,7 +152,6 @@ export default function Home() {
       );
       setDataSesiChatbotMahasiswa(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -175,7 +166,6 @@ export default function Home() {
       );
       setDataChatbotMahasiswa(dataChatbotMahasiswaFiltered);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -190,7 +180,6 @@ export default function Home() {
       );
       setDataPesanBot(dataPesanBotFiltered);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -207,7 +196,6 @@ export default function Home() {
       );
       setDataRiwayatPesanChatbot(dataRiwayatPesanChatbotFiltered);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -224,7 +212,6 @@ export default function Home() {
         return acc;
       }, {});
 
-      console.log(dataInformasiAkademik);
       setCustomDataConsumeGPT({
         dosen_pa: dataDosenPA.map((dosen) => ({
           nama: dosen.nama,
@@ -301,8 +288,6 @@ ${dbCustomContext}
   ${informasiAkademik}
 `;
 
-    console.log(customContext);
-
     const filteredMessages = dataRiwayatPesanChatbot
       .slice(-10)
       .map(({ role, pesan }) => ({
@@ -340,7 +325,6 @@ ${dbCustomContext}
         data.choices[0]?.message?.content || "Tidak ada respons dari model."
       );
     } catch (error) {
-      console.error("Error getting ChatGPT response:", error.message);
       throw new Error("Gagal mendapatkan respons dari ChatGPT.");
     }
   };
@@ -350,7 +334,6 @@ ${dbCustomContext}
       const { data } = await axios.post(url, payload);
       return data;
     } catch (error) {
-      console.error(`Error posting to ${url}:`, (error as Error).message);
       throw new Error(`Gagal mengirim data ke ${url}.`);
     }
   };
@@ -363,7 +346,6 @@ ${dbCustomContext}
 
   const handleAddChatChatbotMahasiswa = async (newData: any) => {
     if (!newData || !newData.pesan) {
-      console.error("Data baru atau pesan tidak valid.");
       return;
     }
 
@@ -415,12 +397,7 @@ ${dbCustomContext}
 
         setActiveSesiChatbotMahasiswa(result.sesi_chatbot_mahasiswa_id);
       }
-    } catch (error) {
-      console.error(
-        "Error handling chatbot mahasiswa:",
-        (error as Error).message
-      );
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -442,36 +419,10 @@ ${dbCustomContext}
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
 
-    // if (authTokenCookie) {
-    //   const token = authTokenCookie.split("=")[1];
-    //   try {
-    //     const decodedToken: any = jwtDecode(token);
-    //     setDataUser(decodedToken);
-
-    //     if (decodedToken.role === "Mahasiswa") {
-    //       setRoleUser("Mahasiswa");
-    //     } else if (
-    //       decodedToken.role === "Dosen" &&
-    //       dataDosenPA.find((data: any) => data.dosen_id === decodedToken.id)
-    //     ) {
-    //       setRoleUser("Dosen PA");
-    //     } else if (
-    //       decodedToken.role === "Dosen" &&
-    //       dataKaprodi.find((data) => data.dosen_id === decodedToken.id)
-    //     ) {
-    //       setRoleUser("Kaprodi");
-    //     } else if (decodedToken.role === "Admin") {
-    //       setRoleUser("Admin");
-    //     }
-    //   } catch (error) {
-    //     console.error("Invalid token:", error);
-    //   }
-    // }
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
         const decodedToken: any = jwtDecode(token);
-        console.log("Decoded token:", decodedToken);
 
         // Ambil data mahasiswa dan cocokan nim
         fetch(`${API_BASE_URL}/api/datamahasiswa`)
@@ -486,12 +437,8 @@ ${dbCustomContext}
               console.warn("Mahasiswa dengan NIM tersebut tidak ditemukan.");
             }
           })
-          .catch((err) => {
-            console.error("Gagal fetch /datamahasiswa:", err);
-          });
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+          .catch((err) => {});
+      } catch (error) {}
     }
   }, [dataDosenPA, dataKaprodi]);
 

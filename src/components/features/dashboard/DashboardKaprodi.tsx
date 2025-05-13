@@ -114,7 +114,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       // Menyimpan data tahun ajaran yang sudah difilter
       setDataTahunAjaran(uniqueTahunAjaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -130,7 +129,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       const data = await response.data;
       setDataDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -146,7 +144,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       const data = await response.data;
       setDataBimbingan(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -186,7 +183,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       );
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -203,9 +199,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       await patchKaprodi(jurusanValue);
       getDataKaprodiByEmail();
       setImagePreview(null);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const getDataKaprodiByEmail = async () => {
@@ -217,7 +211,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       );
 
       if (!kaprodi) {
-        console.error("Kaprodi tidak ditemukan");
         return;
       }
 
@@ -234,7 +227,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       setEmail(kaprodi.email);
       setNoTelpKaprodi(kaprodi.hp);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -248,13 +240,11 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
       );
 
       if (!kaprodi) {
-        console.error("Kaprodi tidak ditemukan");
         return;
       }
 
       setDataKaprodiUser(kaprodi);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -283,7 +273,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setDataLaporanBimbingan(laporanBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -311,7 +300,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setDataLaporanBimbinganByDosenPAID(laporanBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -427,7 +415,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setDataBimbinganBySelectedDosenPA(bimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -440,7 +427,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setDataAllMahasiswa(dataMahasiswa.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -461,7 +447,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         selectedDataPrestasiIlmiahMahasiswa
       );
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -481,7 +466,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
         dataSelectedPrestasiPorseniMahasiswa
       );
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -572,7 +556,6 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setSelectedDataStatusMahasiswa(selectedDataStatusMahasiswa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1346,9 +1329,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
               const x = data.cell.x + data.cell.width / 2 - imgWidth / 2;
               const y = data.cell.y + 2;
               doc.addImage(imgSrc, "PNG", x, y, imgWidth, imgHeight);
-            } catch (error) {
-              console.error("Gagal menambahkan gambar:", error);
-            }
+            } catch (error) {}
           }
 
           // Kalau bukan gambar valid, biarkan autoTable render nilai default ("-" atau lainnya)

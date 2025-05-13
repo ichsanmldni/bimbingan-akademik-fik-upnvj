@@ -14,8 +14,6 @@
 // If the loader is already loaded, just stop.
 const SW_VERSION = "v2"; // ubah versinya kalau kamu update isi file
 
-console.log("🔄 Service Worker Version:", SW_VERSION);
-
 if (!self.define) {
   let registry = {};
 
@@ -109,8 +107,6 @@ define(["./workbox-631a4576"], function (workbox) {
 });
 
 self.addEventListener("push", function (event) {
-  console.log("📥 PUSH RECEIVED:", event.data?.text());
-
   const data = event.data?.json() || {};
   const options = {
     body: data.body || "Default body",

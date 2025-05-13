@@ -73,7 +73,6 @@ export default function Home() {
   };
 
   const handleSelectSubBab = (babName, subBabName) => {
-    console.log(babName, subBabName);
     dispatch(
       fetchDataSubBabByNama({
         selectedBab: babName,

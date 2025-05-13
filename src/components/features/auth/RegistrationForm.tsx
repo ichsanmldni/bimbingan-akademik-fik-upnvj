@@ -112,9 +112,7 @@ const RegistrationForm = () => {
           });
         }
       }
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
   const getDataDosenTetapByRole = async (role) => {
     try {
@@ -136,7 +134,6 @@ const RegistrationForm = () => {
 
       setDataDosenTetap(dataByRole);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -153,11 +150,9 @@ const RegistrationForm = () => {
       const dataDosen = data.find(
         (data) => data.nama_lengkap === selectedNamaLengkapDosen
       );
-      console.log(dataDosen);
 
       setSelectedDataDosen(dataDosen);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -184,11 +179,9 @@ const RegistrationForm = () => {
     }
   }, [selectedDataDosen]);
 
-  console.log(selectedEmailDosen);
-
   return (
-    <div className="border rounded-lg w-1/2 self-center">
-      <h3 className="text-center pt-4 pb-4 px-20 font-semibold text-[28px]">
+    <div className="border mx-12 md:mx-0 rounded-xl md:rounded-lg md:w-1/2 self-center">
+      <h3 className="text-[16px] text-center pt-4 pb-2 px-20 font-semibold md:text-[28px]">
         Daftar sekarang!
       </h3>
       <form

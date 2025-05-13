@@ -69,7 +69,6 @@ export const fetchDataBabByNama = createAsyncThunk(
   "dataBab/fetchDataBabByNama",
   async ({ selectedBab }: { selectedBab: string }, { rejectWithValue }) => {
     try {
-      console.log(selectedBab);
       const response = await axios.get(`${API_BASE_URL}/api/databab`);
       const bab = response.data.find((data) => data.nama === selectedBab);
 

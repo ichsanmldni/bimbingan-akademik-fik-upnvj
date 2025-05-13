@@ -93,8 +93,6 @@ export default function Home() {
     (state: RootState) => state.mahasiswa?.data
   );
   const dataDosenPA = useSelector((state: RootState) => state.dosenPA?.data);
-  console.log(dataMahasiswa);
-  console.log(dataDosenPA);
   const dataKaprodi = useSelector((state: RootState) => state.kaprodi?.data);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
@@ -122,28 +120,22 @@ export default function Home() {
       const data = await response.data;
       setDataJadwalDosenPa(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
 
   const getDataDosenPaByMahasiswa = async () => {
     try {
-      console.log(dataMahasiswaUser);
-      console.log(dataDosenPA);
       const dosenPa = dataDosenPA.find(
         (data) => data.id === dataMahasiswaUser?.dosen_pa_id
       );
-      console.log(dosenPa);
 
       if (!dosenPa) {
-        console.error("Dosen PA tidak ditemukan");
         return; // Hentikan eksekusi jika dosen PA tidak ditemukan
       }
 
       setuserDosenPa(dosenPa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -158,7 +150,6 @@ export default function Home() {
 
       setDataMahasiswaUser(mahasiswa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -177,7 +168,6 @@ export default function Home() {
       const sortedDataJenisBimbingan = data.sort((a, b) => a.order - b.order);
       setDataJenisBimbingan(sortedDataJenisBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -202,7 +192,6 @@ export default function Home() {
       // Menyimpan data tahun ajaran yang sudah difilter
       setDataTahunAjaran(uniqueTahunAjaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -222,7 +211,6 @@ export default function Home() {
       );
       setDataTopikBimbinganPribadi(sortedDataTopikBimbinganPribadi);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -241,7 +229,6 @@ export default function Home() {
       const sortedDataSistemBimbingan = data.sort((a, b) => a.order - b.order);
       setDataSistemBimbingan(sortedDataSistemBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -427,21 +414,10 @@ export default function Home() {
     const cookies = document.cookie.split("; ");
     const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
 
-    // if (authTokenCookie) {
-    //   const token = authTokenCookie.split("=")[1];
-    //   try {
-    //     const decodedToken = jwtDecode<any>(token);
-    //     console.log(decodedToken);
-    //     setDataUser(decodedToken);
-    //   } catch (error) {
-    //     console.error("Invalid token:", error);
-    //   }
-    // }
     if (authTokenCookie) {
       const token = authTokenCookie.split("=")[1];
       try {
         const decodedToken: any = jwtDecode(token);
-        console.log("Decoded token:", decodedToken);
 
         // Ambil data mahasiswa dan cocokan nim
         fetch(`${API_BASE_URL}/api/datamahasiswa`)
@@ -456,12 +432,8 @@ export default function Home() {
               console.warn("Mahasiswa dengan NIM tersebut tidak ditemukan.");
             }
           })
-          .catch((err) => {
-            console.error("Gagal fetch /datamahasiswa:", err);
-          });
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+          .catch((err) => {});
+      } catch (error) {}
     }
     getDataTahunAJaran();
     getDataJenisBimbingan();
@@ -499,8 +471,6 @@ export default function Home() {
     const targetUrl = `/`;
     window.location.href = targetUrl;
   };
-  console.log(roleUser);
-  console.log("ini data user", dataUser);
   return (
     <div>
       <NavbarUser

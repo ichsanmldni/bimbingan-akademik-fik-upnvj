@@ -266,9 +266,7 @@ const ManageCustomContexChatbot = () => {
       getDataCustomContext();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditCustomContext = async (id: number) => {
@@ -283,9 +281,7 @@ const ManageCustomContexChatbot = () => {
       getDataCustomContext();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeleteCustomContext = async (id: number) => {
@@ -297,9 +293,7 @@ const ManageCustomContexChatbot = () => {
       const result = await deleteCustomContext(customContextValue);
       closeModal();
       getDataCustomContext();
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const patchCustomContextOrder = async (updatedOrder) => {
@@ -323,9 +317,7 @@ const ManageCustomContexChatbot = () => {
       const result = await patchCustomContextOrder(
         afterOrderEditDataCustomContext
       );
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const getDataCustomContext = async () => {
@@ -343,7 +335,6 @@ const ManageCustomContexChatbot = () => {
         setAfterOrderEditDataCustomContext([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };

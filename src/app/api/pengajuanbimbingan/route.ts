@@ -84,7 +84,7 @@ export async function POST(req: Request) {
         !semester
       ) {
         return new Response(
-          JSON.stringify({ message: "Semua kolom harus diisi!" }),
+          JSON.stringify({ message: "Semua kolom wajib diisi!" }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
       }
@@ -353,7 +353,6 @@ export async function PATCH(req: Request) {
       }
     }
   } catch (error) {
-    console.log(error.message);
     return new Response(
       JSON.stringify({
         message: "Something went wrong",

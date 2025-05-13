@@ -8,7 +8,6 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
   const token = cookieStore.get("authBMFK")?.value;
-  console.log(token);
 
   if (!token) {
     return NextResponse.json(
@@ -20,9 +19,7 @@ export async function POST(req: NextRequest) {
   let decoded: any;
   try {
     decoded = jwt.verify(token, JWT_SECRET);
-    console.log(decoded);
   } catch (err) {
-    console.error("JWT verification failed:", err);
     return NextResponse.json(
       { success: false, message: "Invalid or expired token" },
       { status: 403 }
@@ -30,7 +27,6 @@ export async function POST(req: NextRequest) {
   }
 
   const { nim, email, role } = decoded;
-  console.log(decoded);
   if (!role) {
     return NextResponse.json(
       { success: false, message: "Token payload incomplete" },
@@ -134,7 +130,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Database error:", error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

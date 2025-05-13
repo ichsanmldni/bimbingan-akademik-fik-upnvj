@@ -108,22 +108,6 @@ export default function Home() {
     dispatch,
   ]);
 
-  useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken: any = jwtDecode(token);
-        console.log("Decoded token:", decodedToken);
-
-        // Ambil data mahasiswa dan cocokan nim
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }
-  }, []);
-
   // Get user data based on role
   const userData = useMemo(() => {
     if (!dataUser) return null;
@@ -155,14 +139,9 @@ export default function Home() {
     dispatch(fetchKaprodi());
   }, []);
 
-  console.log(userData);
-
   useEffect(() => {
     const requestPermission = async () => {
       const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        console.log("Notification permission granted");
-      }
     };
     requestPermission();
   }, []);

@@ -25,13 +25,9 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         "/push/custom-sw.js?v=2",
         { scope: "/push/" }
       );
-      console.log("✅ Service Worker registered:", registration);
-
       // ⬇️ Tunggu registrasi khusus scope "/push/"
       const pushReg = await navigator.serviceWorker.getRegistration("/push/");
       if (!pushReg) throw new Error("Custom SW belum terdaftar!");
-
-      console.log("🔧 SW Push Scope Ready:", pushReg);
 
       // ⬇️ Subscribe ke PushManager
       const subscription = await pushReg.pushManager.subscribe({
@@ -41,17 +37,12 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
         ),
       });
 
-      console.log("✅ Berhasil dapat subscription:", subscription);
-
       // ⬇️ Kirim ke backend
       await axios.post(
         `${API_BASE_URL}/api/notifications/subscribe`,
         subscription
       );
-      console.log("📬 Berhasil kirim ke backend");
-    } catch (error) {
-      console.error("❌ Gagal subscribe:", error);
-    }
+    } catch (error) {}
   };
 
   function urlBase64ToUint8Array(base64String: string) {
