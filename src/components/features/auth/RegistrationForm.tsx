@@ -185,10 +185,10 @@ const RegistrationForm = () => {
         Daftar sekarang!
       </h3>
       <form
-        className="pl-8 pr-2 pb-4 flex flex-col gap-4"
+        className="pl-8 pr-8 pb-4 flex flex-col gap-4"
         onSubmit={handleSubmit}
       >
-        <div className="pr-8 flex flex-col overflow-y-auto max-h-[300px]">
+        <div className="flex flex-col overflow-y-auto max-h-[300px]">
           <SelectField
             options={[
               { value: "Dosen PA", label: "Dosen PA" },
@@ -197,7 +197,7 @@ const RegistrationForm = () => {
             onChange={(e) => setSelectedRole(e.target.value)}
             value={selectedRole}
             placeholder="Pilih Role"
-            className={`px-3 py-2 mt-4 text-[15px] border focus:outline-none rounded-lg appearance-none w-full`}
+            className={`px-3 py-2 mt-4 w-full min-w-[200px] max-w-full text-[15px] border focus:outline-none rounded-lg appearance-none w-full`}
           />
           <SelectField
             options={dataDosenTetap.map((dosen) => ({
@@ -210,7 +210,7 @@ const RegistrationForm = () => {
             value={selectedNamaLengkapDosen}
             j
             placeholder={`${selectedRole === "Kaprodi" ? "Nama Kaprodi" : "Nama Dosen"}`}
-            className="px-3 py-2 mt-4 text-[15px] border focus:outline-none rounded-lg appearance-none w-full"
+            className="px-3 py-2 mt-4 w-full min-w-[200px] max-w-full text-[15px] border focus:outline-none rounded-lg appearance-none w-full"
           />
           <InputField
             type="text"
@@ -221,7 +221,7 @@ const RegistrationForm = () => {
                 : selectedEmailDosen
             }
             disabled={true}
-            className="px-3 py-2 mt-4 text-[15px] border rounded-lg focus:outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+            className="px-3 py-2 mt-4 w-full min-w-[200px] max-w-full text-[15px] border rounded-lg focus:outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
           />
           {selectedEmailDosen === null && (
             <p className="mt-2 ml-2 text-sm text-red-500">
