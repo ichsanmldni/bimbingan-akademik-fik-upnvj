@@ -36,6 +36,10 @@ export async function POST(req: Request) {
       where: { dosen_pa_id, status_lulus: false },
     });
 
+    const dosenPA = await prisma.dosenpa.findUnique({
+      where: { id: dosen_pa_id },
+    });
+
     const pesansiaran = await prisma.pesansiaran.findFirst({
       where: { dosen_pa_id },
     });
@@ -63,16 +67,22 @@ export async function POST(req: Request) {
         },
       });
 
-      mahasiswa.map(
-        async (data) =>
-          await prisma.statuspembacaanpesansiaran.create({
-            data: {
-              pesan_siaran_id: pesanSiaran.id,
-              mahasiswa_id: data.id,
-              is_read: false,
-            },
-          })
-      );
+      mahasiswa.map(async (data) => {
+        await prisma.statuspembacaanpesansiaran.create({
+          data: {
+            pesan_siaran_id: pesanSiaran.id,
+            mahasiswa_id: data.id,
+            is_read: false,
+          },
+        });
+        await sendPushNotification({
+          role: "mahasiswa",
+          userId: data.id,
+          title: "Anda Memiliki Pesan Siaran Baru",
+          body: `${dosenPA.nama} : ${pesan_siaran}`,
+          url: "/chatpribadi",
+        });
+      });
     } else if (pesansiaran) {
       const pesanChatSiaran = await prisma.pesanchatsiaran.create({
         data: {
@@ -106,6 +116,13 @@ export async function POST(req: Request) {
           data: {
             is_read: false,
           },
+        });
+        await sendPushNotification({
+          role: "mahasiswa",
+          userId: data.id,
+          title: "Anda Memiliki Pesan Siaran Baru",
+          body: `${dosenPA.nama} : ${pesan_siaran}`,
+          url: "/chatpribadi",
         });
       });
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 interface ChatbotSession {
@@ -95,12 +96,34 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
       <div className="flex flex-col w-full mb-4">
         <button
           onClick={() => setActiveSesiChatbotMahasiswa(0)}
-          className={`text-[14px] text-left outline-none py-2 px-3 bg-gray-100 shadow-sm rounded-lg ${
-            activeSesiChatbotMahasiswa === 0
-              ? "bg-[#FE6500] text-white"
-              : "hover:bg-[#FE6500] hover:text-white"
-          }`}
+          className={`group text-[14px] flex gap-2 text-left outline-none py-2 px-3 mr-6 rounded-lg transition-all duration-200
+  ${
+    activeSesiChatbotMahasiswa === 0
+      ? "bg-[#FE6500] text-white shadow-md" // Aktif → tanpa hover/active effect
+      : "bg-white text-black shadow-md hover:shadow-lg active:shadow-inner active:translate-y-[1px] hover:bg-[#FFE5CC]"
+  }
+`}
         >
+          <Image
+            src="/edit-icon.png"
+            alt="New Chat"
+            width={24}
+            height={24}
+            className={`size-5 transition-colors rounded 
+      ${
+        activeSesiChatbotMahasiswa === 0 ? "hidden" : "group-hover:bg-[#FFE5CC]"
+      }
+    `}
+          />
+          <Image
+            src="/edit-icon-white.png"
+            alt="New Chat"
+            width={24}
+            height={24}
+            className={`size-5 transition-colors rounded 
+      ${activeSesiChatbotMahasiswa === 0 ? "block" : "hidden"}
+    `}
+          />
           New Chat
         </button>
       </div>
@@ -135,10 +158,10 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
                       setActiveSesiChatbotMahasiswa(item.id);
                     }}
                     key={item.id}
-                    className={`outline-none text-[15px] w-full text-left py-2 px-3 rounded-lg hover:bg-[#FE6500] hover:text-white ${
+                    className={`outline-none text-[15px] w-full text-left py-2 px-3 rounded-lg ${
                       activeSesiChatbotMahasiswa === item.id
                         ? "bg-[#FE6500] text-white"
-                        : ""
+                        : "hover:bg-[#FFE5CC]"
                     }`}
                   >
                     <div>
