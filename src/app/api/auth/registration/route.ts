@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "User already exists" },
+        { message: "Akun Dosen PA ini sudah terdaftar!" },
         { status: 400 }
       );
     }

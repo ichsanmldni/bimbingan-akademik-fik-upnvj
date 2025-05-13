@@ -2477,7 +2477,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                               "Tidak Sah"
                             )
                           }
-                          className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium transition duration-200 ease-in-out"
+                          className="w-1/2 bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-md py-2 font-medium transition duration-200 ease-in-out disabled:bg-red-300 disabled:cursor-not-allowed disabled:opacity-70"
                           disabled={keteranganKonfirmasi === ""}
                           aria-label="Konfirmasi Tidak Sah"
                         >
@@ -2490,7 +2490,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                               "Sah"
                             )
                           }
-                          className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out"
+                          className="w-1/2 bg-green-500 hover:bg-green-600 text-white cursor-pointer rounded-md py-2 font-medium text-sm transition duration-200 ease-in-out disabled:bg-green-300 disabled:cursor-not-allowed disabled:opacity-70"
                           disabled={keteranganKonfirmasi === ""}
                           aria-label="Konfirmasi Sah"
                         >
@@ -2734,7 +2734,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                                   data.permasalahan
                                 )
                               }
-                              className="w-1/2 bg-red-500 text-white cursor-pointer hover:bg-red-600 rounded-md py-2 font-medium text-[14px]"
+                              className="w-1/2 bg-red-500 text-white cursor-pointer hover:bg-red-600 rounded-md py-2 font-medium text-[14px] disabled:bg-red-300 disabled:cursor-not-allowed disabled:opacity-70"
                               disabled={keteranganKonfirmasi === ""}
                             >
                               Reschedule
@@ -2749,7 +2749,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
                                   data.permasalahan
                                 )
                               }
-                              className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 hover:bg-green-600 font-medium text-[14px]"
+                              className="w-1/2 bg-green-500 text-white cursor-pointer rounded-md py-2 hover:bg-green-600 font-medium text-[14px] disabled:bg-green-300 disabled:cursor-not-allowed disabled:opacity-70"
                               disabled={keteranganKonfirmasi === ""}
                             >
                               Diterima
