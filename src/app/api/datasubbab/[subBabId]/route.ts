@@ -54,12 +54,13 @@ export async function POST(req: Request): Promise<Response> {
 
     const { nama, order, isi } = body;
 
-    console.log(nama, order, isi);
-
     if (!nama || order === undefined || !isi) {
       return new Response(
-        JSON.stringify({ message: "All fields are required" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({ message: "Semua kolom wajib diisi!" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
       );
     }
 

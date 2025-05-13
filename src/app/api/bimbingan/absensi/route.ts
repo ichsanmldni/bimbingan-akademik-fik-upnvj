@@ -36,7 +36,7 @@ export async function PATCH(req: Request): Promise<Response> {
     if (jenis === "Pribadi") {
       if (!dokumentasi_kehadiran && !ttd_kehadiran && !solusi) {
         return new Response(
-          JSON.stringify({ message: "Wajib input semua kolom!" }),
+          JSON.stringify({ message: "Semua kolom wajib diisi!!" }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
       }

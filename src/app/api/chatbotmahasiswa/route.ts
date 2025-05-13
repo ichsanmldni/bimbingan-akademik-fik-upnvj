@@ -35,7 +35,6 @@ export async function POST(req: Request): Promise<Response> {
     const body: ChatbotMahasiswaRequestBody = await req.json();
     const { sesi_chatbot_mahasiswa_id, pesan, waktu_kirim, mahasiswa_id } =
       body;
-    console.log(body);
 
     // Check if sesi_chatbot_mahasiswa_id is not provided and mahasiswa_id is provided
     if (!sesi_chatbot_mahasiswa_id && mahasiswa_id) {

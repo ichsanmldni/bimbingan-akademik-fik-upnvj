@@ -40,14 +40,12 @@ export const fetchStatusPesanSiaran = createAsyncThunk(
 
     const dataMahasiswa = await axios.get(`${API_BASE_URL}/api/datamahasiswa`);
     const dataStatus = response.data;
-    console.log(dataStatus);
 
     // Temukan pesan siaran untuk dosen
     const pesanSiaranUser = pesanSiaran.find(
       (data) => data.dosen_pa_id === dosenPaId
     );
 
-    console.log(pesanSiaranUser);
     if (!pesanSiaranUser) {
       return true; // Default dianggap belum dibaca jika tidak ditemukan
     }

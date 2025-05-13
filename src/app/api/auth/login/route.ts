@@ -126,7 +126,6 @@ export async function POST(req: Request): Promise<Response> {
                 },
               });
             } catch (prismaError) {
-              console.error("Prisma error:", prismaError);
               // Simpan pesan kesalahan Prisma ke dalam variabel
               const prismaErrorMessage =
                 (prismaError as Error).message || "Gagal membuat mahasiswa!";
@@ -211,7 +210,6 @@ export async function POST(req: Request): Promise<Response> {
             }
           );
         } else {
-          console.error("General error:", error);
           return new Response(
             JSON.stringify({
               message: error.response?.data.message || "Login gagal!",
@@ -367,7 +365,6 @@ export async function POST(req: Request): Promise<Response> {
             },
           });
         } catch (error) {
-          console.error("Error fetching data from UPNVJ API:", error);
           return new Response(
             JSON.stringify({ message: "Gagal mengambil data dari API UPNVJ" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
@@ -403,7 +400,6 @@ export async function POST(req: Request): Promise<Response> {
           },
         });
       } catch (error) {
-        console.error("Error fetching data from UPNVJ API:", error);
         return new Response(
           JSON.stringify({ message: "Gagal mengambil data dari API UPNVJ" }),
           { status: 500, headers: { "Content-Type": "application/json" } }

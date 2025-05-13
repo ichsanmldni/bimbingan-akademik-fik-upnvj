@@ -422,7 +422,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       );
 
       if (!mahasiswa) {
-        console.error("Mahasiswa tidak ditemukan");
         return;
       }
 
@@ -434,7 +433,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         );
 
         if (!dosenpa) {
-          console.error("Dosen PA tidak ditemukan");
           return;
         }
 
@@ -487,7 +485,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         mahasiswa.dosen_pa_id === null ? "" : mahasiswa.dosen_pa_id
       );
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -519,7 +516,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
         setDataJadwalDosenPA(data);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -535,7 +531,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       const data = await response.data;
       setDataJurusan(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -567,7 +562,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       );
       setDataPeminatan(sortedDataPeminatan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -583,7 +577,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       const data = await response.data;
       setDataDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -608,7 +601,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setDataPengajuanBimbingan(pengajuanBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -628,7 +620,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setDataBimbingan(bimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };

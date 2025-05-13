@@ -332,7 +332,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       setIsEditOrder(false);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -345,12 +344,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           ...updatedOrder,
         }
       );
-      console.log("Order updated successfully:", response.data);
+
       getDataJenisBimbingan();
       setIsEditOrder(false);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -362,12 +360,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           ...updatedOrder,
         }
       );
-      console.log("Order updated successfully:", response.data);
+
       getDataTopikBimbinganPribadi();
       setIsEditOrder(false);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -380,12 +377,11 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
           ...updatedOrder,
         }
       );
-      console.log("Order updated successfully:", response.data);
+
       getDataSistemBimbingan();
       setIsEditOrder(false);
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -393,10 +389,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
   const handleSavePeminatanOrder = async () => {
     try {
       const result = await patchPeminatanOrder(afterOrderEditDataPeminatan);
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleSaveJenisBimbinganOrder = async () => {
@@ -404,10 +397,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const result = await patchJenisBimbinganOrder(
         afterOrderEditDataJenisBimbingan
       );
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleSaveTopikBimbinganPribadiOrder = async () => {
@@ -415,10 +405,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const result = await patchTopikBimbinganPribadiOrder(
         afterOrderEditDataTopikBimbinganPribadi
       );
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleSaveSistemBimbinganOrder = async () => {
@@ -426,10 +413,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const result = await patchSistemBimbinganOrder(
         afterOrderEditDataSistemBimbingan
       );
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const getDataJurusan = async () => {
@@ -443,7 +427,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const data = await response.data;
       setDataJurusan(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -479,7 +462,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         setAfterOrderEditDataPeminatan([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -503,7 +485,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         setAfterOrderEditDataJenisBimbingan([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -527,7 +508,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         setAfterOrderEditDataTopikBimbinganPribadi([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -551,7 +531,6 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         setAfterOrderEditDataSistemBimbingan([]);
       }
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -973,10 +952,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datapeminatan/${jurusanid}`,
         updatedData
       );
-      console.log("Peminatan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -999,10 +977,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datapeminatan/${jurusanid}`,
         { data: deletedData }
       );
-      console.log("Peminatan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -1021,9 +998,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataPeminatanByJurusan(selectedJurusan);
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditPeminatan = async (id: any) => {
@@ -1037,10 +1012,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataPeminatanByJurusan(selectedJurusan);
       setIsEditOrder(false);
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeletePeminatan = async (id: any) => {
@@ -1052,10 +1024,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const result = await deletePeminatan(peminatanValue);
       getDataPeminatanByJurusan(selectedJurusan);
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const addJenisBimbingan = async (newData: any) => {
@@ -1090,10 +1059,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datajenisbimbingan`,
         updatedData
       );
-      console.log("Jenis Bimbingan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -1104,10 +1072,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datatopikbimbinganpribadi`,
         updatedData
       );
-      console.log("Topik Bimbingan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -1118,10 +1085,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datajenisbimbingan`,
         { data: deletedData }
       );
-      console.log("Jenis Bimbingan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -1132,10 +1098,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datatopikbimbinganpribadi`,
         { data: deletedData }
       );
-      console.log("Topik Bimbingan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -1154,9 +1119,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataJenisBimbingan();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditJenisBimbingan = async (id: any) => {
@@ -1170,10 +1133,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataJenisBimbingan();
       setIsEditOrder(false);
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeleteJenisBimbingan = async (id: any) => {
@@ -1185,10 +1145,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const result = await deleteJenisBimbingan(jenisBimbinganValue);
       getDataJenisBimbingan();
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleAddTopikBimbinganPribadi = async (e: any) => {
@@ -1205,9 +1162,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataTopikBimbinganPribadi();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditTopikBimbinganPribadi = async (id: any) => {
@@ -1223,10 +1178,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataTopikBimbinganPribadi();
       setIsEditOrder(false);
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeleteTopikBimbinganPribadi = async (id: any) => {
@@ -1240,10 +1192,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       );
       getDataTopikBimbinganPribadi();
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const addSistemBimbingan = async (newData: any) => {
@@ -1265,10 +1214,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datasistembimbingan`,
         updatedData
       );
-      console.log("Sistem Bimbingan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -1279,10 +1227,9 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
         `${API_BASE_URL}/api/datasistembimbingan`,
         { data: deletedData }
       );
-      console.log("Sistem Bimbingan updated successfully:", response.data);
+
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -1301,9 +1248,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataSistemBimbingan();
       setIsEditOrder(false);
       closeModal();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleEditSistemBimbingan = async (id: any) => {
@@ -1317,10 +1262,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       getDataSistemBimbingan();
       setIsEditOrder(false);
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDeleteSistemBimbingan = async (id: any) => {
@@ -1332,10 +1274,7 @@ const ManageParameter: React.FC<ManageParameterProps> = ({ activeNavbar }) => {
       const result = await deleteSistemBimbingan(sistemBimbinganValue);
       getDataSistemBimbingan();
       closeModal();
-      console.log("Response from backend:", result);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {

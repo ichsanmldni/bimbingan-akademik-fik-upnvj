@@ -18,7 +18,6 @@ const TabelStatistikLaporan = ({ dataBimbingan, dataLaporanBimbingan }) => {
 
       setDataDosenPA(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -32,7 +31,6 @@ const TabelStatistikLaporan = ({ dataBimbingan, dataLaporanBimbingan }) => {
 
       setDataMahasiswa(response.data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -73,7 +71,6 @@ const TabelStatistikLaporan = ({ dataBimbingan, dataLaporanBimbingan }) => {
 
       setdataDosenPaBimbingan(dataNamaDosenPA);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };

@@ -30,7 +30,6 @@ const Dashboard = () => {
 
   const roleUser = useSelector((state: RootState) => state.auth.roleUser) || "";
   const dataUser = useSelector((state: RootState) => state.auth.dataUser);
-  console.log(dataUser);
   const statusAuthUser = useSelector((state: RootState) => state.auth.status);
 
   // Data states
@@ -126,8 +125,6 @@ const Dashboard = () => {
     statusDataDosenPA,
     statusDataKaprodi,
   ]);
-
-  console.log(userData);
 
   useEffect(() => {
     const submenu = searchParams.get("submenu");

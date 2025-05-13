@@ -131,7 +131,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       // Menyimpan data tahun ajaran yang sudah difilter
       setDataTahunAjaran(uniqueTahunAjaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -330,7 +329,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setDataPengesahanBimbingan(bimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -420,13 +418,11 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       );
 
       if (!dosen) {
-        console.error("Dosen tidak ditemukan");
         return;
       }
 
       setDataDosenPA(dosen);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -439,7 +435,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       );
 
       if (!dosen) {
-        console.error("Dosen tidak ditemukan");
         return;
       }
 
@@ -455,7 +450,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       setEmail(dosen.email);
       setNoTelpDosen(dosen.hp);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -483,7 +477,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const data = await response.data;
       setDataJadwalDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -509,7 +502,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       );
       setDataPengajuanBimbingan(pengajuanBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -535,7 +527,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       );
       setDataLaporanBimbingan(laporanBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -548,7 +539,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       );
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -605,9 +595,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const result = await patchDosenPA(dosenPAValue);
       getDataDosenById();
       setImagePreview(null);
-    } catch (error) {
-      console.error("Failed to save the updated order.");
-    }
+    } catch (error) {}
   };
 
   const handleDetailLaporanDosen = (data) => {
@@ -1671,10 +1659,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         44
       ); // Moved up by 10y
 
-      console.log(data);
-
       const bimbinganDataLembarKonsultasi = data.konsultasi_mahasiswa;
-      console.log(bimbinganDataLembarKonsultasi);
 
       const bodyBimbinganLembarKonsultasi =
         bimbinganDataLembarKonsultasi.length === 0
@@ -1745,9 +1730,7 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
             data.column.index === 6 &&
             data.section === "body"
           ) {
-            console.log(data);
-            const imgSrc = data.cell.raw; // Mengambil sumber gambar dari properti raw
-            console.log(data.cell.raw);
+            const imgSrc = data.cell.raw;
             if (imgSrc && imgSrc !== "-") {
               const imgWidth = 8;
               const imgHeight = 8;
@@ -1931,7 +1914,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
       const data = await response.data;
       setDataBimbingan(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1952,7 +1934,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         selectedDataPrestasiIlmiahMahasiswa
       );
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1972,7 +1953,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         dataSelectedPrestasiPorseniMahasiswa
       );
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -1989,7 +1969,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
       setSelectedDataStatusMahasiswa(selectedDataStatusMahasiswa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };

@@ -39,9 +39,8 @@ export async function POST(req: Request): Promise<Response> {
 
     // Validate required fields
     if (!nama_lengkap || !jurusan || !email || order === undefined) {
-      console.log(body);
       return new Response(
-        JSON.stringify({ message: "All fields are required" }),
+        JSON.stringify({ message: "Wajib input semua kolom!" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -77,8 +76,7 @@ export async function PATCH(req: Request): Promise<Response> {
 
     // Validate required fields
     if (!id || !nama_lengkap || !jurusan) {
-      console.log(body);
-      return new Response(JSON.stringify({ message: "Invalid data" }), {
+      return new Response(JSON.stringify({ message: "Data tidak valid!" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });

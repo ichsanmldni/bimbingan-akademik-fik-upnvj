@@ -240,7 +240,7 @@ export async function POST(req: Request): Promise<Response> {
         !tanda_tangan_dosen_pa
       ) {
         return new Response(
-          JSON.stringify({ message: "Semua kolom harus diisi!" }),
+          JSON.stringify({ message: "Semua kolom wajib diisi!" }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
       } else if (!tahun_ajaran) {

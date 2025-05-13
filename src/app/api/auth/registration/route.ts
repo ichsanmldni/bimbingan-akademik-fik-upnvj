@@ -8,8 +8,6 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { email, nama_lengkap, role } = body;
 
-  console.log(email, nama_lengkap, role);
-
   try {
     // Cek apakah user sudah ada
     const existingUser =
@@ -101,7 +99,6 @@ export async function POST(req: Request) {
       message: "Registrasi berhasil, cek email Anda.",
     });
   } catch (error) {
-    console.error("Registration error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },
       { status: 500 }

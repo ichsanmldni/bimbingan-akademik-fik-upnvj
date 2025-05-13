@@ -114,10 +114,8 @@ export default function ChatMahasiswa() {
     };
 
     try {
-      const result = await patchChatPribadi(updatedData);
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+      await patchChatPribadi(updatedData);
+    } catch (error) {}
   };
 
   const handleAddChatDosenPA = async (newData: any) => {
@@ -129,9 +127,7 @@ export default function ChatMahasiswa() {
     try {
       await addChatDosenPA(newChat);
       getDataChatDosenPABySelectedChatPribadiId();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const handleAddPesanChatSiaran = async (newData: any) => {
@@ -144,9 +140,7 @@ export default function ChatMahasiswa() {
       await addPesanChatSiaran(newChat);
       getDataPesanSiaran();
       getDataPesanChatSiaranByDosenPAID();
-    } catch (error) {
-      console.error("Registration error:", (error as Error).message);
-    }
+    } catch (error) {}
   };
 
   const getDataDosenPA = async () => {
@@ -160,7 +154,6 @@ export default function ChatMahasiswa() {
       const data = await response.data;
       setDataDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -176,7 +169,6 @@ export default function ChatMahasiswa() {
       const data = await response.data;
       setDataKaprodi(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -188,12 +180,10 @@ export default function ChatMahasiswa() {
       const dosenPa = dataDosenPA.data.find((data) => data.id === dosenPAID);
 
       if (!dosenPa) {
-        console.error("Dosen PA tidak ditemukan");
         return; // Hentikan eksekusi jika dosen PA tidak ditemukan
       }
       setUserDosenPA(dosenPa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -206,7 +196,6 @@ export default function ChatMahasiswa() {
       );
       return response.data;
     } catch (error) {
-      console.error("Error updating order:", error);
       throw error;
     }
   };
@@ -227,7 +216,6 @@ export default function ChatMahasiswa() {
 
       setDataChatPribadi(dataChat);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -241,7 +229,6 @@ export default function ChatMahasiswa() {
 
       setAllPesanSiaran(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -255,7 +242,6 @@ export default function ChatMahasiswa() {
 
       setAllPesanChatSiaran(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -275,7 +261,6 @@ export default function ChatMahasiswa() {
 
       setDataPesanSiaran(dataSiaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -295,7 +280,6 @@ export default function ChatMahasiswa() {
       }
       setChatDosenPAData(dataChat);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -317,7 +301,6 @@ export default function ChatMahasiswa() {
       setPesanChatSiaranData(dataSiaran);
       setIsDosenBroadcast(true);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -337,7 +320,6 @@ export default function ChatMahasiswa() {
       }
       setChatMahasiswaData(dataChat);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -350,9 +332,7 @@ export default function ChatMahasiswa() {
       try {
         const decodedToken = jwtDecode(token);
         setDataUser(decodedToken);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+      } catch (error) {}
     }
     getDataDosenPA();
     getDataKaprodi();

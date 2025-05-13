@@ -91,7 +91,6 @@ export default function Home() {
       // Menyimpan data tahun ajaran yang sudah difilter
       setDataTahunAjaran(uniqueTahunAjaran);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -142,7 +141,6 @@ export default function Home() {
       const data = await response.data;
       setDataJadwalDosenPa(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -158,13 +156,11 @@ export default function Home() {
       );
 
       if (!dosenPa) {
-        console.error("Dosen PA tidak ditemukan");
         return; // Hentikan eksekusi jika dosen PA tidak ditemukan
       }
 
       setuserDosenPa(dosenPa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -185,7 +181,6 @@ export default function Home() {
 
       setDataMahasiswaUser(mahasiswa);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -204,7 +199,6 @@ export default function Home() {
       const sortedDataJenisBimbingan = data.sort((a, b) => a.order - b.order);
       setDataJenisBimbingan(sortedDataJenisBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -224,7 +218,6 @@ export default function Home() {
       );
       setDataTopikBimbinganPribadi(sortedDataTopikBimbinganPribadi);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -243,7 +236,6 @@ export default function Home() {
       const sortedDataSistemBimbingan = data.sort((a, b) => a.order - b.order);
       setDataSistemBimbingan(sortedDataSistemBimbingan);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -278,7 +270,6 @@ export default function Home() {
       const data = await response.data;
       setDataDosenPA(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -296,7 +287,6 @@ export default function Home() {
       const data = await response.data;
       setDataKaprodi(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -314,7 +304,6 @@ export default function Home() {
       const data = await response.data;
       setDataMahasiswa(data);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -502,9 +491,7 @@ export default function Home() {
       try {
         const decodedToken = jwtDecode<any>(token);
         setDataUser(decodedToken);
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
+      } catch (error) {}
     }
     getDataTahunAJaran();
     getDataJenisBimbingan();

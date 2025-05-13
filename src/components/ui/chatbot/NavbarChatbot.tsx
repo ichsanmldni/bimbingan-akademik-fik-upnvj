@@ -69,7 +69,6 @@ export default function NavbarChatbot({
 
       setIsChatPribadiUnread(!isMahasiswaRead);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -93,7 +92,6 @@ export default function NavbarChatbot({
 
       setIsPesanSiaranUnread(!isPesanSiaranUserRead);
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -117,7 +115,6 @@ export default function NavbarChatbot({
   }, [isPesanSiaranUnread, isChatPribadiUnread]);
 
   useEffect(() => {
-    console.log(roleUser, dataUser);
     if (roleUser && dataUser?.id) {
       dispatch(fetchNotifikasi({ roleUser, userId }));
     }
