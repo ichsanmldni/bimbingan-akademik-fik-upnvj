@@ -2,7 +2,7 @@ import React from "react";
 import botIcon from "../../../assets/images/logo-bot-only.png";
 import Image from "next/image";
 
-const BubbleChatStart = ({ data }: any) => {
+const BubbleChatStartChatbot = ({ data }: any) => {
   const formattedTime = new Date(data.waktu_kirim).toLocaleTimeString("id-ID", {
     hour: "2-digit",
     minute: "2-digit",
@@ -96,4 +96,4 @@ const BubbleChatStart = ({ data }: any) => {
   );
 };
 
-export default BubbleChatStart;
+export default BubbleChatStartChatbot;

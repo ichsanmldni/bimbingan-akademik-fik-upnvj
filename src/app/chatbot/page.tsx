@@ -1,7 +1,7 @@
 "use client";
 
-import BubbleChatEnd from "@/components/ui/chatbot/BubbleChatEnd";
-import BubbleChatStart from "@/components/ui/chatbot/BubbleChatStart";
+import BubbleChatEndChatbot from "@/components/ui/chatbot/BubbleChatEndChatbot";
+import BubbleChatStartChatbot from "@/components/ui/chatbot/BubbleChatStartChatbot";
 import ChatbotHeader from "@/components/ui/chatbot/ChatbotHeader";
 import NavbarChatbot from "@/components/ui/chatbot/NavbarChatbot";
 import SidebarChatbot from "@/components/ui/chatbot/SidebarChatbot";
@@ -586,9 +586,15 @@ ${dbCustomContext}
                   {sortedChatbotData.map((data: any, index) => (
                     <React.Fragment key={index}>
                       {data.role === "Mahasiswa" ? (
-                        <BubbleChatEnd key={index + "message"} data={data} />
+                        <BubbleChatEndChatbot
+                          key={index + "message"}
+                          data={data}
+                        />
                       ) : (
-                        <BubbleChatStart key={index + "message"} data={data} />
+                        <BubbleChatStartChatbot
+                          key={index + "message"}
+                          data={data}
+                        />
                       )}
                     </React.Fragment>
                   ))}
