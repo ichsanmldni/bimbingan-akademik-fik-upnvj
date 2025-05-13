@@ -15,7 +15,6 @@ import BubbleChatStart from "@/components/ui/BubbleChatStart";
 import BubbleChatEnd from "@/components/ui/BubbleChatEnd";
 import { env } from "process";
 import { MessageSquareText } from "lucide-react";
-import MessageMahasiswa from "@/components/ui/chatbot/MessageMahasiswa";
 import { select } from "slate";
 import ProfileImage from "@/components/ui/ProfileImage";
 
