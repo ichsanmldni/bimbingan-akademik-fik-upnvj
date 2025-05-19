@@ -73,6 +73,7 @@
     "slate-history": "^0.110.3",
     "slate-react": "^0.112.0",
     "styled-components": "^6.1.14",
+    "swr": "^2.3.3",
     "tailwindcss-displaymodes": "^1.0.8",
     "translate": "^3.0.1",
     "uuid": "^11.0.3",

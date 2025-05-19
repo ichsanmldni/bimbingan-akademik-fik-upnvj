@@ -5,7 +5,7 @@ import Logo from "@/components/ui/LogoUPNVJ";
 import SelectField from "@/components/ui/SelectField";
 import NavbarUser from "@/components/ui/NavbarUser";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import DatePicker from "react-datepicker";
@@ -15,21 +15,90 @@ import { id } from "date-fns/locale";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { env } from "process";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store";
+import { useDispatch } from "react-redux";
+import { fetchMahasiswa } from "@/lib/features/mahasiswaSlice";
+import { fetchDosenPA } from "@/lib/features/dosenPASlice";
+import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
+
+export const selectIsLoadingGlobal = ({
+  dataUser,
+  dataDosenPA,
+  dataKaprodi,
+  dataJenisBimbingan,
+  dataTopikBimbinganPribadi,
+  dataSistemBimbingan,
+  optionsTahunAjaran,
+  dataTahunAjaran,
+}: {
+  dataUser: any;
+  dataDosenPA: any[];
+  dataKaprodi: any[];
+  dataJenisBimbingan: any[];
+  dataTopikBimbinganPribadi: any[];
+  dataSistemBimbingan: any[];
+  optionsTahunAjaran: any[];
+  dataTahunAjaran: any[];
+}) => {
+  const checks = {
+    dataUser: !!dataUser,
+    dataDosenPA: dataDosenPA.length > 0,
+    dataKaprodi: dataKaprodi.length > 0,
+    dataJenisBimbingan: dataJenisBimbingan.length > 0,
+    dataTopikBimbinganPribadi: dataTopikBimbinganPribadi.length > 0,
+    dataSistemBimbingan: dataSistemBimbingan.length > 0,
+    optionsTahunAjaran: optionsTahunAjaran.length > 0,
+    dataTahunAjaran: dataTahunAjaran.length > 0,
+  };
+
+  console.log("Cek data loading:", checks);
+
+  return Object.values(checks).some((value) => !value);
+};
+
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
 
 export default function Home() {
+  const dispatch = useDispatch<AppDispatch>();
+  const roleUser =
+    useSelector((state: RootState) => state.auth?.roleUser) || "";
+  const dataUser = useSelector((state: RootState) => state.auth?.dataUser);
+
+  // Data states
+  const dataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.data
+  );
+  const dataDosenPA = useSelector((state: RootState) => state.dosenPA?.data);
+  const dataKaprodi = useSelector((state: RootState) => state.kaprodi?.data);
+
+  // Status states
+  const statusDataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.status
+  );
+  const statusDataDosenPA = useSelector(
+    (state: RootState) => state.dosenPA?.status
+  );
+  const statusDataKaprodi = useSelector(
+    (state: RootState) => state.kaprodi?.status
+  );
+  const statusDataUser = useSelector((state: RootState) => state.user?.status);
+
   const [namaLengkap, setNamaLengkap] = useState<string>("");
   const [nim, setNim] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [noWa, setNoWa] = useState<string>("");
   const [jurusan, setJurusan] = useState<string>("");
   const [ipk, setIpk] = useState<string>("");
-  const [roleUser, setRoleUser] = useState<string>("");
-  const [dataDosenPA, setDataDosenPA] = useState<any>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<any>([]); // Adjust type as needed
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [selectedHari, setSelectedHari] = useState<string>("");
   const [selectedJam, setSelectedJam] = useState<string>("");
-  const [dataUser, setDataUser] = useState<any>({});
   const [dataJadwalDosenPa, setDataJadwalDosenPa] = useState<any>([]);
   const [selectedJenisBimbingan, setSelectedJenisBimbingan] =
     useState<string>("");
@@ -51,7 +120,6 @@ export default function Home() {
   >([]);
   const [userDosenPa, setuserDosenPa] = useState<any>(null);
   const [dataMahasiswaUser, setDataMahasiswaUser] = useState<any>(null);
-  const [dataMahasiswa, setDataMahasiswa] = useState<any>([]);
   const [permasalahan, setPermasalahan] = useState("");
   const [selectedIsPermasalahan, setSelectedIsPermasalahan] = useState("");
   const [datePerwalianWajib, setDatePerwalianWajib] = useState("");
@@ -67,8 +135,6 @@ export default function Home() {
   ]);
   const [selectedSemester, setSelectedSemester] = useState("");
   const [isiPesanSiaran, setIsiPesanSiaran] = useState("");
-
-  const STARSENDER_API_KEY = process.env.NEXT_PUBLIC_STARSENDER_API_KEY;
 
   const getDataTahunAJaran = async () => {
     try {
@@ -259,55 +325,6 @@ export default function Home() {
     }
   };
 
-  const getDataDosenPA = async () => {
-    try {
-      const response = await axios.get<any>(`${API_BASE_URL}/api/datadosenpa`);
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataDosenPA(data);
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const getDataKaprodi = async () => {
-    try {
-      const response = await axios.get<any[]>(
-        `${API_BASE_URL}/api/datakaprodi`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataKaprodi(data);
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const getDataMahasiswa = async () => {
-    try {
-      const response = await axios.get<any>(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
-
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      const data = await response.data;
-      setDataMahasiswa(data);
-    } catch (error) {
-      throw error;
-    }
-  };
-
   const handleAddPerwalianWajib = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
@@ -339,19 +356,6 @@ export default function Home() {
       };
 
       const result = await addPerwalianWajib(perwalianWajibValue);
-
-      // const notificationResponse = await axios.post("/api/sendmessage", {
-      //   to: "085810676264",
-      //   body: `Kepada Yth. Mahasiswa,\n\nKami informasikan bahwa jadwal bimbingan
-      //    Perwalian KRS dari Dosen Pembimbing Akademik Anda, *${dataDosenPA[0].nama}*,
-      //    baru saja diatur.\n\nJadwal Bimbingan: ${perwalianWajibValue.jadwal_bimbingan}\n\n
-      //    Buka di dashboard untuk melihat detailnya: https://bimbingan-konseling-fikupnvj.vercel.app/
-      //    // \n\nTerima kasih.`,
-      // });
-
-      // if (!notificationResponse.data.success) {
-      //   throw new Error("Gagal mengirim notifikasi");
-      // }
 
       toast.success(
         <div className="flex items-center">
@@ -401,17 +405,6 @@ export default function Home() {
   useEffect(() => {
     setSelectedTopikBimbinganPribadi("");
   }, [selectedJenisBimbingan]);
-
-  useEffect(() => {
-    if (dataUser.role === "Mahasiswa") {
-      setRoleUser("Mahasiswa");
-    } else if (dataUser.role === "Dosen PA") {
-      setRoleUser("Dosen PA");
-    } else if (dataUser.role === "Kaprodi") {
-      setRoleUser("Kaprodi");
-    }
-  }, [dataUser, dataDosenPA, dataKaprodi]);
-
   useEffect(() => {
     if (dataMahasiswaUser && dataMahasiswaUser.id) {
       setNamaLengkap(dataMahasiswaUser.nama);
@@ -483,23 +476,10 @@ export default function Home() {
   }, [dataSistemBimbingan]);
 
   useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
-
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken = jwtDecode<any>(token);
-        setDataUser(decodedToken);
-      } catch (error) {}
-    }
     getDataTahunAJaran();
     getDataJenisBimbingan();
     getDataTopikBimbinganPribadi();
     getDataSistemBimbingan();
-    getDataKaprodi();
-    getDataMahasiswa();
-    getDataDosenPA();
   }, []);
 
   useEffect(() => {
@@ -533,105 +513,139 @@ export default function Home() {
   const getDayName = (date: Date) => {
     return format(date, "EEEE", { locale: id });
   };
+
+  useEffect(() => {
+    dispatch(fetchMahasiswa());
+    dispatch(fetchDosenPA());
+    dispatch(fetchKaprodi());
+  }, []);
+
+  const userData = useMemo(() => {
+    if (!dataUser) return null;
+
+    if (roleUser === "Mahasiswa" && statusDataMahasiswa === "succeeded") {
+      return dataMahasiswa.find((data) => data.nim === dataUser?.nim) || null;
+    }
+    if (roleUser === "Dosen PA" && statusDataDosenPA === "succeeded") {
+      return dataDosenPA.find((data) => data.email === dataUser?.email) || null;
+    }
+    if (roleUser === "Kaprodi" && statusDataKaprodi === "succeeded") {
+      return dataKaprodi.find((data) => data.email === dataUser?.email) || null;
+    }
+    return null;
+  }, [
+    roleUser,
+    dataUser,
+    dataMahasiswa,
+    dataDosenPA,
+    dataKaprodi,
+    statusDataMahasiswa,
+    statusDataDosenPA,
+    statusDataKaprodi,
+  ]);
+
+  const isLoading = selectIsLoadingGlobal({
+    dataUser,
+    dataDosenPA,
+    dataKaprodi,
+    dataJenisBimbingan,
+    dataTopikBimbinganPribadi,
+    dataSistemBimbingan,
+    optionsTahunAjaran,
+    dataTahunAjaran,
+  });
+
   return (
-    <div>
-      <NavbarUser
-        roleUser={roleUser}
-        dataUser={
-          roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.nim === dataUser.nim)
-            : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.email === dataUser.email)
-              : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.email === dataUser.email)
-                : undefined
-        }
-      />
-      <div className="pt-[100px]">
-        <div className="mt-4 mb-10 mx-4 md:mx-[130px] border rounded-lg">
-          <h1 className="font-semibold text-[30px] text-center pt-4">
-            Perwalian Wajib Dosen Pembimbing Akademik
-          </h1>
-          <form
-            className="flex flex-col gap-4 p-8"
-            onSubmit={handleAddPerwalianWajib}
-          >
-            <SelectField
-              options={optionsTahunAjaran}
-              onChange={(e: any) => setSelectedTahunAjaran(e.target.value)}
-              value={selectedTahunAjaran}
-              placeholder="Pilih Tahun Ajaran"
-              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
-            />
-            <SelectField
-              options={optionsSemester}
-              onChange={(e: any) => setSelectedSemester(e.target.value)}
-              value={selectedSemester}
-              placeholder="Pilih Semester"
-              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
-            />
-            <SelectField
-              options={optionsJenisBimbingan}
-              onChange={(e) => setSelectedJenisBimbingan(e.target.value)}
-              value={selectedJenisBimbingan}
-              placeholder="Pilih Jenis Bimbingan"
-              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
-            />
-            <SelectField
-              options={optionsSistemBimbingan}
-              onChange={(e) => setSelectedSistemBimbingan(e.target.value)}
-              value={selectedSistemBimbingan}
-              placeholder="Pilih Sistem Bimbingan"
-              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
-            />
-            <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
-              <input
-                type="date"
-                value={datePerwalianWajib}
-                onChange={handleDateChange}
-                min={today}
-                className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
-              />
-              <div className="flex md:gap-3 items-center">
-                <input
-                  type="time"
-                  value={startPerwalianWajibTime}
-                  onChange={handleStartTimeChange}
-                  className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
-                />
-                <p>-</p>
-                <input
-                  type="time"
-                  value={endPerwalianWajibTime}
-                  onChange={handleEndTimeChange}
-                  className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
-                />
-              </div>
-            </div>
-            <textarea
-              placeholder="Isi Pesan Siaran"
-              className="border text-[15px] focus:outline-none rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
-              onChange={(e) => {
-                setIsiPesanSiaran(e.target.value);
-              }}
-              value={isiPesanSiaran}
-            />
-            <button
-              type="submit"
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-[6px] font-medium"
+    <>
+      {isLoading && <Spinner />}
+      <div>
+        <NavbarUser roleUser={roleUser} dataUser={userData} />
+        <div className="pt-[100px]">
+          <div className="mt-4 mb-10 mx-4 md:mx-[130px] border rounded-lg">
+            <h1 className="font-semibold text-[30px] text-center pt-4">
+              Perwalian Wajib Dosen Pembimbing Akademik
+            </h1>
+            <form
+              className="flex flex-col gap-4 p-8"
+              onSubmit={handleAddPerwalianWajib}
             >
-              Atur Perwalian
-            </button>
-          </form>
-          <ToastContainer />
+              <SelectField
+                options={optionsTahunAjaran}
+                onChange={(e: any) => setSelectedTahunAjaran(e.target.value)}
+                value={selectedTahunAjaran}
+                placeholder="Pilih Tahun Ajaran"
+                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
+              />
+              <SelectField
+                options={optionsSemester}
+                onChange={(e: any) => setSelectedSemester(e.target.value)}
+                value={selectedSemester}
+                placeholder="Pilih Semester"
+                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
+              />
+              <SelectField
+                options={optionsJenisBimbingan}
+                onChange={(e) => setSelectedJenisBimbingan(e.target.value)}
+                value={selectedJenisBimbingan}
+                placeholder="Pilih Jenis Bimbingan"
+                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
+              />
+              <SelectField
+                options={optionsSistemBimbingan}
+                onChange={(e) => setSelectedSistemBimbingan(e.target.value)}
+                value={selectedSistemBimbingan}
+                placeholder="Pilih Sistem Bimbingan"
+                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full focus:outline-none`}
+              />
+              <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
+                <input
+                  type="date"
+                  value={datePerwalianWajib}
+                  onChange={handleDateChange}
+                  min={today}
+                  className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
+                />
+                <div className="flex md:gap-3 items-center">
+                  <input
+                    type="time"
+                    value={startPerwalianWajibTime}
+                    onChange={handleStartTimeChange}
+                    className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
+                  />
+                  <p>-</p>
+                  <input
+                    type="time"
+                    value={endPerwalianWajibTime}
+                    onChange={handleEndTimeChange}
+                    className="mt-2 px-3 py-2 text-[15px] border rounded-lg"
+                  />
+                </div>
+              </div>
+              <textarea
+                placeholder="Isi Pesan Siaran"
+                className="border text-[15px] focus:outline-none rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+                onChange={(e) => {
+                  setIsiPesanSiaran(e.target.value);
+                }}
+                value={isiPesanSiaran}
+              />
+              <button
+                type="submit"
+                className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-[6px] font-medium"
+              >
+                Atur Perwalian
+              </button>
+            </form>
+            <ToastContainer />
+          </div>
+        </div>
+
+        <div className="border hidden md:block">
+          <p className="text-center my-8 text-[16px]">
+            Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
+          </p>
         </div>
       </div>
-
-      <div className="border hidden md:block">
-        <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
-        </p>
-      </div>
-    </div>
+    </>
   );
 }

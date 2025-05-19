@@ -6,10 +6,12 @@ import React, { useEffect, useState } from "react";
 import ChatDosenPA from "@/components/features/chatpribadi/ChatDosenPA";
 import ChatMahasiswa from "@/components/features/chatpribadi/ChatMahasiswa";
 import { env } from "process";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
 
 export default function ChatPribadi() {
   const [roleUser, setRoleUser] = useState("");
-  const [dataUser, setDataUser] = useState<any>(null);
+  const dataUser = useSelector((state: RootState) => state.auth.dataUser);
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [dataKaprodi, setDataKaprodi] = useState([]);
 
@@ -46,15 +48,6 @@ export default function ChatPribadi() {
   };
 
   useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken: any = jwtDecode(token);
-        setDataUser(decodedToken);
-      } catch (error) {}
-    }
     getDataDosenPA();
     getDataKaprodi();
   }, []);
