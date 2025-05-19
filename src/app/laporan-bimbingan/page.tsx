@@ -57,6 +57,7 @@ import { fetchMahasiswa } from "@/lib/features/mahasiswaSlice";
 import { fetchDosenPA } from "@/lib/features/dosenPASlice";
 import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
 import { useDispatch } from "react-redux";
+import Spinner from "@/components/ui/Spinner";
 
 const HOTKEYS: { [key: string]: string } = {
   "mod+b": "bold",
@@ -75,7 +76,7 @@ const initialValue: any = [
   },
 ];
 
-export const selectIsLoadingGlobal = ({
+const selectIsLoadingGlobal = ({
   dataUser,
   dataMahasiswaUser,
   dataDosenPA,
@@ -108,14 +109,6 @@ export const selectIsLoadingGlobal = ({
 
   return false;
 };
-
-export function Spinner() {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
-    </div>
-  );
-}
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();

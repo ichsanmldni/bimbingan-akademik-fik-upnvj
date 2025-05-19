@@ -18,10 +18,11 @@ import { fetchKaprodi } from "../lib/features/kaprodiSlice";
 import { fetchUser } from "../lib/features/userSlice";
 import { fetchAuthUser } from "../lib/features/authSlice";
 import { RootState, AppDispatch } from "../lib/store";
+import Spinner from "@/components/ui/Spinner";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
-export const selectIsLoadingGlobal = (
+const selectIsLoadingGlobal = (
   statusAuthUser,
   roleUser,
   statusDataUser,
@@ -39,14 +40,6 @@ export const selectIsLoadingGlobal = (
     (roleUser === "Admin" && statusDataUser === "loading")
   );
 };
-
-export function Spinner() {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
-    </div>
-  );
-}
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();

@@ -24,6 +24,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Span } from "slate";
 import AlumniRestrictionModal from "@/components/ui/AlumniRestrictionModal";
+import Spinner from "@/components/ui/Spinner";
 
 const schedule = {
   Senin: [],
@@ -33,7 +34,7 @@ const schedule = {
   Jumat: [],
 };
 
-export const selectIsLoadingGlobal = ({
+const selectIsLoadingGlobal = ({
   dataMahasiswa,
   dataDosenPA,
   dataJurusan,
@@ -75,14 +76,6 @@ export const selectIsLoadingGlobal = ({
 
   return false; // semua data sudah ada
 };
-
-export function Spinner() {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
-    </div>
-  );
-}
 
 const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapMahasiswa, setNamaLengkapMahasiswa] = useState<string>("");

@@ -12,8 +12,9 @@ import { jwtDecode } from "jwt-decode";
 import { env } from "process";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import Spinner from "@/components/ui/Spinner";
 
-export const selectIsLoadingGlobal = ({
+const selectIsLoadingGlobal = ({
   roleUser,
   dataUser,
   dataDosenPA,
@@ -65,14 +66,6 @@ export const selectIsLoadingGlobal = ({
 
   return false;
 };
-
-export function Spinner() {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
-    </div>
-  );
-}
 
 export default function Home() {
   const [roleUser, setRoleUser] = useState<string>("");
