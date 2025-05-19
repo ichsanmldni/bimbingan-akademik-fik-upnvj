@@ -21,6 +21,7 @@ import "jspdf-autotable";
 import "./fonts/times new roman bold-normal";
 import "./fonts/times new roman-normal";
 import { Fragment } from "react";
+import Spinner from "@/components/ui/Spinner";
 
 import {
   Dialog,
@@ -42,7 +43,7 @@ const schedule: Record<string, string[]> = {
   Jumat: [],
 };
 
-export const selectIsLoadingGlobal = ({
+const selectIsLoadingGlobal = ({
   userProfile,
   dataDosen,
   dataJadwalDosenPA,
@@ -73,14 +74,6 @@ export const selectIsLoadingGlobal = ({
     isEmpty(dataTahunAjaran)
   );
 };
-
-export function Spinner() {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
-    </div>
-  );
-}
 
 const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   const dataDosenPA: any = useSelector(
