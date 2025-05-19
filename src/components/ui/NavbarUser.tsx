@@ -23,6 +23,29 @@ import {
 import { AppDispatch, RootState } from "@/lib/store";
 import { useSelector } from "react-redux";
 
+const SkeletonNavbar = () => {
+  return (
+    <div className="fixed z-[999] flex justify-between md:justify-start w-full bg-white border py-5 px-[24px] md:px-[52px] animate-pulse">
+      <div className="hidden md:flex md:w-[35%] items-center gap-5">
+        <div className="bg-gray-300 rounded w-10 h-10"></div>
+        <div className="bg-gray-300 rounded w-48 h-6"></div>
+      </div>
+      <div className="hidden md:flex items-center w-[45%] gap-6">
+        {/* Beberapa skeleton link */}
+        <div className="bg-gray-300 rounded w-20 h-5"></div>
+        <div className="bg-gray-300 rounded w-28 h-5"></div>
+        <div className="bg-gray-300 rounded w-32 h-5"></div>
+        <div className="bg-gray-300 rounded w-32 h-5"></div>
+      </div>
+      <div className="flex gap-10 justify-end md:w-[20%] items-center">
+        <div className="bg-gray-300 rounded w-6 h-6"></div>
+        <div className="bg-gray-300 rounded w-6 h-6"></div>
+        <div className="bg-gray-300 rounded w-6 h-6"></div>
+      </div>
+    </div>
+  );
+};
+
 const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [isModalNotificationOpen, setIsModalNotificationOpen] = useState(false);
@@ -82,6 +105,12 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
 
   const isActive = (path: string) => pathname === path;
 
+  const isLoading =
+    !roleUser ||
+    !dataUser ||
+    notificationCount === undefined ||
+    notificationCount === null;
+
   useEffect(() => {
     if (roleUser && dataUser?.id) {
       dispatch(fetchNotifikasi({ roleUser, userId }));
@@ -126,6 +155,8 @@ const NavbarUser: React.FC<any> = ({ roleUser, dataUser }) => {
     isChatPribadiMahasiswaUnread,
     isChatPribadiDosenPAUnread,
   ]);
+
+  if (isLoading) return <SkeletonNavbar />;
 
   return (
     <>

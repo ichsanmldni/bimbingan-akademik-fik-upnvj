@@ -200,6 +200,7 @@ export async function POST(req: Request): Promise<Response> {
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
+          console.log(error);
           return new Response(
             JSON.stringify({
               message: error.response?.data.message || "Login gagal!",

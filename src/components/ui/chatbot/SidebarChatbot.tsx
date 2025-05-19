@@ -23,6 +23,7 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
   setIsOpen,
 }) => {
   const [grouped, setGrouped] = useState<Record<string, ChatbotSession[]>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   const groupDataByDate = (data: ChatbotSession[]) => {
     const grouped: Record<string, ChatbotSession[]> = {};
@@ -73,20 +74,33 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
   };
 
   useEffect(() => {
-    if (data.length === 0) {
-      setGrouped({
-        "Hari Ini": [
-          {
-            id: 0,
-            waktu_mulai: new Date().toISOString(),
-            pesan_pertama: "New Chat",
-          },
-        ],
-      });
-    } else {
-      groupDataByDate(data);
-    }
+    // Simulasi loading, kamu bisa sesuaikan dengan API call / data fetch aslinya
+    setIsLoading(true);
+
+    setTimeout(() => {
+      if (data.length === 0) {
+        setGrouped({});
+      } else {
+        groupDataByDate(data);
+      }
+      setIsLoading(false);
+    }, 1000); // delay 800ms untuk loading skeleton, bisa diubah
   }, [data]);
+
+  // Skeleton loader sederhana untuk list chat
+  const renderSkeleton = () => {
+    const skeletonItems = Array(15).fill(0);
+    return (
+      <div className="flex flex-col gap-2 pr-4">
+        {skeletonItems.map((_, i) => (
+          <div
+            key={i}
+            className="h-9 bg-gray-300 rounded-lg animate-pulse w-full"
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="h-screen flex flex-col items-start pt-4 md:pt-[80px] pl-6 pr-2 pb-8 bg-white shadow-md w-[200px] md:w-[270px]">
@@ -128,59 +142,61 @@ const SidebarChatbot: React.FC<SidebarChatbotProps> = ({
         </button>
       </div>
       <div className="overflow-y-auto w-full mt-2 pb-2 custom-scrollbar flex flex-col gap-4">
-        {/* Render berdasarkan grup */}
-        {Object.keys(grouped)
-          .sort((a, b) => {
-            const order = [
-              "Hari Ini",
-              "Kemarin",
-              "7 Hari Terakhir",
-              "30 Hari Terakhir",
-              "Lebih Lama",
-            ];
+        {/* Jika loading tampilkan skeleton */}
+        {isLoading
+          ? renderSkeleton()
+          : Object.keys(grouped)
+              .sort((a, b) => {
+                const order = [
+                  "Hari Ini",
+                  "Kemarin",
+                  "7 Hari Terakhir",
+                  "30 Hari Terakhir",
+                  "Lebih Lama",
+                ];
 
-            const aIndex = order.indexOf(a);
-            const bIndex = order.indexOf(b);
+                const aIndex = order.indexOf(a);
+                const bIndex = order.indexOf(b);
 
-            if (aIndex !== -1 && bIndex !== -1) {
-              return aIndex - bIndex;
-            }
+                if (aIndex !== -1 && bIndex !== -1) {
+                  return aIndex - bIndex;
+                }
 
-            return 0; // Tidak perlu sorting bulan/tahun karena sudah digantikan dengan "Lebih Lama"
-          })
-          .map((group) => (
-            <div key={group}>
-              <p className="text-[#FE6500] font-bold ml-2 mb-2">{group}</p>
-              <div className="flex flex-col gap-1 mr-4">
-                {grouped[group].map((item) => (
-                  <button
-                    onClick={() => {
-                      setActiveSesiChatbotMahasiswa(item.id);
-                    }}
-                    key={item.id}
-                    className={`outline-none text-[15px] w-full text-left py-2 px-3 rounded-lg ${
-                      activeSesiChatbotMahasiswa === item.id
-                        ? "bg-[#FE6500] text-white"
-                        : "hover:bg-[#FFE5CC]"
-                    }`}
-                  >
-                    <div>
-                      <span className="block md:hidden">
-                        {item.pesan_pertama.length > 13
-                          ? item.pesan_pertama.slice(0, 13) + "..."
-                          : item.pesan_pertama}
-                      </span>
-                      <span className="hidden md:block">
-                        {item.pesan_pertama.length > 20
-                          ? item.pesan_pertama.slice(0, 20) + "..."
-                          : item.pesan_pertama}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+                return 0; // Tidak perlu sorting bulan/tahun karena sudah digantikan dengan "Lebih Lama"
+              })
+              .map((group) => (
+                <div key={group}>
+                  <p className="text-[#FE6500] font-bold ml-2 mb-2">{group}</p>
+                  <div className="flex flex-col gap-1 mr-4">
+                    {grouped[group].map((item) => (
+                      <button
+                        onClick={() => {
+                          setActiveSesiChatbotMahasiswa(item.id);
+                        }}
+                        key={item.id}
+                        className={`outline-none text-[15px] w-full text-left py-2 px-3 rounded-lg ${
+                          activeSesiChatbotMahasiswa === item.id
+                            ? "bg-[#FE6500] text-white"
+                            : "hover:bg-[#FFE5CC]"
+                        }`}
+                      >
+                        <div>
+                          <span className="block md:hidden">
+                            {item.pesan_pertama.length > 13
+                              ? item.pesan_pertama.slice(0, 13) + "..."
+                              : item.pesan_pertama}
+                          </span>
+                          <span className="hidden md:block">
+                            {item.pesan_pertama.length > 20
+                              ? item.pesan_pertama.slice(0, 20) + "..."
+                              : item.pesan_pertama}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
       </div>
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {

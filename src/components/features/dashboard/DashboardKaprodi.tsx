@@ -25,6 +25,41 @@ import PDFModal from "@/components/ui/PDFModal";
 import StoreProvider from "@/app/StoreProvider";
 import { Catamaran } from "next/font/google";
 
+export const selectIsLoadingGlobal = ({
+  dataMahasiswaUser,
+  dataDosenPA,
+  optionsTahunAjaran,
+  dataTahunAjaran,
+}) => {
+  // fungsi untuk cek apakah data kosong (array kosong, object kosong, null, atau undefined)
+  const isEmpty = (data) =>
+    data === null ||
+    data === undefined ||
+    (Array.isArray(data) && data.length === 0) ||
+    (typeof data === "object" &&
+      !Array.isArray(data) &&
+      Object.keys(data).length === 0);
+
+  if (
+    isEmpty(dataMahasiswaUser) ||
+    isEmpty(dataDosenPA) ||
+    isEmpty(optionsTahunAjaran) ||
+    isEmpty(dataTahunAjaran)
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
+
 const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapKaprodi, setNamaLengkapKaprodi] = useState<string>("");
   const [emailKaprodi, setEmailKaprodi] = useState<string>("");
@@ -1605,8 +1640,16 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   }, [dataLaporanBimbingan, dataBimbingan]);
 
+  const isLoading = selectIsLoadingGlobal({
+    dataMahasiswaUser: dataAllMahasiswa,
+    dataDosenPA: dataDosenPA,
+    optionsTahunAjaran: optionsTahunAjaran,
+    dataTahunAjaran: dataTahunAjaran,
+  });
+
   return (
-    <StoreProvider>
+    <>
+      {isLoading && <Spinner />}
       {selectedSubMenuDashboard === "Profile Kaprodi" && (
         <div className="md:w-[75%] p-4 md:pl-[30px] md:pr-[128px] py-4 md:py-[30px]">
           <div className="border px-6 md:px-[70px] py-6 md:py-[30px] rounded-lg">
@@ -1943,15 +1986,15 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
                         <div className="flex items-center">
                           <p className="font-semibold text-orange-500">
                             {`
-                        ${
-                          dataAllMahasiswa
-                            .filter(
-                              (dataMahasiswa) =>
-                                dataMahasiswa.dosen_pa_id === data.id
-                            )
-                            .filter((data) => !data.status_lulus).length
-                        } mahasiswa bimbingan aktif
-                      `}
+                    ${
+                      dataAllMahasiswa
+                        .filter(
+                          (dataMahasiswa) =>
+                            dataMahasiswa.dosen_pa_id === data.id
+                        )
+                        .filter((data) => !data.status_lulus).length
+                    } mahasiswa bimbingan aktif
+                  `}
                           </p>
                         </div>
                       </div>
@@ -2339,7 +2382,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
           <ToastContainer />
         </div>
       )}
-    </StoreProvider>
+    </>
   );
 };
 

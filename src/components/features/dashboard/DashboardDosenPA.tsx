@@ -31,6 +31,8 @@ import {
 } from "@headlessui/react";
 import { EyeIcon } from "lucide-react";
 import PDFModal from "@/components/ui/PDFModal";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/store";
 
 const schedule: Record<string, string[]> = {
   Senin: [],
@@ -40,7 +42,50 @@ const schedule: Record<string, string[]> = {
   Jumat: [],
 };
 
+export const selectIsLoadingGlobal = ({
+  userProfile,
+  dataDosen,
+  dataJadwalDosenPA,
+  dataPengajuanBimbingan,
+  dataLaporanBimbingan,
+  dataPengesahanBimbingan,
+  dataBimbingan,
+  optionsTahunAjaran,
+  dataTahunAjaran,
+}) => {
+  const isEmpty = (data) =>
+    data === null ||
+    data === undefined ||
+    (Array.isArray(data) && data.length === 0) ||
+    (typeof data === "object" &&
+      !Array.isArray(data) &&
+      Object.keys(data).length === 0);
+
+  return (
+    isEmpty(userProfile) ||
+    isEmpty(dataDosen) ||
+    isEmpty(dataJadwalDosenPA) ||
+    isEmpty(dataPengajuanBimbingan) ||
+    isEmpty(dataLaporanBimbingan) ||
+    isEmpty(dataPengesahanBimbingan) ||
+    isEmpty(dataBimbingan) ||
+    isEmpty(optionsTahunAjaran) ||
+    isEmpty(dataTahunAjaran)
+  );
+};
+
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
+
 const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
+  const dataDosenPA: any = useSelector(
+    (state: RootState) => state.dosenPA?.data
+  );
   const [userProfile, setUserProfile] = useState({
     nama: "",
     email: "",
@@ -60,7 +105,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     useState<boolean>(false);
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [isAddJadwal, setIsAddJadwal] = useState<boolean>(false);
-  const [dataDosenPA, setDataDosenPA] = useState(null);
   const [dataDosen, setDataDosen] = useState(null);
   const [dataClickedLaporanBimbingan, setDataClickedLaporanBimbingan] =
     useState(null);
@@ -407,23 +451,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
         error.response?.data?.message ||
         "Terjadi kesalahan. Silakan coba lagi.";
       throw new Error(errorMessage);
-    }
-  };
-
-  const getDataDosenPAByDosenEmail = async () => {
-    try {
-      const dataDosenPA = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
-      const dosen = dataDosenPA.data.find(
-        (data) => data.email === dataUser.email
-      );
-
-      if (!dosen) {
-        return;
-      }
-
-      setDataDosenPA(dosen);
-    } catch (error) {
-      throw error;
     }
   };
 
@@ -2001,7 +2028,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     if (dataUser && dataUser.email) {
       getDataDosenById();
       getDataPengesahanBimbinganByIDDosenPA();
-      getDataDosenPAByDosenEmail();
     }
   }, [dataUser]);
 
@@ -2089,8 +2115,21 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
     }
   }, [userProfile, namaLengkapDosen, emailDosen, email, noTelpDosen]);
 
+  const isLoading = selectIsLoadingGlobal({
+    userProfile,
+    dataDosen,
+    dataJadwalDosenPA,
+    dataPengajuanBimbingan,
+    dataLaporanBimbingan,
+    dataPengesahanBimbingan,
+    dataBimbingan,
+    optionsTahunAjaran,
+    dataTahunAjaran,
+  });
+
   return (
     <>
+      {isLoading && <Spinner />}
       {selectedSubMenuDashboard === "Profile Dosen PA" && (
         <div className="md:w-[75%] px-4 md:px-0 py-4 md:py-0">
           <div className="px-4 md:px-[70px] py-[30px] rounded-lg">

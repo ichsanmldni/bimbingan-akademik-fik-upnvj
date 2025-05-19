@@ -161,23 +161,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <NavbarUser
-        roleUser={roleUser}
-        dataUser={
-          roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data: any) => data.nim === dataUser?.nim) ||
-              {}
-            : roleUser === "Dosen PA"
-              ? dataDosenPA.find(
-                  (data: any) => data.email === dataUser?.email
-                ) || {}
-              : roleUser === "Kaprodi"
-                ? dataKaprodi.find(
-                    (data: any) => data.email === dataUser?.email
-                  ) || {}
-                : {}
-        }
-      />
+      <NavbarUser roleUser={roleUser} dataUser={userData} />
       <div className="md:flex h-screen w-full pt-[80px]">
         <div className="flex flex-col md:w-[25%] rounded-2xl border border-gray-200 bg-white shadow-sm mt-4 md:mt-0 mx-4 md:mx-0 md:ml-24 gap-6 pt-6 pb-6 px-6">
           <h1 className="text-lg font-semibold text-gray-800">

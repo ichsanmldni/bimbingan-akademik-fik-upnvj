@@ -65,6 +65,7 @@ export const config = {
     "/chatpribadi",
     "/admin",
     "/dashboard/:path*",
+    "/perwalian-wajib/:path*",
     "/informasi-akademik/:path*",
     "/laporan-bimbingan/:path*",
     "/pengajuan-bimbingan/:path*",

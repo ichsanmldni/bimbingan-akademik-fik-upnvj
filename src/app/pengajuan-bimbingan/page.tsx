@@ -5,7 +5,7 @@ import Logo from "@/components/ui/LogoUPNVJ";
 import SelectField from "@/components/ui/SelectField";
 import NavbarUser from "@/components/ui/NavbarUser";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import DatePicker from "react-datepicker";
@@ -23,19 +23,82 @@ import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
 import AlumniRestrictionModal from "@/components/ui/AlumniRestrictionModal";
 import { useRouter } from "next/navigation";
 
+export const selectIsLoadingGlobal = ({
+  dataMahasiswaUser,
+  userDosenPa,
+  dataJenisBimbingan,
+  dataTopikBimbinganPribadi,
+  dataSistemBimbingan,
+  optionsTahunAjaran,
+  dataTahunAjaran,
+  dataJadwalDosenPa,
+}: {
+  dataMahasiswaUser: any;
+  userDosenPa: any;
+  dataJenisBimbingan: any[];
+  dataTopikBimbinganPribadi: any[];
+  dataSistemBimbingan: any[];
+  optionsTahunAjaran: { value: string; label: string }[];
+  dataTahunAjaran: any[];
+  dataJadwalDosenPa: any[];
+}) => {
+  const checks = {
+    dataMahasiswaUser: !!dataMahasiswaUser,
+    userDosenPa: !!userDosenPa,
+    dataJenisBimbingan: dataJenisBimbingan.length > 0,
+    dataTopikBimbinganPribadi: dataTopikBimbinganPribadi.length > 0,
+    dataSistemBimbingan: dataSistemBimbingan.length > 0,
+    optionsTahunAjaran: optionsTahunAjaran.length > 0,
+    dataTahunAjaran: dataTahunAjaran.length > 0,
+    dataJadwalDosenPa: dataJadwalDosenPa.length > 0,
+  };
+
+  console.log("Cek data loading:", checks);
+
+  return Object.values(checks).some((value) => !value);
+};
+
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
+
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
+  const roleUser =
+    useSelector((state: RootState) => state.auth?.roleUser) || "";
+  const dataUser = useSelector((state: RootState) => state.auth?.dataUser);
+
+  // Data states
+  const dataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.data
+  );
+  const dataDosenPA = useSelector((state: RootState) => state.dosenPA?.data);
+  const dataKaprodi = useSelector((state: RootState) => state.kaprodi?.data);
+
+  // Status states
+  const statusDataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.status
+  );
+  const statusDataDosenPA = useSelector(
+    (state: RootState) => state.dosenPA?.status
+  );
+  const statusDataKaprodi = useSelector(
+    (state: RootState) => state.kaprodi?.status
+  );
+  const statusDataUser = useSelector((state: RootState) => state.user?.status);
   const [namaLengkap, setNamaLengkap] = useState<string>("");
   const [nim, setNim] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [noWa, setNoWa] = useState<string>("");
   const [jurusan, setJurusan] = useState<string>("");
   const [ipk, setIpk] = useState<string>("");
-  const [roleUser, setRoleUser] = useState<string>("");
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
   const [selectedHari, setSelectedHari] = useState<string>("");
   const [selectedJam, setSelectedJam] = useState<string>("");
-  const [dataUser, setDataUser] = useState<any>({});
   const [dataJadwalDosenPa, setDataJadwalDosenPa] = useState<any>([]);
   const [selectedTopikBimbinganPribadi, setSelectedTopikBimbinganPribadi] =
     useState<string>("");
@@ -89,11 +152,6 @@ export default function Home() {
   ]);
   const [isOpenModalAlumni, setIsOpenModalAlumni] = useState(true);
   const router = useRouter();
-  const dataMahasiswa = useSelector(
-    (state: RootState) => state.mahasiswa?.data
-  );
-  const dataDosenPA = useSelector((state: RootState) => state.dosenPA?.data);
-  const dataKaprodi = useSelector((state: RootState) => state.kaprodi?.data);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -354,10 +412,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    setRoleUser("Mahasiswa");
-  }, [dataUser, dataDosenPA, dataKaprodi]);
-
-  useEffect(() => {
     if (dataMahasiswaUser && dataMahasiswaUser.id) {
       setNamaLengkap(dataMahasiswaUser.nama);
       setNim(dataMahasiswaUser.nim);
@@ -408,37 +462,16 @@ export default function Home() {
   }, [dataSistemBimbingan]);
 
   useEffect(() => {
-    dispatch(fetchMahasiswa());
-    dispatch(fetchDosenPA());
-    dispatch(fetchKaprodi());
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
-
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken: any = jwtDecode(token);
-
-        // Ambil data mahasiswa dan cocokan nim
-        fetch(`${API_BASE_URL}/api/datamahasiswa`)
-          .then((res) => res.json())
-          .then((data) => {
-            const matchedUser = data.find(
-              (mahasiswa) => mahasiswa.nim === decodedToken.nim
-            );
-            if (matchedUser) {
-              setDataUser(matchedUser);
-            } else {
-              console.warn("Mahasiswa dengan NIM tersebut tidak ditemukan.");
-            }
-          })
-          .catch((err) => {});
-      } catch (error) {}
-    }
     getDataTahunAJaran();
     getDataJenisBimbingan();
     getDataTopikBimbinganPribadi();
     getDataSistemBimbingan();
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchMahasiswa());
+    dispatch(fetchDosenPA());
+    dispatch(fetchKaprodi());
   }, []);
 
   useEffect(() => {
@@ -471,224 +504,256 @@ export default function Home() {
     const targetUrl = `/`;
     window.location.href = targetUrl;
   };
+
+  const userData = useMemo(() => {
+    if (!dataUser) return null;
+
+    if (roleUser === "Mahasiswa" && statusDataMahasiswa === "succeeded") {
+      return dataMahasiswa.find((data) => data.nim === dataUser?.nim) || null;
+    }
+    if (roleUser === "Dosen PA" && statusDataDosenPA === "succeeded") {
+      return dataDosenPA.find((data) => data.email === dataUser?.email) || null;
+    }
+    if (roleUser === "Kaprodi" && statusDataKaprodi === "succeeded") {
+      return dataKaprodi.find((data) => data.email === dataUser?.email) || null;
+    }
+    return null;
+  }, [
+    roleUser,
+    dataUser,
+    dataMahasiswa,
+    dataDosenPA,
+    dataKaprodi,
+    statusDataMahasiswa,
+    statusDataDosenPA,
+    statusDataKaprodi,
+  ]);
+
+  const isLoading = selectIsLoadingGlobal({
+    dataMahasiswaUser,
+    userDosenPa,
+    dataJenisBimbingan,
+    dataTopikBimbinganPribadi,
+    dataSistemBimbingan,
+    optionsTahunAjaran,
+    dataTahunAjaran,
+    dataJadwalDosenPa,
+  });
+
   return (
-    <div>
-      <NavbarUser
-        roleUser={roleUser}
-        dataUser={
-          roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.nim === dataUser.nim)
-            : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.email === dataUser.email)
-              : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.email === dataUser.email)
-                : undefined
-        }
-      />
-      <div className="pt-[100px]">
-        <div className="mt-4 mb-10 mx-4 md:mx-[130px] border rounded-lg">
-          <h1 className="font-semibold text-[30px] text-center pt-4">
-            Pengajuan Bimbingan Akademik Mahasiswa
-          </h1>
-          <form
-            className="flex flex-col gap-4 p-8"
-            onSubmit={handleAddPengajuanBimbingan}
-          >
-            <InputField
-              disabled
-              type="text"
-              placeholder="Nama Lengkap"
-              onChange={(e) => setNamaLengkap(e.target.value)}
-              value={namaLengkap}
-              className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
-            />
-            <InputField
-              disabled
-              type="text"
-              placeholder="NIM"
-              onChange={(e) => setNim(e.target.value)}
-              value={nim}
-              className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
-            />
-            <InputField
-              disabled
-              type="text"
-              placeholder="E-mail"
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-              className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
-            />
-            <InputField
-              disabled
-              type="text"
-              placeholder="No Whatsapp"
-              onChange={(e) => setNoWa(e.target.value)}
-              value={noWa}
-              className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
-            />
-            <InputField
-              disabled
-              type="text"
-              placeholder="Jurusan"
-              onChange={(e) => setJurusan(e.target.value)}
-              value={jurusan}
-              className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
-            />
-            <InputField
-              disabled
-              type="text"
-              placeholder="IPK"
-              onChange={(e) => setIpk(e.target.value)}
-              value={ipk}
-              className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
-            />
-            <SelectField
-              options={optionsTahunAjaran}
-              onChange={(e) => setSelectedTahunAjaran(e.target.value)}
-              value={selectedTahunAjaran}
-              placeholder="Pilih Tahun Ajaran"
-              className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
-            />
-            <SelectField
-              options={optionsSemester}
-              onChange={(e) => setSelectedSemester(e.target.value)}
-              value={selectedSemester}
-              placeholder="Pilih Semester"
-              className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
-            />
-            <SelectField
-              options={optionsPeriodePengajuan}
-              onChange={(e) => setSelectedPeriodePengajuan(e.target.value)}
-              value={selectedPeriodePengajuan}
-              placeholder="Pilih Periode Pengajuan"
-              className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
-            />
-            <div className="flex flex-col">
-              <DatePicker
-                selected={selectedDateTime}
-                onChange={(date: any) => {
-                  setSelectedDateTime(date);
-                  if (date) {
-                    setSelectedHari(getDayName(date));
-                  }
-                }}
-                popperContainer={({ children }) => (
-                  <div className="relative z-10">{children}</div>
-                )}
-                dateFormat="EEEE, dd MMMM yyyy"
-                placeholderText="Pilih Jadwal Bimbingan"
-                className="px-3 py-2 caret-transparent border cursor-pointer rounded-lg w-full focus:outline-none appearance-none text-[15px]"
-                minDate={new Date()}
-                locale={id}
+    <>
+      {isLoading && <Spinner />}
+      <div>
+        <NavbarUser roleUser={roleUser} dataUser={userData} />
+        <div className="pt-[100px]">
+          <div className="mt-4 mb-10 mx-4 md:mx-[130px] border rounded-lg">
+            <h1 className="font-semibold text-[30px] text-center pt-4">
+              Pengajuan Bimbingan Akademik Mahasiswa
+            </h1>
+            <form
+              className="flex flex-col gap-4 p-8"
+              onSubmit={handleAddPengajuanBimbingan}
+            >
+              <InputField
+                disabled
+                type="text"
+                placeholder="Nama Lengkap"
+                onChange={(e) => setNamaLengkap(e.target.value)}
+                value={namaLengkap}
+                className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
               />
-              <div
-                className={`flex flex-col mt-3 ml-3 ${selectedHari === "" && "hidden"}`}
-              >
-                {dataJadwalDosenPa.filter(
-                  (jadwal) => jadwal.hari === selectedHari
-                ).length > 0 ? (
-                  <p className="text-[15px] mb-2">Pilih Jam :</p>
-                ) : dataJadwalDosenPa.filter(
+              <InputField
+                disabled
+                type="text"
+                placeholder="NIM"
+                onChange={(e) => setNim(e.target.value)}
+                value={nim}
+                className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
+              />
+              <InputField
+                disabled
+                type="text"
+                placeholder="E-mail"
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+                className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
+              />
+              <InputField
+                disabled
+                type="text"
+                placeholder="No Whatsapp"
+                onChange={(e) => setNoWa(e.target.value)}
+                value={noWa}
+                className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
+              />
+              <InputField
+                disabled
+                type="text"
+                placeholder="Jurusan"
+                onChange={(e) => setJurusan(e.target.value)}
+                value={jurusan}
+                className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
+              />
+              <InputField
+                disabled
+                type="text"
+                placeholder="IPK"
+                onChange={(e) => setIpk(e.target.value)}
+                value={ipk}
+                className="px-3 py-2 text-[15px] border rounded-lg focus:outline-none"
+              />
+              <SelectField
+                options={optionsTahunAjaran}
+                onChange={(e) => setSelectedTahunAjaran(e.target.value)}
+                value={selectedTahunAjaran}
+                placeholder="Pilih Tahun Ajaran"
+                className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
+              />
+              <SelectField
+                options={optionsSemester}
+                onChange={(e) => setSelectedSemester(e.target.value)}
+                value={selectedSemester}
+                placeholder="Pilih Semester"
+                className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
+              />
+              <SelectField
+                options={optionsPeriodePengajuan}
+                onChange={(e) => setSelectedPeriodePengajuan(e.target.value)}
+                value={selectedPeriodePengajuan}
+                placeholder="Pilih Periode Pengajuan"
+                className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
+              />
+              <div className="flex flex-col">
+                <DatePicker
+                  selected={selectedDateTime}
+                  onChange={(date: any) => {
+                    setSelectedDateTime(date);
+                    if (date) {
+                      setSelectedHari(getDayName(date));
+                    }
+                  }}
+                  popperContainer={({ children }) => (
+                    <div className="relative z-10">{children}</div>
+                  )}
+                  dateFormat="EEEE, dd MMMM yyyy"
+                  placeholderText="Pilih Jadwal Bimbingan"
+                  className="px-3 py-2 caret-transparent border cursor-pointer rounded-lg w-full focus:outline-none appearance-none text-[15px]"
+                  minDate={new Date()}
+                  locale={id}
+                />
+                <div
+                  className={`flex flex-col mt-3 ml-3 ${selectedHari === "" && "hidden"}`}
+                >
+                  {dataJadwalDosenPa.filter(
                     (jadwal) => jadwal.hari === selectedHari
-                  ).length === 0 ? (
-                  <p className="text-[15px] text-red-500 font-medium">
-                    Jadwal tidak tersedia, pilih hari lain
-                  </p>
-                ) : (
-                  ""
-                )}
-                <div className={`flex gap-4`}>
-                  {dataJadwalDosenPa
-                    .filter((data) => data.hari === selectedHari)
-                    .sort((a, b) => {
-                      // Mengonversi jam_mulai ke format yang bisa dibandingkan
-                      const jamMulaiA = a.jam_mulai.split(":").map(Number);
-                      const jamMulaiB = b.jam_mulai.split(":").map(Number);
+                  ).length > 0 ? (
+                    <p className="text-[15px] mb-2">Pilih Jam :</p>
+                  ) : dataJadwalDosenPa.filter(
+                      (jadwal) => jadwal.hari === selectedHari
+                    ).length === 0 ? (
+                    <p className="text-[15px] text-red-500 font-medium">
+                      Jadwal tidak tersedia, pilih hari lain
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                  <div className={`flex gap-4`}>
+                    {dataJadwalDosenPa
+                      .filter((data) => data.hari === selectedHari)
+                      .sort((a, b) => {
+                        // Mengonversi jam_mulai ke format yang bisa dibandingkan
+                        const jamMulaiA = a.jam_mulai.split(":").map(Number);
+                        const jamMulaiB = b.jam_mulai.split(":").map(Number);
 
-                      // Menghitung total menit untuk perbandingan
-                      const totalMenitA = jamMulaiA[0] * 60 + jamMulaiA[1];
-                      const totalMenitB = jamMulaiB[0] * 60 + jamMulaiB[1];
+                        // Menghitung total menit untuk perbandingan
+                        const totalMenitA = jamMulaiA[0] * 60 + jamMulaiA[1];
+                        const totalMenitB = jamMulaiB[0] * 60 + jamMulaiB[1];
 
-                      return totalMenitA - totalMenitB; // Mengurutkan dari yang terkecil
-                    })
-                    .map((jadwal) => (
-                      <div
-                        key={jadwal.id}
-                        className={`p-2 border rounded-lg cursor-pointer ${
-                          selectedJam ===
-                          `${jadwal.jam_mulai}-${jadwal.jam_selesai}`
-                            ? "bg-orange-500 text-white"
-                            : ""
-                        }`}
-                        onClick={() => {
-                          setSelectedJam(
+                        return totalMenitA - totalMenitB; // Mengurutkan dari yang terkecil
+                      })
+                      .map((jadwal) => (
+                        <div
+                          key={jadwal.id}
+                          className={`p-2 border rounded-lg cursor-pointer ${
+                            selectedJam ===
                             `${jadwal.jam_mulai}-${jadwal.jam_selesai}`
-                          );
-                        }}
-                      >
-                        <p className="text-[15px]">{`${jadwal.jam_mulai}-${jadwal.jam_selesai}`}</p>
-                      </div>
-                    ))}
+                              ? "bg-orange-500 text-white"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            setSelectedJam(
+                              `${jadwal.jam_mulai}-${jadwal.jam_selesai}`
+                            );
+                          }}
+                        >
+                          <p className="text-[15px]">{`${jadwal.jam_mulai}-${jadwal.jam_selesai}`}</p>
+                        </div>
+                      ))}
+                  </div>
                 </div>
               </div>
-            </div>
-            <SelectField
-              options={optionsSistemBimbingan}
-              onChange={(e) => setSelectedSistemBimbingan(e.target.value)}
-              value={selectedSistemBimbingan}
-              placeholder="Pilih Sistem Bimbingan"
-              className={`px-3 py-2 text-[15px] cursor-pointer border rounded-lg appearance-none w-full focus:outline-none`}
-            />
-            <SelectField
-              options={optionsTopikBimbinganPribadi}
-              onChange={(e) => setSelectedTopikBimbinganPribadi(e.target.value)}
-              value={selectedTopikBimbinganPribadi}
-              placeholder="Pilih Topik Bimbingan"
-              className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
-            />
-            <textarea
-              placeholder={permasalahan === "" ? "Permasalahan" : permasalahan}
-              onChange={(e) => {
-                setPermasalahan(e.target.value);
-              }}
-              value={permasalahan}
-              className="border focus:outline-none rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
-            />
-            <button
-              type="submit"
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-[6px] font-medium"
-            >
-              Ajukan
-            </button>
-          </form>
-          <ToastContainer />
+              <SelectField
+                options={optionsSistemBimbingan}
+                onChange={(e) => setSelectedSistemBimbingan(e.target.value)}
+                value={selectedSistemBimbingan}
+                placeholder="Pilih Sistem Bimbingan"
+                className={`px-3 py-2 text-[15px] cursor-pointer border rounded-lg appearance-none w-full focus:outline-none`}
+              />
+              <SelectField
+                options={optionsTopikBimbinganPribadi}
+                onChange={(e) =>
+                  setSelectedTopikBimbinganPribadi(e.target.value)
+                }
+                value={selectedTopikBimbinganPribadi}
+                placeholder="Pilih Topik Bimbingan"
+                className={`px-3 py-2 text-[15px] border cursor-pointer rounded-lg appearance-none w-full focus:outline-none`}
+              />
+              <textarea
+                placeholder={
+                  permasalahan === "" ? "Permasalahan" : permasalahan
+                }
+                onChange={(e) => {
+                  setPermasalahan(e.target.value);
+                }}
+                value={permasalahan}
+                className="border focus:outline-none rounded-lg px-3 py-2 w-full h-24" // Anda bisa menyesuaikan lebar dan tinggi sesuai kebutuhan
+              />
+              <button
+                type="submit"
+                className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-[6px] font-medium"
+              >
+                Ajukan
+              </button>
+            </form>
+            <ToastContainer />
+          </div>
         </div>
-      </div>
-      {dataUser.status_lulus && (
-        <AlumniRestrictionModal
-          onClose={closeModalAlumni}
-          isOpen={isOpenModalAlumni}
-        />
-      )}
+        {userData?.status_lulus && (
+          <AlumniRestrictionModal
+            onClose={closeModalAlumni}
+            isOpen={isOpenModalAlumni}
+          />
+        )}
 
-      <div className="border hidden md:block">
-        <div className="flex justify-between mx-32 py-8 border-black border-b">
-          <div className="flex gap-5 w-2/5 items-center">
-            <Logo className="size-[100px] min-w-[100px]" />
-            <h1 className="text-start font-semibold text-[30px]">
-              Bimbingan Akademik Mahasiswa FIK
-            </h1>
+        <div className="border hidden md:block">
+          <div className="flex justify-between mx-32 py-8 border-black border-b">
+            <div className="flex gap-5 w-2/5 items-center">
+              <Logo className="size-[100px] min-w-[100px]" />
+              <h1 className="text-start font-semibold text-[30px]">
+                Bimbingan Akademik Mahasiswa FIK
+              </h1>
+            </div>
+            <div className="flex items-end gap-5">
+              <Link href="/informasi-akademik" className="text-[14px]">
+                Informasi Akademik
+              </Link>
+            </div>
           </div>
-          <div className="flex items-end gap-5">
-            <Link href="/informasi-akademik" className="text-[14px]">
-              Informasi Akademik
-            </Link>
-          </div>
+          <p className="text-center my-8 text-[16px]">
+            Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
+          </p>
         </div>
-        <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
-        </p>
       </div>
-    </div>
+    </>
   );
 }

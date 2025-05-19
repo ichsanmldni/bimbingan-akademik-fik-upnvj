@@ -20,8 +20,35 @@ import {
   fetchDataSubBabByBab,
   fetchDataSubBabByNama,
 } from "@/lib/features/babSlice";
+import { fetchMahasiswa } from "@/lib/features/mahasiswaSlice";
+import { fetchDosenPA } from "@/lib/features/dosenPASlice";
+import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
+
+// components/Spinner.jsx
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
+
+// di file selectors.js misalnya
+export const selectIsLoadingGlobal = (state) => {
+  // dataBabSlice
+  const loadingBab = state.bab.loading;
+
+  // mahasiswaSlice
+  const loadingMahasiswa = state.mahasiswa.status === "loading";
+
+  // kalau ada slice lain tinggal tambah di sini...
+
+  return loadingBab || loadingMahasiswa; // true kalau salah satu loading
+};
 
 export default function Home() {
+  const isLoading = useSelector(selectIsLoadingGlobal);
+
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
   const dispatch = useDispatch<AppDispatch>();
@@ -115,116 +142,110 @@ export default function Home() {
     }
   }, [dispatch, selectedBabData]);
 
-  // useEffect(() => {
-  //   if (dataBab && dataBab.length > 0) {
-  //     setOpenMenu(dataBab[0].nama);
-  //     getDataSubBabByBab(dataBab[0].nama);
-  //   }
-  // }, [dataBab]);
-
-  // useEffect(() => {
-  //   if (dataSubBab && dataSubBab.length > 0) {
-  //     setSelectedSubBabData(dataSubBab[0]);
-  //   }
-  // }, [dataSubBab]);
-
-  // useEffect(() => {
-  //   getDataBab();
-  // }, []);
+  useEffect(() => {
+    dispatch(fetchMahasiswa());
+    dispatch(fetchDosenPA());
+    dispatch(fetchKaprodi());
+  }, []);
 
   return (
-    <div>
-      <NavbarUser roleUser={roleUser} dataUser={userData} />
-      <div className="flex w-full overflow-y-auto min-h-screen pt-[80px]">
-        <div className="flex flex-col w-[40%] md:w-[25%] border md:ml-32 gap-6 pt-10 pb-6 px-8">
-          <h1 className="md:text-[18px] font-semibold">Informasi Akademik</h1>
-          <div className="flex flex-col gap-4">
-            {dataBab.map((data: any) => {
-              return (
-                <div key={data.id}>
-                  <div
-                    className="flex items-center justify-between cursor-pointer"
-                    onClick={() => {
-                      toggleMenu(data.nama);
-                      handleSelectBab(data.nama);
-                    }}
-                  >
-                    <h1 className="font-semibold text-[14px]">{data.nama}</h1>
-                    <div className="">
-                      {openMenu === data.nama ? (
-                        <Image
-                          src={dropupIcon}
-                          alt="Dropup Icon"
-                          className="size-4 p-1"
-                        />
-                      ) : (
-                        <Image
-                          src={dropdownIcon}
-                          alt="Dropdown Icon"
-                          className="size-4 p-1"
-                        />
-                      )}
+    <>
+      {isLoading && <Spinner />}
+      <div>
+        <NavbarUser roleUser={roleUser} dataUser={userData} />
+        <div className="flex w-full overflow-y-auto min-h-screen pt-[80px]">
+          <div className="flex flex-col w-[40%] md:w-[25%] border md:ml-32 gap-6 pt-10 pb-6 px-8">
+            <h1 className="md:text-[18px] font-semibold">Informasi Akademik</h1>
+            <div className="flex flex-col gap-4">
+              {dataBab.map((data: any) => {
+                return (
+                  <div key={data.id}>
+                    <div
+                      className="flex items-center justify-between cursor-pointer"
+                      onClick={() => {
+                        toggleMenu(data.nama);
+                        handleSelectBab(data.nama);
+                      }}
+                    >
+                      <h1 className="font-semibold text-[14px]">{data.nama}</h1>
+                      <div className="">
+                        {openMenu === data.nama ? (
+                          <Image
+                            src={dropupIcon}
+                            alt="Dropup Icon"
+                            className="size-4 p-1"
+                          />
+                        ) : (
+                          <Image
+                            src={dropdownIcon}
+                            alt="Dropdown Icon"
+                            className="size-4 p-1"
+                          />
+                        )}
+                      </div>
                     </div>
+                    {openMenu === data.nama && (
+                      <div className="text-[14px] text-gray-700">
+                        {dataSubBab.map((data: any) => (
+                          <p
+                            key={data.id}
+                            onClick={() =>
+                              handleSelectSubBab(openMenu, data.nama)
+                            }
+                            className="mt-2 cursor-pointer"
+                          >
+                            {data.nama}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {openMenu === data.nama && (
-                    <div className="text-[14px] text-gray-700">
-                      {dataSubBab.map((data: any) => (
-                        <p
-                          key={data.id}
-                          onClick={() =>
-                            handleSelectSubBab(openMenu, data.nama)
-                          }
-                          className="mt-2 cursor-pointer"
-                        >
-                          {data.nama}
+                );
+              })}
+            </div>
+          </div>
+          {/* ini isi */}
+          <div className="md:w-[75%] w-[70%] h-[500px] py-10 px-4 md:px-[100px]">
+            <h1 className="font-bold text-[18px]">
+              {selectedSubBabData?.nama}
+            </h1>
+            <p className="mt-5 leading-[26px] overflow-y-auto text-justify">
+              {(() => {
+                try {
+                  const isi = JSON.parse(selectedSubBabData?.isi);
+
+                  // Kalau hasil parsing array -> render per paragraph
+                  if (Array.isArray(isi)) {
+                    return isi
+                      .filter((item) =>
+                        item.children.some((child) => child.text.trim() !== "")
+                      )
+                      .map((item, index) => (
+                        <p key={index} className="mb-2">
+                          {item.children.map((child, childIndex) => (
+                            <span key={childIndex}>{child.text}</span>
+                          ))}
                         </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                      ));
+                  }
+
+                  // Kalau hasil parsing bukan array (aneh), fallback tampilkan
+                  return <p>{selectedSubBabData?.isi}</p>;
+                } catch (error) {
+                  // Kalau gagal parsing (memang string biasa), langsung tampilkan
+                  return <p>{selectedSubBabData?.isi}</p>;
+                }
+              })()}
+            </p>
           </div>
         </div>
-        {/* ini isi */}
-        <div className="md:w-[75%] w-[70%] h-[500px] py-10 px-4 md:px-[100px]">
-          <h1 className="font-bold text-[18px]">{selectedSubBabData?.nama}</h1>
-          <p className="mt-5 leading-[26px] overflow-y-auto text-justify">
-            {(() => {
-              try {
-                const isi = JSON.parse(selectedSubBabData?.isi);
 
-                // Kalau hasil parsing array -> render per paragraph
-                if (Array.isArray(isi)) {
-                  return isi
-                    .filter((item) =>
-                      item.children.some((child) => child.text.trim() !== "")
-                    )
-                    .map((item, index) => (
-                      <p key={index} className="mb-2">
-                        {item.children.map((child, childIndex) => (
-                          <span key={childIndex}>{child.text}</span>
-                        ))}
-                      </p>
-                    ));
-                }
-
-                // Kalau hasil parsing bukan array (aneh), fallback tampilkan
-                return <p>{selectedSubBabData?.isi}</p>;
-              } catch (error) {
-                // Kalau gagal parsing (memang string biasa), langsung tampilkan
-                return <p>{selectedSubBabData?.isi}</p>;
-              }
-            })()}
+        <div className="hidden md:block border">
+          <p className="text-center my-8 text-[16px]">
+            Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
           </p>
         </div>
       </div>
-
-      <div className="hidden md:block border">
-        <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
-        </p>
-      </div>
-    </div>
+    </>
   );
 }

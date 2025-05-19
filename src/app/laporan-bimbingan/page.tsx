@@ -51,6 +51,12 @@ import FileButton from "@/components/ui/FileButton";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PDFModal from "@/components/ui/PDFModal";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/lib/store";
+import { fetchMahasiswa } from "@/lib/features/mahasiswaSlice";
+import { fetchDosenPA } from "@/lib/features/dosenPASlice";
+import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
+import { useDispatch } from "react-redux";
 
 const HOTKEYS: { [key: string]: string } = {
   "mod+b": "bold",
@@ -69,16 +75,75 @@ const initialValue: any = [
   },
 ];
 
+export const selectIsLoadingGlobal = ({
+  dataUser,
+  dataMahasiswaUser,
+  dataDosenPA,
+  dataKaprodi,
+  optionsTahunAjaran,
+  dataTahunAjaran,
+  roleUser,
+}) => {
+  const isEmpty = (data) =>
+    data === null ||
+    data === undefined ||
+    (Array.isArray(data) && data.length === 0) ||
+    (typeof data === "object" && Object.keys(data).length === 0);
+
+  if (!roleUser) {
+    return true;
+  }
+
+  if (["Mahasiswa", "Dosen PA", "Kaprodi"].includes(roleUser)) {
+    if (isEmpty(dataMahasiswaUser)) return true;
+    if (isEmpty(dataDosenPA)) return true;
+    if (isEmpty(dataKaprodi)) return true;
+    if (isEmpty(optionsTahunAjaran)) return true;
+    if (isEmpty(dataTahunAjaran)) return true;
+  }
+
+  if (roleUser === "Admin" && isEmpty(dataUser)) {
+    return true;
+  }
+
+  return false;
+};
+
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
+
 export default function Home() {
+  const dispatch = useDispatch<AppDispatch>();
+  const roleUser =
+    useSelector((state: RootState) => state.auth?.roleUser) || "";
+  const dataUser = useSelector((state: RootState) => state.auth?.dataUser);
+
+  // Data states
+  const dataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.data
+  );
+  const dataDosenPA = useSelector((state: RootState) => state.dosenPA?.data);
+  const dataKaprodi = useSelector((state: RootState) => state.kaprodi?.data);
+  const statusDataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa.status
+  );
+  const statusDataDosenPA = useSelector(
+    (state: RootState) => state.dosenPA.status
+  );
+  const statusDataKaprodi = useSelector(
+    (state: RootState) => state.kaprodi.status
+  );
+  const statusDataUser = useSelector((state: RootState) => state.user.status);
   const [selectedKaprodi, setSelectedKaprodi] = useState<any>("");
   const [selectedSemester, setSelectedSemester] = useState<any>("");
   const [selectedTahunAjaran, setSelectedTahunAjaran] = useState<any>("");
   const [pendahuluan, setPendahuluan] = useState<any>([]);
   const [kesimpulan, setKesimpulan] = useState<any>([]);
-  const [roleUser, setRoleUser] = useState<any>("");
-  const [dataUser, setDataUser] = useState<any>({});
-  const [dataDosenPA, setDataDosenPA] = useState<any>([]);
-  const [dataKaprodi, setDataKaprodi] = useState<any>([]);
   const [optionsKaprodi, setOptionsKaprodi] = useState<any>([]);
   const [optionsJenisBimbingan, setOptionsJenisBimbingan] = useState<any>([]);
   const [optionsSemester, setOptionsSemester] = useState<any>([]);
@@ -89,7 +154,6 @@ export default function Home() {
   const [filteredBimbingan, setFilteredBimbingan] = useState<any>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedBimbingan, setSelectedBimbingan] = useState<any>([]);
-  const [dataMahasiswa, setDataMahasiswa] = useState<any>([]); // Adjust type as needed
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const [
     dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal,
@@ -857,6 +921,12 @@ export default function Home() {
   };
 
   useEffect(() => {
+    dispatch(fetchMahasiswa());
+    dispatch(fetchDosenPA());
+    dispatch(fetchKaprodi());
+  }, []);
+
+  useEffect(() => {
     setFilteredBimbingan(
       dataBimbingan.filter(
         (data) => data.pengajuan_bimbingan.tahun_ajaran === tahunAjaranFilter
@@ -1086,45 +1156,6 @@ export default function Home() {
       );
     } else {
       setImagePreviews((prev: any) => [...prev, data.dokumentasi_kehadiran]);
-    }
-  };
-
-  const getDataMahasiswa = async () => {
-    try {
-      const response = await axios.get<any[]>(
-        `${API_BASE_URL}/api/datamahasiswa`
-      );
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-      setDataMahasiswa(response.data);
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const getDataDosenPA = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/datadosenpa`);
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-      setDataDosenPA(response.data);
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const getDataKaprodi = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/datakaprodi`);
-      if (response.status !== 200) {
-        throw new Error("Gagal mengambil data");
-      }
-
-      setDataKaprodi(response.data);
-    } catch (error) {
-      throw error;
     }
   };
 
@@ -2387,20 +2418,7 @@ export default function Home() {
   }, [jenisBimbinganFilter, jadwalFilter, jurusanFilter]);
 
   useEffect(() => {
-    getDataDosenPA();
-    getDataKaprodi();
     getDataTahunAJaran();
-    getDataMahasiswa();
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
-
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken = jwtDecode(token);
-        setDataUser(decodedToken);
-      } catch (error) {}
-    }
   }, []);
 
   useEffect(() => {
@@ -2432,16 +2450,6 @@ export default function Home() {
   }, [selectedKaprodi]);
 
   useEffect(() => {
-    if (dataUser.role === "Mahasiswa") {
-      setRoleUser("Mahasiswa");
-    } else if (dataUser.role === "Dosen PA") {
-      setRoleUser("Dosen PA");
-    } else if (dataUser.role === "Kaprodi") {
-      setRoleUser("Kaprodi");
-    }
-  }, [dataUser, dataDosenPA, dataKaprodi]);
-
-  useEffect(() => {
     if (userProfile && userProfile.nama) {
       getDataBimbinganByDosenPaId();
     }
@@ -2456,142 +2464,96 @@ export default function Home() {
     }
   }, [jurusanFilter]);
 
-  return (
-    <div>
-      <NavbarUser
-        roleUser={roleUser}
-        dataUser={
-          roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data: any) => data.nim === dataUser.nim)
-            : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data: any) => data.email === dataUser.email)
-              : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data: any) => data.email === dataUser.email)
-                : undefined
-        }
-      />
-      <div className="pt-20 md:pt-[100px]">
-        <div className="mt-4 mb-20 md:mb-[280px] mx-2 md:mx-[130px] border rounded-lg">
-          <form
-            className="flex flex-col gap-4 px-2 py-4 md:p-8"
-            onSubmit={handleAddLaporanBimbingan}
-          >
-            {dataBimbingan.filter(
-              (data: any) => data.laporan_bimbingan_id === null
-            ).length === 0 ? (
-              <div className="flex flex-col items-center p-4">
-                <svg
-                  className="h-12 w-12 text-red-500 mb-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+  const userData = useMemo(() => {
+    if (!dataUser) return null;
 
-                <p className="text-center text-red-500">
-                  Saat ini tidak ada bimbingan yang perlu dilaporkan.
-                </p>
-                <p className="text-center text-gray-600">
-                  Semua bimbingan yang telah Anda lakukan telah dilaporkan, atau
-                  belum ada bimbingan yang baru dilaksanakan. Jika Anda telah
-                  melakukan bimbingan, pastikan absensi mahasiswa telah
-                  diverifikasi agar dapat dilaporkan dengan status yang sah.
-                </p>
-              </div>
-            ) : (
-              <div>
-                <div className="flex gap-4">
-                  <div className="relative max-w-[30%] md:max-w[100%]">
-                    <select
-                      value={tahunAjaranFilter}
-                      onChange={(e) => setTahunAjaranFilter(e.target.value)}
-                      className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
-                    >
-                      <option disabled value="">
-                        Pilih Tahun Ajaran
-                      </option>
-                      {tahunAjaranOptions.map(
-                        (tahun_ajaran: any, index: any) => (
-                          <option key={index} value={tahun_ajaran}>
-                            {tahun_ajaran}
-                          </option>
-                        )
-                      )}
-                    </select>
-                    <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-black"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </span>
-                  </div>
-                  {tahunAjaranFilter !== "" && (
+    if (roleUser === "Mahasiswa" && statusDataMahasiswa === "succeeded") {
+      return dataMahasiswa.find((data) => data.nim === dataUser?.nim) || null;
+    }
+    if (roleUser === "Dosen PA" && statusDataDosenPA === "succeeded") {
+      return dataDosenPA.find((data) => data.email === dataUser?.email) || null;
+    }
+    if (roleUser === "Kaprodi" && statusDataKaprodi === "succeeded") {
+      return dataKaprodi.find((data) => data.email === dataUser?.email) || null;
+    }
+    return null;
+  }, [
+    roleUser,
+    dataUser,
+    dataMahasiswa,
+    dataDosenPA,
+    dataKaprodi,
+    statusDataMahasiswa,
+    statusDataDosenPA,
+    statusDataKaprodi,
+  ]);
+
+  const isLoading = selectIsLoadingGlobal({
+    dataUser,
+    dataMahasiswaUser: dataMahasiswa,
+    dataDosenPA,
+    dataKaprodi,
+    optionsTahunAjaran: tahunAjaranOptions, // pastikan state-nya sesuai
+    dataTahunAjaran,
+    roleUser,
+  });
+
+  return (
+    <>
+      {isLoading && <Spinner />}
+      <div>
+        <NavbarUser roleUser={roleUser} dataUser={userData} />
+        <div className="pt-20 md:pt-[100px]">
+          <div className="mt-4 mb-20 md:mb-[280px] mx-2 md:mx-[130px] border rounded-lg">
+            <form
+              className="flex flex-col gap-4 px-2 py-4 md:p-8"
+              onSubmit={handleAddLaporanBimbingan}
+            >
+              {dataBimbingan.filter(
+                (data: any) => data.laporan_bimbingan_id === null
+              ).length === 0 ? (
+                <div className="flex flex-col items-center p-4">
+                  <svg
+                    className="h-12 w-12 text-red-500 mb-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+
+                  <p className="text-center text-red-500">
+                    Saat ini tidak ada bimbingan yang perlu dilaporkan.
+                  </p>
+                  <p className="text-center text-gray-600">
+                    Semua bimbingan yang telah Anda lakukan telah dilaporkan,
+                    atau belum ada bimbingan yang baru dilaksanakan. Jika Anda
+                    telah melakukan bimbingan, pastikan absensi mahasiswa telah
+                    diverifikasi agar dapat dilaporkan dengan status yang sah.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex gap-4">
                     <div className="relative max-w-[30%] md:max-w[100%]">
                       <select
-                        value={semesterFilter}
-                        onChange={(e) => setSemesterFilter(e.target.value)}
+                        value={tahunAjaranFilter}
+                        onChange={(e) => setTahunAjaranFilter(e.target.value)}
                         className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
                       >
                         <option disabled value="">
-                          Pilih Semester
+                          Pilih Tahun Ajaran
                         </option>
-                        {optionsSemester.map((semester: any, index: any) => (
-                          <option key={index} value={semester}>
-                            {semester}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 text-black"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </span>
-                    </div>
-                  )}
-                  {tahunAjaranFilter !== "" && semesterFilter !== "" && (
-                    <div className="relative max-w-[30%] md:max-w[100%]">
-                      <select
-                        value={periodePengajuanFilter}
-                        onChange={(e) =>
-                          setPeriodePengajuanFilter(e.target.value)
-                        }
-                        className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
-                      >
-                        <option disabled value="">
-                          Pilih Periode Pengajuan Bimbingan
-                        </option>
-                        {optionsPeriodePengajuan.map(
-                          (periode: any, index: any) => (
-                            <option key={index} value={periode}>
-                              {periode}
+                        {tahunAjaranOptions.map(
+                          (tahun_ajaran: any, index: any) => (
+                            <option key={index} value={tahun_ajaran}>
+                              {tahun_ajaran}
                             </option>
                           )
                         )}
@@ -2613,25 +2575,19 @@ export default function Home() {
                         </svg>
                       </span>
                     </div>
-                  )}
-                  {tahunAjaranFilter !== "" &&
-                    semesterFilter !== "" &&
-                    periodePengajuanFilter !== "" && (
+                    {tahunAjaranFilter !== "" && (
                       <div className="relative max-w-[30%] md:max-w[100%]">
                         <select
-                          disabled={
-                            periodePengajuanFilter === "" ? true : false
-                          }
-                          value={jurusanFilter}
-                          onChange={(e) => setJurusanFilter(e.target.value)}
-                          className="block w-full py-2 px-4 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
+                          value={semesterFilter}
+                          onChange={(e) => setSemesterFilter(e.target.value)}
+                          className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
                         >
                           <option disabled value="">
-                            Pilih Jurusan
+                            Pilih Semester
                           </option>
-                          {jurusanOptions.map((jurusan: any, index: any) => (
-                            <option key={index} value={jurusan}>
-                              {jurusan}
+                          {optionsSemester.map((semester: any, index: any) => (
+                            <option key={index} value={semester}>
+                              {semester}
                             </option>
                           ))}
                         </select>
@@ -2653,1788 +2609,1986 @@ export default function Home() {
                         </span>
                       </div>
                     )}
-                </div>
-                <div>
-                  {tahunAjaranFilter &&
-                  semesterFilter &&
-                  dataBimbingan
-                    .filter((data: any) => data.laporan_bimbingan_id === null)
-                    .filter(
-                      (data: any) =>
-                        data.pengajuan_bimbingan.tahun_ajaran ===
-                        tahunAjaranFilter
-                    )
-                    .filter(
-                      (data: any) =>
-                        data.pengajuan_bimbingan.semester === semesterFilter
-                    ).length === 0 ? (
-                    <div className="flex flex-col items-center">
-                      <svg
-                        className="h-12 w-12 text-red-500 mb-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-
-                      <p className="text-center text-red-500">
-                        Saat ini tidak ada bimbingan {tahunAjaranFilter}{" "}
-                        {semesterFilter} yang perlu dilaporkan.
-                      </p>
-                      <p className="text-center text-gray-600">
-                        Semua bimbingan tahun ajaran {tahunAjaranFilter}{" "}
-                        {semesterFilter} yang telah Anda lakukan telah
-                        dilaporkan, atau belum ada bimbingan tahun ajaran{" "}
-                        {tahunAjaranFilter} {semesterFilter} yang baru
-                        dilaksanakan. Jika Anda telah melakukan bimbingan tahun
-                        ajaran {tahunAjaranFilter} {semesterFilter}, pastikan
-                        absensi mahasiswa telah diverifikasi agar dapat
-                        dilaporkan dengan status yang sah.
-                      </p>
-                    </div>
-                  ) : tahunAjaranFilter &&
+                    {tahunAjaranFilter !== "" && semesterFilter !== "" && (
+                      <div className="relative max-w-[30%] md:max-w[100%]">
+                        <select
+                          value={periodePengajuanFilter}
+                          onChange={(e) =>
+                            setPeriodePengajuanFilter(e.target.value)
+                          }
+                          className="block w-full px-4 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
+                        >
+                          <option disabled value="">
+                            Pilih Periode Pengajuan Bimbingan
+                          </option>
+                          {optionsPeriodePengajuan.map(
+                            (periode: any, index: any) => (
+                              <option key={index} value={periode}>
+                                {periode}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-black"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    )}
+                    {tahunAjaranFilter !== "" &&
+                      semesterFilter !== "" &&
+                      periodePengajuanFilter !== "" && (
+                        <div className="relative max-w-[30%] md:max-w[100%]">
+                          <select
+                            disabled={
+                              periodePengajuanFilter === "" ? true : false
+                            }
+                            value={jurusanFilter}
+                            onChange={(e) => setJurusanFilter(e.target.value)}
+                            className="block w-full py-2 px-4 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-orange-500 appearance-none"
+                          >
+                            <option disabled value="">
+                              Pilih Jurusan
+                            </option>
+                            {jurusanOptions.map((jurusan: any, index: any) => (
+                              <option key={index} value={jurusan}>
+                                {jurusan}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 text-black"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                  <div>
+                    {tahunAjaranFilter &&
                     semesterFilter &&
-                    periodePengajuanFilter &&
                     dataBimbingan
                       .filter((data: any) => data.laporan_bimbingan_id === null)
                       .filter(
                         (data: any) =>
-                          data.pengajuan_bimbingan.periode_pengajuan ===
-                          periodePengajuanFilter
+                          data.pengajuan_bimbingan.tahun_ajaran ===
+                          tahunAjaranFilter
+                      )
+                      .filter(
+                        (data: any) =>
+                          data.pengajuan_bimbingan.semester === semesterFilter
                       ).length === 0 ? (
-                    <div className="flex flex-col items-center">
-                      <svg
-                        className="h-12 w-12 text-red-500 mb-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      <div className="flex flex-col items-center">
+                        <svg
+                          className="h-12 w-12 text-red-500 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
 
-                      <p className="text-center text-red-500">
-                        Saat ini tidak ada bimbingan ${jenisBimbinganFilter}{" "}
-                        yang perlu dilaporkan.
-                      </p>
-                      <p className="text-center text-gray-600">
-                        Semua bimbingan ${jenisBimbinganFilter} yang telah Anda
-                        lakukan telah dilaporkan, atau belum ada bimbingan $
-                        {jenisBimbinganFilter} yang baru dilaksanakan. Jika Anda
-                        telah melakukan bimbingan ${jenisBimbinganFilter},
-                        pastikan absensi mahasiswa telah diverifikasi agar dapat
-                        dilaporkan dengan status yang sah.
-                      </p>
-                    </div>
-                  ) : tahunAjaranFilter === "" ? (
-                    <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
-                      <svg
-                        className="h-12 w-12 text-red-500 mb-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-
-                      <p className="text-center text-red-500">
-                        Anda belum memilih tahun ajaran.
-                      </p>
-                      <p className="text-center text-gray-600">
-                        Mohon untuk memilih tahun ajaran yang akan dilaporkan.
-                      </p>
-                    </div>
-                  ) : semesterFilter === "" ? (
-                    <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
-                      <svg
-                        className="h-12 w-12 text-red-500 mb-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-
-                      <p className="text-center text-red-500">
-                        Anda belum memilih semester.
-                      </p>
-                      <p className="text-center text-gray-600">
-                        Mohon untuk memilih semester yang ingin dilaporkan.
-                      </p>
-                    </div>
-                  ) : periodePengajuanFilter === "" ? (
-                    <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
-                      <svg
-                        className="h-12 w-12 text-red-500 mb-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-
-                      <p className="text-center text-red-500">
-                        Anda belum memilih periode bimbingan.
-                      </p>
-                      <p className="text-center text-gray-600">
-                        Mohon untuk memilih periode bimbingan yang akan
-                        dilaporkan.
-                      </p>
-                    </div>
-                  ) : jurusanFilter === "" ? (
-                    <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
-                      <svg
-                        className="h-12 w-12 text-red-500 mb-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-
-                      <p className="text-center text-red-500">
-                        Anda belum memilih jurusan.
-                      </p>
-                      <p className="text-center text-gray-600">
-                        Mohon untuk memilih jurusan dari peserta bimbingan yang
-                        akan dilaporkan. Laporan ini akan diteruskan kepada
-                        Kaprodi sesuai dengan jurusan terkait.
-                      </p>
-                    </div>
-                  ) : (
-                    <div>
-                      <div>
-                        <div className="flex mt-6 mb-4 justify-between items-center">
-                          <p className="font-medium">
-                            Pilih Bimbingan ({selectedBimbingan.length}) :
-                          </p>
-                          <div className="flex items-center">
-                            <label className="font-medium">
-                              Select All ({filteredBimbingan.length})
-                            </label>
-                            <input
-                              type="checkbox"
-                              checked={
-                                selectedBimbingan.length ===
-                                  filteredBimbingan.length &&
-                                filteredBimbingan.length > 0
-                              }
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  const allFilteredBimbingan =
-                                    filteredBimbingan.map((data: any) => data);
-
-                                  setSelectedBimbingan(allFilteredBimbingan);
-
-                                  allFilteredBimbingan.map((data: any) =>
-                                    setImagePreviews((prev: any) => [
-                                      ...prev,
-                                      data.dokumentasi_kehadiran,
-                                    ])
-                                  );
-                                } else {
-                                  // Deselect all
-                                  setSelectedBimbingan([]);
-                                  setImagePreviews([]);
-                                }
-                              }}
-                              className="ml-2 size-4 cursor-pointer"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="overflow-x-auto mt-2">
-                          <div className="flex space-x-4 pb-4">
-                            {filteredBimbingan.map((data: any) => (
-                              <div
-                                className={`border rounded-lg min-w-[70%] md:min-w-[30%] flex flex-col gap-1 text-[15px] cursor-pointer ${
-                                  selectedBimbingan.some(
-                                    (bimbingan: any) => bimbingan.id === data.id
-                                  )
-                                    ? "bg-orange-500 text-white font-medium"
-                                    : ""
-                                }`}
-                                key={data.id}
-                              >
-                                <label className="flex flex-col gap-2 cursor-pointer">
-                                  <div className="flex justify-between px-4 pb-4">
-                                    <div className="">
-                                      <p className="pt-4">
-                                        {data.pengajuan_bimbingan.nama_lengkap}
-                                      </p>
-                                      <p>{data.pengajuan_bimbingan.jurusan}</p>
-                                      {(() => {
-                                        const jadwal =
-                                          data.pengajuan_bimbingan
-                                            .jadwal_bimbingan;
-                                        const parts = jadwal.split(" ");
-
-                                        if (parts.length === 5) {
-                                          const [
-                                            day,
-                                            date,
-                                            month,
-                                            year,
-                                            timeRange,
-                                          ] = parts;
-                                          const formattedDay = day.replace(
-                                            ",",
-                                            ""
-                                          );
-                                          const formattedDate = `${formattedDay}, ${date} ${month} ${year}`;
-                                          const [startTime, endTime] =
-                                            timeRange.split("-");
-
-                                          return (
-                                            <>
-                                              <p>{`${formattedDate}`}</p>
-                                              <p>{`${startTime}-${endTime}`}</p>
-                                            </>
-                                          );
-                                        } else {
-                                          return <p>Jadwal tidak valid.</p>;
-                                        }
-                                      })()}
-                                      <p>
-                                        {data.pengajuan_bimbingan
-                                          .jenis_bimbingan === "Pribadi"
-                                          ? `${data.pengajuan_bimbingan.jenis_bimbingan} (Topik : ${data.pengajuan_bimbingan.topik_bimbingan})`
-                                          : data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
-                                                "Perwalian"
-                                              )
-                                            ? data.pengajuan_bimbingan
-                                                .jenis_bimbingan
-                                            : ""}
-                                      </p>
-                                      <p>
-                                        {
-                                          data.pengajuan_bimbingan
-                                            .sistem_bimbingan
-                                        }
-                                      </p>
-                                    </div>
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedBimbingan.some(
-                                        (bimbingan: any) =>
-                                          bimbingan.id === data.id
-                                      )}
-                                      onChange={() => toggleBimbingan(data)}
-                                      className="size-4 self-start mt-4 cursor-pointer"
-                                    />
-                                  </div>
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                        <p className="text-center text-red-500">
+                          Saat ini tidak ada bimbingan {tahunAjaranFilter}{" "}
+                          {semesterFilter} yang perlu dilaporkan.
+                        </p>
+                        <p className="text-center text-gray-600">
+                          Semua bimbingan tahun ajaran {tahunAjaranFilter}{" "}
+                          {semesterFilter} yang telah Anda lakukan telah
+                          dilaporkan, atau belum ada bimbingan tahun ajaran{" "}
+                          {tahunAjaranFilter} {semesterFilter} yang baru
+                          dilaksanakan. Jika Anda telah melakukan bimbingan
+                          tahun ajaran {tahunAjaranFilter} {semesterFilter},
+                          pastikan absensi mahasiswa telah diverifikasi agar
+                          dapat dilaporkan dengan status yang sah.
+                        </p>
                       </div>
-                      {selectedBimbingan.length > 0 ? (
-                        [
-                          "Sebelum Perwalian KRS",
-                          "Setelah Perwalian KRS - Sebelum Perwalian UTS",
-                          "Setelah Perwalian UTS - Sebelum Perwalian UAS",
-                        ].includes(periodePengajuanFilter) ? (
-                          <div className="flex flex-col gap-4 mt-6 border py-2 px-4 md:p-8 rounded-lg">
-                            <h1 className="text-center font-bold text-[20px] mb-2">
-                              LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK
-                              FAKULTAS ILMU KOMPUTER UPN “VETERAN” JAKARTA
-                            </h1>
-                            <SelectField
-                              options={optionsKaprodi}
-                              disabled
-                              value={selectedKaprodi}
-                              placeholder="Pilih Kaprodi"
-                              className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
-                            />
-                            <div className="flex flex-col gap-4">
-                              <p className="font-bold">A. PENDAHULUAN</p>
-                              <div className="p-6 border rounded-lg ">
-                                <RichTextPendahuluan
-                                  value={pendahuluan}
-                                  onChange={setPendahuluan}
-                                />
-                              </div>
+                    ) : tahunAjaranFilter &&
+                      semesterFilter &&
+                      periodePengajuanFilter &&
+                      dataBimbingan
+                        .filter(
+                          (data: any) => data.laporan_bimbingan_id === null
+                        )
+                        .filter(
+                          (data: any) =>
+                            data.pengajuan_bimbingan.periode_pengajuan ===
+                            periodePengajuanFilter
+                        ).length === 0 ? (
+                      <div className="flex flex-col items-center">
+                        <svg
+                          className="h-12 w-12 text-red-500 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+
+                        <p className="text-center text-red-500">
+                          Saat ini tidak ada bimbingan ${jenisBimbinganFilter}{" "}
+                          yang perlu dilaporkan.
+                        </p>
+                        <p className="text-center text-gray-600">
+                          Semua bimbingan ${jenisBimbinganFilter} yang telah
+                          Anda lakukan telah dilaporkan, atau belum ada
+                          bimbingan ${jenisBimbinganFilter} yang baru
+                          dilaksanakan. Jika Anda telah melakukan bimbingan $
+                          {jenisBimbinganFilter}, pastikan absensi mahasiswa
+                          telah diverifikasi agar dapat dilaporkan dengan status
+                          yang sah.
+                        </p>
+                      </div>
+                    ) : tahunAjaranFilter === "" ? (
+                      <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
+                        <svg
+                          className="h-12 w-12 text-red-500 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+
+                        <p className="text-center text-red-500">
+                          Anda belum memilih tahun ajaran.
+                        </p>
+                        <p className="text-center text-gray-600">
+                          Mohon untuk memilih tahun ajaran yang akan dilaporkan.
+                        </p>
+                      </div>
+                    ) : semesterFilter === "" ? (
+                      <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
+                        <svg
+                          className="h-12 w-12 text-red-500 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+
+                        <p className="text-center text-red-500">
+                          Anda belum memilih semester.
+                        </p>
+                        <p className="text-center text-gray-600">
+                          Mohon untuk memilih semester yang ingin dilaporkan.
+                        </p>
+                      </div>
+                    ) : periodePengajuanFilter === "" ? (
+                      <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
+                        <svg
+                          className="h-12 w-12 text-red-500 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+
+                        <p className="text-center text-red-500">
+                          Anda belum memilih periode bimbingan.
+                        </p>
+                        <p className="text-center text-gray-600">
+                          Mohon untuk memilih periode bimbingan yang akan
+                          dilaporkan.
+                        </p>
+                      </div>
+                    ) : jurusanFilter === "" ? (
+                      <div className="border rounded-lg p-10 mt-6 flex flex-col items-center">
+                        <svg
+                          className="h-12 w-12 text-red-500 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+
+                        <p className="text-center text-red-500">
+                          Anda belum memilih jurusan.
+                        </p>
+                        <p className="text-center text-gray-600">
+                          Mohon untuk memilih jurusan dari peserta bimbingan
+                          yang akan dilaporkan. Laporan ini akan diteruskan
+                          kepada Kaprodi sesuai dengan jurusan terkait.
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div>
+                          <div className="flex mt-6 mb-4 justify-between items-center">
+                            <p className="font-medium">
+                              Pilih Bimbingan ({selectedBimbingan.length}) :
+                            </p>
+                            <div className="flex items-center">
+                              <label className="font-medium">
+                                Select All ({filteredBimbingan.length})
+                              </label>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  selectedBimbingan.length ===
+                                    filteredBimbingan.length &&
+                                  filteredBimbingan.length > 0
+                                }
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    const allFilteredBimbingan =
+                                      filteredBimbingan.map(
+                                        (data: any) => data
+                                      );
+
+                                    setSelectedBimbingan(allFilteredBimbingan);
+
+                                    allFilteredBimbingan.map((data: any) =>
+                                      setImagePreviews((prev: any) => [
+                                        ...prev,
+                                        data.dokumentasi_kehadiran,
+                                      ])
+                                    );
+                                  } else {
+                                    // Deselect all
+                                    setSelectedBimbingan([]);
+                                    setImagePreviews([]);
+                                  }
+                                }}
+                                className="ml-2 size-4 cursor-pointer"
+                              />
                             </div>
+                          </div>
 
-                            <div className="flex flex-col gap-4">
-                              <p className="font-bold">
-                                B. HASIL KONSULTASI PEMBIMBINGAN
-                              </p>
-                              <div className="p-6 flex flex-col gap-4 border rounded-lg ">
-                                <div className="border rounded-lg p-4">
-                                  <div className="flex items-center justify-between">
-                                    <p className="font-medium">
-                                      Prestasi Akademik Mahasiswa
-                                    </p>
-                                    <button
-                                      onClick={(e: any) =>
-                                        togglePrestasiAkademikMahasiswaForm(e)
-                                      }
-                                      className="flex items-center px-3 py-2"
-                                    >
-                                      {showPrestasiAkademikMahasiswaForm ? (
-                                        <FontAwesomeIcon icon={faChevronUp} />
-                                      ) : (
-                                        <FontAwesomeIcon icon={faChevronDown} />
-                                      )}
-                                    </button>
-                                  </div>
+                          <div className="overflow-x-auto mt-2">
+                            <div className="flex space-x-4 pb-4">
+                              {filteredBimbingan.map((data: any) => (
+                                <div
+                                  className={`border rounded-lg min-w-[70%] md:min-w-[30%] flex flex-col gap-1 text-[15px] cursor-pointer ${
+                                    selectedBimbingan.some(
+                                      (bimbingan: any) =>
+                                        bimbingan.id === data.id
+                                    )
+                                      ? "bg-orange-500 text-white font-medium"
+                                      : ""
+                                  }`}
+                                  key={data.id}
+                                >
+                                  <label className="flex flex-col gap-2 cursor-pointer">
+                                    <div className="flex justify-between px-4 pb-4">
+                                      <div className="">
+                                        <p className="pt-4">
+                                          {
+                                            data.pengajuan_bimbingan
+                                              .nama_lengkap
+                                          }
+                                        </p>
+                                        <p>
+                                          {data.pengajuan_bimbingan.jurusan}
+                                        </p>
+                                        {(() => {
+                                          const jadwal =
+                                            data.pengajuan_bimbingan
+                                              .jadwal_bimbingan;
+                                          const parts = jadwal.split(" ");
 
-                                  {showPrestasiAkademikMahasiswaForm && (
-                                    <div className="mt-2 flex flex-col gap-4 p-4">
-                                      <div className="flex items-center">
-                                        <label className="w-1/2 md:w-1/6">
-                                          IPK &ge; 3.5
-                                        </label>
-                                        <InputField
-                                          disabled
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-1/2 md:w-1/6">
-                                          3 &le; IPK &lt; 3.5
-                                        </label>
-                                        <InputField
-                                          disabled
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-1/2 md:w-1/6">
-                                          2.5 &le; IPK &lt; 3
-                                        </label>
-                                        <InputField
-                                          disabled
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-1/2 md:w-1/6">
-                                          2 &le; IPK &lt; 2.5
-                                        </label>
-                                        <InputField
-                                          disabled
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-1/2 md:w-1/6">
-                                          IPK &lt; 2
-                                        </label>
-                                        <InputField
-                                          disabled
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm
-                                          }
-                                          className="px-3 w-5/6 py-2 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="border rounded-lg p-4">
-                                  <div className="flex items-center justify-between">
-                                    <p className="font-medium">
-                                      Prestasi Ilmiah Mahasiswa
-                                    </p>
-                                    <button
-                                      onClick={(e) =>
-                                        togglePrestasiIlmiahMahasiswaForm(e)
-                                      }
-                                      className="flex items-center px-3 py-2"
-                                    >
-                                      {showPrestasiIlmiahMahasiswaForm ? (
-                                        <FontAwesomeIcon icon={faChevronUp} />
-                                      ) : (
-                                        <FontAwesomeIcon icon={faChevronDown} />
-                                      )}
-                                    </button>
-                                  </div>
-
-                                  {showPrestasiIlmiahMahasiswaForm && (
-                                    <div className="mt-2 flex flex-col p-4">
-                                      <>
-                                        <button
-                                          className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                                          onClick={(e) => {
-                                            openAddPrestasiIlmiahMahasiswaModal(
-                                              e
+                                          if (parts.length === 5) {
+                                            const [
+                                              day,
+                                              date,
+                                              month,
+                                              year,
+                                              timeRange,
+                                            ] = parts;
+                                            const formattedDay = day.replace(
+                                              ",",
+                                              ""
                                             );
-                                          }}
-                                        >
-                                          <Image
-                                            src={plusIcon}
-                                            alt="Plus Icon"
-                                          />
-                                          <p className="text-white text-[10px] md:text-[14px]">
-                                            Tambah Prestasi Ilmiah Mahasiswa
-                                          </p>
-                                        </button>
-                                        <div className="mt-6 overflow-x-auto">
-                                          <table className="min-w-full text-[16px] border-collapse table-fixed">
-                                            <thead>
-                                              <tr className="bg-gray-100 text-center">
-                                                <th className="px-4 py-2 w-[20%] rounded-tl-lg rounded-bl-lg">
-                                                  Bidang Prestasi
-                                                </th>
-                                                <th className="px-4 py-2 w-[15%]">
-                                                  NIM
-                                                </th>
-                                                <th className="px-4 py-2 w-[15%]">
-                                                  Nama
-                                                </th>
-                                                <th className="px-4 py-2 w-[15%]">
-                                                  Tingkat Prestasi
-                                                </th>
-                                                <th className="px-4 py-2 w-[10%]">
-                                                  Lampiran
-                                                </th>
-                                                <th className="px-4 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
-                                                  Action
-                                                </th>
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {prestasiIlmiahMahasiswaFormValue.length ===
-                                              0 ? (
-                                                <tr>
-                                                  <td
-                                                    colSpan={6}
-                                                    className="text-center py-4"
-                                                  >
-                                                    <div className="bg-gray-50 p-4 rounded-lg shadow-md">
-                                                      <h2 className="text-xl font-semibold text-gray-700">
-                                                        Silahkan Tambah Prestasi
-                                                        Ilmiah Mahasiswa
-                                                      </h2>
-                                                      <p className="text-gray-500 mt-2">
-                                                        Saat ini belum ada data
-                                                        prestasi ilmiah yang
-                                                        dimasukkan. Klik tombol
-                                                        tambah prestasi ilmiah
-                                                        mahasiswa untuk
-                                                        menambahkannya.
-                                                      </p>
-                                                    </div>
-                                                  </td>
-                                                </tr>
-                                              ) : (
-                                                prestasiIlmiahMahasiswaFormValue.map(
-                                                  (data: any, index: any) => (
-                                                    <tr key={index}>
-                                                      <td className="border-b text-center border-gray-200 px-4 break-words overflow-wrap">
-                                                        {data.bidang_prestasi}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4 max-w-[200px] break-words overflow-wrap">
-                                                        {data.nim}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        {data.nama}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        {data.tingkat_prestasi}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        <FileButton
-                                                          data={data}
-                                                          className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600"
-                                                        />
-                                                      </td>
-                                                      <td className="border-b border-gray-200 px-4 py-4">
-                                                        <div className="flex gap-2 items-center justify-center">
-                                                          <EditButton
-                                                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                                                            onClick={(
-                                                              e: any
-                                                            ) => {
-                                                              setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                                                data
-                                                              );
-                                                              setPreviewUrlEditPrestasiIlmiahMahasiswaModal(
-                                                                URL.createObjectURL(
-                                                                  data.file
-                                                                )
-                                                              );
-                                                              openEditPrestasiIlmiahMahasiswaModal(
-                                                                e
-                                                              );
-                                                            }}
-                                                          />
-                                                          <TrashButton
-                                                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                                                            onClick={(
-                                                              e: any
-                                                            ) => {
-                                                              setIdSelectedPrestasiIlmiahMahasiswaDeleteModal(
-                                                                data.id
-                                                              );
-                                                              openDeletePrestasiIlmiahMahasiswaModal(
-                                                                e
-                                                              );
-                                                            }}
-                                                          />
-                                                        </div>
-                                                      </td>
-                                                    </tr>
-                                                  )
-                                                )
-                                              )}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      </>
-                                      <Modal
-                                        isOpen={
-                                          isModalAddPrestasiIlmiahMahasiswaOpen
-                                        }
-                                        onClose={
-                                          closeAddPrestasiIlmiahMahasiswaModal
-                                        }
-                                        onAdd={handleAddPrestasiIlmiahMahasiswa}
-                                        modalType="Tambah"
-                                        title="Tambah Prestasi Akademik Mahasiswa"
-                                      >
-                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Bidang Prestasi"
-                                            onChange={(e: any) =>
-                                              setBidangPrestasiAddPrestasiIlmiahMahasiswaModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              bidangPrestasiAddPrestasiIlmiahMahasiswaModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan NIM"
-                                            onChange={(e: any) =>
-                                              setNimAddPrestasiIlmiahMahasiswaModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              nimAddPrestasiIlmiahMahasiswaModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e: any) =>
-                                              setNamaLengkapAddPrestasiIlmiahMahasiswaModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              namaLengkapAddPrestasiIlmiahMahasiswaModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <select
-                                            value={
-                                              tingkatPrestasiAddPrestasiIlmiahMahasiswaModal
-                                            }
-                                            onChange={(e) =>
-                                              setTingkatPrestasiAddPrestasiIlmiahMahasiswaModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          >
-                                            <option value="">
-                                              Pilih Tingkat Prestasi
-                                            </option>
-                                            <option value="Lokal">Lokal</option>
-                                            <option value="Nasional">
-                                              Nasional
-                                            </option>
-                                            <option value="Internasional">
-                                              Internasional
-                                            </option>
-                                          </select>
-                                          <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={(e) =>
-                                              handleFileChangeAddPrestasiIlmiahMahasiswaModal(
-                                                e
-                                              )
-                                            }
-                                            className="mb-3"
-                                          />
-                                          {previewUrlAddPrestasiIlmiahMahasiswaModal && (
-                                            <iframe
-                                              src={
-                                                previewUrlAddPrestasiIlmiahMahasiswaModal
-                                              }
-                                              title="Preview PDF"
-                                              width="100%"
-                                              height="300"
-                                              className="mb-3"
-                                            />
-                                          )}
-                                        </form>
-                                      </Modal>
-                                      <Modal
-                                        isOpen={
-                                          isModalEditPrestasiIlmiahMahasiswaOpen
-                                        }
-                                        onClose={
-                                          closeEditPrestasiIlmiahMahasiswaModal
-                                        }
-                                        onEdit={
-                                          handleEditPrestasiIlmiahMahasiswa
-                                        }
-                                        modalType="Edit"
-                                        title="Tambah Prestasi Akademik Mahasiswa"
-                                      >
-                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Bidang Prestasi"
-                                            onChange={(e: any) =>
-                                              setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                                  bidang_prestasi:
-                                                    e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedPrestasiIlmiahMahasiswaEditModal.bidang_prestasi
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan NIM"
-                                            onChange={(e: any) =>
-                                              setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                                  nim: e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedPrestasiIlmiahMahasiswaEditModal.nim
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e: any) =>
-                                              setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                                  nama: e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedPrestasiIlmiahMahasiswaEditModal.nama
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <select
-                                            value={
-                                              dataSelectedPrestasiIlmiahMahasiswaEditModal.tingkat_prestasi
-                                            }
-                                            onChange={(e) =>
-                                              setDataSelectedPrestasiIlmiahMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
-                                                  tingkat_prestasi:
-                                                    e.target.value,
-                                                }
-                                              )
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          >
-                                            <option value="">
-                                              Pilih Tingkat Prestasi
-                                            </option>
-                                            <option value="Lokal">Lokal</option>
-                                            <option value="Nasional">
-                                              Nasional
-                                            </option>
-                                            <option value="Internasional">
-                                              Internasional
-                                            </option>
-                                          </select>
-                                          <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={(e) =>
-                                              handleFileChangeEditPrestasiIlmiahMahasiswaModal(
-                                                e
-                                              )
-                                            }
-                                            className="mb-3"
-                                          />
-                                          <iframe
-                                            src={
-                                              previewUrlEditPrestasiIlmiahMahasiswaModal
-                                            }
-                                            title="Preview PDF"
-                                            width="100%"
-                                            height="300"
-                                            className="mb-3"
-                                          />
-                                        </form>
-                                      </Modal>
-                                      <Modal
-                                        isOpen={
-                                          isModalDeletePrestasiIlmiahMahasiswaOpen
-                                        }
-                                        onClose={
-                                          closeDeletePrestasiIlmiahMahasiswaModal
-                                        }
-                                        onDelete={
-                                          handleDeletePrestasiIlmiahMahasiswa
-                                        }
-                                        modalType="Delete"
-                                        title="Hapus Prestasi Ilmiah Mahasiswa"
-                                      >
-                                        <p>
-                                          Apakah Anda yakin ingin menghapus
-                                          Prestasi Ilmiah Mahasiswa ini?
-                                        </p>
-                                      </Modal>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="border rounded-lg p-4">
-                                  <div className="flex items-center justify-between">
-                                    <p className="font-medium">
-                                      Prestasi Mahasiswa mendapatkan Beasiswa
-                                    </p>
-                                    <button
-                                      onClick={(e) =>
-                                        togglePrestasiMahasiswaMendapatkanBeasiswaForm(
-                                          e
-                                        )
-                                      }
-                                      className="flex items-center px-3 py-2"
-                                    >
-                                      {showPrestasiMahasiswaMendapatkanBeasiswaForm ? (
-                                        <FontAwesomeIcon icon={faChevronUp} />
-                                      ) : (
-                                        <FontAwesomeIcon icon={faChevronDown} />
-                                      )}
-                                    </button>
-                                  </div>
+                                            const formattedDate = `${formattedDay}, ${date} ${month} ${year}`;
+                                            const [startTime, endTime] =
+                                              timeRange.split("-");
 
-                                  {showPrestasiMahasiswaMendapatkanBeasiswaForm && (
-                                    <div className="mt-2 flex flex-col gap-4 p-4">
-                                      <div className="flex items-center">
-                                        <label className="w-2/3 md:w-1/6">
-                                          BBM
-                                        </label>
-                                        <InputField
-                                          disabled={false}
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-2/3 md:w-1/6">
-                                          Pegadaian
-                                        </label>
-                                        <InputField
-                                          disabled={false}
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-2/3 md:w-1/6">
-                                          Supersemar
-                                        </label>
-                                        <InputField
-                                          disabled={false}
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-2/3 md:w-1/6">
-                                          PPA
-                                        </label>
-                                        <InputField
-                                          disabled={false}
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-2/3 md:w-1/6">
-                                          YKL
-                                        </label>
-                                        <InputField
-                                          disabled={false}
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                      <div className="flex items-center">
-                                        <label className="w-2/3 md:w-1/6">
-                                          Dan lain-lain
-                                        </label>
-                                        <InputField
-                                          disabled={false}
-                                          type="number"
-                                          placeholder="Jumlah Mahasiswa"
-                                          onChange={(e: any) =>
-                                            setJumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm(
-                                              parseInt(e.target.value, 10)
-                                            )
-                                          }
-                                          value={
-                                            jumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm
-                                          }
-                                          className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="border rounded-lg p-4">
-                                  <div className="flex items-center justify-between">
-                                    <p className="font-medium">
-                                      Prestasi Mahasiswa mengikuti PORSENI
-                                    </p>
-                                    <button
-                                      onClick={(e) =>
-                                        togglePrestasiMahasiswaMengikutiPorseniForm(
-                                          e
-                                        )
-                                      }
-                                      className="flex items-center px-3 py-2"
-                                    >
-                                      {showPrestasiMahasiswaMengikutiPorseniForm ? (
-                                        <FontAwesomeIcon icon={faChevronUp} />
-                                      ) : (
-                                        <FontAwesomeIcon icon={faChevronDown} />
-                                      )}
-                                    </button>
-                                  </div>
-
-                                  {showPrestasiMahasiswaMengikutiPorseniForm && (
-                                    <div className="mt-2 flex flex-col p-4">
-                                      <>
-                                        <button
-                                          className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                                          onClick={(e) => {
-                                            openAddPrestasiMahasiswaMengikutiPorseniModal(
-                                              e
+                                            return (
+                                              <>
+                                                <p>{`${formattedDate}`}</p>
+                                                <p>{`${startTime}-${endTime}`}</p>
+                                              </>
                                             );
-                                          }}
-                                        >
-                                          <Image
-                                            src={plusIcon}
-                                            alt="Plus Icon"
-                                          />
-                                          <p className="text-white text-[10px] md:text-[14px]">
-                                            Tambah Prestasi Porseni Mahasiswa
-                                          </p>
-                                        </button>
-                                        <div className="mt-6 overflow-x-auto">
-                                          <table className="min-w-full text-[16px] border-collapse table-fixed">
-                                            <thead>
-                                              <tr className="bg-gray-100 text-center">
-                                                <th className="px-4 py-2 w-[20%] rounded-tl-lg rounded-bl-lg">
-                                                  Jenis Kegiatan
-                                                </th>
-                                                <th className="px-4 py-2 w-[15%]">
-                                                  NIM
-                                                </th>
-                                                <th className="px-4 py-2 w-[15%]">
-                                                  Nama
-                                                </th>
-                                                <th className="px-4 py-2 w-[15%]">
-                                                  Tingkat Prestasi
-                                                </th>
-                                                <th className="px-4 py-2 w-[10%]">
-                                                  Lampiran
-                                                </th>
-                                                <th className="px-4 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
-                                                  Action
-                                                </th>
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {prestasiMahasiswaMengikutiPorseniFormValue.length ===
-                                              0 ? (
-                                                <tr>
-                                                  <td
-                                                    colSpan={6}
-                                                    className="text-center py-4"
-                                                  >
-                                                    <div className="bg-gray-50 p-4 rounded-lg shadow-md">
-                                                      <h2 className="text-xl font-semibold text-gray-700">
-                                                        Silahkan Tambah Prestasi
-                                                        Porseni Mahasiswa
-                                                      </h2>
-                                                      <p className="text-gray-500 mt-2">
-                                                        Saat ini belum ada data
-                                                        prestasi porseni yang
-                                                        dimasukkan. Klik tombol
-                                                        tambah prestasi porseni
-                                                        mahasiswa untuk
-                                                        menambahkannya.
-                                                      </p>
-                                                    </div>
-                                                  </td>
-                                                </tr>
-                                              ) : (
-                                                prestasiMahasiswaMengikutiPorseniFormValue.map(
-                                                  (data: any, index: any) => (
-                                                    <tr key={index}>
-                                                      <td className="border-b text-center border-gray-200 px-4 break-words overflow-wrap">
-                                                        {data.jenis_kegiatan}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4 max-w-[200px] break-words overflow-wrap">
-                                                        {data.nim}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        {data.nama}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        {data.tingkat_prestasi}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        <FileButton
-                                                          data={data}
-                                                          className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600"
-                                                        />
-                                                      </td>
-                                                      <td className="border-b border-gray-200 px-4 py-4">
-                                                        <div className="flex gap-2 items-center justify-center">
-                                                          <EditButton
-                                                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                                                            onClick={(
-                                                              e: any
-                                                            ) => {
-                                                              setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
-                                                                data
-                                                              );
-                                                              setPreviewUrlEditPrestasiMahasiswaMengikutiPorseniModal(
-                                                                URL.createObjectURL(
-                                                                  data.file
-                                                                )
-                                                              );
-                                                              openEditPrestasiMahasiswaMengikutiPorseniModal(
-                                                                e
-                                                              );
-                                                            }}
-                                                          />
-                                                          <TrashButton
-                                                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                                                            onClick={(
-                                                              e: any
-                                                            ) => {
-                                                              setIdSelectedPrestasiMahasiswaMengikutiPorseniDeleteModal(
-                                                                data.id
-                                                              );
-                                                              openDeletePrestasiMahasiswaMengikutiPorseniModal(
-                                                                e
-                                                              );
-                                                            }}
-                                                          />
-                                                        </div>
-                                                      </td>
-                                                    </tr>
-                                                  )
-                                                )
-                                              )}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      </>
-                                      <Modal
-                                        isOpen={
-                                          isModalAddPrestasiMahasiswaMengikutiPorseniOpen
-                                        }
-                                        onClose={
-                                          closeAddPrestasiMahasiswaMengikutiPorseniModal
-                                        }
-                                        onAdd={
-                                          handleAddPrestasiMahasiswaMengikutiPorseni
-                                        }
-                                        modalType="Tambah"
-                                        title="Tambah Prestasi PORSENI Mahasiswa"
-                                      >
-                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Jenis Kegiatan"
-                                            onChange={(e: any) =>
-                                              setJenisKegiatanAddPrestasiMahasiswaMengikutiPorseniModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              jenisKegiatanAddPrestasiMahasiswaMengikutiPorseniModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan NIM"
-                                            onChange={(e: any) =>
-                                              setNimAddPrestasiMahasiswaMengikutiPorseniModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              nimAddPrestasiMahasiswaMengikutiPorseniModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e: any) =>
-                                              setNamaLengkapAddPrestasiMahasiswaMengikutiPorseniModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              namaLengkapAddPrestasiMahasiswaMengikutiPorseniModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <select
-                                            value={
-                                              tingkatPrestasiAddPrestasiMahasiswaMengikutiPorseniModal
-                                            }
-                                            onChange={(e) =>
-                                              setTingkatPrestasiAddPrestasiMahasiswaMengikutiPorseniModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          >
-                                            <option value="">
-                                              Pilih Tingkat Prestasi
-                                            </option>
-                                            <option value="Lokal">Lokal</option>
-                                            <option value="Nasional">
-                                              Nasional
-                                            </option>
-                                            <option value="Internasional">
-                                              Internasional
-                                            </option>
-                                          </select>
-                                          <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={(e) =>
-                                              handleFileChangeAddPrestasiMahasiswaMengikutiPorseniModal(
-                                                e
-                                              )
-                                            }
-                                            className="mb-3"
-                                          />
-                                          {previewUrlAddPrestasiMahasiswaMengikutiPorseniModal && (
-                                            <iframe
-                                              src={
-                                                previewUrlAddPrestasiMahasiswaMengikutiPorseniModal
-                                              }
-                                              title="Preview PDF"
-                                              width="100%"
-                                              height="300"
-                                              className="mb-3"
-                                            />
-                                          )}
-                                        </form>
-                                      </Modal>
-                                      <Modal
-                                        isOpen={
-                                          isModalEditPrestasiMahasiswaMengikutiPorseniOpen
-                                        }
-                                        onClose={
-                                          closeEditPrestasiMahasiswaMengikutiPorseniModal
-                                        }
-                                        onEdit={
-                                          handleEditPrestasiMahasiswaMengikutiPorseni
-                                        }
-                                        modalType="Edit"
-                                        title="Edit Prestasi PORSENI Mahasiswa"
-                                      >
-                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Jenis Kegiatan"
-                                            onChange={(e: any) =>
-                                              setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
-                                                  jenis_kegiatan:
-                                                    e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.jenis_kegiatan
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan NIM"
-                                            onChange={(e: any) =>
-                                              setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
-                                                  nim: e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.nim
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e: any) =>
-                                              setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
-                                                  nama: e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.nama
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <select
-                                            value={
-                                              dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.tingkat_prestasi
-                                            }
-                                            onChange={(e) =>
-                                              setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
-                                                {
-                                                  ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
-                                                  tingkat_prestasi:
-                                                    e.target.value,
-                                                }
-                                              )
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          >
-                                            <option value="">
-                                              Pilih Tingkat Prestasi
-                                            </option>
-                                            <option value="Lokal">Lokal</option>
-                                            <option value="Nasional">
-                                              Nasional
-                                            </option>
-                                            <option value="Internasional">
-                                              Internasional
-                                            </option>
-                                          </select>
-                                          <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={(e) =>
-                                              handleFileChangeEditPrestasiMahasiswaMengikutiPorseniModal(
-                                                e
-                                              )
-                                            }
-                                            className="mb-3"
-                                          />
-                                          <iframe
-                                            src={
-                                              previewUrlEditPrestasiMahasiswaMengikutiPorseniModal
-                                            }
-                                            title="Preview PDF"
-                                            width="100%"
-                                            height="300"
-                                            className="mb-3"
-                                          />
-                                        </form>
-                                      </Modal>
-                                      <Modal
-                                        isOpen={
-                                          isModalDeletePrestasiMahasiswaMengikutiPorseniOpen
-                                        }
-                                        onClose={
-                                          closeDeletePrestasiMahasiswaMengikutiPorseniModal
-                                        }
-                                        onDelete={
-                                          handleDeletePrestasiMahasiswaMengikutiPorseni
-                                        }
-                                        modalType="Delete"
-                                        title="Hapus Prestasi Porseni Mahasiswa"
-                                      >
+                                          } else {
+                                            return <p>Jadwal tidak valid.</p>;
+                                          }
+                                        })()}
                                         <p>
-                                          Apakah Anda yakin ingin menghapus
-                                          Prestasi Porseni Mahasiswa ini?
+                                          {data.pengajuan_bimbingan
+                                            .jenis_bimbingan === "Pribadi"
+                                            ? `${data.pengajuan_bimbingan.jenis_bimbingan} (Topik : ${data.pengajuan_bimbingan.topik_bimbingan})`
+                                            : data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
+                                                  "Perwalian"
+                                                )
+                                              ? data.pengajuan_bimbingan
+                                                  .jenis_bimbingan
+                                              : ""}
                                         </p>
-                                      </Modal>
+                                        <p>
+                                          {
+                                            data.pengajuan_bimbingan
+                                              .sistem_bimbingan
+                                          }
+                                        </p>
+                                      </div>
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedBimbingan.some(
+                                          (bimbingan: any) =>
+                                            bimbingan.id === data.id
+                                        )}
+                                        onChange={() => toggleBimbingan(data)}
+                                        className="size-4 self-start mt-4 cursor-pointer"
+                                      />
                                     </div>
-                                  )}
+                                  </label>
                                 </div>
-                                <div className="border rounded-lg p-4">
-                                  <div className="flex items-center justify-between">
-                                    <p className="font-medium">
-                                      Data Status Mahasiswa
-                                    </p>
-                                    <button
-                                      onClick={(e) =>
-                                        toggleDataStatusMahasiswaForm(e)
-                                      }
-                                      className="flex items-center px-3 py-2"
-                                    >
-                                      {showDataStatusMahasiswaForm ? (
-                                        <FontAwesomeIcon icon={faChevronUp} />
-                                      ) : (
-                                        <FontAwesomeIcon icon={faChevronDown} />
-                                      )}
-                                    </button>
-                                  </div>
-
-                                  {showDataStatusMahasiswaForm && (
-                                    <div className="mt-2 flex flex-col p-4">
-                                      <>
-                                        <button
-                                          className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                                          onClick={(e) => {
-                                            openAddDataStatusMahasiswaModal(e);
-                                          }}
-                                        >
-                                          <Image
-                                            src={plusIcon}
-                                            alt="Plus Icon"
-                                          />
-                                          <p className="text-white text-[10px] md:text-[14px]">
-                                            Tambah Data Status Mahasiswa
-                                          </p>
-                                        </button>
-                                        <div className="mt-6 overflow-x-auto">
-                                          <table className="min-w-full text-[16px] border-collapse table-fixed">
-                                            <thead>
-                                              <tr className="bg-gray-100 text-center">
-                                                <th className="px-4 py-2 w-[15%] rounded-tl-lg rounded-bl-lg">
-                                                  NIM
-                                                </th>
-                                                <th className="px-4 py-2 w-[15%]">
-                                                  Nama
-                                                </th>
-                                                <th className="px-4 py-2 w-[20%]">
-                                                  Status
-                                                </th>
-                                                <th className="px-4 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
-                                                  Action
-                                                </th>
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {dataStatusMahasiswaFormValue.length ===
-                                              0 ? (
-                                                <tr>
-                                                  <td
-                                                    colSpan={4}
-                                                    className="text-center py-4"
-                                                  >
-                                                    <div className="bg-gray-50 p-4 rounded-lg shadow-md">
-                                                      <h2 className="text-xl font-semibold text-gray-700">
-                                                        Silahkan Tambah Data
-                                                        Status Mahasiswa
-                                                      </h2>
-                                                      <p className="text-gray-500 mt-2">
-                                                        Saat ini belum ada data
-                                                        status yang dimasukkan.
-                                                        Klik tombol tambah data
-                                                        status mahasiswa untuk
-                                                        menambahkannya.
-                                                      </p>
-                                                    </div>
-                                                  </td>
-                                                </tr>
-                                              ) : (
-                                                dataStatusMahasiswaFormValue.map(
-                                                  (data: any, index: any) => (
-                                                    <tr key={index}>
-                                                      <td className="border-b text-center border-gray-200 px-4 max-w-[200px] break-words overflow-wrap">
-                                                        {data.nim}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        {data.nama}
-                                                      </td>
-                                                      <td className="border-b text-center border-gray-200 px-4">
-                                                        {data.status}
-                                                      </td>
-                                                      <td className="border-b border-gray-200 px-4 py-4">
-                                                        <div className="flex gap-2 items-center justify-center">
-                                                          <EditButton
-                                                            className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
-                                                            onClick={(
-                                                              e: any
-                                                            ) => {
-                                                              setDataSelectedDataStatusMahasiswaEditModal(
-                                                                data
-                                                              );
-                                                              openEditDataStatusMahasiswaModal(
-                                                                e
-                                                              );
-                                                            }}
-                                                          />
-                                                          <TrashButton
-                                                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
-                                                            onClick={(
-                                                              e: any
-                                                            ) => {
-                                                              setIdSelectedDataStatusMahasiswaDeleteModal(
-                                                                data.id
-                                                              );
-                                                              openDeleteDataStatusMahasiswaModal(
-                                                                e
-                                                              );
-                                                            }}
-                                                          />
-                                                        </div>
-                                                      </td>
-                                                    </tr>
-                                                  )
-                                                )
-                                              )}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      </>
-                                      <Modal
-                                        isOpen={
-                                          isModalAddDataStatusMahasiswaOpen
-                                        }
-                                        onClose={
-                                          closeAddDataStatusMahasiswaModal
-                                        }
-                                        onAdd={handleAddDataStatusMahasiswa}
-                                        modalType="Tambah"
-                                        title="Tambah Data Status Mahasiswa"
-                                      >
-                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan NIM"
-                                            onChange={(e: any) =>
-                                              setNimAddDataStatusMahasiswaModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              nimAddDataStatusMahasiswaModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e: any) =>
-                                              setNamaLengkapAddDataStatusMahasiswaModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            value={
-                                              namaLengkapAddDataStatusMahasiswaModal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <select
-                                            value={
-                                              statusAddDataStatusMahasiswaModal
-                                            }
-                                            onChange={(e) =>
-                                              setStatusAddDataStatusMahasiswaModal(
-                                                e.target.value
-                                              )
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          >
-                                            <option value="">
-                                              Pilih Status
-                                            </option>
-                                            <option value="Cuti">Cuti</option>
-                                            <option value="Mengundurkan Diri">
-                                              Mengundurkan Diri
-                                            </option>
-                                            <option value="Tanpa Keterangan">
-                                              Tanpa Keterangan
-                                            </option>
-                                          </select>
-                                        </form>
-                                      </Modal>
-                                      <Modal
-                                        isOpen={
-                                          isModalEditDataStatusMahasiswaOpen
-                                        }
-                                        onClose={
-                                          closeEditDataStatusMahasiswaModal
-                                        }
-                                        onEdit={handleEditDataStatusMahasiswa}
-                                        modalType="Edit"
-                                        title="Edit Data Status Mahasiswa"
-                                      >
-                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan NIM"
-                                            onChange={(e: any) =>
-                                              setDataSelectedDataStatusMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedDataStatusMahasiswaEditModal,
-                                                  nim: e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedDataStatusMahasiswaEditModal.nim
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <InputField
-                                            type="text"
-                                            placeholder="Masukkan Nama Lengkap"
-                                            onChange={(e: any) =>
-                                              setDataSelectedDataStatusMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedDataStatusMahasiswaEditModal,
-                                                  nama: e.target.value,
-                                                }
-                                              )
-                                            }
-                                            value={
-                                              dataSelectedDataStatusMahasiswaEditModal.nama
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <select
-                                            value={
-                                              dataSelectedDataStatusMahasiswaEditModal.status
-                                            }
-                                            onChange={(e) =>
-                                              setDataSelectedDataStatusMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedDataStatusMahasiswaEditModal,
-                                                  status: e.target.value,
-                                                }
-                                              )
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          >
-                                            <option value="">
-                                              Pilih Status
-                                            </option>
-                                            <option value="Cuti">Cuti</option>
-                                            <option value="Mengundurkan Diri">
-                                              Mengundurkan Diri
-                                            </option>
-                                            <option value="Tanpa Keterangan">
-                                              Tanpa Keterangan
-                                            </option>
-                                          </select>
-                                        </form>
-                                      </Modal>
-                                      <Modal
-                                        isOpen={
-                                          isModalDeleteDataStatusMahasiswaOpen
-                                        }
-                                        onClose={
-                                          closeDeleteDataStatusMahasiswaModal
-                                        }
-                                        onDelete={
-                                          handleDeleteDataStatusMahasiswa
-                                        }
-                                        modalType="Delete"
-                                        title="Hapus Data Status Mahasiswa"
-                                      >
-                                        <p>
-                                          Apakah Anda yakin ingin menghapus Data
-                                          Status Mahasiswa ini?
-                                        </p>
-                                      </Modal>
-                                    </div>
-                                  )}
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        {selectedBimbingan.length > 0 ? (
+                          [
+                            "Sebelum Perwalian KRS",
+                            "Setelah Perwalian KRS - Sebelum Perwalian UTS",
+                            "Setelah Perwalian UTS - Sebelum Perwalian UAS",
+                          ].includes(periodePengajuanFilter) ? (
+                            <div className="flex flex-col gap-4 mt-6 border py-2 px-4 md:p-8 rounded-lg">
+                              <h1 className="text-center font-bold text-[20px] mb-2">
+                                LAPORAN PERWALIAN DOSEN PEMBIMBING AKADEMIK
+                                FAKULTAS ILMU KOMPUTER UPN “VETERAN” JAKARTA
+                              </h1>
+                              <SelectField
+                                options={optionsKaprodi}
+                                disabled
+                                value={selectedKaprodi}
+                                placeholder="Pilih Kaprodi"
+                                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
+                              />
+                              <div className="flex flex-col gap-4">
+                                <p className="font-bold">A. PENDAHULUAN</p>
+                                <div className="p-6 border rounded-lg ">
+                                  <RichTextPendahuluan
+                                    value={pendahuluan}
+                                    onChange={setPendahuluan}
+                                  />
                                 </div>
                               </div>
-                              <div className="mt-4 border rounded-lg">
-                                <div className="flex flex-col gap-8">
-                                  <p className="font-bold mx-auto mt-8">
-                                    Data Konsultasi Mahasiswa
-                                  </p>
-                                  <button
-                                    className="flex mr-8 px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
-                                    onClick={(e) => {
-                                      openAddDataKonsultasiMahasiswaModal(e);
-                                    }}
-                                  >
-                                    <Image src={plusIcon} alt="Plus Icon" />
-                                    <p className="text-white text-[10px] md:text-[14px]">
-                                      Tambah Data Konsultasi Mahasiswa
-                                    </p>
-                                  </button>
-                                  <div className="flex flex-col px-8 mb-10">
-                                    <div className="overflow-x-auto">
-                                      <table className="min-w-full text-[14px] border-collapse table-fixed">
-                                        <thead>
-                                          <tr className="bg-gray-100 text-center">
-                                            <th className="px-2 py-2 w-[5%] rounded-tl-lg rounded-bl-lg">
-                                              No
-                                            </th>
-                                            <th className="px-2 py-2 w-[5%]">
-                                              Tanggal
-                                            </th>
-                                            <th className="px-2 py-2 w-[10%]">
-                                              NIM
-                                            </th>
-                                            <th className="px-2 py-2 w-[10%]">
-                                              Nama
-                                            </th>
-                                            <th className="px-2 py-2 w-[20%]">
-                                              Permasalahan
-                                            </th>
-                                            <th className="px-2 py-2 w-[25%]">
-                                              Solusi
-                                            </th>
-                                            <th className="px-2 py-2 w-[10%]">
-                                              TTD MHS
-                                            </th>
-                                            <th className="px-4 py-2 w-[15%] rounded-tr-lg rounded-br-lg">
-                                              Action
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {dataKonsultasiMahasiswa.length ===
-                                          0 ? (
-                                            <tr>
-                                              <td
-                                                colSpan={8}
-                                                className="text-center py-4"
-                                              >
-                                                <div className="bg-gray-50 p-4 rounded-lg shadow-md">
-                                                  <p className="text-gray-500 text-[14px] mt-2">
-                                                    Saat ini belum ada data
-                                                    konsultasi.
-                                                  </p>
-                                                </div>
-                                              </td>
-                                            </tr>
-                                          ) : (
-                                            dataKonsultasiMahasiswa.map(
-                                              (data: any, index: any) => (
-                                                <DataRowKonsultasiMahasiswa
-                                                  key={index}
-                                                  data={data}
-                                                  index={index}
-                                                />
-                                              )
-                                            )
-                                          )}
-                                        </tbody>
-                                      </table>
+
+                              <div className="flex flex-col gap-4">
+                                <p className="font-bold">
+                                  B. HASIL KONSULTASI PEMBIMBINGAN
+                                </p>
+                                <div className="p-6 flex flex-col gap-4 border rounded-lg ">
+                                  <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium">
+                                        Prestasi Akademik Mahasiswa
+                                      </p>
+                                      <button
+                                        onClick={(e: any) =>
+                                          togglePrestasiAkademikMahasiswaForm(e)
+                                        }
+                                        className="flex items-center px-3 py-2"
+                                      >
+                                        {showPrestasiAkademikMahasiswaForm ? (
+                                          <FontAwesomeIcon icon={faChevronUp} />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faChevronDown}
+                                          />
+                                        )}
+                                      </button>
                                     </div>
-                                    <Modal
-                                      isOpen={
-                                        isModalAddDataKonsultasiMahasiswaOpen
-                                      }
-                                      onClose={
-                                        closeAddDataKonsultasiMahasiswaModal
-                                      }
-                                      onAdd={handleAddDataKonsultasiMahasiswa}
-                                      modalType="Tambah"
-                                      title="Tambah Data Konsultasi Mahasiswa"
-                                    >
-                                      <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                        <select
-                                          value={
-                                            dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal
-                                          }
-                                          onChange={(e) =>
-                                            setDataSelectedNamaMahasiswaAddKonsultasiBimbinganModal(
-                                              e.target.value
-                                            )
-                                          }
-                                          className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                        >
-                                          <option value="">
-                                            Pilih Peserta Perwalian
-                                          </option>
-                                          {selectedBimbingan
-                                            .filter((data) =>
-                                              data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
-                                                "Perwalian"
+
+                                    {showPrestasiAkademikMahasiswaForm && (
+                                      <div className="mt-2 flex flex-col gap-4 p-4">
+                                        <div className="flex items-center">
+                                          <label className="w-1/2 md:w-1/6">
+                                            IPK &ge; 3.5
+                                          </label>
+                                          <InputField
+                                            disabled
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm(
+                                                parseInt(e.target.value, 10)
                                               )
-                                            )
-                                            .map((data, index) => (
-                                              <option
-                                                key={index}
-                                                value={
-                                                  data.pengajuan_bimbingan
-                                                    .nama_lengkap
-                                                }
-                                              >
-                                                {
-                                                  data.pengajuan_bimbingan
-                                                    .nama_lengkap
-                                                }
+                                            }
+                                            value={
+                                              jumlahMahasiswaIpkAPrestasiAkademikMahasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-1/2 md:w-1/6">
+                                            3 &le; IPK &lt; 3.5
+                                          </label>
+                                          <InputField
+                                            disabled
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaIpkBPrestasiAkademikMahasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-1/2 md:w-1/6">
+                                            2.5 &le; IPK &lt; 3
+                                          </label>
+                                          <InputField
+                                            disabled
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaIpkCPrestasiAkademikMahasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-1/2 md:w-1/6">
+                                            2 &le; IPK &lt; 2.5
+                                          </label>
+                                          <InputField
+                                            disabled
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaIpkDPrestasiAkademikMahasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-1/2 md:w-1/6">
+                                            IPK &lt; 2
+                                          </label>
+                                          <InputField
+                                            disabled
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaIpkEPrestasiAkademikMahasiswaForm
+                                            }
+                                            className="px-3 w-5/6 py-2 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium">
+                                        Prestasi Ilmiah Mahasiswa
+                                      </p>
+                                      <button
+                                        onClick={(e) =>
+                                          togglePrestasiIlmiahMahasiswaForm(e)
+                                        }
+                                        className="flex items-center px-3 py-2"
+                                      >
+                                        {showPrestasiIlmiahMahasiswaForm ? (
+                                          <FontAwesomeIcon icon={faChevronUp} />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faChevronDown}
+                                          />
+                                        )}
+                                      </button>
+                                    </div>
+
+                                    {showPrestasiIlmiahMahasiswaForm && (
+                                      <div className="mt-2 flex flex-col p-4">
+                                        <>
+                                          <button
+                                            className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                                            onClick={(e) => {
+                                              openAddPrestasiIlmiahMahasiswaModal(
+                                                e
+                                              );
+                                            }}
+                                          >
+                                            <Image
+                                              src={plusIcon}
+                                              alt="Plus Icon"
+                                            />
+                                            <p className="text-white text-[10px] md:text-[14px]">
+                                              Tambah Prestasi Ilmiah Mahasiswa
+                                            </p>
+                                          </button>
+                                          <div className="mt-6 overflow-x-auto">
+                                            <table className="min-w-full text-[16px] border-collapse table-fixed">
+                                              <thead>
+                                                <tr className="bg-gray-100 text-center">
+                                                  <th className="px-4 py-2 w-[20%] rounded-tl-lg rounded-bl-lg">
+                                                    Bidang Prestasi
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[15%]">
+                                                    NIM
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[15%]">
+                                                    Nama
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[15%]">
+                                                    Tingkat Prestasi
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[10%]">
+                                                    Lampiran
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
+                                                    Action
+                                                  </th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {prestasiIlmiahMahasiswaFormValue.length ===
+                                                0 ? (
+                                                  <tr>
+                                                    <td
+                                                      colSpan={6}
+                                                      className="text-center py-4"
+                                                    >
+                                                      <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+                                                        <h2 className="text-xl font-semibold text-gray-700">
+                                                          Silahkan Tambah
+                                                          Prestasi Ilmiah
+                                                          Mahasiswa
+                                                        </h2>
+                                                        <p className="text-gray-500 mt-2">
+                                                          Saat ini belum ada
+                                                          data prestasi ilmiah
+                                                          yang dimasukkan. Klik
+                                                          tombol tambah prestasi
+                                                          ilmiah mahasiswa untuk
+                                                          menambahkannya.
+                                                        </p>
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                ) : (
+                                                  prestasiIlmiahMahasiswaFormValue.map(
+                                                    (data: any, index: any) => (
+                                                      <tr key={index}>
+                                                        <td className="border-b text-center border-gray-200 px-4 break-words overflow-wrap">
+                                                          {data.bidang_prestasi}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4 max-w-[200px] break-words overflow-wrap">
+                                                          {data.nim}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          {data.nama}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          {
+                                                            data.tingkat_prestasi
+                                                          }
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          <FileButton
+                                                            data={data}
+                                                            className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600"
+                                                          />
+                                                        </td>
+                                                        <td className="border-b border-gray-200 px-4 py-4">
+                                                          <div className="flex gap-2 items-center justify-center">
+                                                            <EditButton
+                                                              className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                                                              onClick={(
+                                                                e: any
+                                                              ) => {
+                                                                setDataSelectedPrestasiIlmiahMahasiswaEditModal(
+                                                                  data
+                                                                );
+                                                                setPreviewUrlEditPrestasiIlmiahMahasiswaModal(
+                                                                  URL.createObjectURL(
+                                                                    data.file
+                                                                  )
+                                                                );
+                                                                openEditPrestasiIlmiahMahasiswaModal(
+                                                                  e
+                                                                );
+                                                              }}
+                                                            />
+                                                            <TrashButton
+                                                              className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                                                              onClick={(
+                                                                e: any
+                                                              ) => {
+                                                                setIdSelectedPrestasiIlmiahMahasiswaDeleteModal(
+                                                                  data.id
+                                                                );
+                                                                openDeletePrestasiIlmiahMahasiswaModal(
+                                                                  e
+                                                                );
+                                                              }}
+                                                            />
+                                                          </div>
+                                                        </td>
+                                                      </tr>
+                                                    )
+                                                  )
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </>
+                                        <Modal
+                                          isOpen={
+                                            isModalAddPrestasiIlmiahMahasiswaOpen
+                                          }
+                                          onClose={
+                                            closeAddPrestasiIlmiahMahasiswaModal
+                                          }
+                                          onAdd={
+                                            handleAddPrestasiIlmiahMahasiswa
+                                          }
+                                          modalType="Tambah"
+                                          title="Tambah Prestasi Akademik Mahasiswa"
+                                        >
+                                          <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Bidang Prestasi"
+                                              onChange={(e: any) =>
+                                                setBidangPrestasiAddPrestasiIlmiahMahasiswaModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                bidangPrestasiAddPrestasiIlmiahMahasiswaModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan NIM"
+                                              onChange={(e: any) =>
+                                                setNimAddPrestasiIlmiahMahasiswaModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                nimAddPrestasiIlmiahMahasiswaModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Nama Lengkap"
+                                              onChange={(e: any) =>
+                                                setNamaLengkapAddPrestasiIlmiahMahasiswaModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                namaLengkapAddPrestasiIlmiahMahasiswaModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <select
+                                              value={
+                                                tingkatPrestasiAddPrestasiIlmiahMahasiswaModal
+                                              }
+                                              onChange={(e) =>
+                                                setTingkatPrestasiAddPrestasiIlmiahMahasiswaModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            >
+                                              <option value="">
+                                                Pilih Tingkat Prestasi
                                               </option>
-                                            ))}
-                                        </select>
-                                        {dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal !==
-                                          "" &&
-                                        selectedDataBimbinganAddDataKonsultasiMahasiswaModal ? (
+                                              <option value="Lokal">
+                                                Lokal
+                                              </option>
+                                              <option value="Nasional">
+                                                Nasional
+                                              </option>
+                                              <option value="Internasional">
+                                                Internasional
+                                              </option>
+                                            </select>
+                                            <input
+                                              type="file"
+                                              accept="application/pdf"
+                                              onChange={(e) =>
+                                                handleFileChangeAddPrestasiIlmiahMahasiswaModal(
+                                                  e
+                                                )
+                                              }
+                                              className="mb-3"
+                                            />
+                                            {previewUrlAddPrestasiIlmiahMahasiswaModal && (
+                                              <iframe
+                                                src={
+                                                  previewUrlAddPrestasiIlmiahMahasiswaModal
+                                                }
+                                                title="Preview PDF"
+                                                width="100%"
+                                                height="300"
+                                                className="mb-3"
+                                              />
+                                            )}
+                                          </form>
+                                        </Modal>
+                                        <Modal
+                                          isOpen={
+                                            isModalEditPrestasiIlmiahMahasiswaOpen
+                                          }
+                                          onClose={
+                                            closeEditPrestasiIlmiahMahasiswaModal
+                                          }
+                                          onEdit={
+                                            handleEditPrestasiIlmiahMahasiswa
+                                          }
+                                          modalType="Edit"
+                                          title="Tambah Prestasi Akademik Mahasiswa"
+                                        >
+                                          <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Bidang Prestasi"
+                                              onChange={(e: any) =>
+                                                setDataSelectedPrestasiIlmiahMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
+                                                    bidang_prestasi:
+                                                      e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedPrestasiIlmiahMahasiswaEditModal.bidang_prestasi
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan NIM"
+                                              onChange={(e: any) =>
+                                                setDataSelectedPrestasiIlmiahMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
+                                                    nim: e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedPrestasiIlmiahMahasiswaEditModal.nim
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Nama Lengkap"
+                                              onChange={(e: any) =>
+                                                setDataSelectedPrestasiIlmiahMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
+                                                    nama: e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedPrestasiIlmiahMahasiswaEditModal.nama
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <select
+                                              value={
+                                                dataSelectedPrestasiIlmiahMahasiswaEditModal.tingkat_prestasi
+                                              }
+                                              onChange={(e) =>
+                                                setDataSelectedPrestasiIlmiahMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiIlmiahMahasiswaEditModal,
+                                                    tingkat_prestasi:
+                                                      e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            >
+                                              <option value="">
+                                                Pilih Tingkat Prestasi
+                                              </option>
+                                              <option value="Lokal">
+                                                Lokal
+                                              </option>
+                                              <option value="Nasional">
+                                                Nasional
+                                              </option>
+                                              <option value="Internasional">
+                                                Internasional
+                                              </option>
+                                            </select>
+                                            <input
+                                              type="file"
+                                              accept="application/pdf"
+                                              onChange={(e) =>
+                                                handleFileChangeEditPrestasiIlmiahMahasiswaModal(
+                                                  e
+                                                )
+                                              }
+                                              className="mb-3"
+                                            />
+                                            <iframe
+                                              src={
+                                                previewUrlEditPrestasiIlmiahMahasiswaModal
+                                              }
+                                              title="Preview PDF"
+                                              width="100%"
+                                              height="300"
+                                              className="mb-3"
+                                            />
+                                          </form>
+                                        </Modal>
+                                        <Modal
+                                          isOpen={
+                                            isModalDeletePrestasiIlmiahMahasiswaOpen
+                                          }
+                                          onClose={
+                                            closeDeletePrestasiIlmiahMahasiswaModal
+                                          }
+                                          onDelete={
+                                            handleDeletePrestasiIlmiahMahasiswa
+                                          }
+                                          modalType="Delete"
+                                          title="Hapus Prestasi Ilmiah Mahasiswa"
+                                        >
+                                          <p>
+                                            Apakah Anda yakin ingin menghapus
+                                            Prestasi Ilmiah Mahasiswa ini?
+                                          </p>
+                                        </Modal>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium">
+                                        Prestasi Mahasiswa mendapatkan Beasiswa
+                                      </p>
+                                      <button
+                                        onClick={(e) =>
+                                          togglePrestasiMahasiswaMendapatkanBeasiswaForm(
+                                            e
+                                          )
+                                        }
+                                        className="flex items-center px-3 py-2"
+                                      >
+                                        {showPrestasiMahasiswaMendapatkanBeasiswaForm ? (
+                                          <FontAwesomeIcon icon={faChevronUp} />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faChevronDown}
+                                          />
+                                        )}
+                                      </button>
+                                    </div>
+
+                                    {showPrestasiMahasiswaMendapatkanBeasiswaForm && (
+                                      <div className="mt-2 flex flex-col gap-4 p-4">
+                                        <div className="flex items-center">
+                                          <label className="w-2/3 md:w-1/6">
+                                            BBM
+                                          </label>
+                                          <InputField
+                                            disabled={false}
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaBeasiswaBBMPrestasiMahasiswaMendapatkanBeasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-2/3 md:w-1/6">
+                                            Pegadaian
+                                          </label>
+                                          <InputField
+                                            disabled={false}
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaBeasiswaPegadaianPrestasiMahasiswaMendapatkanBeasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-2/3 md:w-1/6">
+                                            Supersemar
+                                          </label>
+                                          <InputField
+                                            disabled={false}
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaBeasiswaSupersemarPrestasiMahasiswaMendapatkanBeasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-2/3 md:w-1/6">
+                                            PPA
+                                          </label>
+                                          <InputField
+                                            disabled={false}
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaBeasiswaPPAPrestasiMahasiswaMendapatkanBeasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-2/3 md:w-1/6">
+                                            YKL
+                                          </label>
+                                          <InputField
+                                            disabled={false}
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaBeasiswaYKLPrestasiMahasiswaMendapatkanBeasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                        <div className="flex items-center">
+                                          <label className="w-2/3 md:w-1/6">
+                                            Dan lain-lain
+                                          </label>
+                                          <InputField
+                                            disabled={false}
+                                            type="number"
+                                            placeholder="Jumlah Mahasiswa"
+                                            onChange={(e: any) =>
+                                              setJumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm(
+                                                parseInt(e.target.value, 10)
+                                              )
+                                            }
+                                            value={
+                                              jumlahMahasiswaBeasiswaDllPrestasiMahasiswaMendapatkanBeasiswaForm
+                                            }
+                                            className="px-3 py-2 w-5/6 text-[15px] border rounded-lg"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium">
+                                        Prestasi Mahasiswa mengikuti PORSENI
+                                      </p>
+                                      <button
+                                        onClick={(e) =>
+                                          togglePrestasiMahasiswaMengikutiPorseniForm(
+                                            e
+                                          )
+                                        }
+                                        className="flex items-center px-3 py-2"
+                                      >
+                                        {showPrestasiMahasiswaMengikutiPorseniForm ? (
+                                          <FontAwesomeIcon icon={faChevronUp} />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faChevronDown}
+                                          />
+                                        )}
+                                      </button>
+                                    </div>
+
+                                    {showPrestasiMahasiswaMengikutiPorseniForm && (
+                                      <div className="mt-2 flex flex-col p-4">
+                                        <>
+                                          <button
+                                            className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                                            onClick={(e) => {
+                                              openAddPrestasiMahasiswaMengikutiPorseniModal(
+                                                e
+                                              );
+                                            }}
+                                          >
+                                            <Image
+                                              src={plusIcon}
+                                              alt="Plus Icon"
+                                            />
+                                            <p className="text-white text-[10px] md:text-[14px]">
+                                              Tambah Prestasi Porseni Mahasiswa
+                                            </p>
+                                          </button>
+                                          <div className="mt-6 overflow-x-auto">
+                                            <table className="min-w-full text-[16px] border-collapse table-fixed">
+                                              <thead>
+                                                <tr className="bg-gray-100 text-center">
+                                                  <th className="px-4 py-2 w-[20%] rounded-tl-lg rounded-bl-lg">
+                                                    Jenis Kegiatan
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[15%]">
+                                                    NIM
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[15%]">
+                                                    Nama
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[15%]">
+                                                    Tingkat Prestasi
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[10%]">
+                                                    Lampiran
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
+                                                    Action
+                                                  </th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {prestasiMahasiswaMengikutiPorseniFormValue.length ===
+                                                0 ? (
+                                                  <tr>
+                                                    <td
+                                                      colSpan={6}
+                                                      className="text-center py-4"
+                                                    >
+                                                      <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+                                                        <h2 className="text-xl font-semibold text-gray-700">
+                                                          Silahkan Tambah
+                                                          Prestasi Porseni
+                                                          Mahasiswa
+                                                        </h2>
+                                                        <p className="text-gray-500 mt-2">
+                                                          Saat ini belum ada
+                                                          data prestasi porseni
+                                                          yang dimasukkan. Klik
+                                                          tombol tambah prestasi
+                                                          porseni mahasiswa
+                                                          untuk menambahkannya.
+                                                        </p>
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                ) : (
+                                                  prestasiMahasiswaMengikutiPorseniFormValue.map(
+                                                    (data: any, index: any) => (
+                                                      <tr key={index}>
+                                                        <td className="border-b text-center border-gray-200 px-4 break-words overflow-wrap">
+                                                          {data.jenis_kegiatan}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4 max-w-[200px] break-words overflow-wrap">
+                                                          {data.nim}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          {data.nama}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          {
+                                                            data.tingkat_prestasi
+                                                          }
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          <FileButton
+                                                            data={data}
+                                                            className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600"
+                                                          />
+                                                        </td>
+                                                        <td className="border-b border-gray-200 px-4 py-4">
+                                                          <div className="flex gap-2 items-center justify-center">
+                                                            <EditButton
+                                                              className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                                                              onClick={(
+                                                                e: any
+                                                              ) => {
+                                                                setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
+                                                                  data
+                                                                );
+                                                                setPreviewUrlEditPrestasiMahasiswaMengikutiPorseniModal(
+                                                                  URL.createObjectURL(
+                                                                    data.file
+                                                                  )
+                                                                );
+                                                                openEditPrestasiMahasiswaMengikutiPorseniModal(
+                                                                  e
+                                                                );
+                                                              }}
+                                                            />
+                                                            <TrashButton
+                                                              className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                                                              onClick={(
+                                                                e: any
+                                                              ) => {
+                                                                setIdSelectedPrestasiMahasiswaMengikutiPorseniDeleteModal(
+                                                                  data.id
+                                                                );
+                                                                openDeletePrestasiMahasiswaMengikutiPorseniModal(
+                                                                  e
+                                                                );
+                                                              }}
+                                                            />
+                                                          </div>
+                                                        </td>
+                                                      </tr>
+                                                    )
+                                                  )
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </>
+                                        <Modal
+                                          isOpen={
+                                            isModalAddPrestasiMahasiswaMengikutiPorseniOpen
+                                          }
+                                          onClose={
+                                            closeAddPrestasiMahasiswaMengikutiPorseniModal
+                                          }
+                                          onAdd={
+                                            handleAddPrestasiMahasiswaMengikutiPorseni
+                                          }
+                                          modalType="Tambah"
+                                          title="Tambah Prestasi PORSENI Mahasiswa"
+                                        >
+                                          <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Jenis Kegiatan"
+                                              onChange={(e: any) =>
+                                                setJenisKegiatanAddPrestasiMahasiswaMengikutiPorseniModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                jenisKegiatanAddPrestasiMahasiswaMengikutiPorseniModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan NIM"
+                                              onChange={(e: any) =>
+                                                setNimAddPrestasiMahasiswaMengikutiPorseniModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                nimAddPrestasiMahasiswaMengikutiPorseniModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Nama Lengkap"
+                                              onChange={(e: any) =>
+                                                setNamaLengkapAddPrestasiMahasiswaMengikutiPorseniModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                namaLengkapAddPrestasiMahasiswaMengikutiPorseniModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <select
+                                              value={
+                                                tingkatPrestasiAddPrestasiMahasiswaMengikutiPorseniModal
+                                              }
+                                              onChange={(e) =>
+                                                setTingkatPrestasiAddPrestasiMahasiswaMengikutiPorseniModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            >
+                                              <option value="">
+                                                Pilih Tingkat Prestasi
+                                              </option>
+                                              <option value="Lokal">
+                                                Lokal
+                                              </option>
+                                              <option value="Nasional">
+                                                Nasional
+                                              </option>
+                                              <option value="Internasional">
+                                                Internasional
+                                              </option>
+                                            </select>
+                                            <input
+                                              type="file"
+                                              accept="application/pdf"
+                                              onChange={(e) =>
+                                                handleFileChangeAddPrestasiMahasiswaMengikutiPorseniModal(
+                                                  e
+                                                )
+                                              }
+                                              className="mb-3"
+                                            />
+                                            {previewUrlAddPrestasiMahasiswaMengikutiPorseniModal && (
+                                              <iframe
+                                                src={
+                                                  previewUrlAddPrestasiMahasiswaMengikutiPorseniModal
+                                                }
+                                                title="Preview PDF"
+                                                width="100%"
+                                                height="300"
+                                                className="mb-3"
+                                              />
+                                            )}
+                                          </form>
+                                        </Modal>
+                                        <Modal
+                                          isOpen={
+                                            isModalEditPrestasiMahasiswaMengikutiPorseniOpen
+                                          }
+                                          onClose={
+                                            closeEditPrestasiMahasiswaMengikutiPorseniModal
+                                          }
+                                          onEdit={
+                                            handleEditPrestasiMahasiswaMengikutiPorseni
+                                          }
+                                          modalType="Edit"
+                                          title="Edit Prestasi PORSENI Mahasiswa"
+                                        >
+                                          <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Jenis Kegiatan"
+                                              onChange={(e: any) =>
+                                                setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
+                                                    jenis_kegiatan:
+                                                      e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.jenis_kegiatan
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan NIM"
+                                              onChange={(e: any) =>
+                                                setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
+                                                    nim: e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.nim
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Nama Lengkap"
+                                              onChange={(e: any) =>
+                                                setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
+                                                    nama: e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.nama
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <select
+                                              value={
+                                                dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal.tingkat_prestasi
+                                              }
+                                              onChange={(e) =>
+                                                setDataSelectedPrestasiMahasiswaMengikutiPorseniEditModal(
+                                                  {
+                                                    ...dataSelectedPrestasiMahasiswaMengikutiPorseniEditModal,
+                                                    tingkat_prestasi:
+                                                      e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            >
+                                              <option value="">
+                                                Pilih Tingkat Prestasi
+                                              </option>
+                                              <option value="Lokal">
+                                                Lokal
+                                              </option>
+                                              <option value="Nasional">
+                                                Nasional
+                                              </option>
+                                              <option value="Internasional">
+                                                Internasional
+                                              </option>
+                                            </select>
+                                            <input
+                                              type="file"
+                                              accept="application/pdf"
+                                              onChange={(e) =>
+                                                handleFileChangeEditPrestasiMahasiswaMengikutiPorseniModal(
+                                                  e
+                                                )
+                                              }
+                                              className="mb-3"
+                                            />
+                                            <iframe
+                                              src={
+                                                previewUrlEditPrestasiMahasiswaMengikutiPorseniModal
+                                              }
+                                              title="Preview PDF"
+                                              width="100%"
+                                              height="300"
+                                              className="mb-3"
+                                            />
+                                          </form>
+                                        </Modal>
+                                        <Modal
+                                          isOpen={
+                                            isModalDeletePrestasiMahasiswaMengikutiPorseniOpen
+                                          }
+                                          onClose={
+                                            closeDeletePrestasiMahasiswaMengikutiPorseniModal
+                                          }
+                                          onDelete={
+                                            handleDeletePrestasiMahasiswaMengikutiPorseni
+                                          }
+                                          modalType="Delete"
+                                          title="Hapus Prestasi Porseni Mahasiswa"
+                                        >
+                                          <p>
+                                            Apakah Anda yakin ingin menghapus
+                                            Prestasi Porseni Mahasiswa ini?
+                                          </p>
+                                        </Modal>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="border rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium">
+                                        Data Status Mahasiswa
+                                      </p>
+                                      <button
+                                        onClick={(e) =>
+                                          toggleDataStatusMahasiswaForm(e)
+                                        }
+                                        className="flex items-center px-3 py-2"
+                                      >
+                                        {showDataStatusMahasiswaForm ? (
+                                          <FontAwesomeIcon icon={faChevronUp} />
+                                        ) : (
+                                          <FontAwesomeIcon
+                                            icon={faChevronDown}
+                                          />
+                                        )}
+                                      </button>
+                                    </div>
+
+                                    {showDataStatusMahasiswaForm && (
+                                      <div className="mt-2 flex flex-col p-4">
+                                        <>
+                                          <button
+                                            className="flex px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                                            onClick={(e) => {
+                                              openAddDataStatusMahasiswaModal(
+                                                e
+                                              );
+                                            }}
+                                          >
+                                            <Image
+                                              src={plusIcon}
+                                              alt="Plus Icon"
+                                            />
+                                            <p className="text-white text-[10px] md:text-[14px]">
+                                              Tambah Data Status Mahasiswa
+                                            </p>
+                                          </button>
+                                          <div className="mt-6 overflow-x-auto">
+                                            <table className="min-w-full text-[16px] border-collapse table-fixed">
+                                              <thead>
+                                                <tr className="bg-gray-100 text-center">
+                                                  <th className="px-4 py-2 w-[15%] rounded-tl-lg rounded-bl-lg">
+                                                    NIM
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[15%]">
+                                                    Nama
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[20%]">
+                                                    Status
+                                                  </th>
+                                                  <th className="px-4 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
+                                                    Action
+                                                  </th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {dataStatusMahasiswaFormValue.length ===
+                                                0 ? (
+                                                  <tr>
+                                                    <td
+                                                      colSpan={4}
+                                                      className="text-center py-4"
+                                                    >
+                                                      <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+                                                        <h2 className="text-xl font-semibold text-gray-700">
+                                                          Silahkan Tambah Data
+                                                          Status Mahasiswa
+                                                        </h2>
+                                                        <p className="text-gray-500 mt-2">
+                                                          Saat ini belum ada
+                                                          data status yang
+                                                          dimasukkan. Klik
+                                                          tombol tambah data
+                                                          status mahasiswa untuk
+                                                          menambahkannya.
+                                                        </p>
+                                                      </div>
+                                                    </td>
+                                                  </tr>
+                                                ) : (
+                                                  dataStatusMahasiswaFormValue.map(
+                                                    (data: any, index: any) => (
+                                                      <tr key={index}>
+                                                        <td className="border-b text-center border-gray-200 px-4 max-w-[200px] break-words overflow-wrap">
+                                                          {data.nim}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          {data.nama}
+                                                        </td>
+                                                        <td className="border-b text-center border-gray-200 px-4">
+                                                          {data.status}
+                                                        </td>
+                                                        <td className="border-b border-gray-200 px-4 py-4">
+                                                          <div className="flex gap-2 items-center justify-center">
+                                                            <EditButton
+                                                              className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600"
+                                                              onClick={(
+                                                                e: any
+                                                              ) => {
+                                                                setDataSelectedDataStatusMahasiswaEditModal(
+                                                                  data
+                                                                );
+                                                                openEditDataStatusMahasiswaModal(
+                                                                  e
+                                                                );
+                                                              }}
+                                                            />
+                                                            <TrashButton
+                                                              className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                                                              onClick={(
+                                                                e: any
+                                                              ) => {
+                                                                setIdSelectedDataStatusMahasiswaDeleteModal(
+                                                                  data.id
+                                                                );
+                                                                openDeleteDataStatusMahasiswaModal(
+                                                                  e
+                                                                );
+                                                              }}
+                                                            />
+                                                          </div>
+                                                        </td>
+                                                      </tr>
+                                                    )
+                                                  )
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </>
+                                        <Modal
+                                          isOpen={
+                                            isModalAddDataStatusMahasiswaOpen
+                                          }
+                                          onClose={
+                                            closeAddDataStatusMahasiswaModal
+                                          }
+                                          onAdd={handleAddDataStatusMahasiswa}
+                                          modalType="Tambah"
+                                          title="Tambah Data Status Mahasiswa"
+                                        >
+                                          <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan NIM"
+                                              onChange={(e: any) =>
+                                                setNimAddDataStatusMahasiswaModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                nimAddDataStatusMahasiswaModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Nama Lengkap"
+                                              onChange={(e: any) =>
+                                                setNamaLengkapAddDataStatusMahasiswaModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              value={
+                                                namaLengkapAddDataStatusMahasiswaModal
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <select
+                                              value={
+                                                statusAddDataStatusMahasiswaModal
+                                              }
+                                              onChange={(e) =>
+                                                setStatusAddDataStatusMahasiswaModal(
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            >
+                                              <option value="">
+                                                Pilih Status
+                                              </option>
+                                              <option value="Cuti">Cuti</option>
+                                              <option value="Mengundurkan Diri">
+                                                Mengundurkan Diri
+                                              </option>
+                                              <option value="Tanpa Keterangan">
+                                                Tanpa Keterangan
+                                              </option>
+                                            </select>
+                                          </form>
+                                        </Modal>
+                                        <Modal
+                                          isOpen={
+                                            isModalEditDataStatusMahasiswaOpen
+                                          }
+                                          onClose={
+                                            closeEditDataStatusMahasiswaModal
+                                          }
+                                          onEdit={handleEditDataStatusMahasiswa}
+                                          modalType="Edit"
+                                          title="Edit Data Status Mahasiswa"
+                                        >
+                                          <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan NIM"
+                                              onChange={(e: any) =>
+                                                setDataSelectedDataStatusMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedDataStatusMahasiswaEditModal,
+                                                    nim: e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedDataStatusMahasiswaEditModal.nim
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <InputField
+                                              type="text"
+                                              placeholder="Masukkan Nama Lengkap"
+                                              onChange={(e: any) =>
+                                                setDataSelectedDataStatusMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedDataStatusMahasiswaEditModal,
+                                                    nama: e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              value={
+                                                dataSelectedDataStatusMahasiswaEditModal.nama
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            />
+                                            <select
+                                              value={
+                                                dataSelectedDataStatusMahasiswaEditModal.status
+                                              }
+                                              onChange={(e) =>
+                                                setDataSelectedDataStatusMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedDataStatusMahasiswaEditModal,
+                                                    status: e.target.value,
+                                                  }
+                                                )
+                                              }
+                                              className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                            >
+                                              <option value="">
+                                                Pilih Status
+                                              </option>
+                                              <option value="Cuti">Cuti</option>
+                                              <option value="Mengundurkan Diri">
+                                                Mengundurkan Diri
+                                              </option>
+                                              <option value="Tanpa Keterangan">
+                                                Tanpa Keterangan
+                                              </option>
+                                            </select>
+                                          </form>
+                                        </Modal>
+                                        <Modal
+                                          isOpen={
+                                            isModalDeleteDataStatusMahasiswaOpen
+                                          }
+                                          onClose={
+                                            closeDeleteDataStatusMahasiswaModal
+                                          }
+                                          onDelete={
+                                            handleDeleteDataStatusMahasiswa
+                                          }
+                                          modalType="Delete"
+                                          title="Hapus Data Status Mahasiswa"
+                                        >
+                                          <p>
+                                            Apakah Anda yakin ingin menghapus
+                                            Data Status Mahasiswa ini?
+                                          </p>
+                                        </Modal>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="mt-4 border rounded-lg">
+                                  <div className="flex flex-col gap-8">
+                                    <p className="font-bold mx-auto mt-8">
+                                      Data Konsultasi Mahasiswa
+                                    </p>
+                                    <button
+                                      className="flex mr-8 px-3 py-2 bg-orange-500 items-center gap-2 rounded-lg ml-auto hover:bg-orange-600"
+                                      onClick={(e) => {
+                                        openAddDataKonsultasiMahasiswaModal(e);
+                                      }}
+                                    >
+                                      <Image src={plusIcon} alt="Plus Icon" />
+                                      <p className="text-white text-[10px] md:text-[14px]">
+                                        Tambah Data Konsultasi Mahasiswa
+                                      </p>
+                                    </button>
+                                    <div className="flex flex-col px-8 mb-10">
+                                      <div className="overflow-x-auto">
+                                        <table className="min-w-full text-[14px] border-collapse table-fixed">
+                                          <thead>
+                                            <tr className="bg-gray-100 text-center">
+                                              <th className="px-2 py-2 w-[5%] rounded-tl-lg rounded-bl-lg">
+                                                No
+                                              </th>
+                                              <th className="px-2 py-2 w-[5%]">
+                                                Tanggal
+                                              </th>
+                                              <th className="px-2 py-2 w-[10%]">
+                                                NIM
+                                              </th>
+                                              <th className="px-2 py-2 w-[10%]">
+                                                Nama
+                                              </th>
+                                              <th className="px-2 py-2 w-[20%]">
+                                                Permasalahan
+                                              </th>
+                                              <th className="px-2 py-2 w-[25%]">
+                                                Solusi
+                                              </th>
+                                              <th className="px-2 py-2 w-[10%]">
+                                                TTD MHS
+                                              </th>
+                                              <th className="px-4 py-2 w-[15%] rounded-tr-lg rounded-br-lg">
+                                                Action
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {dataKonsultasiMahasiswa.length ===
+                                            0 ? (
+                                              <tr>
+                                                <td
+                                                  colSpan={8}
+                                                  className="text-center py-4"
+                                                >
+                                                  <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+                                                    <p className="text-gray-500 text-[14px] mt-2">
+                                                      Saat ini belum ada data
+                                                      konsultasi.
+                                                    </p>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            ) : (
+                                              dataKonsultasiMahasiswa.map(
+                                                (data: any, index: any) => (
+                                                  <DataRowKonsultasiMahasiswa
+                                                    key={index}
+                                                    data={data}
+                                                    index={index}
+                                                  />
+                                                )
+                                              )
+                                            )}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                      <Modal
+                                        isOpen={
+                                          isModalAddDataKonsultasiMahasiswaOpen
+                                        }
+                                        onClose={
+                                          closeAddDataKonsultasiMahasiswaModal
+                                        }
+                                        onAdd={handleAddDataKonsultasiMahasiswa}
+                                        modalType="Tambah"
+                                        title="Tambah Data Konsultasi Mahasiswa"
+                                      >
+                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
+                                          <select
+                                            value={
+                                              dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal
+                                            }
+                                            onChange={(e) =>
+                                              setDataSelectedNamaMahasiswaAddKonsultasiBimbinganModal(
+                                                e.target.value
+                                              )
+                                            }
+                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                          >
+                                            <option value="">
+                                              Pilih Peserta Perwalian
+                                            </option>
+                                            {selectedBimbingan
+                                              .filter((data) =>
+                                                data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
+                                                  "Perwalian"
+                                                )
+                                              )
+                                              .map((data, index) => (
+                                                <option
+                                                  key={index}
+                                                  value={
+                                                    data.pengajuan_bimbingan
+                                                      .nama_lengkap
+                                                  }
+                                                >
+                                                  {
+                                                    data.pengajuan_bimbingan
+                                                      .nama_lengkap
+                                                  }
+                                                </option>
+                                              ))}
+                                          </select>
+                                          {dataSelectedNamaMahasiswaAddKonsultasiBimbinganModal !==
+                                            "" &&
+                                          selectedDataBimbinganAddDataKonsultasiMahasiswaModal ? (
+                                            <div>
+                                              <InputField
+                                                type="text"
+                                                disabled
+                                                placeholder="Masukkan NIM"
+                                                value={
+                                                  selectedDataBimbinganAddDataKonsultasiMahasiswaModal
+                                                    .pengajuan_bimbingan.nim
+                                                }
+                                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                              />
+                                              <InputField
+                                                type="text"
+                                                disabled
+                                                placeholder="Masukkan Tanggal Bimbingan"
+                                                value={formatTanggal(
+                                                  selectedDataBimbinganAddDataKonsultasiMahasiswaModal
+                                                    .pengajuan_bimbingan
+                                                    .jadwal_bimbingan
+                                                )}
+                                                className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
+                                              />
+                                              <p className="text-sm font-medium text-gray-700 mt-2">
+                                                Permasalahan
+                                              </p>
+                                              <textarea
+                                                placeholder="Permasalahan"
+                                                value={
+                                                  permasalahanAddDataKonsultasiMahasiswaModal
+                                                }
+                                                onChange={(e) => {
+                                                  setPermasalahanAddDataKonsultasiMahasiswaModal(
+                                                    e.target.value
+                                                  );
+                                                }}
+                                                className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
+                                              />
+                                              <p className="text-sm font-medium text-gray-700 mt-2">
+                                                Solusi
+                                              </p>
+                                              <textarea
+                                                placeholder="Solusi"
+                                                value={
+                                                  solusiAddDataKonsultasiMahasiswaModal
+                                                }
+                                                onChange={(e) => {
+                                                  setSolusiAddDataKonsultasiMahasiswaModal(
+                                                    e.target.value
+                                                  );
+                                                }}
+                                                className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
+                                              />
+                                              <p className="text-sm font-medium text-gray-700 mt-2">
+                                                Ttd Mahasiswa
+                                              </p>
+                                              <img
+                                                alt="ttd absensi"
+                                                className="border rounded-lg mt-2 p-4 w-[100px]"
+                                                src={
+                                                  selectedDataBimbinganAddDataKonsultasiMahasiswaModal.ttd_kehadiran
+                                                }
+                                              />
+                                            </div>
+                                          ) : (
+                                            ""
+                                          )}
+                                        </form>
+                                      </Modal>
+                                      <Modal
+                                        isOpen={
+                                          isModalEditDataKonsultasiMahasiswaOpen
+                                        }
+                                        onClose={
+                                          closeEditDataKonsultasiMahasiswaModal
+                                        }
+                                        onEdit={
+                                          handleEditDataKonsultasiMahasiswa
+                                        }
+                                        modalType="Edit"
+                                        title="Edit Data Konsultasi Mahasiswa"
+                                      >
+                                        <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
                                           <div>
                                             <InputField
                                               type="text"
                                               disabled
                                               placeholder="Masukkan NIM"
                                               value={
-                                                selectedDataBimbinganAddDataKonsultasiMahasiswaModal
-                                                  .pengajuan_bimbingan.nim
+                                                dataSelectedDataKonsultasiMahasiswaEditModal.nim
                                               }
                                               className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
                                             />
@@ -4442,11 +4596,9 @@ export default function Home() {
                                               type="text"
                                               disabled
                                               placeholder="Masukkan Tanggal Bimbingan"
-                                              value={formatTanggal(
-                                                selectedDataBimbinganAddDataKonsultasiMahasiswaModal
-                                                  .pengajuan_bimbingan
-                                                  .jadwal_bimbingan
-                                              )}
+                                              value={
+                                                dataSelectedDataKonsultasiMahasiswaEditModal.tanggal
+                                              }
                                               className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
                                             />
                                             <p className="text-sm font-medium text-gray-700 mt-2">
@@ -4455,11 +4607,15 @@ export default function Home() {
                                             <textarea
                                               placeholder="Permasalahan"
                                               value={
-                                                permasalahanAddDataKonsultasiMahasiswaModal
+                                                dataSelectedDataKonsultasiMahasiswaEditModal.permasalahan
                                               }
                                               onChange={(e) => {
-                                                setPermasalahanAddDataKonsultasiMahasiswaModal(
-                                                  e.target.value
+                                                setDataSelectedDataKonsultasiMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedDataKonsultasiMahasiswaEditModal,
+                                                    permasalahan:
+                                                      e.target.value,
+                                                  }
                                                 );
                                               }}
                                               className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
@@ -4470,11 +4626,14 @@ export default function Home() {
                                             <textarea
                                               placeholder="Solusi"
                                               value={
-                                                solusiAddDataKonsultasiMahasiswaModal
+                                                dataSelectedDataKonsultasiMahasiswaEditModal.solusi
                                               }
                                               onChange={(e) => {
-                                                setSolusiAddDataKonsultasiMahasiswaModal(
-                                                  e.target.value
+                                                setDataSelectedDataKonsultasiMahasiswaEditModal(
+                                                  {
+                                                    ...dataSelectedDataKonsultasiMahasiswaEditModal,
+                                                    solusi: e.target.value,
+                                                  }
                                                 );
                                               }}
                                               className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
@@ -4482,228 +4641,171 @@ export default function Home() {
                                             <p className="text-sm font-medium text-gray-700 mt-2">
                                               Ttd Mahasiswa
                                             </p>
-                                            <img
-                                              alt="ttd absensi"
-                                              className="border rounded-lg mt-2 p-4 w-[100px]"
-                                              src={
-                                                selectedDataBimbinganAddDataKonsultasiMahasiswaModal.ttd_kehadiran
-                                              }
-                                            />
                                           </div>
-                                        ) : (
-                                          ""
-                                        )}
-                                      </form>
-                                    </Modal>
-                                    <Modal
-                                      isOpen={
-                                        isModalEditDataKonsultasiMahasiswaOpen
-                                      }
-                                      onClose={
-                                        closeEditDataKonsultasiMahasiswaModal
-                                      }
-                                      onEdit={handleEditDataKonsultasiMahasiswa}
-                                      modalType="Edit"
-                                      title="Edit Data Konsultasi Mahasiswa"
-                                    >
-                                      <form className="max-h-[400px] flex flex-col gap-2 pr-4 overflow-y-auto">
-                                        <div>
-                                          <InputField
-                                            type="text"
-                                            disabled
-                                            placeholder="Masukkan NIM"
-                                            value={
-                                              dataSelectedDataKonsultasiMahasiswaEditModal.nim
+                                          <img
+                                            alt="ttd absensi"
+                                            className="border rounded-lg mt-2 p-4 w-[100px]"
+                                            src={
+                                              dataSelectedDataKonsultasiMahasiswaEditModal.ttd_mhs
                                             }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
                                           />
-                                          <InputField
-                                            type="text"
-                                            disabled
-                                            placeholder="Masukkan Tanggal Bimbingan"
-                                            value={
-                                              dataSelectedDataKonsultasiMahasiswaEditModal.tanggal
-                                            }
-                                            className="px-3 py-2 text-[15px] w-full focus:outline-none border rounded-lg mb-3"
-                                          />
-                                          <p className="text-sm font-medium text-gray-700 mt-2">
-                                            Permasalahan
-                                          </p>
-                                          <textarea
-                                            placeholder="Permasalahan"
-                                            value={
-                                              dataSelectedDataKonsultasiMahasiswaEditModal.permasalahan
-                                            }
-                                            onChange={(e) => {
-                                              setDataSelectedDataKonsultasiMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedDataKonsultasiMahasiswaEditModal,
-                                                  permasalahan: e.target.value,
-                                                }
-                                              );
-                                            }}
-                                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
-                                          />
-                                          <p className="text-sm font-medium text-gray-700 mt-2">
-                                            Solusi
-                                          </p>
-                                          <textarea
-                                            placeholder="Solusi"
-                                            value={
-                                              dataSelectedDataKonsultasiMahasiswaEditModal.solusi
-                                            }
-                                            onChange={(e) => {
-                                              setDataSelectedDataKonsultasiMahasiswaEditModal(
-                                                {
-                                                  ...dataSelectedDataKonsultasiMahasiswaEditModal,
-                                                  solusi: e.target.value,
-                                                }
-                                              );
-                                            }}
-                                            className="border mt-2 focus:outline-none text-sm rounded-lg px-3 py-2 w-full h-24"
-                                          />
-                                          <p className="text-sm font-medium text-gray-700 mt-2">
-                                            Ttd Mahasiswa
-                                          </p>
-                                        </div>
-                                        <img
-                                          alt="ttd absensi"
-                                          className="border rounded-lg mt-2 p-4 w-[100px]"
-                                          src={
-                                            dataSelectedDataKonsultasiMahasiswaEditModal.ttd_mhs
-                                          }
-                                        />
-                                      </form>
-                                    </Modal>
-                                    <Modal
-                                      isOpen={
-                                        isModalDeleteDataKonsultasiMahasiswaOpen
-                                      }
-                                      onClose={
-                                        closeDeleteDataKonsultasiMahasiswaModal
-                                      }
-                                      onDelete={
-                                        handleDeleteDataKonsultasiMahasiswa
-                                      }
-                                      modalType="Delete"
-                                      title="Hapus Data Konsultasi Mahasiswa"
-                                    >
-                                      <p>
-                                        Apakah Anda yakin ingin menghapus Data
-                                        Konsultasi Mahasiswa ini?
-                                      </p>
-                                    </Modal>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="mt-4 border rounded-lg">
-                                <div className="flex flex-col gap-8">
-                                  <p className="font-bold mx-auto mt-8">
-                                    Data Absensi Perwalian
-                                  </p>
-                                  <div className="flex flex-col px-8 mb-10">
-                                    <div className="overflow-x-auto">
-                                      <table className="min-w-full text-[14px] border-collapse table-fixed">
-                                        <thead>
-                                          <tr className="bg-gray-100 text-center">
-                                            <th className="px-2 py-2 w-[10%] rounded-tl-lg rounded-bl-lg">
-                                              No
-                                            </th>
-                                            <th className="px-2 py-2 w-[25%]">
-                                              NIM
-                                            </th>
-                                            <th className="px-2 py-2 w-[40%]">
-                                              Nama
-                                            </th>
-                                            <th className="px-2 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
-                                              TTD MHS
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {selectedBimbingan.filter((data) =>
-                                            data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
-                                              "Perwalian"
-                                            )
-                                          ).length === 0 ? (
-                                            <tr>
-                                              <td
-                                                colSpan={7}
-                                                className="text-center py-4"
-                                              >
-                                                <div className="bg-gray-50 p-4 rounded-lg shadow-md">
-                                                  <p className="text-gray-500 text-[14px] mt-2">
-                                                    Saat ini belum ada data
-                                                    Absensi.
-                                                  </p>
-                                                </div>
-                                              </td>
-                                            </tr>
-                                          ) : (
-                                            selectedBimbingan
-                                              .filter((data) =>
-                                                data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
-                                                  "Perwalian"
-                                                )
-                                              )
-                                              .map((data: any, index: any) => (
-                                                <DataRowAbsensiMahasiswa
-                                                  key={index}
-                                                  data={data}
-                                                  index={index}
-                                                />
-                                              ))
-                                          )}
-                                        </tbody>
-                                      </table>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col gap-4">
-                              <p className="font-bold">
-                                C. KESIMPULAN DAN SARAN
-                              </p>
-                              <div className="p-6 border rounded-lg ">
-                                <RichTextKesimpulan
-                                  value={kesimpulan}
-                                  onChange={setKesimpulan}
-                                />
-                              </div>
-                            </div>
-                            {imagePreviews.length > 0 ? (
-                              <div className="border rounded-lg px-3 py-2">
-                                <label className="text-[15px] text-neutral-400">
-                                  Dokumentasi
-                                </label>
-                                <div className="grid grid-cols-3 gap-4 m-6">
-                                  {imagePreviews.map((src: any, index: any) => (
-                                    <div
-                                      key={index}
-                                      className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
-                                    >
-                                      <img
-                                        src={src}
-                                        alt={`Preview ${index + 1}`}
-                                        className="max-h-[200px]"
-                                      />
-                                      <button
-                                        onClick={(e) =>
-                                          handleDeleteImage(e, index)
+                                        </form>
+                                      </Modal>
+                                      <Modal
+                                        isOpen={
+                                          isModalDeleteDataKonsultasiMahasiswaOpen
                                         }
-                                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
+                                        onClose={
+                                          closeDeleteDataKonsultasiMahasiswaModal
+                                        }
+                                        onDelete={
+                                          handleDeleteDataKonsultasiMahasiswa
+                                        }
+                                        modalType="Delete"
+                                        title="Hapus Data Konsultasi Mahasiswa"
                                       >
-                                        <Image
-                                          src={cancelIcon}
-                                          alt={`cancelicon`}
-                                          className="p-2"
-                                        />
-                                      </button>
+                                        <p>
+                                          Apakah Anda yakin ingin menghapus Data
+                                          Konsultasi Mahasiswa ini?
+                                        </p>
+                                      </Modal>
                                     </div>
-                                  ))}
-                                  <label className="cursor-pointer flex justify-center items-center border-dashed border-2 border-gray-300 rounded-lg h-[200px] w-full col-span-3">
+                                  </div>
+                                </div>
+                                <div className="mt-4 border rounded-lg">
+                                  <div className="flex flex-col gap-8">
+                                    <p className="font-bold mx-auto mt-8">
+                                      Data Absensi Perwalian
+                                    </p>
+                                    <div className="flex flex-col px-8 mb-10">
+                                      <div className="overflow-x-auto">
+                                        <table className="min-w-full text-[14px] border-collapse table-fixed">
+                                          <thead>
+                                            <tr className="bg-gray-100 text-center">
+                                              <th className="px-2 py-2 w-[10%] rounded-tl-lg rounded-bl-lg">
+                                                No
+                                              </th>
+                                              <th className="px-2 py-2 w-[25%]">
+                                                NIM
+                                              </th>
+                                              <th className="px-2 py-2 w-[40%]">
+                                                Nama
+                                              </th>
+                                              <th className="px-2 py-2 w-[25%] rounded-tr-lg rounded-br-lg">
+                                                TTD MHS
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {selectedBimbingan.filter((data) =>
+                                              data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
+                                                "Perwalian"
+                                              )
+                                            ).length === 0 ? (
+                                              <tr>
+                                                <td
+                                                  colSpan={7}
+                                                  className="text-center py-4"
+                                                >
+                                                  <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+                                                    <p className="text-gray-500 text-[14px] mt-2">
+                                                      Saat ini belum ada data
+                                                      Absensi.
+                                                    </p>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            ) : (
+                                              selectedBimbingan
+                                                .filter((data) =>
+                                                  data.pengajuan_bimbingan.jenis_bimbingan.startsWith(
+                                                    "Perwalian"
+                                                  )
+                                                )
+                                                .map(
+                                                  (data: any, index: any) => (
+                                                    <DataRowAbsensiMahasiswa
+                                                      key={index}
+                                                      data={data}
+                                                      index={index}
+                                                    />
+                                                  )
+                                                )
+                                            )}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col gap-4">
+                                <p className="font-bold">
+                                  C. KESIMPULAN DAN SARAN
+                                </p>
+                                <div className="p-6 border rounded-lg ">
+                                  <RichTextKesimpulan
+                                    value={kesimpulan}
+                                    onChange={setKesimpulan}
+                                  />
+                                </div>
+                              </div>
+                              {imagePreviews.length > 0 ? (
+                                <div className="border rounded-lg px-3 py-2">
+                                  <label className="text-[15px] text-neutral-400">
+                                    Dokumentasi
+                                  </label>
+                                  <div className="grid grid-cols-3 gap-4 m-6">
+                                    {imagePreviews.map(
+                                      (src: any, index: any) => (
+                                        <div
+                                          key={index}
+                                          className="relative min-h-[100px] flex justify-center items-center border rounded-lg"
+                                        >
+                                          <img
+                                            src={src}
+                                            alt={`Preview ${index + 1}`}
+                                            className="max-h-[200px]"
+                                          />
+                                          <button
+                                            onClick={(e) =>
+                                              handleDeleteImage(e, index)
+                                            }
+                                            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
+                                          >
+                                            <Image
+                                              src={cancelIcon}
+                                              alt={`cancelicon`}
+                                              className="p-2"
+                                            />
+                                          </button>
+                                        </div>
+                                      )
+                                    )}
+                                    <label className="cursor-pointer flex justify-center items-center border-dashed border-2 border-gray-300 rounded-lg h-[200px] w-full col-span-3">
+                                      <input
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        className="hidden"
+                                      />
+                                      <div className="flex justify-center items-center">
+                                        <Image
+                                          src={ImagePlus}
+                                          alt="imagePlus"
+                                        />
+                                      </div>
+                                    </label>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col gap-2 h-[300px] px-3 py-2 text-[15px] border rounded-lg">
+                                  <label className="text-neutral-400">
+                                    Dokumentasi
+                                  </label>
+                                  <label className="cursor-pointer w-full h-full flex justify-center items-center">
                                     <input
                                       type="file"
                                       multiple
@@ -4711,120 +4813,102 @@ export default function Home() {
                                       onChange={handleImageUpload}
                                       className="hidden"
                                     />
-                                    <div className="flex justify-center items-center">
+                                    <div className="w-full h-full flex justify-center items-center">
                                       <Image src={ImagePlus} alt="imagePlus" />
                                     </div>
                                   </label>
                                 </div>
-                              </div>
-                            ) : (
-                              <div className="flex flex-col gap-2 h-[300px] px-3 py-2 text-[15px] border rounded-lg">
-                                <label className="text-neutral-400">
-                                  Dokumentasi
-                                </label>
-                                <label className="cursor-pointer w-full h-full flex justify-center items-center">
-                                  <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    className="hidden"
+                              )}
+                              <div className="flex flex-col w-full md:w-1/2 mx-auto gap-2 my-4">
+                                <p className="text-center font-medium">
+                                  Silahkan Tanda Tangan Laporan Perwalian
+                                </p>
+                                <div className="flex flex-col">
+                                  <SignatureCanvas
+                                    ref={sigCanvas}
+                                    penColor="black"
+                                    canvasProps={{
+                                      className:
+                                        "border border-gray-300 rounded-lg h-[300px]",
+                                    }}
                                   />
-                                  <div className="w-full h-full flex justify-center items-center">
-                                    <Image src={ImagePlus} alt="imagePlus" />
-                                  </div>
-                                </label>
+                                  <a
+                                    onClick={clearSignature}
+                                    className="text-blue-500 underline text-end cursor-pointer hover:text-blue-700"
+                                  >
+                                    Clear
+                                  </a>
+                                </div>
                               </div>
-                            )}
-                            <div className="flex flex-col w-full md:w-1/2 mx-auto gap-2 my-4">
-                              <p className="text-center font-medium">
-                                Silahkan Tanda Tangan Laporan Perwalian
-                              </p>
-                              <div className="flex flex-col">
-                                <SignatureCanvas
-                                  ref={sigCanvas}
-                                  penColor="black"
-                                  canvasProps={{
-                                    className:
-                                      "border border-gray-300 rounded-lg h-[300px]",
-                                  }}
-                                />
+                              <div className="flex justify-end gap-2">
+                                <p>Sudah selesai membuat laporan?</p>
                                 <a
-                                  onClick={clearSignature}
+                                  onClick={(e: any) =>
+                                    handlePreviewPDFPerwalian(e)
+                                  }
                                   className="text-blue-500 underline text-end cursor-pointer hover:text-blue-700"
                                 >
-                                  Clear
+                                  Preview PDF Laporan
                                 </a>
                               </div>
-                            </div>
-                            <div className="flex justify-end gap-2">
-                              <p>Sudah selesai membuat laporan?</p>
-                              <a
-                                onClick={(e: any) =>
-                                  handlePreviewPDFPerwalian(e)
-                                }
-                                className="text-blue-500 underline text-end cursor-pointer hover:text-blue-700"
+                              <PDFModal
+                                isOpen={isModalOpen}
+                                closeModal={closeModal}
+                                pdfUrl={pdfUrl}
+                              />
+                              <button
+                                type="submit"
+                                className="bg-orange-500 hover:bg-orange-600 rounded-lg py-[6px] text-white font-medium"
                               >
-                                Preview PDF Laporan
-                              </a>
+                                Buat Laporan
+                              </button>
                             </div>
-                            <PDFModal
-                              isOpen={isModalOpen}
-                              closeModal={closeModal}
-                              pdfUrl={pdfUrl}
-                            />
-                            <button
-                              type="submit"
-                              className="bg-orange-500 hover:bg-orange-600 rounded-lg py-[6px] text-white font-medium"
-                            >
-                              Buat Laporan
-                            </button>
-                          </div>
+                          ) : (
+                            ""
+                          )
                         ) : (
-                          ""
-                        )
-                      ) : (
-                        <div className="border mt-6 rounded-lg p-10 flex flex-col items-center">
-                          <svg
-                            className="h-12 w-12 text-red-500 mb-4"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
+                          <div className="border mt-6 rounded-lg p-10 flex flex-col items-center">
+                            <svg
+                              className="h-12 w-12 text-red-500 mb-4"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
 
-                          <p className="text-center text-red-500">
-                            Anda belum memilih bimbingan yang akan dilaporkan.
-                          </p>
-                          <p className="text-center text-gray-600">
-                            Pilih bimbingan yang akan dilaporkan terlebih
-                            dahulu.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                            <p className="text-center text-red-500">
+                              Anda belum memilih bimbingan yang akan dilaporkan.
+                            </p>
+                            <p className="text-center text-gray-600">
+                              Pilih bimbingan yang akan dilaporkan terlebih
+                              dahulu.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </form>
-          <ToastContainer />
+              )}
+            </form>
+            <ToastContainer />
+          </div>
+        </div>
+
+        <div className="border hidden md:block">
+          <p className="text-center my-8 text-[16px]">
+            Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
+          </p>
         </div>
       </div>
-
-      <div className="border hidden md:block">
-        <p className="text-center my-8 text-[16px]">
-          Hak cipta &copy; 2025 Bimbingan Akademik Mahasiswa FIK UPNVJ
-        </p>
-      </div>
-    </div>
+    </>
   );
 }
 

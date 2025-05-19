@@ -114,7 +114,7 @@ const NotificationModal: React.FC<any> = ({
     ) {
       submenu = "Riwayat%20Laporan%20Bimbingan%20Role%20Dosen%20PA";
     }
-
+    onRead();
     router.push(`/dashboard?submenu=${submenu}`);
   };
 

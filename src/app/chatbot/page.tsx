@@ -6,10 +6,73 @@ import ChatbotHeader from "@/components/ui/chatbot/ChatbotHeader";
 import NavbarChatbot from "@/components/ui/chatbot/NavbarChatbot";
 import SidebarChatbot from "@/components/ui/chatbot/SidebarChatbot";
 import TextInputPesanChatbot from "@/components/ui/chatbot/TextInputPesanChatbot";
+import { RootState } from "@/lib/store";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { env } from "process";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+
+export const selectIsLoadingGlobal = ({
+  roleUser,
+  dataUser,
+  dataDosenPA,
+  dataKaprodi,
+  dataMahasiswa,
+  dataJadwalDosenPA,
+  dataSesiChatbotMahasiswa,
+}) => {
+  const isEmpty = (data) =>
+    data === null ||
+    data === undefined ||
+    (Array.isArray(data) && data.length === 0) ||
+    (typeof data === "object" &&
+      !Array.isArray(data) &&
+      Object.keys(data).length === 0) ||
+    data === "";
+
+  if (!roleUser) {
+    console.log("Loading karena roleUser kosong:", roleUser);
+    return true;
+  }
+  if (isEmpty(dataUser)) {
+    console.log("Loading karena dataUser kosong:", dataUser);
+    return true;
+  }
+  if (isEmpty(dataDosenPA)) {
+    console.log("Loading karena dataDosenPA kosong:", dataDosenPA);
+    return true;
+  }
+  if (isEmpty(dataKaprodi)) {
+    console.log("Loading karena dataKaprodi kosong:", dataKaprodi);
+    return true;
+  }
+  if (isEmpty(dataMahasiswa)) {
+    console.log("Loading karena dataMahasiswa kosong:", dataMahasiswa);
+    return true;
+  }
+  if (isEmpty(dataJadwalDosenPA)) {
+    console.log("Loading karena dataJadwalDosenPA kosong:", dataJadwalDosenPA);
+    return true;
+  }
+  if (isEmpty(dataSesiChatbotMahasiswa)) {
+    console.log(
+      "Loading karena dataSesiChatbotMahasiswa kosong:",
+      dataSesiChatbotMahasiswa
+    );
+    return true;
+  }
+
+  return false;
+};
+
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [roleUser, setRoleUser] = useState<string>("");
@@ -24,8 +87,8 @@ export default function Home() {
   const [dataRiwayatPesanChatbot, setDataRiwayatPesanChatbot] = useState([]);
   const [chatbotData, setChatbotData] = useState<any>([]);
   const [sortedChatbotData, setSortedChatbotData] = useState([]);
-  const [dataUser, setDataUser] = useState<any>(null);
   const [dataDBCustomContext, setDataDBCustomContext] = useState([]);
+  const dataUser = useSelector((state: RootState) => state.auth.dataUser);
 
   const [customDataConsumeGPT, setCustomDataConsumeGPT] = useState({
     dosen_pa: [],
@@ -150,7 +213,11 @@ export default function Home() {
       const response = await axios.get(
         `${API_BASE_URL}/api/sesichatbotmahasiswa`
       );
-      setDataSesiChatbotMahasiswa(response.data);
+
+      const filteredDataSesiChatbot = response.data.filter(
+        (data) => data.mahasiswa_id === mahasiswaID
+      );
+      setDataSesiChatbotMahasiswa(filteredDataSesiChatbot);
     } catch (error) {
       throw error;
     }
@@ -199,6 +266,20 @@ export default function Home() {
       throw error;
     }
   };
+
+  console.log(dataUser);
+
+  useEffect(() => {
+    if (dataUser) {
+      if (dataUser.role === "Mahasiswa") {
+        setRoleUser("Mahasiswa");
+      } else if (dataUser.role === "Dosen PA") {
+        setRoleUser("Dosen PA");
+      } else if (dataUser.role === "Kaprodi") {
+        setRoleUser("Kaprodi");
+      }
+    }
+  }, [dataUser, dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
     if (
@@ -375,6 +456,7 @@ ${dbCustomContext}
         getDataPesanBotBySesiChatbotMahasiswaID();
         getDataRiwayatPesanChatbotBySesiChatbotMahasiswaID();
       } else {
+        setIsNewChat(true);
         const newChat = {
           ...newData,
           mahasiswa_id: mahasiswaID,
@@ -396,6 +478,7 @@ ${dbCustomContext}
         await addPesanBot(newPesanBot);
 
         setActiveSesiChatbotMahasiswa(result.sesi_chatbot_mahasiswa_id);
+        setIsNewChat(false);
       }
     } catch (error) {}
   };
@@ -414,33 +497,6 @@ ${dbCustomContext}
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [sortedChatbotData]); // Mengawasi perubahan pada chatData
-
-  useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const authTokenCookie = cookies.find((row) => row.startsWith("authBMFK="));
-
-    if (authTokenCookie) {
-      const token = authTokenCookie.split("=")[1];
-      try {
-        const decodedToken: any = jwtDecode(token);
-
-        // Ambil data mahasiswa dan cocokan nim
-        fetch(`${API_BASE_URL}/api/datamahasiswa`)
-          .then((res) => res.json())
-          .then((data) => {
-            const matchedUser = data.find(
-              (mahasiswa) => mahasiswa.nim === decodedToken.nim
-            );
-            if (matchedUser) {
-              setDataUser(matchedUser);
-            } else {
-              console.warn("Mahasiswa dengan NIM tersebut tidak ditemukan.");
-            }
-          })
-          .catch((err) => {});
-      } catch (error) {}
-    }
-  }, [dataDosenPA, dataKaprodi]);
 
   useEffect(() => {
     if (dataUser && dataUser.nim && dataMahasiswa && dataMahasiswa.length > 0) {
@@ -476,141 +532,191 @@ ${dbCustomContext}
     getDataDosenPA();
     getDataKaprodi();
     getDataMahasiswa();
-    getDataSesiChatbotMahasiswa();
     getDataJadwalDosenPA();
     getDataInformasiAkademik();
     getDataDBCustomContext();
   }, []);
 
   useEffect(() => {
+    getDataSesiChatbotMahasiswa();
+  }, [mahasiswaID]);
+
+  useEffect(() => {
     getDataChatbotMahasiswabySesiChatbotMahasiswaID();
     getDataPesanBotBySesiChatbotMahasiswaID();
     getDataRiwayatPesanChatbotBySesiChatbotMahasiswaID();
-    getDataSesiChatbotMahasiswa();
   }, [activeSesiChatbotMahasiswa]);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isNewChat, setIsNewChat] = useState(false);
+
+  useEffect(() => {
+    if (isNewChat === true) {
+      getDataSesiChatbotMahasiswa();
+    }
+  }, [isNewChat]);
+
+  // Status states
+  const statusDataMahasiswa = useSelector(
+    (state: RootState) => state.mahasiswa?.status
+  );
+  const statusDataDosenPA = useSelector(
+    (state: RootState) => state.dosenPA?.status
+  );
+  const statusDataKaprodi = useSelector(
+    (state: RootState) => state.kaprodi?.status
+  );
+  const statusDataUser = useSelector((state: RootState) => state.user?.status);
+
+  const userData = useMemo(() => {
+    if (!dataUser) return null;
+
+    if (roleUser === "Mahasiswa" && statusDataMahasiswa === "succeeded") {
+      return dataMahasiswa.find((data) => data.nim === dataUser?.nim) || null;
+    }
+    if (roleUser === "Dosen PA" && statusDataDosenPA === "succeeded") {
+      return dataDosenPA.find((data) => data.email === dataUser?.email) || null;
+    }
+    if (roleUser === "Kaprodi" && statusDataKaprodi === "succeeded") {
+      return dataKaprodi.find((data) => data.email === dataUser?.email) || null;
+    }
+    return null;
+  }, [
+    roleUser,
+    dataUser,
+    dataMahasiswa,
+    dataDosenPA,
+    dataKaprodi,
+    statusDataMahasiswa,
+    statusDataDosenPA,
+    statusDataKaprodi,
+  ]);
+
+  const isLoading = selectIsLoadingGlobal({
+    roleUser,
+    dataUser,
+    dataDosenPA,
+    dataKaprodi,
+    dataMahasiswa,
+    dataJadwalDosenPA,
+    dataSesiChatbotMahasiswa,
+  });
 
   return (
-    <div className="h-screen relative">
-      <NavbarChatbot
-        isPathChatbot={true}
-        roleUser={roleUser}
-        dataUser={
-          roleUser === "Mahasiswa"
-            ? dataMahasiswa.find((data) => data.nim === dataUser?.nim)
-            : roleUser === "Dosen PA"
-              ? dataDosenPA.find((data) => data.email === dataUser?.email)
-              : roleUser === "Kaprodi"
-                ? dataKaprodi.find((data) => data.email === dataUser?.email)
-                : null
-        }
-      />
-      {dataUser?.status_lulus === true ? (
-        <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-md px-4 py-3 mx-4 md:mx-8 mt-4 md:mt-[96px] mb-4 text-sm md:text-base">
-          Anda telah lulus dan tidak lagi terdaftar sebagai mahasiswa bimbingan.
-          Oleh karena itu, fitur <strong>Chatbot Bimbingan Akademik</strong>{" "}
-          tidak tersedia.
-        </div>
-      ) : (
-        <div className="flex h-screen">
-          {/* Sidebar */}
-          {isOpen && (
-            <div
-              className="fixed inset-0 bg-black/50 md:hidden z-[100]"
-              onClick={() => setIsOpen(false)}
-            />
-          )}
-          <div
-            className={`fixed h-screen inset-0 md:relative w-[200px] md:w-[270px] bg-white shadow-md transition-transform duration-300 
-    ${isOpen ? "translate-x-0 z-[999]" : "-translate-x-full"} md:translate-x-0`}
-          >
-            <SidebarChatbot
-              setActiveSesiChatbotMahasiswa={setActiveSesiChatbotMahasiswa}
-              activeSesiChatbotMahasiswa={activeSesiChatbotMahasiswa}
-              data={dataSesiChatbotMahasiswa}
-              setIsOpen={setIsOpen}
-            />
+    <>
+      {isLoading && <Spinner />}
+      <div className="h-screen relative">
+        <NavbarChatbot
+          isPathChatbot={true}
+          roleUser={roleUser}
+          dataUser={userData}
+        />
+        {userData?.status_lulus === true ? (
+          <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-md px-4 py-3 mx-4 md:mx-8 mt-4 md:mt-[96px] mb-4 text-sm md:text-base">
+            Anda telah lulus dan tidak lagi terdaftar sebagai mahasiswa
+            bimbingan. Oleh karena itu, fitur{" "}
+            <strong>Chatbot Bimbingan Akademik</strong> tidak tersedia.
           </div>
-
-          {/* Main Chat Area */}
-          <div
-            className={`flex flex-col flex-1 min-h-screen w-full pt-[72px] ${isOpen ? "md:pl-[200px]" : "ml-0"} transition-all duration-300`}
-          >
-            <div className="flex justify-between items-center">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden p-2 text-gray-700 focus:outline-none"
-              >
-                <svg
-                  className={`w-6 h-6 ${isOpen ? "hidden" : "block"}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16m-7 6h7"
-                  />
-                </svg>
-                <svg
-                  className={`w-6 h-6 ${isOpen ? "block" : "hidden"}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {sortedChatbotData.length === 0 ? (
-              <div className="flex-1 px-20 md:px-[120px] flex items-center">
-                <ChatbotHeader />
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto px-[40px] flex flex-col w-full justify-between gap-8">
-                <div
-                  id="message-container"
-                  className="flex-1 w-full flex flex-col"
-                >
-                  {sortedChatbotData.map((data: any, index) => (
-                    <React.Fragment key={index}>
-                      {data.role === "Mahasiswa" ? (
-                        <BubbleChatEndChatbot
-                          key={index + "message"}
-                          data={data}
-                        />
-                      ) : (
-                        <BubbleChatStartChatbot
-                          key={index + "message"}
-                          data={data}
-                        />
-                      )}
-                    </React.Fragment>
-                  ))}
-                  <div ref={messageEndRef} />
-                </div>
-              </div>
+        ) : (
+          <div className="flex h-screen">
+            {/* Sidebar */}
+            {isOpen && (
+              <div
+                className="fixed inset-0 bg-black/50 md:hidden z-[100]"
+                onClick={() => setIsOpen(false)}
+              />
             )}
-
-            <div className="px-10 py-4">
-              <TextInputPesanChatbot
-                handleAddChatChatbotMahasiswa={handleAddChatChatbotMahasiswa}
+            <div
+              className={`fixed h-screen inset-0 md:relative w-[200px] md:w-[270px] bg-white shadow-md transition-transform duration-300 
+    ${isOpen ? "translate-x-0 z-[999]" : "-translate-x-full"} md:translate-x-0`}
+            >
+              <SidebarChatbot
+                setActiveSesiChatbotMahasiswa={setActiveSesiChatbotMahasiswa}
+                activeSesiChatbotMahasiswa={activeSesiChatbotMahasiswa}
+                data={dataSesiChatbotMahasiswa}
+                setIsOpen={setIsOpen}
               />
             </div>
+
+            {/* Main Chat Area */}
+            <div
+              className={`flex flex-col flex-1 min-h-screen w-full pt-[72px] ${isOpen ? "md:pl-[200px]" : "ml-0"} transition-all duration-300`}
+            >
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="md:hidden p-2 text-gray-700 focus:outline-none"
+                >
+                  <svg
+                    className={`w-6 h-6 ${isOpen ? "hidden" : "block"}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16m-7 6h7"
+                    />
+                  </svg>
+                  <svg
+                    className={`w-6 h-6 ${isOpen ? "block" : "hidden"}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {sortedChatbotData.length === 0 ? (
+                <div className="flex-1 px-20 md:px-[120px] flex items-center">
+                  <ChatbotHeader />
+                </div>
+              ) : (
+                <div className="flex-1 overflow-y-auto px-[40px] flex flex-col w-full justify-between gap-8">
+                  <div
+                    id="message-container"
+                    className="flex-1 w-full flex flex-col"
+                  >
+                    {sortedChatbotData.map((data: any, index) => (
+                      <React.Fragment key={index}>
+                        {data.role === "Mahasiswa" ? (
+                          <BubbleChatEndChatbot
+                            key={index + "message"}
+                            data={data}
+                          />
+                        ) : (
+                          <BubbleChatStartChatbot
+                            key={index + "message"}
+                            data={data}
+                          />
+                        )}
+                      </React.Fragment>
+                    ))}
+                    <div ref={messageEndRef} />
+                  </div>
+                </div>
+              )}
+
+              <div className="px-10 py-4">
+                <TextInputPesanChatbot
+                  handleAddChatChatbotMahasiswa={handleAddChatChatbotMahasiswa}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }

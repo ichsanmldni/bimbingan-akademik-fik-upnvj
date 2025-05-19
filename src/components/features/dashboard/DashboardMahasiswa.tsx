@@ -33,6 +33,57 @@ const schedule = {
   Jumat: [],
 };
 
+export const selectIsLoadingGlobal = ({
+  dataMahasiswa,
+  dataDosenPA,
+  dataJurusan,
+  dataPeminatan,
+  dataPengajuanBimbingan,
+  dataBimbingan,
+  dataJadwalDosenPA,
+}) => {
+  // Fungsi cek apakah data kosong (array kosong, object kosong, null, undefined)
+  const isEmpty = (data) =>
+    data === null ||
+    data === undefined ||
+    (Array.isArray(data) && data.length === 0) ||
+    (typeof data === "object" &&
+      !Array.isArray(data) &&
+      Object.keys(data).length === 0);
+
+  if (isEmpty(dataMahasiswa)) {
+    return true;
+  }
+  if (isEmpty(dataDosenPA)) {
+    return true;
+  }
+  if (isEmpty(dataJurusan)) {
+    return true;
+  }
+  if (isEmpty(dataPeminatan)) {
+    return true;
+  }
+  if (isEmpty(dataPengajuanBimbingan)) {
+    return true;
+  }
+  if (isEmpty(dataBimbingan)) {
+    return true;
+  }
+  if (isEmpty(dataJadwalDosenPA)) {
+    return true;
+  }
+
+  return false; // semua data sudah ada
+};
+
+export function Spinner() {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-[1000]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-blue-600 border-b-transparent"></div>
+    </div>
+  );
+}
+
 const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
   const [namaLengkapMahasiswa, setNamaLengkapMahasiswa] = useState<string>("");
   const [emailMahasiswa, setEmailMahasiswa] = useState<string>("");
@@ -819,8 +870,19 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
     router.push(targetUrl);
   };
 
+  const isLoading = selectIsLoadingGlobal({
+    dataMahasiswa,
+    dataDosenPA,
+    dataJurusan,
+    dataPeminatan,
+    dataPengajuanBimbingan,
+    dataBimbingan,
+    dataJadwalDosenPA,
+  });
+
   return (
     <>
+      {isLoading && <Spinner />}
       {selectedSubMenuDashboard === "Profile Mahasiswa" && (
         <div className="md:w-[75%] md:px-0 md:mb-[200px] md:py-0">
           {/* flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-440px)] px-5 md:pr-4 md:pl-0 py-4 md:pt-0 md:pb-0 md:mt-8 rounded-lg */}
