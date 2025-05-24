@@ -203,7 +203,7 @@ const LoginForm: React.FC<LoginProps> = ({ isAdmin }) => {
             </Link>
             <button
               type="submit"
-              className="p-2 rounded-lg text-[14px] bg-orange-500 text-white"
+              className="p-2 rounded-lg text-[14px] bg-orange-500 text-white hover:bg-orange-600"
             >
               Masuk
             </button>

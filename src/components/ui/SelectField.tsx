@@ -10,7 +10,7 @@ const SelectField: React.FC<any> = ({
 }) => (
   <div className="relative">
     <select
-      className={`${className} ${value === "" ? "text-gray-400" : "text-black"} ${disabled ? "bg-gray-100" : ""}`}
+      className={`${className} ${value === "" ? "text-neutral-400" : "text-black"} ${disabled ? "bg-gray-100" : ""}`}
       value={value}
       onChange={onChange}
       disabled={disabled}
@@ -28,7 +28,7 @@ const SelectField: React.FC<any> = ({
       className={`${className.includes("hidden") ? "hidden" : "block"} ${className.match(/mt-\d+/)?.[0] || ""} absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none`}
     >
       <svg
-        className="w-4 h-4 text-gray-400"
+        className="w-4 h-4 text-neutral-400"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"

@@ -19,6 +19,7 @@ import { fetchUser } from "../lib/features/userSlice";
 import { fetchAuthUser } from "../lib/features/authSlice";
 import { RootState, AppDispatch } from "../lib/store";
 import Spinner from "@/components/ui/Spinner";
+import DosenPASetRestrictionModal from "@/components/ui/DosenPASetRestrictionModal";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
@@ -45,6 +46,7 @@ export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
   const [activeNavbar, setActiveNavbar] = useState<string>("Manage Parameter");
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isOpenModalDosenNull, setIsOpenModalDosenNull] = useState(true);
 
   // Auth state
   const roleUser = useSelector((state: RootState) => state.auth.roleUser) || "";
@@ -68,6 +70,13 @@ export default function Home() {
   );
   const statusDataUser = useSelector((state: RootState) => state.user.status);
   // First, ensure authentication is complete
+
+  const closeModalDosenNull = () => {
+    setIsOpenModalDosenNull(false);
+    const targetUrl = `/dashboard`;
+    window.location.href = targetUrl;
+  };
+
   useEffect(() => {
     dispatch(fetchAuthUser());
   }, []);
@@ -273,6 +282,14 @@ export default function Home() {
                 />
               </Link>
             )}
+            {roleUser === "Mahasiswa" &&
+              userData?.dosen_pa_id === null &&
+              userData?.status_lulus === false && (
+                <DosenPASetRestrictionModal
+                  onClose={closeModalDosenNull}
+                  isOpen={isOpenModalDosenNull}
+                />
+              )}
 
             <div className="hidden md:block border">
               <p className="text-center my-4 text-[16px]">

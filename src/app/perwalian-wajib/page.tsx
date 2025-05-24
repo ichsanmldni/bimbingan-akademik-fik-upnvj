@@ -26,7 +26,6 @@ import Spinner from "@/components/ui/Spinner";
 const selectIsLoadingGlobal = ({
   dataUser,
   dataDosenPA,
-  dataKaprodi,
   dataJenisBimbingan,
   dataTopikBimbinganPribadi,
   dataSistemBimbingan,
@@ -35,7 +34,6 @@ const selectIsLoadingGlobal = ({
 }: {
   dataUser: any;
   dataDosenPA: any[];
-  dataKaprodi: any[];
   dataJenisBimbingan: any[];
   dataTopikBimbinganPribadi: any[];
   dataSistemBimbingan: any[];
@@ -45,7 +43,6 @@ const selectIsLoadingGlobal = ({
   const checks = {
     dataUser: !!dataUser,
     dataDosenPA: dataDosenPA.length > 0,
-    dataKaprodi: dataKaprodi.length > 0,
     dataJenisBimbingan: dataJenisBimbingan.length > 0,
     dataTopikBimbinganPribadi: dataTopikBimbinganPribadi.length > 0,
     dataSistemBimbingan: dataSistemBimbingan.length > 0,
@@ -540,7 +537,6 @@ export default function Home() {
   const isLoading = selectIsLoadingGlobal({
     dataUser,
     dataDosenPA,
-    dataKaprodi,
     dataJenisBimbingan,
     dataTopikBimbinganPribadi,
     dataSistemBimbingan,

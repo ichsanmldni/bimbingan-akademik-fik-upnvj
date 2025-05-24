@@ -26,12 +26,7 @@ import StoreProvider from "@/app/StoreProvider";
 import { Catamaran } from "next/font/google";
 import Spinner from "@/components/ui/Spinner";
 
-const selectIsLoadingGlobal = ({
-  dataMahasiswaUser,
-  dataDosenPA,
-  optionsTahunAjaran,
-  dataTahunAjaran,
-}) => {
+const selectIsLoadingGlobal = ({ userProfile }) => {
   // fungsi untuk cek apakah data kosong (array kosong, object kosong, null, atau undefined)
   const isEmpty = (data) =>
     data === null ||
@@ -41,12 +36,7 @@ const selectIsLoadingGlobal = ({
       !Array.isArray(data) &&
       Object.keys(data).length === 0);
 
-  if (
-    isEmpty(dataMahasiswaUser) ||
-    isEmpty(dataDosenPA) ||
-    isEmpty(optionsTahunAjaran) ||
-    isEmpty(dataTahunAjaran)
-  ) {
+  if (isEmpty(userProfile)) {
     return true;
   }
 
@@ -1634,10 +1624,7 @@ const DashboardKaprodi = ({ selectedSubMenuDashboard, dataUser }) => {
   }, [dataLaporanBimbingan, dataBimbingan]);
 
   const isLoading = selectIsLoadingGlobal({
-    dataMahasiswaUser: dataAllMahasiswa,
-    dataDosenPA: dataDosenPA,
-    optionsTahunAjaran: optionsTahunAjaran,
-    dataTahunAjaran: dataTahunAjaran,
+    userProfile,
   });
 
   return (

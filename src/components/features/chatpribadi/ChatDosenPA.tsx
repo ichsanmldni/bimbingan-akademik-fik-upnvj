@@ -20,10 +20,10 @@ import ProfileImage from "@/components/ui/ProfileImage";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import Spinner from "@/components/ui/Spinner";
+import DosenPASetRestrictionModal from "@/components/ui/DosenPASetRestrictionModal";
 
 const selectIsLoadingGlobal = ({
   dataUser,
-  userDosenPA,
   dataPesanSiaran,
   dataPesanChatSiaran,
   chatData,
@@ -34,7 +34,6 @@ const selectIsLoadingGlobal = ({
   allPesanChatMahasiswa,
 }: {
   dataUser: any | null; // null: masih loading, object: selesai
-  userDosenPA: any | null;
   dataPesanSiaran: any[] | null; // null: loading, []: selesai tapi kosong
   dataPesanChatSiaran: any[] | null;
   chatData: any[] | null;
@@ -46,7 +45,6 @@ const selectIsLoadingGlobal = ({
 }) => {
   const checks = {
     dataUser: dataUser !== null,
-    userDosenPA: userDosenPA !== null,
     dataPesanSiaran: dataPesanSiaran !== null,
     dataPesanChatSiaran: dataPesanChatSiaran !== null,
     chatData: chatData !== null,
@@ -89,6 +87,7 @@ export default function ChatDosenPA() {
   const [selectedDataChatPribadi, setSelectedDataChatPribadi] = useState<any>(
     {}
   );
+  const [isOpenModalDosenNull, setIsOpenModalDosenNull] = useState(true);
   const [selectedDataPesanSiaran, setSelectedDataPesanSiaran] = useState<any>(
     []
   );
@@ -191,8 +190,18 @@ export default function ChatDosenPA() {
         `${API_BASE_URL}/api/chatpribadi`
       );
 
+      const dataMahasiswa = await axios.get(
+        `${API_BASE_URL}/api/datamahasiswa`
+      );
+
+      const mahasiswa = dataMahasiswa.data.find(
+        (data) => data.nim === dataUser.nim
+      );
+
       const dataChat = dataChatPribadi.data.find(
-        (data) => data.mahasiswa_id === mahasiswaID
+        (data) =>
+          data.mahasiswa_id === mahasiswaID &&
+          data.dosen_pa_id === mahasiswa.dosen_pa_id
       );
 
       if (!dataChat) {
@@ -499,9 +508,14 @@ export default function ChatDosenPA() {
     statusDataKaprodi,
   ]);
 
+  const closeModalDosenNull = () => {
+    setIsOpenModalDosenNull(false);
+    const targetUrl = `/dashboard`;
+    window.location.href = targetUrl;
+  };
+
   const isLoading = selectIsLoadingGlobal({
     dataUser,
-    userDosenPA,
     dataPesanSiaran,
     dataPesanChatSiaran,
     chatData,
@@ -805,6 +819,12 @@ export default function ChatDosenPA() {
             ""
           )}
         </div>
+        {userData?.dosen_pa_id === null && (
+          <DosenPASetRestrictionModal
+            onClose={closeModalDosenNull}
+            isOpen={isOpenModalDosenNull}
+          />
+        )}
       </div>
     </>
   );
