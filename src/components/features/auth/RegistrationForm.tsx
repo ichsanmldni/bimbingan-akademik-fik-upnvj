@@ -233,7 +233,7 @@ const RegistrationForm = () => {
         <button
           type="submit"
           className="p-2 mt-2 rounded-lg text-[14px] text-white 
-             bg-orange-500 disabled:bg-orange-300 
+             bg-orange-500 disabled:bg-orange-300 hover:bg-orange-600
              disabled:cursor-not-allowed disabled:opacity-70"
           disabled={
             selectedRole === "" ||

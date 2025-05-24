@@ -13,7 +13,7 @@ const InputField: React.FC<any> = ({
       type={type}
       className={`${
         value === "" ? "text-neutral-400" : "text-black"
-      } ${className}`}
+      } ${className} ${disabled ? "bg-gray-100" : ""}`}
       placeholder={placeholder}
       onChange={onChange}
       value={value}

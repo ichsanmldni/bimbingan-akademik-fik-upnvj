@@ -23,35 +23,30 @@ import { fetchKaprodi } from "@/lib/features/kaprodiSlice";
 import AlumniRestrictionModal from "@/components/ui/AlumniRestrictionModal";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/ui/Spinner";
+import DosenPASetRestrictionModal from "@/components/ui/DosenPASetRestrictionModal";
 
 const selectIsLoadingGlobal = ({
   dataMahasiswaUser,
-  userDosenPa,
   dataJenisBimbingan,
   dataTopikBimbinganPribadi,
   dataSistemBimbingan,
   optionsTahunAjaran,
   dataTahunAjaran,
-  dataJadwalDosenPa,
 }: {
   dataMahasiswaUser: any;
-  userDosenPa: any;
   dataJenisBimbingan: any[];
   dataTopikBimbinganPribadi: any[];
   dataSistemBimbingan: any[];
   optionsTahunAjaran: { value: string; label: string }[];
   dataTahunAjaran: any[];
-  dataJadwalDosenPa: any[];
 }) => {
   const checks = {
     dataMahasiswaUser: !!dataMahasiswaUser,
-    userDosenPa: !!userDosenPa,
     dataJenisBimbingan: dataJenisBimbingan.length > 0,
     dataTopikBimbinganPribadi: dataTopikBimbinganPribadi.length > 0,
     dataSistemBimbingan: dataSistemBimbingan.length > 0,
     optionsTahunAjaran: optionsTahunAjaran.length > 0,
     dataTahunAjaran: dataTahunAjaran.length > 0,
-    dataJadwalDosenPa: dataJadwalDosenPa.length > 0,
   };
 
   console.log("Cek data loading:", checks);
@@ -144,6 +139,7 @@ export default function Home() {
     },
   ]);
   const [isOpenModalAlumni, setIsOpenModalAlumni] = useState(true);
+  const [isOpenModalDosenNull, setIsOpenModalDosenNull] = useState(true);
   const router = useRouter();
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
@@ -497,6 +493,11 @@ export default function Home() {
     const targetUrl = `/`;
     window.location.href = targetUrl;
   };
+  const closeModalDosenNull = () => {
+    setIsOpenModalDosenNull(false);
+    const targetUrl = `/dashboard`;
+    window.location.href = targetUrl;
+  };
 
   const userData = useMemo(() => {
     if (!dataUser) return null;
@@ -524,13 +525,11 @@ export default function Home() {
 
   const isLoading = selectIsLoadingGlobal({
     dataMahasiswaUser,
-    userDosenPa,
     dataJenisBimbingan,
     dataTopikBimbinganPribadi,
     dataSistemBimbingan,
     optionsTahunAjaran,
     dataTahunAjaran,
-    dataJadwalDosenPa,
   });
 
   return (
@@ -725,6 +724,12 @@ export default function Home() {
           <AlumniRestrictionModal
             onClose={closeModalAlumni}
             isOpen={isOpenModalAlumni}
+          />
+        )}
+        {userData?.dosen_pa_id === null && (
+          <DosenPASetRestrictionModal
+            onClose={closeModalDosenNull}
+            isOpen={isOpenModalDosenNull}
           />
         )}
 

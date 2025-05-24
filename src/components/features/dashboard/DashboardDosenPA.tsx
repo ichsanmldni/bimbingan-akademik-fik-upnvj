@@ -43,17 +43,7 @@ const schedule: Record<string, string[]> = {
   Jumat: [],
 };
 
-const selectIsLoadingGlobal = ({
-  userProfile,
-  dataDosen,
-  dataJadwalDosenPA,
-  dataPengajuanBimbingan,
-  dataLaporanBimbingan,
-  dataPengesahanBimbingan,
-  dataBimbingan,
-  optionsTahunAjaran,
-  dataTahunAjaran,
-}) => {
+const selectIsLoadingGlobal = ({ userProfile }) => {
   const isEmpty = (data) =>
     data === null ||
     data === undefined ||
@@ -62,28 +52,14 @@ const selectIsLoadingGlobal = ({
       !Array.isArray(data) &&
       Object.keys(data).length === 0);
 
-  return (
-    isEmpty(userProfile) ||
-    isEmpty(dataDosen) ||
-    isEmpty(dataJadwalDosenPA) ||
-    isEmpty(dataPengajuanBimbingan) ||
-    isEmpty(dataLaporanBimbingan) ||
-    isEmpty(dataPengesahanBimbingan) ||
-    isEmpty(dataBimbingan) ||
-    isEmpty(optionsTahunAjaran) ||
-    isEmpty(dataTahunAjaran)
-  );
+  return isEmpty(userProfile);
 };
 
 const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
   const dataDosenPA: any = useSelector(
     (state: RootState) => state.dosenPA?.data
   );
-  const [userProfile, setUserProfile] = useState({
-    nama: "",
-    email: "",
-    hp: "",
-  });
+  const [userProfile, setUserProfile] = useState(null);
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState([]);
   const [dataPengajuanBimbingan, setDataPengajuanBimbingan] = useState([]);
   const [dataLaporanBimbingan, setDataLaporanBimbingan] = useState([]);
@@ -2110,14 +2086,6 @@ const DashboardDosenPA = ({ selectedSubMenuDashboard, dataUser }) => {
 
   const isLoading = selectIsLoadingGlobal({
     userProfile,
-    dataDosen,
-    dataJadwalDosenPA,
-    dataPengajuanBimbingan,
-    dataLaporanBimbingan,
-    dataPengesahanBimbingan,
-    dataBimbingan,
-    optionsTahunAjaran,
-    dataTahunAjaran,
   });
 
   return (

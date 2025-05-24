@@ -8,7 +8,7 @@ type Props = {
   onClose: () => void;
 };
 
-const AlumniRestrictionModal = ({ isOpen, onClose }: Props) => {
+const DosenPASetRestrictionModal = ({ isOpen, onClose }: Props) => {
   useEffect(() => {
     if (!isOpen) return;
     const timer = setTimeout(() => {
@@ -19,7 +19,7 @@ const AlumniRestrictionModal = ({ isOpen, onClose }: Props) => {
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[1000]" onClose={onClose}>
+      <Dialog as="div" className="relative z-[1001]" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -52,9 +52,8 @@ const AlumniRestrictionModal = ({ isOpen, onClose }: Props) => {
                 </Dialog.Title>
                 <div className="mt-2">
                   <p className="text-sm text-gray-700">
-                    Anda telah lulus dan tidak dapat lagi mengakses fitur ini.
-                    Jika Anda memerlukan informasi lebih lanjut, silakan hubungi
-                    admin program studi.
+                    Anda belum mengatur Dosen PA anda, silakan atur dulu di
+                    dashboard profile mahasiswa!
                   </p>
                 </div>
 
@@ -76,4 +75,4 @@ const AlumniRestrictionModal = ({ isOpen, onClose }: Props) => {
   );
 };
 
-export default AlumniRestrictionModal;
+export default DosenPASetRestrictionModal;

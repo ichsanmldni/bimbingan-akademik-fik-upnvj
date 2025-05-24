@@ -25,6 +25,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Span } from "slate";
 import AlumniRestrictionModal from "@/components/ui/AlumniRestrictionModal";
 import Spinner from "@/components/ui/Spinner";
+import DosenPASetRestrictionModal from "@/components/ui/DosenPASetRestrictionModal";
 
 const schedule = {
   Senin: [],
@@ -34,15 +35,7 @@ const schedule = {
   Jumat: [],
 };
 
-const selectIsLoadingGlobal = ({
-  dataMahasiswa,
-  dataDosenPA,
-  dataJurusan,
-  dataPeminatan,
-  dataPengajuanBimbingan,
-  dataBimbingan,
-  dataJadwalDosenPA,
-}) => {
+const selectIsLoadingGlobal = ({ userProfile }) => {
   // Fungsi cek apakah data kosong (array kosong, object kosong, null, undefined)
   const isEmpty = (data) =>
     data === null ||
@@ -52,25 +45,7 @@ const selectIsLoadingGlobal = ({
       !Array.isArray(data) &&
       Object.keys(data).length === 0);
 
-  if (isEmpty(dataMahasiswa)) {
-    return true;
-  }
-  if (isEmpty(dataDosenPA)) {
-    return true;
-  }
-  if (isEmpty(dataJurusan)) {
-    return true;
-  }
-  if (isEmpty(dataPeminatan)) {
-    return true;
-  }
-  if (isEmpty(dataPengajuanBimbingan)) {
-    return true;
-  }
-  if (isEmpty(dataBimbingan)) {
-    return true;
-  }
-  if (isEmpty(dataJadwalDosenPA)) {
+  if (isEmpty(userProfile)) {
     return true;
   }
 
@@ -90,6 +65,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
   const [dataDosenPA, setDataDosenPA] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModalAlumni, setIsOpenModalAlumni] = useState(true);
+  const [isOpenModalDosenNull, setIsOpenModalDosenNull] = useState(true);
   const [documentation, setDocumentation] = useState(null);
   const [optionsJurusan, setOptionsJurusan] = useState([]);
   const [optionsPeminatan, setOptionsPeminatan] = useState([]);
@@ -98,16 +74,7 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
   const [dataBimbingan, setDataBimbingan] = useState<any>([]);
   const [imagePreview, setImagePreview] = useState(null);
   const [dataMahasiswa, setDataMahasiswa] = useState<any>();
-  const [userProfile, setUserProfile] = useState({
-    nama: "",
-    email: "",
-    nim: "",
-    hp: "",
-    jurusan: "",
-    peminatan: "",
-    dosen_pa: "",
-    ipk: "",
-  });
+  const [userProfile, setUserProfile] = useState(null);
   const [isDataChanged, setIsDataChanged] = useState<boolean>(false);
   const [dataJadwalDosenPA, setDataJadwalDosenPA] = useState<any[]>([]); // Adjust type as needed
   const [previewDocumentation, setPreviewDocumentation] = useState([]);
@@ -842,6 +809,9 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
   useEffect(() => {
     setImagePreview(null);
     getDataMahasiswaById();
+    if (selectedSubMenuDashboard === "Profile Mahasiswa") {
+      setIsOpenModalDosenNull(true);
+    }
   }, [selectedSubMenuDashboard]);
 
   useEffect(() => {
@@ -862,15 +832,14 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
     const targetUrl = `/dashboard?submenu=${encodeURIComponent("Profile Mahasiswa")}`;
     router.push(targetUrl);
   };
+  const closeModalDosenNull = () => {
+    setIsOpenModalDosenNull(false);
+    const targetUrl = `/dashboard?submenu=${encodeURIComponent("Profile Mahasiswa")}`;
+    router.push(targetUrl);
+  };
 
   const isLoading = selectIsLoadingGlobal({
-    dataMahasiswa,
-    dataDosenPA,
-    dataJurusan,
-    dataPeminatan,
-    dataPengajuanBimbingan,
-    dataBimbingan,
-    dataJadwalDosenPA,
+    userProfile,
   });
 
   return (
@@ -922,6 +891,14 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
             </div>
 
             <form className="flex flex-col mt-8 gap-4">
+              <SelectField
+                options={optionsDosenPA}
+                onChange={(e) => setSelectedDosenPA(e.target.value)}
+                value={selectedDosenPA}
+                placeholder="Pilih Dosen PA"
+                disabled={dataUser.status_lulus}
+                className={`px-3 py-2 text-[15px] border cursor-pointer outline-none rounded-lg appearance-none w-full`}
+              />
               <InputField
                 disabled
                 type="text"
@@ -968,13 +945,15 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                 value={noTelpMahasiswa}
                 className="px-3 py-2 text-[15px] border rounded-lg"
               />
-              <SelectField
-                options={optionsJurusan}
+              <InputField
                 disabled
+                type="text"
+                placeholder={
+                  selectedJurusan === "" ? "Jurusan" : selectedJurusan
+                }
                 onChange={(e) => setSelectedJurusan(e.target.value)}
                 value={selectedJurusan}
-                placeholder="Pilih Jurusan"
-                className={`px-3 py-2 text-[15px] border rounded-lg appearance-none w-full`}
+                className="px-3 py-2 text-[15px] border rounded-lg"
               />
               <InputField
                 type="text"
@@ -994,14 +973,6 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                 disabled={dataUser.status_lulus}
                 className={`px-3 py-2 text-[15px] outline-none cursor-pointer border rounded-lg appearance-none w-full`}
               />
-              <SelectField
-                options={optionsDosenPA}
-                onChange={(e) => setSelectedDosenPA(e.target.value)}
-                value={selectedDosenPA}
-                placeholder="Pilih Dosen PA"
-                disabled={dataUser.status_lulus}
-                className={`px-3 py-2 text-[15px] border cursor-pointer outline-none rounded-lg appearance-none w-full`}
-              />
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -1020,7 +991,8 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
       )}
       {selectedSubMenuDashboard === "Jadwal Kosong Dosen PA Role Mahasiswa" && (
         <>
-          {dataUser.status_lulus === false ? (
+          {dataUser?.status_lulus === false &&
+          dataUser?.dosen_pa_id !== null ? (
             <div className="md:w-[75%] md:px-0 px-4 mb-[200px] py-4 md:py-0">
               <div className=" flex flex-col gap-6 md:pt-6 px-[25px] pt-[15px] pb-[30px] md:px-[30px] rounded-lg">
                 <h1 className="font-semibold text-[20px]">
@@ -1093,11 +1065,18 @@ const DashboardMahasiswa = ({ selectedSubMenuDashboard, dataUser }) => {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : dataUser?.dosen_pa_id === null ? (
+            <DosenPASetRestrictionModal
+              onClose={closeModalDosenNull}
+              isOpen={isOpenModalDosenNull}
+            />
+          ) : dataUser?.status_lulus === true ? (
             <AlumniRestrictionModal
               onClose={closeModalAlumni}
               isOpen={isOpenModalAlumni}
             />
+          ) : (
+            ""
           )}
         </>
       )}

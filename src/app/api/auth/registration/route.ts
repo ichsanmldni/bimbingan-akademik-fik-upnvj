@@ -99,6 +99,7 @@ export async function POST(req: Request) {
       message: "Registrasi berhasil, cek email Anda.",
     });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { message: "Something went wrong" },
       { status: 500 }

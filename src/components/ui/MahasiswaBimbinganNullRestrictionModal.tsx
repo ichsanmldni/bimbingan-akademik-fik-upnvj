@@ -8,7 +8,7 @@ type Props = {
   onClose: () => void;
 };
 
-const AlumniRestrictionModal = ({ isOpen, onClose }: Props) => {
+const MahasiswaBimbinganNullRestrictionModal = ({ isOpen, onClose }: Props) => {
   useEffect(() => {
     if (!isOpen) return;
     const timer = setTimeout(() => {
@@ -52,9 +52,9 @@ const AlumniRestrictionModal = ({ isOpen, onClose }: Props) => {
                 </Dialog.Title>
                 <div className="mt-2">
                   <p className="text-sm text-gray-700">
-                    Anda telah lulus dan tidak dapat lagi mengakses fitur ini.
-                    Jika Anda memerlukan informasi lebih lanjut, silakan hubungi
-                    admin program studi.
+                    Anda belum memiliki mahasiswa bimbingan akademik, silakan
+                    hubungi mahasiswa bimbingan anda untuk mengatur dosen
+                    pembimbing akademik nya pada sistem BIMAFIK!
                   </p>
                 </div>
 
@@ -76,4 +76,4 @@ const AlumniRestrictionModal = ({ isOpen, onClose }: Props) => {
   );
 };
 
-export default AlumniRestrictionModal;
+export default MahasiswaBimbinganNullRestrictionModal;

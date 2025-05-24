@@ -493,16 +493,7 @@ const ManageDataDosenTetap: React.FC<ManageDataDosenTetapProps> = () => {
       <div className="mt-6">
         {afterOrderEditDataDosenTetap.length === 0 ? (
           <>
-            <div className="justify-between flex">
-              <button
-                onClick={() => {
-                  openModal("Tambah");
-                }}
-                className="flex px-3 mr-4 py-2 bg-orange-500 items-center gap-2 rounded-lg hover:bg-orange-600"
-              >
-                <Image src={plusIcon} alt="Plus Icon" />
-                <p className="text-white text-[14px]">Tambah Dosen Tetap</p>
-              </button>
+            <div className="justify-end flex">
               <button
                 onClick={() => {
                   openModal("Tambah");

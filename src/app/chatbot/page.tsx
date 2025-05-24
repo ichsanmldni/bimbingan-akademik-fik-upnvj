@@ -14,15 +14,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import Spinner from "@/components/ui/Spinner";
 
-const selectIsLoadingGlobal = ({
-  roleUser,
-  dataUser,
-  dataDosenPA,
-  dataKaprodi,
-  dataMahasiswa,
-  dataJadwalDosenPA,
-  dataSesiChatbotMahasiswa,
-}) => {
+const selectIsLoadingGlobal = ({ roleUser, dataUser }) => {
   const isEmpty = (data) =>
     data === null ||
     data === undefined ||
@@ -38,29 +30,6 @@ const selectIsLoadingGlobal = ({
   }
   if (isEmpty(dataUser)) {
     console.log("Loading karena dataUser kosong:", dataUser);
-    return true;
-  }
-  if (isEmpty(dataDosenPA)) {
-    console.log("Loading karena dataDosenPA kosong:", dataDosenPA);
-    return true;
-  }
-  if (isEmpty(dataKaprodi)) {
-    console.log("Loading karena dataKaprodi kosong:", dataKaprodi);
-    return true;
-  }
-  if (isEmpty(dataMahasiswa)) {
-    console.log("Loading karena dataMahasiswa kosong:", dataMahasiswa);
-    return true;
-  }
-  if (isEmpty(dataJadwalDosenPA)) {
-    console.log("Loading karena dataJadwalDosenPA kosong:", dataJadwalDosenPA);
-    return true;
-  }
-  if (isEmpty(dataSesiChatbotMahasiswa)) {
-    console.log(
-      "Loading karena dataSesiChatbotMahasiswa kosong:",
-      dataSesiChatbotMahasiswa
-    );
     return true;
   }
 
@@ -588,11 +557,6 @@ ${dbCustomContext}
   const isLoading = selectIsLoadingGlobal({
     roleUser,
     dataUser,
-    dataDosenPA,
-    dataKaprodi,
-    dataMahasiswa,
-    dataJadwalDosenPA,
-    dataSesiChatbotMahasiswa,
   });
 
   return (

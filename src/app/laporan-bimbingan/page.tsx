@@ -76,15 +76,7 @@ const initialValue: any = [
   },
 ];
 
-const selectIsLoadingGlobal = ({
-  dataUser,
-  dataMahasiswaUser,
-  dataDosenPA,
-  dataKaprodi,
-  optionsTahunAjaran,
-  dataTahunAjaran,
-  roleUser,
-}) => {
+const selectIsLoadingGlobal = ({ dataUser, roleUser }) => {
   const isEmpty = (data) =>
     data === null ||
     data === undefined ||
@@ -95,15 +87,7 @@ const selectIsLoadingGlobal = ({
     return true;
   }
 
-  if (["Mahasiswa", "Dosen PA", "Kaprodi"].includes(roleUser)) {
-    if (isEmpty(dataMahasiswaUser)) return true;
-    if (isEmpty(dataDosenPA)) return true;
-    if (isEmpty(dataKaprodi)) return true;
-    if (isEmpty(optionsTahunAjaran)) return true;
-    if (isEmpty(dataTahunAjaran)) return true;
-  }
-
-  if (roleUser === "Admin" && isEmpty(dataUser)) {
+  if (isEmpty(dataUser)) {
     return true;
   }
 
@@ -2483,11 +2467,6 @@ export default function Home() {
 
   const isLoading = selectIsLoadingGlobal({
     dataUser,
-    dataMahasiswaUser: dataMahasiswa,
-    dataDosenPA,
-    dataKaprodi,
-    optionsTahunAjaran: tahunAjaranOptions, // pastikan state-nya sesuai
-    dataTahunAjaran,
     roleUser,
   });
 
