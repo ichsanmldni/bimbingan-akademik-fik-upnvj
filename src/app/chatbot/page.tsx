@@ -364,11 +364,27 @@ ${dbCustomContext}
           },
         }
       );
+
+      const tokenUsed = data?.usage?.total_tokens ?? 0;
+      await axios.patch(`${API_BASE_URL}/api/tokenuser`, {
+        mahasiswaId: mahasiswaID,
+        tokenUsed,
+      });
       return (
         data.choices[0]?.message?.content || "Tidak ada respons dari model."
       );
     } catch (error) {
-      throw new Error("Gagal mendapatkan respons dari ChatGPT.");
+      if (error.response) {
+        if (error.response.status === 403) {
+          return "Token Anda telah habis. Silakan coba lagi besok.";
+        }
+
+        return "Terjadi kesalahan dari server.";
+      } else if (error.request) {
+        return "Gagal terhubung ke server. Periksa koneksi internet Anda.";
+      }
+
+      return "Terjadi kesalahan tak terduga.";
     }
   };
 

@@ -237,6 +237,9 @@ model mahasiswa {
   dosen_pa_id          Int?
   dosen_pa   dosenpa? @relation(fields: [dosen_pa_id], references: [id], onDelete: SetNull)
   status_lulus Boolean @default(false)
+  used_tokens     Int?               @default(0)
+  token_limit     Int?               @default(200000)
+  last_token_reset DateTime?
   statuspembacaanpesansiaran  statuspembacaanpesansiaran[]
   chatpribadi          chatpribadi[]
   notifikasimahasiswa  notifikasimahasiswa[]
