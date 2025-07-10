@@ -16,10 +16,12 @@ export async function POST(req: Request) {
         : await prisma.kaprodi.findFirst({ where: { nama: nama_lengkap } });
 
     if (existingUser) {
-      return NextResponse.json(
-        { message: "Akun Dosen PA ini sudah terdaftar!" },
-        { status: 400 }
-      );
+      const message =
+        role === "Dosen PA"
+          ? "Akun Dosen PA ini sudah terdaftar!"
+          : "Akun Kaprodi ini sudah terdaftar!";
+
+      return NextResponse.json({ message }, { status: 400 });
     }
 
     // Buat user baru tanpa token dulu
@@ -32,10 +34,16 @@ export async function POST(req: Request) {
         },
       });
     } else if (role === "Kaprodi") {
+      const dataDosen = await prisma.dosentetapfik.findFirst({
+        where: {
+          nama_lengkap,
+        },
+      });
       user = await prisma.kaprodi.create({
         data: {
           email,
           nama: nama_lengkap,
+          kaprodi_jurusan: dataDosen.jurusan,
         },
       });
     }

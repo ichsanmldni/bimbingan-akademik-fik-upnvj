@@ -54,6 +54,20 @@ export async function POST(req: Request): Promise<Response> {
       },
     });
 
+    const dataDosenPa = await prisma.dosenpa.findFirst({
+      where: {
+        nama: nama_lengkap,
+        isDeleted: true,
+      },
+    });
+
+    if (dataDosenPa) {
+      await prisma.dosenpa.update({
+        where: { id: dataDosenPa.id },
+        data: { isDeleted: false },
+      });
+    }
+
     return new Response(JSON.stringify(dosentetapfik), {
       status: 201,
       headers: { "Content-Type": "application/json" },
@@ -103,6 +117,50 @@ export async function PATCH(req: Request): Promise<Response> {
       dataToUpdate.isKaprodi = isKaprodi;
     }
 
+    if (!isKaprodi) {
+      const dataKaprodi = await prisma.kaprodi.findFirst({
+        where: { nama: nama_lengkap },
+      });
+      const dataDosenPa = await prisma.dosenpa.findFirst({
+        where: { nama: nama_lengkap },
+      });
+
+      if (dataKaprodi) {
+        await prisma.kaprodi.update({
+          where: { id: dataKaprodi.id },
+          data: { isDeleted: true },
+        });
+      }
+      if (dataDosenPa) {
+        await prisma.dosenpa.update({
+          where: { id: dataDosenPa.id },
+          data: { isDeleted: false },
+        });
+      }
+    }
+
+    if (isKaprodi) {
+      const dataKaprodi = await prisma.kaprodi.findFirst({
+        where: { nama: nama_lengkap },
+      });
+      const dataDosenPa = await prisma.dosenpa.findFirst({
+        where: { nama: nama_lengkap },
+      });
+
+      if (dataKaprodi) {
+        await prisma.kaprodi.update({
+          where: { id: dataKaprodi.id },
+          data: { isDeleted: false },
+        });
+      }
+      if (dataDosenPa) {
+        await prisma.dosenpa.update({
+          where: { id: dataDosenPa.id },
+          data: { isDeleted: true },
+        });
+      }
+    }
+
     const datadosentetap = await prisma.dosentetapfik.update({
       where: { id },
       data: dataToUpdate,
@@ -147,6 +205,26 @@ export async function DELETE(req: Request): Promise<Response> {
       });
     }
 
+    const dataKaprodi = await prisma.kaprodi.findFirst({
+      where: { nama: existingRecord.nama_lengkap, isDeleted: false },
+    });
+    const dataDosenPa = await prisma.dosenpa.findFirst({
+      where: { nama: existingRecord.nama_lengkap, isDeleted: false },
+    });
+
+    if (dataKaprodi) {
+      await prisma.kaprodi.update({
+        where: { id: dataKaprodi.id },
+        data: { isDeleted: true },
+      });
+    }
+    if (dataDosenPa) {
+      await prisma.dosenpa.update({
+        where: { id: dataDosenPa.id },
+        data: { isDeleted: true },
+      });
+    }
+
     await prisma.dosentetapfik.delete({
       where: { id },
     });
@@ -156,6 +234,7 @@ export async function DELETE(req: Request): Promise<Response> {
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
+    console.log(error);
     return new Response(
       JSON.stringify({
         message: "Something went wrong",

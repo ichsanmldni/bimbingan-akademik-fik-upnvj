@@ -82,8 +82,9 @@ export async function POST(req: Request): Promise<Response> {
 
       const headers = {
         Authorization: `Basic ${base64AuthString}`,
-        "API-KEY-NAME": API_KEY_NAME,
-        "API-KEY-SECRET": API_KEY_SECRET,
+        "X-UPNVJ-API-KEY": API_KEY_SECRET,
+        Accept: "*/*",
+        "User-Agent": "Thunder Client (https://www.thunderclient.com)",
         // No need to set 'Content-Type' here; axios will handle it for FormData
       };
 
@@ -101,6 +102,8 @@ export async function POST(req: Request): Promise<Response> {
         const response = await axios.post(url, formData, {
           headers: combinedHeaders,
         });
+
+        console.log(response.data);
 
         if (response.data.data.nim) {
           user = response.data.data;
@@ -178,14 +181,7 @@ export async function POST(req: Request): Promise<Response> {
           return new Response(
             JSON.stringify({
               message: "Login berhasil!",
-              user: {
-                id: user.id,
-                email: user.email,
-                nama: user.nama,
-                hp: user.hp,
-                profile_image: user.profile_image,
-                role: "Mahasiswa", // atau sesuai role
-              },
+              token,
             }),
             {
               status: 200,
@@ -241,6 +237,15 @@ export async function POST(req: Request): Promise<Response> {
         );
       }
 
+      if (user.isDeleted) {
+        return new Response(
+          JSON.stringify({
+            message: "Akun Anda sudah tidak terdaftar sebagai Dosen PA.",
+          }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
       const token = jwt.sign(
         {
           role,
@@ -261,14 +266,7 @@ export async function POST(req: Request): Promise<Response> {
       return new Response(
         JSON.stringify({
           message: "Login berhasil!",
-          user: {
-            id: user.id,
-            email: user.email,
-            nama: user.nama,
-            hp: user.hp,
-            profile_image: user.profile_image,
-            role: "Dosen PA", // atau sesuai role
-          },
+          token,
         }),
         {
           status: 200,
@@ -285,6 +283,15 @@ export async function POST(req: Request): Promise<Response> {
         return new Response(
           JSON.stringify({ message: "Masukkan Email dengan benar!" }),
           { status: 404, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      if (user.isDeleted) {
+        return new Response(
+          JSON.stringify({
+            message: "Akun Anda sudah tidak terdaftar sebagai Kaprodi.",
+          }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
         );
       }
 
@@ -311,8 +318,9 @@ export async function POST(req: Request): Promise<Response> {
 
         const headers = {
           Authorization: `Basic ${base64AuthString}`,
-          "API-KEY-NAME": API_KEY_NAME,
-          "API-KEY-SECRET": API_KEY_SECRET,
+          "X-UPNVJ-API-KEY": API_KEY_SECRET,
+          Accept: "*/*",
+          "User-Agent": "Thunder Client (https://www.thunderclient.com)",
         };
 
         const url = "https://api.upnvj.ac.id/data/ref_program_studi";
@@ -359,13 +367,16 @@ export async function POST(req: Request): Promise<Response> {
             path: "/",
           });
 
-          return new Response(JSON.stringify({ message: "Login berhasil!" }), {
-            status: 200,
-            headers: {
-              "Content-Type": "application/json",
-              "Set-Cookie": cookie,
-            },
-          });
+          return new Response(
+            JSON.stringify({ message: "Login berhasil!", token }),
+            {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json",
+                "Set-Cookie": cookie,
+              },
+            }
+          );
         } catch (error) {
           return new Response(
             JSON.stringify({ message: "Gagal mengambil data dari API UPNVJ" }),
@@ -394,13 +405,16 @@ export async function POST(req: Request): Promise<Response> {
           path: "/",
         });
 
-        return new Response(JSON.stringify({ message: "Login berhasil!" }), {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            "Set-Cookie": cookie,
-          },
-        });
+        return new Response(
+          JSON.stringify({ message: "Login berhasil!", token }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+              "Set-Cookie": cookie,
+            },
+          }
+        );
       } catch (error) {
         return new Response(
           JSON.stringify({ message: "Gagal mengambil data dari API UPNVJ" }),
@@ -443,13 +457,7 @@ export async function POST(req: Request): Promise<Response> {
       return new Response(
         JSON.stringify({
           message: "Login berhasil!",
-          user: {
-            id: user.id,
-            email: user.email,
-            nickname: user.nickname,
-            profile_image: user.profile_image,
-            role: "Admin", // atau sesuai role
-          },
+          token,
         }),
         {
           status: 200,
